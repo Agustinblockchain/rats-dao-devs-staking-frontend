@@ -14,7 +14,7 @@ import { getStakingPoolDBModel, getStakingPoolFromDBByName, StakingPoolDBInterfa
 import { el } from 'date-fns/locale';
 import { MintingPolicy,  SpendingValidator } from 'lucid-cardano';
 import { CurrencySymbol, PoolParams } from '../../types';
-import { maxMasters, pkhCreators, REACT_SERVER_PATH_FOR_SCRIPTS } from '../../types/constantes';
+import { maxMasters, pkhCreators } from '../../types/constantes';
 import { getEstadoDeployAPI } from "../../stakePool/helpersStakePool";
 
 type Data = {
@@ -43,7 +43,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 	const harvest_TN = req.body.harvest_TN
 	const interest = req.body.interest
 
-	const ruta = REACT_SERVER_PATH_FOR_SCRIPTS
+	const ruta = process.env.REACT_SERVER_PATH_FOR_SCRIPTS
 
 	await connect();
 

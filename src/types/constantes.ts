@@ -119,28 +119,3 @@ export const poolDatum_ClaimedFund = 1
 export const pkhCreators = ["4ca78fc87f397e9ab0735f9ec6659c7b49e110d64e2898c03fb5809f", "ed03815867fcf3d4339e0ea59c761dc15d569af70604c988eb311e53", "553d144a6086ce5801f965786e0e87d7d0054907fad936fcf0710d15", "abfff883edcf7a2e38628015cebb72952e361b2c8a2262f7daf9c16e", "9d19b5fbae262b24d9f44f8fe02475e1c95fdb20dbc39268b7567202", "6b482ade57ace3b77997fb9aa795b821868cc3d384a2a3d52b63f3ab"]
 
 //----------------------------------------------------------------------
-
-console.log ("process.env.USE_MAINNET: " + process.env.USE_MAINNET)
-console.log ("process.env.USE_LOCALHOST: " + process.env.USE_LOCALHOST)
-console.log ("process.env.USE_PRODUCTION: " + process.env.USE_PRODUCTION)
-
-export const NEXT_PUBLIC_BLOCKFROST_URL = process.env.USE_MAINNET === "true"? process.env.NEXT_PUBLIC_BLOCKFROST_URL_MAINNET : process.env.NEXT_PUBLIC_BLOCKFROST_URL_TESTNET_PREVIEW
-
-export const NEXT_PUBLIC_BLOCKFROST_KEY = process.env.USE_MAINNET === "true"? process.env.NEXT_PUBLIC_BLOCKFROST_KEY_MAINNET : process.env.NEXT_PUBLIC_BLOCKFROST_KEY_TESTNET_PREVIEW
-
-export const NEXT_PUBLIC_BLOCKCHAIN_EXPLORER_URL = process.env.USE_MAINNET === "true"? process.env.NEXT_PUBLIC_BLOCKCHAIN_EXPLORER_URL_MAINNET : process.env.NEXT_PUBLIC_BLOCKCHAIN_EXPLORER_URL_TESTNET_PREVIEW
-
-export const REACT_SERVER_URL = process.env.USE_PRODUCTION === "true"? process.env.REACT_SERVER_URL_PRODUCTION : process.env.REACT_SERVER_URL_DEVELOPMENT
-
-export const REACT_SERVER_PATH_FOR_SCRIPTS = process.env.USE_LOCALHOST === "true"? process.env.REACT_SERVER_PATH_FOR_SCRIPTS_LOCAL : process.env.USE_MAINNET === "true"? process.env.REACT_SERVER_PATH_FOR_SCRIPTS_SERVER_MAINNET : process.env.REACT_SERVER_PATH_FOR_SCRIPTS_SERVER_TESTNET_PREVIEW
-
-export const URLDB = process.env.USE_LOCALHOST === "true"? process.env.URLDB_LOCALHOST : process.env.USE_MAINNET === "true"? process.env.URLDB_SERVER_MAINNET : process.env.URLDB_SERVER_TESTNET_PREVIEW
-
-console.log ("NEXT_PUBLIC_BLOCKFROST_URL: " + NEXT_PUBLIC_BLOCKFROST_URL)
-console.log ("NEXT_PUBLIC_BLOCKFROST_KEY: " + NEXT_PUBLIC_BLOCKFROST_KEY)
-console.log ("NEXT_PUBLIC_BLOCKCHAIN_EXPLORER_URL: " + NEXT_PUBLIC_BLOCKCHAIN_EXPLORER_URL)
-console.log ("REACT_SERVER_URL: " + REACT_SERVER_URL)
-console.log ("REACT_SERVER_PATH_FOR_SCRIPTS: " + REACT_SERVER_PATH_FOR_SCRIPTS)
-console.log ("URLDB: " + URLDB)
-
-//----------------------------------------------------------------------

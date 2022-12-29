@@ -3,7 +3,7 @@
 import { C, createCostModels, Lucid, TxComplete, TxSigned } from "lucid-cardano";
 
 import { BigNum, Costmdls, CostModel, hash_script_data, Int, Language, Transaction } from "@dcspark/cardano-multiplatform-lib-browser";
-import { isPreparingTime, maxTxExMem, maxTxExSteps, maxTxSize, NEXT_PUBLIC_BLOCKFROST_KEY, NEXT_PUBLIC_BLOCKFROST_URL, TIME_OUT_TRY_TX, validTimeRangeInSlots } from "../types/constantes";
+import { isPreparingTime, maxTxExMem, maxTxExSteps, maxTxSize, TIME_OUT_TRY_TX, validTimeRangeInSlots } from "../types/constantes";
 import { showPtrInHex, toJson } from "./utils";
 import { Wallet } from "./walletProvider";
 import { EUTxO, Maybe, POSIXTime } from "../types";
@@ -220,9 +220,9 @@ export async function fixTx(txComplete: any, lucid: Lucid, protocolParameters: a
 
     var blockLast: number | undefined = undefined
 
-    await fetch(NEXT_PUBLIC_BLOCKFROST_URL! + '/blocks/latest', {
+    await fetch(process.env.NEXT_PUBLIC_BLOCKFROST_URL! + '/blocks/latest', {
         headers: {
-            'project_id': NEXT_PUBLIC_BLOCKFROST_KEY!
+            'project_id': process.env.NEXT_PUBLIC_BLOCKFROST_KEY!
         }
     })
         .then(response => response.json())

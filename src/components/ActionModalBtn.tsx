@@ -18,7 +18,7 @@ import { NumericFormat } from 'react-number-format';
 import LoadingSpinner from "./LoadingSpinner";
 import { EUTxO, Master } from "../types";
 import { pushSucessNotification, pushWarningNotification } from "../utils/pushNotification";
-import { maxTokensWithDifferentNames, NEXT_PUBLIC_BLOCKCHAIN_EXPLORER_URL } from "../types/constantes";
+import { maxTokensWithDifferentNames } from "../types/constantes";
 import { explainError } from "../stakePool/explainError";
 //--------------------------------------
 
@@ -317,7 +317,7 @@ export default function ActionModalBtn(
 													<path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
 												</svg>
 											</button>
-											<a target={'_blank'} href={`${NEXT_PUBLIC_BLOCKCHAIN_EXPLORER_URL}tx/${hash}`} className='btn__ghost icon' style={{ cursor: 'pointer' }}>
+											<a target={'_blank'} href={`${process.env.NEXT_PUBLIC_BLOCKCHAIN_EXPLORER_URL}tx/${hash}`} className='btn__ghost icon' style={{ cursor: 'pointer' }}>
 												<svg xmlns="http://www.w3.org/2000/svg" className="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
 													<path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
 												</svg>

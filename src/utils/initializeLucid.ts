@@ -1,6 +1,5 @@
 //--------------------------------------
 import { Blockfrost, Lucid, WalletApi } from 'lucid-cardano'
-import { NEXT_PUBLIC_BLOCKFROST_URL, NEXT_PUBLIC_BLOCKFROST_KEY } from '../types/constantes';
 //--------------------------------------
 import { toJson } from './utils';
 //--------------------------------------
@@ -9,7 +8,7 @@ export const initializeLucid = async (walletApi: WalletApi | undefined) => {
     // console.log ("initializeLucid - init")
     try {
         const lucid = await Lucid.new(
-            new Blockfrost(NEXT_PUBLIC_BLOCKFROST_URL!, NEXT_PUBLIC_BLOCKFROST_KEY!),
+            new Blockfrost(process.env.NEXT_PUBLIC_BLOCKFROST_URL!, process.env.NEXT_PUBLIC_BLOCKFROST_KEY!),
             'Preview'
         )
         
@@ -30,7 +29,7 @@ export const initializeLucidWithWalletFromPrivateKey = async (walletPrivateKey: 
     // console.log ("initializeLucidWithWalletFromPrivateKey - init")
     try {
         const lucid = await Lucid.new(
-            new Blockfrost(NEXT_PUBLIC_BLOCKFROST_URL!, NEXT_PUBLIC_BLOCKFROST_KEY!),
+            new Blockfrost(process.env.NEXT_PUBLIC_BLOCKFROST_URL!, process.env.NEXT_PUBLIC_BLOCKFROST_KEY!),
             'Preview'
         )
         
@@ -48,7 +47,7 @@ export const initializeLucidWithWalletFromSeed = async (walletSeed: string) => {
     // console.log ("initializeLucidWithWalletFromSeed - init")
     try {
         const lucid = await Lucid.new(
-            new Blockfrost(NEXT_PUBLIC_BLOCKFROST_URL!, NEXT_PUBLIC_BLOCKFROST_KEY!),
+            new Blockfrost(process.env.NEXT_PUBLIC_BLOCKFROST_URL!, process.env.NEXT_PUBLIC_BLOCKFROST_KEY!),
             'Preview'
         )
         

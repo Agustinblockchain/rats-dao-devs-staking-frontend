@@ -1,12 +1,10 @@
 import * as Mongoose from "mongoose";
-import { URLDB } from "../types/constantes";
-
 
 let database: Mongoose.Connection;
 
 export const connect = async () => {
 	// add your own uri below
-	const uri = URLDB
+	const uri = process.env.URLDB
 	if (!uri) {
 		throw new Error(
 			'Please define the URLDB environment variable'
