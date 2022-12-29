@@ -1,0 +1,337 @@
+/**
+ * Basic styling
+ */
+
+@use "sass:list";
+@use "sass:math";
+
+html, body {
+  min-height: 100%;
+  width: 100%;
+  max-width: 100%;
+  height: fit-content;
+  overflow-x: hidden;
+  transition: $transition-time;
+  scroll-behavior: smooth;
+}
+
+body {
+  font: $base-font-weight #{$base-font-size}/#{$base-line-height} $base-font-family;
+  font-display: optional;
+  color: var(--text-color);
+  background: var(--background-color);
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-feature-settings: "kern" 1;
+  -moz-font-feature-settings: "kern" 1;
+  -o-font-feature-settings: "kern" 1;
+  font-feature-settings: "kern" 1;
+  font-kerning: normal;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex;
+  flex-direction: column;
+}
+
+*:focus-visible {
+  outline: solid #80a6ff 5px;
+}
+
+hr {
+  border: 0;
+  border-top: $base-sizing*0.2 solid white;
+  width: calc(75vw - #{$base-sizing*2});
+  max-width: $base-sizing*10;
+  border-radius: $border-radius;
+}
+
+/**
+ * Set `margin-bottom` to maintain vertical rhythm
+ */
+
+%vertical-rhythm {
+  margin-bottom: $base-sizing * 0.5;
+}
+
+/**
+ * `main` element
+ */
+
+main {
+  display: block;
+  /* Default value of `display` of `main` element is 'inline' in IE 11. */
+}
+
+/**
+ * Images
+ */
+
+img {
+  max-width: 100%;
+  vertical-align: middle;
+  
+}
+
+/**
+ * Figures
+ */
+
+figure>img {
+  display: block;
+}
+
+figcaption {
+  font-size: $small-font-size;
+}
+
+/**
+ * Lists
+ */
+
+ul, ol {
+  margin: 0;
+}
+
+li {
+  >ul, >ol {
+    margin-bottom: 0;
+  }
+}
+
+/**
+ * Headings
+ */
+
+h1 {
+  font-size: 2.5em;
+}
+
+h2 {
+  font-size: 2em;
+}
+
+h3 {
+  font-size: 1.67em;
+  margin: 0
+}
+
+h5 {
+  font-size: 1.33em;
+  margin: 0
+}
+
+h6 {
+  font-size: 1.25em;
+  margin: 1.67em 0
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: $base-font-weight;
+  font-family: "Fredoka One", sans-serif;
+  color: var(--header-color);
+
+  &.subheader {
+    text-transform:uppercase;
+    font-style:normal;
+  }
+}
+
+/**
+ * Links
+ */
+
+a {
+  color: var(--text-color);
+  text-underline-offset: 3px;
+  transition: math.div($transition-time, 2);
+  
+  .social-media-list &:hover {
+    text-decoration: none;
+    .username {
+      text-decoration: underline;
+    }
+  }
+}
+
+.site-title:hover {
+  color: #fff;
+}
+
+a {
+  position: relative;
+}
+
+a:before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  bottom: 0;
+  left: 0;
+  background-color: #FFF;
+  visibility: hidden;
+  transform: scaleX(0);
+  transition: all $transition-time ease-in-out;
+}
+
+a.animatedlink {
+  position: relative;
+}
+
+a.animatedlink:before {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: 0;
+  left: 0;
+  background-color: #FFF;
+  visibility: hidden;
+  transition: all $transition-time ease-in-out;
+}
+
+a.animatedlink:hover:before {
+  visibility: visible;
+  width: 100%;
+}
+
+/**
+ * Switches
+ */
+
+/* The switch - the box around the slider */
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+/* Hide default HTML checkbox */
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/**
+ * Blockquotes
+ */
+
+blockquote {
+  color: $grey-color;
+  border-left: 4px solid $grey-color-light;
+  padding-left: $base-sizing * 0.5;
+  @include relative-font-size(1.125);
+  letter-spacing: -1px;
+  font-style: italic;
+  > :last-child {
+    margin-bottom: 0;
+  }
+}
+
+/**
+ * Code formatting
+ */
+
+pre, code {
+  @include relative-font-size(0.9375);
+  border: 1px solid $grey-color-light;
+  border-radius: 3px;
+  background-color: #eef;
+  color: black;
+}
+
+code {
+  padding: 1px 5px;
+}
+
+pre {
+  padding: 8px 12px;
+  overflow-x: auto;
+  >code {
+    border: 0;
+    padding-right: 0;
+    padding-left: 0;
+  }
+}
+
+/**
+ * Clearfix
+ */
+
+%clearfix:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/**
+ * Icons
+ */
+
+.svg-icon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  fill: #{$grey-color};
+  padding-right: 5px;
+  vertical-align: text-top;
+}
+
+.social-media-list {
+  li+li {
+    padding-top: 5px;
+  }
+}
+
+/**
+ * Tables
+ */
+
+table {
+  max-width: 100%;
+  text-align: $table-text-align;
+  border-collapse: collapse;
+  outline: 1px solid $light-grey;
+  font-size: 0.9em;
+
+  tr {
+    &:nth-child(even) {
+      background-color: rgba(255 255 255 / 8%);
+    }
+  }
+  th, td {
+    padding: math.div($base-sizing, 2);
+  }
+  th {
+    background-color: $orange;
+    color: white;
+    border: 1px solid darken($light-grey, 6%);
+    border-top: none;
+  }
+  td {
+    border: 1px solid $light-grey;
+    border-bottom: none;
+  }
+}
+
+.airtable-embed {
+  border-radius: 0.5em;
+}
+
+.paypal-buttons {
+  iframe {
+    border-radius: $border-radius;
+    overflow: hidden;
+  }
+}
+
+.checklist {
+  li {
+    margin-bottom: math.div($base-sizing, 2);
+    font-size: 1.1em;
+  }
+}

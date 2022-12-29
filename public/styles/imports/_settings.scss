@@ -1,0 +1,106 @@
+@charset "utf-8";
+
+$base-font-family: 'Nunito', -apple-system, BlinkMacSystemFont, "Roboto", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol" !default;
+$base-font-size:   12px !default;
+$base-font-weight: 400 !default;
+
+$header-font-family: 'Fredoka One', -apple-system, BlinkMacSystemFont, "Roboto", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol" !default;
+$header-font-weight: 400 !default;
+
+$small-font-size:  $base-font-size * 0.875 !default;
+$base-line-height: 1.5 !default;
+
+$base-sizing: 30px !default;
+$border-radius: $base-sizing*0.5 !default;
+
+$grey-color: hsl(0,0%,70%) !default;
+$light-grey: hsl(0,0%,85%) !default;
+
+$pink: #e2a7a7;
+$blue: #409acc;
+$orange: #FFC24A;
+
+$grey-color:       #808080 !default;
+$grey-color-light: lighten($grey-color, 40%) !default;
+$grey-color-dark:  darken($grey-color, 25%) !default;
+
+$table-text-align: left !default;
+
+$background-color: linear-gradient($pink, $blue) !default;
+$text-color: #000 !default;
+
+$content-width: 900px !default;
+
+$on-desktop: $content-width+(4*$base-sizing) !default;
+$on-mobile: $content-width+($base-sizing) !default;
+
+$transition-time: 0.4s;
+
+@mixin relative-font-size($ratio) {
+  font-size: $base-font-size * $ratio;
+}
+
+@function css-function( $function, $values... ) {
+	@return 
+		$function
+		+ unquote( '(' )
+		+ $values
+		+ unquote( ')' )
+	;
+}
+
+@function css-min( $values... ) {
+	@return css-function( min, $values );
+}
+
+@function css-max( $values... ) {
+	@return css-function( max, $values );
+}
+
+@function css-clamp( $values... ) {
+	@return css-function( clamp, $values );
+}
+
+:root {
+  --background-color: white;
+	--text-color: #1E1E1E;
+  --hover-color: #000;
+  --header-color: #000;
+	--grey-text-color: #666;
+}
+
+
+$parallax-perspective : 1 !default;
+$parallax-element     : "hero" !default;
+$parallax-ios         : true !default;
+
+@mixin parallax-init(
+  $perspective  : $parallax-perspective,
+  $element      : $parallax-element,
+  $parallax-ios : $parallax-ios
+  ) {
+  #{$element} {
+    overflow: auto;
+    perspective: $perspective * 1px;
+    transform-style: preserve-3d;
+    // Allows for smooth scrolling but disables parallax effects.
+    @if $parallax-ios == false {
+      -webkit-overflow-scrolling: touch;
+    }
+    // Preserve 3D
+    &, * {
+      transform-style: preserve-3d;
+    }
+  }
+}
+
+@mixin parallax(
+  $distance    : 0,
+  $perspective : $parallax-perspective
+  ) {
+  transform:
+    translateZ($distance * $perspective * 1px)
+    scale(abs($distance - 1))
+  ;
+  z-index: $distance * 1000;
+}
