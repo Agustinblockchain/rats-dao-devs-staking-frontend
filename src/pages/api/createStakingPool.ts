@@ -130,7 +130,8 @@ async function crearStakingPool(nombrePool: any, staking_UI: any, harvest_UI: an
 
 	const pabPoolParamsJsonFileName = nombrePool + "/" + 'PABPoolParams-HEX.json';
 
-	const stakePlusV2AddrFileName = nombrePool + "/" + 'Validator-Testnet.addr';
+	const stakePlusV2AddrFileName = process.env.NEXT_PUBLIC_USE_MAINNET === 'true' ? nombrePool + "/" + 'Validator-Mainnet.addr' : nombrePool + "/" + 'Validator-Testnet.addr';
+
 	const stakePlusV2Plutus_FileName = nombrePool + "/" + 'Validator.plutus';
 
 	// const stakePlusV2_Mint_PoolID_Symbol_FileName = nombrePool + "/" + 'Mint_PoolID.symbol';
