@@ -386,7 +386,7 @@ export default function WalletModalBtn() {
 
 
 					<div className="wallet__content">
-						<h3>Wallet ({process.env.USE_MAINNET === "true"?"Mainnet":"Preview"})</h3>
+						<h3>Wallet ({process.env.NEXT_PUBLIC_USE_MAINNET === "true"?"Mainnet":"Preview"})</h3>
 						<br></br>
 						{walletMessage ? <div>{walletMessage}<br></br><br></br></div> : <></>}
 
