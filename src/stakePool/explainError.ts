@@ -140,7 +140,7 @@ export function explainError(errorIn: any): string {
             }
 
             if (res === "" && error.includes("Error: 400:") && error.includes("consumed")) {
-                res += sep + "There are many users at the moment, please try again later!"; sep = ", ";
+                res += sep + "A UTxO that is needed does not exist. It may be that another User already consumes it. Please try again later!"; sep = ", ";
             }
 
             if (res === "" && error.includes("Error: 400:") && error.includes("requiredFee")) {
@@ -148,7 +148,7 @@ export function explainError(errorIn: any): string {
             }
 
             if (res === "" && error.includes("missing from UTxO set")) {
-                res += sep + "The UTxO has been consumed. There are many users at the moment, please try again later!"; sep = ", ";
+                res += sep + "A UTxO that is needed does not exist. It may be that another User already consumes it. Please try again later!"; sep = ", ";
             }
 
             if (res === "" && error.includes("Error: 400:") && error.includes("maximumExecutionUnits")) {
@@ -179,7 +179,7 @@ export function explainError(errorIn: any): string {
             }
 
             if (res === "" && error.includes("BadInputsUTxO")) {
-                res += sep + "The UTxO has been consumed. There are many users at the moment, please try again later!"; sep = ", ";
+                res += sep + "A UTxO that is needed does not exist. It may be that another User already consumes it. Please try again later!"; sep = ", ";
             }
 
             if (res === "" && error.includes("ValueNotConservedUTxO")) {
