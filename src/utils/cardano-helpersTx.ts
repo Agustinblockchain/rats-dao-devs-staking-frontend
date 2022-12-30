@@ -227,7 +227,7 @@ export async function fixTx(txComplete: any, lucid: Lucid, protocolParameters: a
     // })
     await fetch("/api/blockfrost" + '/blocks/latest', {
         headers: {
-            'project_id': ""
+            'project_id': "xxxxx"
         }
     })
         .then(response => response.json())
@@ -239,7 +239,7 @@ export async function fixTx(txComplete: any, lucid: Lucid, protocolParameters: a
     if (blockLast === undefined) {
         throw "Error: Can't get last block from Blockfrost"
     }
-    // console.log ("blockLast: " +  blockLast)	
+    console.log ("blockLast: " +  blockLast)	
     const from = blockLast! + 0
     const until = blockLast! + validTimeRangeInSlots
 

@@ -9,7 +9,7 @@ export const initializeLucid = async (walletApi: WalletApi | undefined) => {
     try {
         const lucid = await Lucid.new(
             // new Blockfrost(process.env.NEXT_PUBLIC_BLOCKFROST_URL!, process.env.NEXT_PUBLIC_BLOCKFROST_KEY!),
-            new Blockfrost("/api/blockfrost", ""),
+            new Blockfrost("/api/blockfrost", "xxxx"),
             process.env.NEXT_PUBLIC_USE_MAINNET === 'true' ? 'Mainnet':'Preview'
         )
         
@@ -31,7 +31,7 @@ export const initializeLucidWithWalletFromPrivateKey = async (walletPrivateKey: 
     try {
         const lucid = await Lucid.new(
             // new Blockfrost(process.env.NEXT_PUBLIC_BLOCKFROST_URL!, process.env.NEXT_PUBLIC_BLOCKFROST_KEY!),
-            new Blockfrost("/api/blockfrost", ""),
+            new Blockfrost("/api/blockfrost", "xxxx"),
             process.env.NEXT_PUBLIC_USE_MAINNET === 'true' ? 'Mainnet':'Preview'
         )
         
@@ -50,7 +50,7 @@ export const initializeLucidWithWalletFromSeed = async (walletSeed: string) => {
     try {
         const lucid = await Lucid.new(
             // new Blockfrost(process.env.NEXT_PUBLIC_BLOCKFROST_URL!, process.env.NEXT_PUBLIC_BLOCKFROST_KEY!),
-            new Blockfrost("/api/blockfrost", ""),
+            new Blockfrost("/api/blockfrost", "xxxx"),
             process.env.NEXT_PUBLIC_USE_MAINNET === 'true' ? 'Mainnet':'Preview'
         )
         

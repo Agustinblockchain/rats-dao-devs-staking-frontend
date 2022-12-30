@@ -1,5 +1,6 @@
 import { NextApiHandler } from 'next';
 import httpProxyMiddleware from 'next-http-proxy-middleware';
+import { toJson } from '../../../utils/utils';
 
 const getTarget = (url?: string) => {
   return process.env.NEXT_PUBLIC_BLOCKFROST_URL
@@ -15,7 +16,7 @@ const blockfrostProxy: NextApiHandler = async (req, res) => {
 
   try {
     if (!target || !PROJECT_ID) throw new Error("Invalid target or project id")
-    console.log("Blockfrost proxy OK")
+    console.log("Blockfrost proxy: " + toJson(req))
 
     const response = await httpProxyMiddleware(req, res, {
       target,
