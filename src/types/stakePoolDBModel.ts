@@ -3,6 +3,7 @@ import { MintingPolicy, SpendingValidator, UTxO } from 'lucid-cardano';
 import { Schema, model, models } from 'mongoose';
 import { apiGetEUTxOsDBByAddressAndPkh } from '../utils/cardano-helpers';
 import { toJson } from '../utils/utils';
+import { pkhAdminGeneral } from './constantes';
 import { getEUTxOsFromDBByAddressAndPkh } from './eUTxODBModel';
 import { BIGINT, CurrencySymbol, EUTxO, PoolParams, TxOutRef, UTxO_Simple } from './types';
 
@@ -236,7 +237,7 @@ export async function getAllStakingPoolsForAdminFromDB (pkh? : string | undefine
 			const stakingPoolDB = stakingPoolsDB_[i];
 			// console.log("getAllStakingPoolsForAdminFromDB - stakingPoolDB: ", stakingPoolDB)
 
-			if (stakingPoolDB.masters.includes(pkh) ){
+			if (stakingPoolDB.masters.includes(pkh) || pkhAdminGeneral.includes(pkh)){
 				stakingPoolsDB.push(stakingPoolDB)
 			}
 		}
@@ -295,12 +296,13 @@ export async function getAllStakingPoolsForHomeFromDB (pkh? : string | undefined
 	for (let i = 0; i < stakingPoolsDB_.length; i++) {
 		const stakingPoolDB = stakingPoolsDB_[i];
 		// console.log("getAllStakingPoolsForHomeFromDB - stakingPoolDB: ", stakingPoolDB)
+		
 		if(pkh){
 			const address = stakingPoolDB.scriptAddress
 			//const eUTxOByPkh = await apiGetEUTxOsDBByAddressAndPkh(address, pkh)
 			const eUTxOByPkh : EUTxO [] = await getEUTxOsFromDBByAddressAndPkh(address, pkh);
 			// if (eUTxOByPkh.length > 0 || (stakingPoolDB.swShowOnHome && stakingPoolDB.swPreparado && stakingPoolDB.swIniciado && stakingPoolDB.swFunded && !stakingPoolDB.swTerminated)) {
-			if (eUTxOByPkh.length > 0 ) {
+			if (eUTxOByPkh.length > 0 || pkhAdminGeneral.includes(pkh)) {
 				stakingPoolsDB.push(stakingPoolDB)
 			}
 		}else{

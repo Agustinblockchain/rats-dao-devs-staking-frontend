@@ -6,7 +6,7 @@ import dynamic from 'next/dynamic'
 import { useStoreState } from '../utils/walletProvider';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import { pkhCreators } from '../types/constantes';
+import { pkhAdminGeneral, pkhCreators } from '../types/constantes';
 import { toJson } from '../utils/utils';
 //--------------------------------------
 //import CreateStakingPool from '../components/CreateStakingPool';
@@ -69,7 +69,7 @@ export async function getServerSideProps(query : any) {
 	try {
 		console.log ("Create getServerSideProps - init - query.query?.pkh:", query.query?.pkh);
 
-		const swCreate = pkhCreators.includes (query.query?.pkh)
+		const swCreate = pkhCreators.includes (query.query?.pkh) || pkhAdminGeneral.includes (query.query?.pkh)
 
 		return {
 			props: {
