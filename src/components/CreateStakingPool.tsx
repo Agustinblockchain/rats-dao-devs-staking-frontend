@@ -32,7 +32,7 @@ import { apiDeleteEUTxODB, apiUpdateEUTxODB } from '../utils/cardano-helpers';
 //import StakingPoolAdmin from './StakingPoolAdmin';
 //--------------------------------------
 
-export default function CreateStakingPool() {
+export default function CreateStakingPool({ pkhValidation }: { pkhValidation: string } ) {
 
 
 	const walletStore = useStoreState(state => state.wallet)
@@ -181,6 +181,7 @@ export default function CreateStakingPool() {
 				swDummyStakingPool: swDummyStakingPool,
 
 				pkh: walletStore.pkh,
+				pkhValidation: pkhValidation,
 
 				masters: masters,
 				poolID_TxOutRef: poolID_TxOutRef,

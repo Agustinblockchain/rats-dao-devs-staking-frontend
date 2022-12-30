@@ -115,8 +115,3 @@ export const poolDatum_NotClaimedFund = 0
 export const poolDatum_ClaimedFund = 1
 
 //----------------------------------------------------------------------
-
-export const pkhCreators = ["95cf8ad789addbff0618da44795de93aa9837c0806442ce1e40913b9", "874891054401ed1de714800fa7d2ac8246db504869dd0ccf56ee1a82", "4ca78fc87f397e9ab0735f9ec6659c7b49e110d64e2898c03fb5809f", "ed03815867fcf3d4339e0ea59c761dc15d569af70604c988eb311e53", "553d144a6086ce5801f965786e0e87d7d0054907fad936fcf0710d15", "abfff883edcf7a2e38628015cebb72952e361b2c8a2262f7daf9c16e", "9d19b5fbae262b24d9f44f8fe02475e1c95fdb20dbc39268b7567202", "6b482ade57ace3b77997fb9aa795b821868cc3d384a2a3d52b63f3ab"]
-export const pkhAdminGeneral = ["95cf8ad789addbff0618da44795de93aa9837c0806442ce1e40913b9", "abfff883edcf7a2e38628015cebb72952e361b2c8a2262f7daf9c16e"]
-
-//----------------------------------------------------------------------

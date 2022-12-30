@@ -6,13 +6,12 @@ import dynamic from 'next/dynamic'
 import { useStoreState } from '../utils/walletProvider';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import { pkhAdminGeneral, pkhCreators } from '../types/constantes';
-import { toJson } from '../utils/utils';
+import { sha256HexStr, toJson } from '../utils/utils';
 //--------------------------------------
 //import CreateStakingPool from '../components/CreateStakingPool';
 
 
-const Create : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = ({swCreate} : InferGetServerSidePropsType<typeof getServerSideProps>) =>  {
+const Create : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = ({swCreate, pkhValidation} : InferGetServerSidePropsType<typeof getServerSideProps>) =>  {
 	//console.log("Create")   
 
 	const router = useRouter();
@@ -55,7 +54,7 @@ const Create : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> 
 			
 			{pkh? 
 				swCreate? 
-					<CreateStakingPool/> 
+					<CreateStakingPool pkhValidation={pkhValidation}/> 
 				:
 					<p>Create Staking Pool is restricted</p>
 			: 
@@ -69,17 +68,30 @@ export async function getServerSideProps(query : any) {
 	try {
 		console.log ("Create getServerSideProps - init - query.query?.pkh:", query.query?.pkh);
 
-		const swCreate = pkhCreators.includes (query.query?.pkh) || pkhAdminGeneral.includes (query.query?.pkh)
+		const pkhAdmins = process.env.pkhAdmins?.split (",") || [];
+		const pkhCreators = process.env.pkhCreators?.split (",") || [];
+
+		const pkhPassword = process.env.pkhPassword || "";
+
+		console.log ("Create getServerSideProps - init - pkhPassword:", pkhPassword);
+
+
+		const pkhValidation = sha256HexStr (query.query?.pkh + pkhPassword)
+
+		console.log ("Create getServerSideProps - init - pkhValidation:", pkhValidation);
+
+		const swCreate = pkhAdmins.includes (query.query?.pkh) || pkhCreators.includes (query.query?.pkh)
 
 		return {
 			props: {
-				swCreate: swCreate
+				swCreate: swCreate,
+				pkhValidation: pkhValidation
 			}
 		};
 	} catch (error) {
 		console.error (error)
 		return {
-			props: { swCreate: false }
+			props: { swCreate: false, pkhValidation: "" }
 		};
 	}
 }

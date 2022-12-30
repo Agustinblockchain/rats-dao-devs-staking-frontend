@@ -6,7 +6,7 @@ import { connect } from '../../utils/dbConnect'
 const fs = require('fs/promises');
 
 import { exec, ExecException }  from 'child_process';
-import { strToHex, toJson } from '../../utils/utils';
+import { sha256HexStr, strToHex, toJson } from '../../utils/utils';
 
 import { getScriptFromFile, getSymbolFromFile, getTextFromFile } from '../../utils/utilsServerSide';
 import { getPABPoolParamsFromFile, getEstadoDeployFromFile } from "../../stakePool/utilsServerSide";
@@ -14,7 +14,7 @@ import { getStakingPoolDBModel, getStakingPoolFromDBByName, StakingPoolDBInterfa
 import { el } from 'date-fns/locale';
 import { MintingPolicy,  SpendingValidator } from 'lucid-cardano';
 import { CurrencySymbol, PoolParams } from '../../types';
-import { maxMasters, pkhAdminGeneral, pkhCreators } from '../../types/constantes';
+import { maxMasters } from '../../types/constantes';
 import { getEstadoDeployAPI } from "../../stakePool/helpersStakePool";
 
 type Data = {
@@ -29,6 +29,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 	const swDummyStakingPool = req.body.swDummyStakingPool
 
 	const pkh = req.body.pkh
+	const pkhValidation = req.body.pkhValidation
 
 	const masters = req.body.masters
 	const poolID_TxOutRef = req.body.poolID_TxOutRef
@@ -66,15 +67,27 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 		return 
 	}
 
-	if(! (pkhCreators.includes (pkh) || pkhAdminGeneral.includes (pkh)) ){
+	const pkhAdmins = process.env.pkhAdmins?.split (",") || [];
+	const pkhCreators = process.env.pkhCreators?.split (",") || [];
+
+	if(! (pkhAdmins.includes (pkh) || pkhCreators.includes (pkh)) ){
+		console.error("/api/createStakingPool - You Can't Create Staking Pool"); 
+		res.status(400).json({ msg: "You Can't Create Staking Pool", stakingPool: stakingPoolWithSameName[0]})
+		return 
+	}
+
+	const pkhPassword = process.env.pkhPassword || "";
+	const pkhValidation_ = sha256HexStr (pkh + pkhPassword)
+
+	if(pkhValidation_ != pkhValidation){
 		console.error("/api/createStakingPool - You Can't Create Staking Pool"); 
 		res.status(400).json({ msg: "You Can't Create Staking Pool", stakingPool: stakingPoolWithSameName[0]})
 		return 
 	}
 
 	if (masters.length == 0 ){
-		console.error("/api/createStakingPool - Can't create Pool with no masters"); 
-		res.status(400).json({ msg: "Can't create Pool with no masters", stakingPool: stakingPoolWithSameName[0]})
+		console.error("/api/createStakingPool - You Can't Create Staking Pool - Wrong Validation Code"); 
+		res.status(400).json({ msg: "You Can't Create Staking Pool - Wrong Validation Code", stakingPool: stakingPoolWithSameName[0]})
 		return 
 	}
 
