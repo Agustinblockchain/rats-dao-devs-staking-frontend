@@ -96,6 +96,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 		swPreparado, swIniciado, swFunded,
 		swClosed, closedAt, swTerminated, terminatedAt,
 		swZeroFunds,
+		swPoolReadyForDelete,
 
 		eUTxOs_With_Datum, countEUTxOs_With_Datum,
 		eUTxO_With_PoolDatum,
@@ -2445,10 +2446,10 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 								<li className="info">Users will not be able to collect any more rewards.</li>
 								<li className="info">After Deleteing all Funds, Masters can recover any funds left over, proportionally to what each one has put in.</li>
 								<ActionModalBtn action={masterDeletePoolAction} swHash={false} poolInfo={poolInfo} 
-									enabled={walletStore.connected && isPoolDataLoaded} actionName="Delete Pool" 
+									enabled={walletStore.connected && isPoolDataLoaded && swPoolReadyForDelete && eUTxOs_With_UserDatum.length == 0 && eUTxOs_With_FundDatum.length == 0} actionName="Delete Pool" 
 									show={true}
 									actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
-								<li className="info">You can delete the Pool only if there are no Funds or registered users yet.</li>
+								<li className="info">You can delete the Pool only if there are no registered users and no remaining funds.</li>
 							</div>
 						</div>
 					</div>

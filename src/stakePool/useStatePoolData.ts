@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useStoreState } from "../utils/walletProvider";
 //--------------------------------------
 import { EUTxO, Master_Funder, PoolDatum, UserDatum } from "../types";
-import { fundID_TN, poolID_TN, scriptID_Master_AddScripts_TN, scriptID_Master_ClosePool_TN, scriptID_Master_DeleteFund_TN, scriptID_Master_DeleteScripts_TN, scriptID_Master_FundAndMerge_TN, scriptID_Master_Fund_TN, scriptID_Master_SendBackDeposit_TN, scriptID_Master_SendBackFund_TN, scriptID_Master_SplitFund_TN, scriptID_Master_TerminatePool_TN, scriptID_User_Deposit_TN, scriptID_User_Harvest_TN, scriptID_User_Withdraw_TN, scriptID_Validator_TN, txID_Master_AddScripts_TN, userID_TN } from "../types/constantes";
+import { fundID_TN, poolDatum_ClaimedFund, poolID_TN, scriptID_Master_AddScripts_TN, scriptID_Master_ClosePool_TN, scriptID_Master_DeleteFund_TN, scriptID_Master_DeleteScripts_TN, scriptID_Master_FundAndMerge_TN, scriptID_Master_Fund_TN, scriptID_Master_SendBackDeposit_TN, scriptID_Master_SendBackFund_TN, scriptID_Master_SplitFund_TN, scriptID_Master_TerminatePool_TN, scriptID_User_Deposit_TN, scriptID_User_Harvest_TN, scriptID_User_Withdraw_TN, scriptID_Validator_TN, txID_Master_AddScripts_TN, userID_TN } from "../types/constantes";
 import { StakingPoolDBInterface } from "../types/stakePoolDBModel";
 import { strToHex, toJson } from "../utils/utils";
 import {
@@ -53,6 +53,8 @@ export default function useStatePoolData(poolInfo: StakingPoolDBInterface) {
     const [swClosed, setSwClosed] = useState<string | 0 | boolean>(poolInfo.swClosed ? poolInfo.swClosed : ui_loading)
     const [swTerminated, setSwTerminated] = useState<string | 0 | boolean>(poolInfo.swTerminated ? poolInfo.swTerminated : ui_loading)
     const [swZeroFunds, setSwZeroFunds] = useState<string | 0 | boolean>(poolInfo.swZeroFunds ? poolInfo.swZeroFunds : ui_loading)
+
+    const [swPoolReadyForDelete, setSwPoolReadyForDelete] = useState<boolean>(false)
 
     const [closedAt, setClosedAt] = useState<string | 0 | Date | undefined>(poolInfo.closedAt !== undefined ? poolInfo.closedAt : ui_loading)
 
@@ -134,6 +136,8 @@ export default function useStatePoolData(poolInfo: StakingPoolDBInterface) {
         setSwClosed(poolInfo.swClosed ? poolInfo.swClosed : ui)
         setSwTerminated(poolInfo.swTerminated ? poolInfo.swTerminated : ui)
         setSwZeroFunds(poolInfo.swZeroFunds ? poolInfo.swZeroFunds : ui)
+
+        setSwPoolReadyForDelete(false)
 
         setClosedAt(poolInfo.closedAt !== undefined ? poolInfo.closedAt : ui)
 
@@ -242,7 +246,12 @@ export default function useStatePoolData(poolInfo: StakingPoolDBInterface) {
         var swClosed = poolInfo.swClosed
         var swTerminated = poolInfo.swTerminated
         var swZeroFunds = poolInfo.swZeroFunds
+        //----
+        var swPoolReadyForDelete = false
+        //----
         var closedAt = poolInfo.closedAt
+        //------------------
+        var poolDatum: PoolDatum | undefined = undefined
         //------------------
         const poolID_AC_Lucid = poolInfo.pParams.ppPoolID_CS + strToHex(poolID_TN);
         //------------------
@@ -347,7 +356,7 @@ export default function useStatePoolData(poolInfo: StakingPoolDBInterface) {
                 // si la fecha del deadline ya paso, o hay closedAt en el poolDatum, y tambien el gracetime ya paso, entonces el pool debe estar terminated
                 // si pdIsTerminated es true, entonces el pool debe estar terminated, significa que fue terminado forzado por el master
 
-                const poolDatum: PoolDatum = eUTxO_With_PoolDatum.datum as PoolDatum
+                poolDatum = eUTxO_With_PoolDatum.datum as PoolDatum
 
                 if (poolDatum.pdIsTerminated === 1) {
                     swClosed = true
@@ -482,6 +491,14 @@ export default function useStatePoolData(poolInfo: StakingPoolDBInterface) {
                     setUserStakedDatas([])
                 }
             }
+        }
+
+        if (eUTxO_With_PoolDatum === undefined || poolDatum === undefined) {
+            swPoolReadyForDelete = true
+        }else{
+            const masterFunders = poolDatum.pdMasterFunders
+            const allMasterFundersClaimed = masterFunders.every((masterFunder) => masterFunder.mfClaimedFund === poolDatum_ClaimedFund)   
+            swPoolReadyForDelete = allMasterFundersClaimed && (eUTxOs_With_FundDatum.length === 0) && (eUTxOs_With_UserDatum.length === 0)
         }
 
         var eUTxO_With_ScriptDatum: EUTxO | undefined = poolInfo.eUTxO_With_ScriptDatum
@@ -753,6 +770,8 @@ export default function useStatePoolData(poolInfo: StakingPoolDBInterface) {
         setSwTerminated(swTerminated)
         setSwZeroFunds(swZeroFunds)
 
+        setSwPoolReadyForDelete(swPoolReadyForDelete)
+
         var terminatedAt_: Date
 
         if (poolInfo.closedAt !== undefined) {
@@ -899,6 +918,8 @@ export default function useStatePoolData(poolInfo: StakingPoolDBInterface) {
 
         swClosed, swTerminated, closedAt, terminatedAt,
         swZeroFunds,
+
+        swPoolReadyForDelete,
 
         eUTxOs_With_Datum, countEUTxOs_With_Datum,
         eUTxO_With_PoolDatum,
