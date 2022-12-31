@@ -16,6 +16,7 @@ import { MintingPolicy,  SpendingValidator } from 'lucid-cardano';
 import { CurrencySymbol, PoolParams } from '../../types';
 import { maxMasters } from '../../types/constantes';
 import { getEstadoDeployAPI } from "../../stakePool/helpersStakePool";
+import { getSession } from 'next-auth/react';
 
 type Data = {
 	msg: string
@@ -24,12 +25,24 @@ type Data = {
 
 export default async function handler( req: NextApiRequest, res: NextApiResponse<Data | string>) {
 
+	//--------------------------------
+    const session = await getSession({ req })
+	if (!session) {
+		console.error("/api/createStakingPool - Must Connect to your Wallet"); 
+        res.status(400).json({ msg: "Must Connect to your Wallet", stakingPool: undefined })
+    }
+    const sesionPkh = session?.user.pkh
+    //--------------------------------
+	if (!(session?.user.swAdmin || session?.user.swCreate)){
+		console.error("/api/createStakingPool - You Can't Create Staking Pool"); 
+		res.status(400).json({ msg: "You Can't Create Staking Pool", stakingPool: undefined})
+		return 
+	}
+    //--------------------------------
+
 	const nombrePool = req.body.nombrePool
 
 	const swDummyStakingPool = req.body.swDummyStakingPool
-
-	const pkh = req.body.pkh
-	const pkhValidation = req.body.pkhValidation
 
 	const masters = req.body.masters
 	const poolID_TxOutRef = req.body.poolID_TxOutRef
@@ -61,33 +74,9 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 
 	const mastersSplited = masters.split(',');
 
-	if(!pkh){
-		console.error("/api/createStakingPool - Must Connect to your Wallet"); 
-		res.status(400).json({ msg: "Must Connect to your Wallet", stakingPool: stakingPoolWithSameName[0]})
-		return 
-	}
-
-	const pkhAdmins = process.env.pkhAdmins?.split (",") || [];
-	const pkhCreators = process.env.pkhCreators?.split (",") || [];
-
-	if(! (pkhAdmins.includes (pkh) || pkhCreators.includes (pkh)) ){
-		console.error("/api/createStakingPool - You Can't Create Staking Pool"); 
-		res.status(400).json({ msg: "You Can't Create Staking Pool", stakingPool: stakingPoolWithSameName[0]})
-		return 
-	}
-
-	const pkhPassword = process.env.pkhPassword || "";
-	const pkhValidation_ = sha256HexStr (pkh + pkhPassword)
-
-	if(pkhValidation_ != pkhValidation){
-		console.error("/api/createStakingPool - You Can't Create Staking Pool"); 
-		res.status(400).json({ msg: "You Can't Create Staking Pool", stakingPool: stakingPoolWithSameName[0]})
-		return 
-	}
-
 	if (masters.length == 0 ){
-		console.error("/api/createStakingPool - You Can't Create Staking Pool - Wrong Validation Code"); 
-		res.status(400).json({ msg: "You Can't Create Staking Pool - Wrong Validation Code", stakingPool: stakingPoolWithSameName[0]})
+		console.error("/api/createStakingPool - Can't create Pool with no masters"); 
+		res.status(400).json({ msg: "Can't create Pool with no masters", stakingPool: stakingPoolWithSameName[0]})
 		return 
 	}
 
@@ -351,6 +340,7 @@ async function crearStakingPool(nombrePool: any, staking_UI: any, harvest_UI: an
 		swTerminated: false,
 
 		swZeroFunds: true,
+		swPoolReadyForDelete: true,
 
 		beginAt: new Date(pabPoolParams.beginAt),
 		deadline: new Date(pabPoolParams.deadline),

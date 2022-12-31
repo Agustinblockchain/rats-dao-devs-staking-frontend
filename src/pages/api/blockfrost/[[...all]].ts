@@ -16,8 +16,7 @@ const blockfrostProxy: NextApiHandler = async (req, res) => {
 
   try {
     if (!target || !PROJECT_ID) throw new Error("Invalid target or project id")
-    console.log("Blockfrost proxy: " + toJson(req))
-
+    //console.log("Blockfrost proxy: " + toJson(req))
     const response = await httpProxyMiddleware(req, res, {
       target,
       headers: {

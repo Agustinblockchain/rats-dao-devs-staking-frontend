@@ -3,12 +3,11 @@
 import { C, createCostModels, Lucid, TxComplete, TxSigned } from "lucid-cardano";
 
 import { BigNum, Costmdls, CostModel, hash_script_data, Int, Language, Transaction } from "@dcspark/cardano-multiplatform-lib-browser";
-import { isPreparingTime, maxTxExMem, maxTxExSteps, maxTxSize, TIME_OUT_TRY_TX, validTimeRangeInSlots } from "../types/constantes";
+import { isConsumingTime, isPreparingTime, maxTxExMem, maxTxExSteps, maxTxSize, TIME_OUT_TRY_TX, validTimeRangeInSlots } from "../types/constantes";
 import { showPtrInHex, toJson } from "./utils";
 import { Wallet } from "./walletProvider";
 import { EUTxO, Maybe, POSIXTime } from "../types";
 import { apiDeleteEUTxODB, apiUpdateEUTxODB } from "./cardano-helpers";
-import { objToPlutusData } from "./cardano-utils";
 
 //---------------------------------------------------------------
 
@@ -146,7 +145,6 @@ export async function makeTx_And_UpdateEUTxOsIsPreparing(functionName: string, w
 }
     
 //---------------------------------------------------------------
-
 
 export async function makeTx(functionName: string, wallet: Wallet, protocolParameters: any, tx: Promise<TxComplete>): Promise<string> {
     //------------------
@@ -346,4 +344,40 @@ export function getTxMemAndStepsUse(protocolParameters: any, txSize: number, txJ
     result.push({ "MAX SIZE": maxTxSize, "MAX MEM": maxTxExMem / 1000000, "MAX STEPS": maxTxExSteps / 1000000000 })
 
     return result
+}
+
+export async function awaitTx (lucid: Lucid, txhash: string, eUTxO_for_consuming: EUTxO[], callback: () => Promise<any>, isWorkingInABuffer?: boolean) {
+    //------------------
+    const now = new Date();
+    //------------------
+    for (let i = 0; i < eUTxO_for_consuming.length; i++) {
+        eUTxO_for_consuming[i].isConsuming = new Maybe<POSIXTime>(BigInt(now.getTime()));
+        await apiUpdateEUTxODB(eUTxO_for_consuming[i]);
+    }
+    async function clearIsConsuming() {
+        console.log("awaitTx - clearIsConsuming");
+        for (let i = 0; i < eUTxO_for_consuming.length; i++) {
+            // eUTxO_for_consuming[i].isConsuming = new Maybe<POSIXTime>();
+            // apiUpdateEUTxODB(eUTxO_for_consuming[i]);
+            await apiDeleteEUTxODB(eUTxO_for_consuming[i]);
+        }
+    }
+    //------------------
+    const timeOut = setTimeout(clearIsConsuming, isConsumingTime);
+    //------------------
+    if (await lucid.awaitTx(txhash)) {
+        console.log("awaitTx - Tx confirmed");
+        //------------------
+        for (let i = 0; i < eUTxO_for_consuming.length; i++) {
+            await apiDeleteEUTxODB(eUTxO_for_consuming[i]);
+        }
+        //------------------
+        if (isWorkingInABuffer === undefined || !isWorkingInABuffer)
+            callback();
+        else
+            await callback();
+        //------------------
+    } else {
+        console.log("awaitTx - Tx not confirmed");
+    }
 }

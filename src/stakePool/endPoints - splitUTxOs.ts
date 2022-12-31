@@ -8,7 +8,7 @@ import { makeTx } from '../utils/cardano-helpersTx';
 
 export async function splitUTxOs(wallet: Wallet, pkh: PaymentKeyHash) : Promise <[string, EUTxO []]> {
     //------------------
-    const functionName = "Split UTxOs";
+    const functionName = "Split Wallet UTxOs";
     //------------------
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;

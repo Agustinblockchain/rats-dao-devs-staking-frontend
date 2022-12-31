@@ -14,6 +14,7 @@ import { searchKeyInObject, searchValueInArray, toJson } from "../utils/utils"
 import { addrToPubKeyHash, pubKeyHashToAddress } from "../utils/cardano-utils"
 import { useLocalStorage } from "../utils/useLocalStorage";
 import Skeleton from "react-loading-skeleton"
+import { signIn, signOut } from "next-auth/react"
 //--------------------------------------
 
 export default function WalletModalBtn() {
@@ -109,6 +110,8 @@ export default function WalletModalBtn() {
 			setSavedWalletName(walletName)
 			setSavedIsWalletFromSeed(false)
 
+			await signIn('credentials', { pkh: pkh , redirect: false })
+
 			//console.log("WalletModalBtn - setSavedWalletName")
 
 			// console.log("WalletModalBtn : " + document.querySelector("#wallet-modal-toggle"))
@@ -194,6 +197,8 @@ export default function WalletModalBtn() {
 			setSavedWalletName(walletName)
 			setSavedIsWalletFromSeed(true)
 
+			await signIn('credentials', { pkh: pkh , redirect: false })
+
 			//console.log("WalletModalBtn - setSavedWalletName")
 
 			// console.log("WalletModalBtn : " + document.querySelector("#wallet-modal-toggle"))
@@ -244,6 +249,8 @@ export default function WalletModalBtn() {
 			setSavedWalletName("")
 			setSavedSwEnviarPorBlockfrost(false)
 			setSavedIsWalletFromSeed(false)
+
+			await signOut({ redirect: false })
 
 			setWalletMessage("Wallet Disconnected!")
 

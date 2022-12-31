@@ -185,9 +185,10 @@ export default function ActionModalBtn(
 				""// <>{(userMaxTokens ===0? userMaxTokens : "Max " + inputUnit + " to use in Wallet: " + userMaxTokens ) || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</>
 				: null}</>
 
-			<br></br>
+			
 			{show?
 				<>
+					<br></br>
 					{enabled && (isWorking === actionNameWithIdx || isWorking === "") ?
 						<label htmlFor={`${actionNameWithIdx}-modal-toggle`} className="btn">
 							{actionName}

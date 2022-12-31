@@ -15,6 +15,7 @@ import { useStoreState } from '../utils/walletProvider';
 import { StakingPoolDBInterface, getStakingPools } from '../types/stakePoolDBModel'
 import { createContext, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
+import { getSession } from 'next-auth/react'
 // import StakingPoolAdmin from '../components/StakingPoolAdmin';
 
 //--------------------------------------
@@ -74,25 +75,40 @@ const Withdraw : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>
 	)
 }
 
-export async function getServerSideProps(query : any) { 
+export async function getServerSideProps(context : any) { 
 	try {
 		
-		console.log ("Withdraw getServerSideProps - init - query.query?.pkh:", query.query?.pkh);
+		console.log ("Withdraw getServerSideProps - init - context.query?.pkh:", context.query?.pkh);
 
 		await connect();
 
 		var rawDataStakingPools : StakingPoolDBInterface []
-		if (query.query?.pkh != undefined) {
-			// console.log ("Withdraw1 getServerSideProps - init - query.query?.pkh:", query.query?.pkh);
-			if(query.query?.pkh != ""){
-				// console.log ("Withdraw2 getServerSideProps - init - query.query?.pkh:", query.query?.pkh);
-				rawDataStakingPools  = await getStakingPools(true, query.query?.pkh)
+		if (context.query?.pkh != undefined) {
+			// console.log ("Withdraw1 getServerSideProps - init - context.query?.pkh:", context.query?.pkh);
+			if(context.query?.pkh != ""){
+				// console.log ("Withdraw2 getServerSideProps - init - context.query?.pkh:", context.query?.pkh);
+
+				const session = await getSession(context)
+				if (session) {
+					console.log ("Withdraw getServerSideProps - init - session:", toJson (session));
+
+					if (session.user.pkh === context.query?.pkh) {
+						rawDataStakingPools  = await getStakingPools(true, context.query?.pkh)
+					}else{
+						rawDataStakingPools = []
+					}
+
+				}else{
+					console.log ("Withdraw getServerSideProps - init - session: undefined");
+					rawDataStakingPools = []
+				}
+				
 			}else{
-				// console.log ("Withdraw3 getServerSideProps - init - query.query?.pkh:", query.query?.pkh);
+				// console.log ("Withdraw3 getServerSideProps - init - context.query?.pkh:", context.query?.pkh);
 				rawDataStakingPools = []
 			}
 	 	}else{
-			// console.log ("Withdraw4 getServerSideProps - init - query.query?.pkh:", query.query?.pkh);
+			// console.log ("Withdraw4 getServerSideProps - init - context.query?.pkh:", context.query?.pkh);
 			rawDataStakingPools = []
 		}
 

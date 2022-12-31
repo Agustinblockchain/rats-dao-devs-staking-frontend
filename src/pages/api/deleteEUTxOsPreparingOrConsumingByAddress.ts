@@ -7,6 +7,7 @@ import { toJson } from '../../utils/utils';
 
 import { deleteEUTxOsFromDBByAddress, deleteEUTxOsFromDBPreparingOrConsumingByAddress } from  '../../types/eUTxODBModel'
 import { EUTxO } from '../../types';
+import { getSession } from 'next-auth/react';
 
 type Data = {
     msg: string
@@ -14,6 +15,12 @@ type Data = {
 
 export default async function handler( req: NextApiRequest, res: NextApiResponse<Data | string>) {
 
+    const session = await getSession({ req })
+	if (!session) {
+		console.error("/api/deleteEUTxOsPreparingOrConsumingByAddress - Must Connect to your Wallet"); 
+        res.status(400).json({ msg: "Must Connect to your Wallet" })
+    }
+    
     const address = req.body.address
 
     await connect();

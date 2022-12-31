@@ -63,7 +63,7 @@ export default function MasterModalBtn(
 	const { isPoolDataLoaded, 
 
         swPreparado, swIniciado, swFunded,
-		swClosed, closedAt, swTerminated, terminatedAt, swZeroFunds,
+		swClosed, closedAt, swTerminated, terminatedAt, swZeroFunds, swPoolReadyForDelete,
 
 		eUTxOs_With_Datum, countEUTxOs_With_Datum,
 		eUTxO_With_PoolDatum,
@@ -272,11 +272,11 @@ export default function MasterModalBtn(
 						<div className="modal__content_btns">
 							<ActionModalBtn action={masterGetBackFundAction} swHash={true} poolInfo={poolInfo} 
 								enabled={walletStore.connected && isPoolDataLoaded && swTerminated === true && swZeroFunds === true} 
-								show={swPreparado === true}
+								show={swPreparado === true && swTerminated === true  }
 								actionName="Get Back Fund" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
 							<ActionModalBtn action={masterSendBackFundAction} swHash={true} master_Selected={masterFunders_Selected.length>0?masterFunders_Selected[0].mfMaster:undefined }  poolInfo={poolInfo} 
-								enabled={walletStore.connected && isPoolDataLoaded &&  masterFunders_Selected.length == 1 && swZeroFunds === true} 
-								show={swPreparado === true}
+								enabled={walletStore.connected && isPoolDataLoaded &&  masterFunders_Selected.length == 1 && swTerminated === true && swZeroFunds === true} 
+								show={swPreparado === true && swTerminated === true }
 								actionName="Send Back Fund" actionIdx={poolInfo.name + "-MasterModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
 							<div className="modal__action_separator">
 								<br></br>

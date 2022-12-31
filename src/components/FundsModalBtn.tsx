@@ -284,39 +284,39 @@ export default function FundsModalBtn(
 							<ActionModalBtn action={masterNewFundAction} swHash={true} poolInfo={poolInfo} 
 								showInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={maxHarvestAmount} 
 								enabled={walletStore.connected && isPoolDataLoaded && swPreparado === true} 
-								show={swPreparado === true}
+								show={swPreparado === true && swTerminated === false}
 								actionName="New Fund" actionIdx={poolInfo.name + "-FundModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
 							<ActionModalBtn 
 									action={masterNewFundsBatchAction} swHash={false} poolInfo={poolInfo} 
 									showInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={maxHarvestAmount} 
 									enabled={walletStore.connected && isPoolDataLoaded && swPreparado === true} 
-									show={swPreparado === true}
+									show={swPreparado === true && swTerminated === false}
 									actionName="New Funds Batch" actionIdx={poolInfo.name + "-FundModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
 									callback={handleCallback} 
 									cancel={handleCancel}
 									/>
 							<ActionModalBtn action={masterFundAndMergeAction} swHash={true} eUTxOs_Selected={eUTxOs_FundDatum_Selected} poolInfo={poolInfo} 
 								showInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={maxHarvestAmount} 
-								enabled={walletStore.connected && isPoolDataLoaded && swFunded === true && eUTxOs_FundDatum_Selected.length > 0} 
-								show={swPreparado === true}
+								enabled={walletStore.connected && isPoolDataLoaded && swFunded === true && swTerminated === false && eUTxOs_FundDatum_Selected.length > 0} 
+								show={swPreparado === true && swFunded === true && swTerminated === false}
 								actionName="Fund And Merge" actionIdx={poolInfo.name + "-FundModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
 							<ActionModalBtn action={masterMergeFundsAction} swHash={true} eUTxOs_Selected={eUTxOs_FundDatum_Selected} poolInfo={poolInfo} 
-								enabled={walletStore.connected && isPoolDataLoaded && swFunded === true && eUTxOs_FundDatum_Selected.length > 0} 
-								show={swPreparado === true}
+								enabled={walletStore.connected && isPoolDataLoaded && swFunded === true && eUTxOs_FundDatum_Selected.length > 1} 
+								show={swPreparado === true && swFunded === true}
 								actionName="Merge Funds" actionIdx={poolInfo.name + "-FundModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
 							<ActionModalBtn action={masterSplitFundAction} swHash={true} eUTxOs_Selected={eUTxOs_FundDatum_Selected} poolInfo={poolInfo} 
 								showInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={maxHarvestAmount} 
 								enabled={walletStore.connected && isPoolDataLoaded && swFunded === true && eUTxOs_FundDatum_Selected.length == 1} 
-								show={swPreparado === true}
+								show={swPreparado === true && swFunded === true && swTerminated === false}
 								actionName="Split Fund" actionIdx={poolInfo.name + "-FundModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
 							<ActionModalBtn action={masterDeleteFundsAction} swHash={true} eUTxOs_Selected={eUTxOs_FundDatum_Selected} poolInfo={poolInfo} 
-								enabled={walletStore.connected && isPoolDataLoaded && swFunded === true && eUTxOs_FundDatum_Selected.length > 0} 
-								show={swPreparado === true}
+								enabled={walletStore.connected && isPoolDataLoaded && swFunded === true && eUTxOs_FundDatum_Selected.length > 0 && swTerminated === true} 
+								show={swPreparado === true && swFunded === true && swTerminated === true}
 								actionName="Delete Funds" actionIdx={poolInfo.name + "-FundModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
 							<ActionModalBtn 
 								action={masterDeleteFundsBatchAction} swHash={false} poolInfo={poolInfo} 
-								enabled={walletStore.connected && isPoolDataLoaded && swFunded === true} actionName="Delete Funds Batch" actionIdx={poolInfo.name + "-FundModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-								show={swPreparado === true}
+								enabled={walletStore.connected && isPoolDataLoaded && swFunded === true && swTerminated === true} actionName="Delete Funds Batch" actionIdx={poolInfo.name + "-FundModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
+								show={swPreparado === true && swFunded === true && swTerminated === true}
 								callback={handleCallback} 
 								cancel={handleCancel}
 								/>

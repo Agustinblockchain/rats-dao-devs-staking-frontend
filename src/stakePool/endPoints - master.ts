@@ -2,7 +2,7 @@
 import { Address, Assets, UTxO } from 'lucid-cardano';
 //--------------------------------------
 import {
-    AssetClass, EUTxO, FundID_TN, FundDatum, Master, Master_Funder, Maybe, PoolDatum, POSIXTime,
+    AssetClass, EUTxO, FundDatum, Master, Master_Funder, Maybe, PoolDatum, POSIXTime,
     Redeemer_Burn_TxID,
     Redeemer_Master_AddScripts,
     Redeemer_Master_ClosePool,
@@ -29,12 +29,15 @@ import {
 } from "../types/constantes";
 import {
     masterClosePoolTx, masterPreparePoolTx,
-    masterFundAndMergeTx, masterSendBackFundTx, masterSendBackDepositTx, masterTerminatePoolTx, masterSplitFundTx, masterDeleteFundsTx, masterNewFundTx} from './endPointsTx - master';
+    masterFundAndMergeTx, masterSendBackFundTx, masterSendBackDepositTx, masterTerminatePoolTx, masterSplitFundTx, masterDeleteFundsTx, masterNewFundTx
+} from './endPointsTx - master';
 import {
     addAssets, find_TxOutRef_In_UTxOs,
-    createValue_Adding_Tokens_Of_AC_Lucid, subsAssets, addAssetsList, find_EUTxO_In_EUTxOs, sumTokensAmt_From_AC_Lucid, apiGetEUTxOsDBByAddress, apiUpdateEUTxODB, apiDeleteEUTxODB} from '../utils/cardano-helpers';
+    createValue_Adding_Tokens_Of_AC_Lucid, subsAssets, addAssetsList, find_EUTxO_In_EUTxOs, sumTokensAmt_From_AC_Lucid, apiGetEUTxOsDBByAddress
+} from '../utils/cardano-helpers';
 import {
-    getAvailaibleFunds_In_EUTxO_With_FundDatum, getFundAmountsRemains_ForMaster} from "./helpersStakePool";
+    getAvailaibleFunds_In_EUTxO_With_FundDatum, getFundAmountsRemains_ForMaster
+} from "./helpersStakePool";
 import {
     mkUpdated_PoolDatum_With_ClosedAt, mkUpdated_PoolDatum_With_Terminated, mkUpdated_FundDatum_With_NewFundAmountAndMerging, mkUpdated_PoolDatum_With_NewFundAmountAndMerging,
     mkUpdated_PoolDatum_With_NewFund,
@@ -45,7 +48,7 @@ import {
 } from './helpersDatums';
 import {
     getEUTxOs_With_FundDatum_InEUxTOList, getEUTxOs_With_UserDatum_InEUxTOList,
-    getEUTxO_With_PoolDatum_InEUxTOList, getExtendedUTxOsWith_Datum
+    getEUTxO_With_PoolDatum_InEUxTOList
 } from './helpersScripts';
 import { makeTx_And_UpdateEUTxOsIsPreparing } from '../utils/cardano-helpersTx';
 import { calculateMinAda, calculateMinAdaOfAssets } from "../utils/cardano-helpers";

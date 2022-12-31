@@ -73,6 +73,8 @@ export function explainError(errorIn: any): string {
             if (error.includes("\"NOTTERMINATED\"")) { res += sep + "The Pool is not finished yet"; sep = ", "; }
             if (error.includes("\"CLOSED\"")) { res += sep + "The Pool is already closed"; sep = ", "; }
 
+
+
             if (error.includes("\"PPMSM\"")) { res += sep + "The signature of one of the Pool Masters is required"; sep = ", "; }
             if (error.includes("\"MSM\"")) { res += sep + "The signature of the master and the redeemer do not match"; sep = ", "; }
 
@@ -122,6 +124,8 @@ export function explainError(errorIn: any): string {
             if (error.includes("\"MSBIV\"")) { res += sep + "Wrong Value paid to User "; sep = ", "; }
             if (error.includes("\"UIGB\"")) { res += sep + "You must return UI Tokens"; sep = ", "; }
             if (error.includes("\"F0\"")) { res += sep + "Fund Count is not Zero"; sep = ", "; }
+
+            if (error.includes("\"FUNDAMT0\"")) { res += sep + "Fund Amount should be Zero"; sep = ", "; }
 
             if (error.includes("\"IFDQTY\"")) { res += sep + "You must use the minimum amount possible of FundDatums to cover the claim Amount"; sep = ", "; }
 
@@ -186,7 +190,7 @@ export function explainError(errorIn: any): string {
                 res += sep + "Technical problems, please try again later!"; sep = ", ";
             }
             if (res === "" && error.includes("Not enough ADA leftover to cover minADA")) {
-                res += sep + "You don't have enough ADA or UTxO available. It is possible that some transfer is still in the process of being validated. Use Split UTxOs or please try again later!!"; sep = ", ";
+                res += sep + "You don't have enough ADA or UTxO available. It is possible that some transfer is still in the process of being validated. Please try Split Wallet UTxOs or try again later!!"; sep = ", ";
             }
             if (res === "" && error.includes("account changed")) {
                 res += sep + "You have changed the wallet in the dApp Connector, please reconnect with your new wallet!"; sep = ", ";

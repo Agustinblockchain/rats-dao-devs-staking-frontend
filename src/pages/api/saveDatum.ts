@@ -18,6 +18,8 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 
 	await connect();
 
+	console.log("/api/saveDatum - Request: " + toJson(req));
+
 	// console.log("/api/saveDatum - Request: " + toJson(req.body));
 
 	try {

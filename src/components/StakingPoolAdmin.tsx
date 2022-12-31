@@ -3,37 +3,39 @@ import Image from 'next/image';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 //--------------------------------------
-import { Address, Assets, Lucid, UTxO } from 'lucid-cardano';
+import { Address, Assets, UTxO } from 'lucid-cardano';
 //--------------------------------------
 import ActionModalBtn from './ActionModalBtn';
 import FundsModalBtn from './FundsModalBtn';
 //--------------------------------------
-import { useStoreActions, useStoreDispatch, useStoreState } from '../utils/walletProvider';
+import { useStoreActions, useStoreState } from '../utils/walletProvider';
 //--------------------------------------
 import {
 	masterPreparePool, masterFundAndMerge,
 	masterNewFund, masterClosePool, masterGetBackFund, masterMergeFunds, masterSendBackFund,
-	masterSendBackDeposit, masterTerminatePool, masterSplitFund, masterDeleteFunds} from '../stakePool/endPoints - master';
+	masterSendBackDeposit, masterTerminatePool, masterSplitFund, masterDeleteFunds
+} from '../stakePool/endPoints - master';
 import { splitUTxOs } from "../stakePool/endPoints - splitUTxOs";
 import {
-    masterAddScriptsMasterClosePool, masterAddScriptsMasterTerminatePool, masterAddScriptsMasterFund, masterAddScriptsMasterFundAndMerge,
-    masterAddScriptsUserWithdraw, masterAddScriptsUserHarvest, masterAddScriptsUserDeposit, masterDeleteScriptsMasterAll, masterDeleteScriptsUserAll, masterAddScriptsMasterSendBackFund, masterAddScriptsMasterSendBackDeposit, masterAddScriptsMasterDeleteFund, masterAddScriptsMasterSplitFund, masterAddScriptsMasterDeleteScripts
+	masterAddScriptsMasterClosePool, masterAddScriptsMasterTerminatePool, masterAddScriptsMasterFund, masterAddScriptsMasterFundAndMerge,
+	masterAddScriptsUserWithdraw, masterAddScriptsUserHarvest, masterAddScriptsUserDeposit, masterDeleteScriptsMasterAll, masterDeleteScriptsUserAll, masterAddScriptsMasterSendBackFund, masterAddScriptsMasterSendBackDeposit, masterAddScriptsMasterDeleteFund, masterAddScriptsMasterSplitFund, masterAddScriptsMasterDeleteScripts
 } from "../stakePool/endPoints - master - scripts";
-import { EUTxO, InterestRate, Master, Maybe, POSIXTime, UTxO_Simple } from '../types';
-import { StakingPoolDBInterface } from '../types/stakePoolDBModel'
+import { EUTxO, Master } from '../types';
+import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
 import useStatePoolData from '../stakePool/useStatePoolData';
-import { useEffect, useState, useRef, createContext, useContext } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { copyToClipboard, searchValueInArray, strToHex, toJson } from '../utils/utils';
 import { explainError } from "../stakePool/explainError";
 import { stakingPoolDBParser } from "../stakePool/helpersStakePool";
-import { isConsumingTime, maxTokensWithDifferentNames, scriptID_Master_AddScripts_TN, scriptID_Master_ClosePool_TN, scriptID_Master_DeleteFund_TN, scriptID_Master_DeleteScripts_TN, scriptID_Master_FundAndMerge_TN, scriptID_Master_Fund_TN, scriptID_Master_SendBackDeposit_TN, scriptID_Master_SendBackFund_TN, scriptID_Master_SplitFund_TN, scriptID_Master_TerminatePool_TN, scriptID_User_Deposit_TN, scriptID_User_Harvest_TN, scriptID_User_Withdraw_TN, scriptID_Validator_TN, txID_Master_AddScripts_TN, txID_User_Deposit_For_User_TN } from '../types/constantes';
-import { getEUTxO_With_ScriptDatum_InEUxTOList, getExtendedUTxOsWith_Datum } from '../stakePool/helpersScripts';
+import { maxTokensWithDifferentNames, scriptID_Master_AddScripts_TN, scriptID_Master_ClosePool_TN, scriptID_Master_DeleteFund_TN, scriptID_Master_DeleteScripts_TN, scriptID_Master_FundAndMerge_TN, scriptID_Master_Fund_TN, scriptID_Master_SendBackDeposit_TN, scriptID_Master_SendBackFund_TN, scriptID_Master_SplitFund_TN, scriptID_Master_TerminatePool_TN, scriptID_User_Deposit_TN, scriptID_User_Harvest_TN, scriptID_User_Withdraw_TN, scriptID_Validator_TN, txID_Master_AddScripts_TN, txID_User_Deposit_For_User_TN } from '../types/constantes';
+import { getEUTxO_With_ScriptDatum_InEUxTOList } from '../stakePool/helpersScripts';
 import { pushSucessNotification, pushWarningNotification } from "../utils/pushNotification";
 import UsersModalBtn from './UsersModalBtn';
 import MasterModalBtn from './MastersModalBtn';
-import { apiDeleteEUTxODB, apiDeleteEUTxOsDBByAddress, apiGetEUTxOsDBByAddress, apiUpdateEUTxODB } from '../utils/cardano-helpers';
+import { apiDeleteEUTxOsDBByAddress, apiGetEUTxOsDBByAddress } from '../utils/cardano-helpers';
 import { useRouter } from 'next/router';
 import LoadingSpinner from './LoadingSpinner';
+import { awaitTx } from '../utils/cardano-helpersTx';
 //--------------------------------------
 
 export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo: StakingPoolDBInterface } ) {
@@ -246,7 +248,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 			setActionMessage("Waiting for confirmation, please wait...")
 			setActionHash(txHash)
 
-			await awaitTx(lucid!, txHash, eUTxO_for_consuming)
+			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
 
 			//await updateUTxO_With_PoolDatum(poolInfo!, txHash);
 
@@ -529,7 +531,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 					setActionMessage("Waiting for confirmation, please wait..." + (isCancelling.current ? " (Canceling when this Tx finishes)" : ""))
 					setActionHash(txHash)
 
-					await awaitTx(lucid!, txHash, eUTxO_for_consuming)
+					await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
 
 					pushSucessNotification("Delete Scripts Master", txHash, true);
 					setActionHash("")
@@ -842,7 +844,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 					setActionMessage("Waiting for confirmation, please wait..." + (isCancelling.current ? " (Canceling when this Tx finishes)" : ""))
 					setActionHash(txHash)
 
-					await awaitTx(lucid!, txHash, eUTxO_for_consuming)
+					await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
 
 					pushSucessNotification("Delete Scripts User", txHash, true);
 					// setActionHash("")
@@ -997,7 +999,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 				setActionHash(txHash)
 			}
 
-			await awaitTx(lucid!, txHash, eUTxO_for_consuming)
+			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
 
 			if (!isWorkingInABuffer.current) setIsWorking("")
 
@@ -1032,7 +1034,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 				setActionHash(txHash)
 			}
 
-			await awaitTx(lucid!, txHash, eUTxO_for_consuming)
+			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
 
 			if (!isWorkingInABuffer.current) setIsWorking("")
 
@@ -1067,7 +1069,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 				setActionHash(txHash)
 			}
 
-			await awaitTx(lucid!, txHash, eUTxO_for_consuming)
+			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
 
 			if (!isWorkingInABuffer.current) setIsWorking("")
 
@@ -1102,7 +1104,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 				setActionHash(txHash)
 			}
 
-			await awaitTx(lucid!, txHash, eUTxO_for_consuming)
+			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
 
 			if (!isWorkingInABuffer.current) setIsWorking("")
 
@@ -1137,7 +1139,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 				setActionHash(txHash)
 			}
 
-			await awaitTx(lucid!, txHash, eUTxO_for_consuming)
+			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
 
 			if (!isWorkingInABuffer.current) setIsWorking("")
 
@@ -1172,7 +1174,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 				setActionHash(txHash)
 			}
 
-			await awaitTx(lucid!, txHash, eUTxO_for_consuming)
+			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
 
 			if (!isWorkingInABuffer.current) setIsWorking("")
 
@@ -1207,7 +1209,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 				setActionHash(txHash)
 			}
 
-			await awaitTx(lucid!, txHash, eUTxO_for_consuming)
+			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
 
 			if (!isWorkingInABuffer.current) setIsWorking("")
 
@@ -1242,7 +1244,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 				setActionHash(txHash)
 			}
 
-			await awaitTx(lucid!, txHash, eUTxO_for_consuming)
+			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
 
 			if (!isWorkingInABuffer.current) setIsWorking("")
 
@@ -1277,7 +1279,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 				setActionHash(txHash)
 			}
 
-			await awaitTx(lucid!, txHash, eUTxO_for_consuming)
+			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
 
 			if (!isWorkingInABuffer.current) setIsWorking("")
 
@@ -1314,7 +1316,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 				setActionHash(txHash)
 			}
 
-			await awaitTx(lucid!, txHash, eUTxO_for_consuming)
+			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
 
 			if (!isWorkingInABuffer.current) setIsWorking("")
 
@@ -1350,7 +1352,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 				setActionHash(txHash)
 			}
 
-			await awaitTx(lucid!, txHash, eUTxO_for_consuming)
+			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
 
 			if (!isWorkingInABuffer.current) setIsWorking("")
 
@@ -1386,7 +1388,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 				setActionHash(txHash)
 			}
 
-			await awaitTx(lucid!, txHash, eUTxO_for_consuming)
+			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
 
 			if (!isWorkingInABuffer.current) setIsWorking("")
 
@@ -1456,7 +1458,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 			if (!isWorkingInABuffer.current) setActionMessage("Waiting for confirmation, please wait...")
 			setActionHash(txHash)
 
-			await awaitTx(lucid!, txHash, eUTxO_for_consuming)
+			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
 
 			if (!isWorkingInABuffer.current) setIsWorking("")
 
@@ -1488,7 +1490,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 
 			setActionHash(txHash)
 
-			await awaitTx(lucid!, txHash, eUTxO_for_consuming)
+			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
 
 			if (!isWorkingInABuffer.current) setIsWorking("")
 
@@ -1521,7 +1523,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 
 			setActionHash(txHash)
 
-			await awaitTx(lucid!, txHash, eUTxO_for_consuming)
+			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
 
 			if (!isWorkingInABuffer.current) setIsWorking("")
 
@@ -1554,7 +1556,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 
 			setActionHash(txHash)
 
-			await awaitTx(lucid!, txHash, eUTxO_for_consuming)
+			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
 
 			if (!isWorkingInABuffer.current) setIsWorking("")
 
@@ -1624,7 +1626,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 
 			setActionHash(txHash)
 
-			await awaitTx(lucid!, txHash, eUTxO_for_consuming)
+			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
 
 			if (!isWorkingInABuffer.current) setIsWorking("")
 
@@ -1657,7 +1659,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 
 			setActionHash(txHash)
 
-			await awaitTx(lucid!, txHash, eUTxO_for_consuming)
+			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
 
 			if (!isWorkingInABuffer.current) setIsWorking("")
 
@@ -1689,7 +1691,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 
 			setActionHash(txHash)
 
-			await awaitTx(lucid!, txHash, eUTxO_for_consuming)
+			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
 
 			if (!isWorkingInABuffer.current) setIsWorking("")
 
@@ -1722,7 +1724,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 
 			setActionHash(txHash)
 
-			await awaitTx(lucid!, txHash, eUTxO_for_consuming)
+			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
 
 			if (!isWorkingInABuffer.current) setIsWorking("")
 
@@ -1755,7 +1757,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 
 			setActionHash(txHash)
 
-			await awaitTx(lucid!, txHash, eUTxO_for_consuming)
+			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
 
 			if (!isWorkingInABuffer.current) setIsWorking("")
 
@@ -1788,7 +1790,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 
 			setActionHash(txHash)
 
-			await awaitTx(lucid!, txHash, eUTxO_for_consuming)
+			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
 
 			if (!isWorkingInABuffer.current) setIsWorking("")
 
@@ -1903,7 +1905,10 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 		try {
 
 			let data = {
-				nombrePool: poolInfo!.name
+				nombrePool: poolInfo!.name,
+				time: new Date().getTime(),
+
+				
 			}
 
 			const urlApi = "/api/deleteStakingPool" 
@@ -2008,7 +2013,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 
 	const splitUTxOsAction = async () => {
 
-		console.log("StakingPoolAdmin - Split UTxOs")
+		console.log("StakingPoolAdmin - Split Wallet UTxOs")
 
 		setActionMessage("Creating Transfer, please wait...")
 
@@ -2022,7 +2027,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 			setActionHash(txHash)
 
 			// await new Promise(r => setTimeout(r, 5000));
-			await awaitTx(lucid!, txHash, eUTxO_for_consuming)
+			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
 
 			if (!isWorkingInABuffer.current) setIsWorking("")
 
@@ -2040,45 +2045,6 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 		var poolInfo = await loadPoolData(false)
 		setPoolInfo(poolInfo)
 		await loadWalletData(walletStore)
-	}
-
-	//--------------------------------------
-
-	const awaitTx = async (lucid: Lucid, txhash: string, eUTxO_for_consuming : EUTxO []) => {
-		//------------------
-		const now = new Date()
-		//------------------
-		for (let i = 0; i < eUTxO_for_consuming.length; i++) {
-            eUTxO_for_consuming[i].isConsuming = new Maybe<POSIXTime>(BigInt(now.getTime()));
-            await apiUpdateEUTxODB(eUTxO_for_consuming[i]);
-        }
-		async function clearIsConsuming (){
-			console.log ("awaitTx - clearIsConsuming")
-			for (let i = 0; i < eUTxO_for_consuming.length; i++) {
-				// eUTxO_for_consuming[i].isConsuming = new Maybe<POSIXTime>();
-				// apiUpdateEUTxODB(eUTxO_for_consuming[i]);
-				await apiDeleteEUTxODB(eUTxO_for_consuming[i]);
-
-			}
-		}
-		//------------------
-        const timeOut = setTimeout(clearIsConsuming, isConsumingTime);
-		//------------------
-		if(await lucid.awaitTx(txhash)){
-			console.log("awaitTx - Tx confirmed")
-			//------------------
-			for (let i = 0; i < eUTxO_for_consuming.length; i++) {
-				await apiDeleteEUTxODB(eUTxO_for_consuming[i]);
-			}
-			//------------------
-			if (!isWorkingInABuffer.current) 
-				updatePage()
-			else
-				await updatePage()
-			//------------------
-		}else{
-			console.log("awaitTx - Tx not confirmed")
-		}
 	}
 
 	//--------------------------------------
@@ -2143,6 +2109,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 						<div>Pool Closed:  {(swClosed === false) ? "No" : (swClosed === true) ? "Yes" : swClosed || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
 						<div>Pool Terminated: {(swTerminated === false) ? "No" : (swTerminated === true) ? "Yes" : swTerminated || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
 						<div>Pool is Ready For Get Back Fund: {(swZeroFunds === false || swTerminated === false) ? "No" : (swTerminated === true && swTerminated === true) ? "Yes" : swZeroFunds || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
+						<div>Pool can be Deleted: {(swPoolReadyForDelete === false) ? "No" : (swPoolReadyForDelete === true) ? "Yes" : swPoolReadyForDelete || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
 						<br></br>
 
 						
@@ -2375,13 +2342,13 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 								<ActionModalBtn action={masterNewFundAction} swHash={true} poolInfo={poolInfo} 
 									showInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={maxHarvestAmount} 
 									enabled={walletStore.connected && isPoolDataLoaded && swPreparado === true} 
-									show={swPreparado === true}
+									show={swPreparado === true && swTerminated === false}
 									actionName="New Fund" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
 								<ActionModalBtn 
 									action={masterNewFundsBatchAction} swHash={false} poolInfo={poolInfo} 
 									showInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={maxHarvestAmount} 
 									enabled={walletStore.connected && isPoolDataLoaded && swPreparado === true} 
-									show={swPreparado === true}
+									show={swPreparado === true && swTerminated === false}
 									actionName="New Funds Batch" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
 									callback={handleCallback} 
 									cancel={handleCancel}
@@ -2419,7 +2386,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 								<ActionModalBtn action={splitUTxOsAction} swHash={true} 
 									enabled={walletStore.connected && isPoolDataLoaded} 
 									show={swPreparado === true}
-									actionName="Split UTxOs" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
+									actionName="Split Wallet UTxOs" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
 							
 							</div>
 						</div>
@@ -2431,22 +2398,37 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 									actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
 								<li className="info">Show or hide the Home Pool.</li>
 								<ActionModalBtn action={masterClosePoolAction} swHash={true} poolInfo={poolInfo} 
-									enabled={walletStore.connected && isPoolDataLoaded && swPreparado === true} 
-									show={swPreparado === true}
+									enabled={walletStore.connected && isPoolDataLoaded && swPreparado === true && swClosed === false} 
+									show={swPreparado === true && swClosed === false}
 									actionName="Close Pool" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
-								<li className="info">Close the Pool at this time, instead of waiting for the Deadline.</li>
-								<li className="info">Users will only be able to collect rewards accumulated so far.</li>
-								<li className="info">Masters can keep adding Funds so there are funds to pay rewards.</li>
-								<li className="info">After Grace Time the Pool will be finished.</li>
+								{swPreparado === true && swClosed === false?
+									<>
+										<li className="info">Close the Pool at this time, instead of waiting for the Deadline.</li>
+										<li className="info">Users will only be able to collect rewards accumulated so far.</li>
+										<li className="info">Masters can keep adding Funds so there are funds to pay rewards.</li>
+										<li className="info">After Grace Time the Pool will be finished.</li>
+									</>
+								:
+									<>
+									</>
+								}
 								<ActionModalBtn action={masterTerminatePoolAction} swHash={true} poolInfo={poolInfo} 
-									enabled={walletStore.connected && isPoolDataLoaded && swPreparado === true} 
-									show={swPreparado === true}
+									enabled={walletStore.connected && isPoolDataLoaded && swPreparado === true && swTerminated === false}  
+									show={swPreparado === true && swTerminated === false}
 									actionName="Terminate Pool" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
-								<li className="info">Finish the Pool now, instead of waiting for Deadline and Grace Time.</li>
-								<li className="info">Users will not be able to collect any more rewards.</li>
-								<li className="info">After Deleteing all Funds, Masters can recover any funds left over, proportionally to what each one has put in.</li>
+								{swPreparado === true && swTerminated === false?
+									<>
+										<li className="info">Finish the Pool now, instead of waiting for Deadline and Grace Time.</li>
+										<li className="info">Users will not be able to collect any more rewards.</li>
+										<li className="info">After Deleteing all Funds, Masters can recover any funds left over, proportionally to what each one has put in.</li>
+									</>
+								:
+									<>
+									</>
+								}
+								
 								<ActionModalBtn action={masterDeletePoolAction} swHash={false} poolInfo={poolInfo} 
-									enabled={walletStore.connected && isPoolDataLoaded && swPoolReadyForDelete && eUTxOs_With_UserDatum.length == 0 && eUTxOs_With_FundDatum.length == 0} actionName="Delete Pool" 
+									enabled={walletStore.connected && isPoolDataLoaded && swPoolReadyForDelete === true} actionName="Delete Pool" 
 									show={true}
 									actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
 								<li className="info">You can delete the Pool only if there are no registered users and no remaining funds.</li>

@@ -7,12 +7,19 @@ import { toJson } from '../../utils/utils';
 
 import { deleteEUTxOsFromDBByTxHashAndIndex, getEUTxOFromDBByTxHashAndIndex } from  '../../types/eUTxODBModel'
 import { EUTxO } from '../../types';
+import { getSession } from 'next-auth/react';
 
 type Data = {
     msg: string
 }
 
 export default async function handler( req: NextApiRequest, res: NextApiResponse<Data | string>) {
+
+    const session = await getSession({ req })
+	if (!session) {
+		console.error("/api/deleteEUTxO - Must Connect to your Wallet"); 
+        res.status(400).json({ msg: "Must Connect to your Wallet" })
+    }
 
     const eUTxO = req.body.eUTxO
 

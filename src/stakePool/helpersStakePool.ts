@@ -22,6 +22,7 @@ export function stakingPoolDBParser(stakingPoolDB: any) {
         closedAt: (stakingPoolDB.closedAt !== undefined ? new Date(stakingPoolDB.closedAt) : undefined),
         swTerminated: stakingPoolDB.swTerminated,
         swZeroFunds: stakingPoolDB.swZeroFunds,
+        swPoolReadyForDelete: stakingPoolDB.swPoolReadyForDelete,
 
         beginAt: new Date(stakingPoolDB.beginAt),
         deadline: new Date(stakingPoolDB.deadline),

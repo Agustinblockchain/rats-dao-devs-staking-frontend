@@ -6,7 +6,7 @@ import { objToPlutusData } from '../utils/cardano-utils';
 //--------------------------------------
 export async function splitUTxOsTx(lucid: Lucid, protocolParameters: any, pkh: PaymentKeyHash, addressWallet: Address, value_For_SplitUTxO: Assets) {
     //------------------
-    const functionName = "Split UTxOs Tx";
+    const functionName = "Split Wallet UTxOs Tx";
     //------------------
     console.log(functionName + " - value For SplitUTxO: " + toJson(value_For_SplitUTxO));
     //------------------

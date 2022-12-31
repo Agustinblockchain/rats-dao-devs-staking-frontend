@@ -7,11 +7,16 @@ import { useStoreState } from '../utils/walletProvider';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { sha256HexStr, toJson } from '../utils/utils';
+
+//--------------------------------------
+
+import { getSession } from 'next-auth/react';
+import { getToken } from 'next-auth/jwt';
 //--------------------------------------
 //import CreateStakingPool from '../components/CreateStakingPool';
 
 
-const Create : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = ({swCreate, pkhValidation} : InferGetServerSidePropsType<typeof getServerSideProps>) =>  {
+const Create : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = ({swCreate} : InferGetServerSidePropsType<typeof getServerSideProps>) =>  {
 	//console.log("Create")   
 
 	const router = useRouter();
@@ -54,7 +59,7 @@ const Create : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> 
 			
 			{pkh? 
 				swCreate? 
-					<CreateStakingPool pkhValidation={pkhValidation}/> 
+					<CreateStakingPool /> 
 				:
 					<p>Create Staking Pool is restricted</p>
 			: 
@@ -64,34 +69,26 @@ const Create : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> 
 	)
 }
 
-export async function getServerSideProps(query : any) { 
+export async function getServerSideProps(context : any) { 
 	try {
-		console.log ("Create getServerSideProps - init - query.query?.pkh:", query.query?.pkh);
+		console.log ("Create getServerSideProps - init - context.query?.pkh:", context.query?.pkh);
 
-		const pkhAdmins = process.env.pkhAdmins?.split (",") || [];
-		const pkhCreators = process.env.pkhCreators?.split (",") || [];
-
-		const pkhPassword = process.env.pkhPassword || "";
-
-		console.log ("Create getServerSideProps - init - pkhPassword:", pkhPassword);
-
-
-		const pkhValidation = sha256HexStr (query.query?.pkh + pkhPassword)
-
-		console.log ("Create getServerSideProps - init - pkhValidation:", pkhValidation);
-
-		const swCreate = pkhAdmins.includes (query.query?.pkh) || pkhCreators.includes (query.query?.pkh)
+		const session = await getSession(context)
+		if (session) {
+			console.log ("Create getServerSideProps - init - session:", toJson (session));
+		}else{
+			console.log ("Create getServerSideProps - init - session: undefined");
+		}
 
 		return {
 			props: {
-				swCreate: swCreate,
-				pkhValidation: pkhValidation
+				swCreate: session && session.user ? session.user.swCreate : false 
 			}
 		};
 	} catch (error) {
 		console.error (error)
 		return {
-			props: { swCreate: false, pkhValidation: "" }
+			props: { swCreate: false }
 		};
 	}
 }

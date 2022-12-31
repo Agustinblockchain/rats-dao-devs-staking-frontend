@@ -2,7 +2,6 @@
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 
-
 import 'react-loading-skeleton/dist/skeleton.css';
 //---------------------------------------
 import TextField from '@mui/material/TextField';
@@ -10,30 +9,25 @@ import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { format } from 'date-fns';
 //--------------------------------------
-import { Lucid, UTxO } from 'lucid-cardano';
+import { UTxO } from 'lucid-cardano';
 //--------------------------------------
 import ActionModalBtn from './ActionModalBtn';
 import LoadingSpinner from "./LoadingSpinner";
 //--------------------------------------
-//import initializeLucid from '../utils/initializeLucid';
-//--------------------------------------
 import { useStoreState } from '../utils/walletProvider';
 //--------------------------------------
-import { toJson } from '../utils/utils';
 import { splitUTxOs } from "../stakePool/endPoints - splitUTxOs";
-import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
-import { explainError } from "../stakePool/explainError";
 import { getEstadoDeployAPI } from "../stakePool/helpersStakePool";
-import { isConsumingTime, maxMasters } from '../types/constantes';
-import { pushSucessNotification, pushWarningNotification } from "../utils/pushNotification";
-import { EUTxO, Maybe, POSIXTime } from '../types';
-import { apiDeleteEUTxODB, apiUpdateEUTxODB } from '../utils/cardano-helpers';
+import { maxMasters } from '../types/constantes';
+import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
+import { pushSucessNotification } from "../utils/pushNotification";
+import { toJson } from '../utils/utils';
 
-//import StakingPoolAdmin from './StakingPoolAdmin';
+import { awaitTx } from '../utils/cardano-helpersTx';
+
 //--------------------------------------
 
-export default function CreateStakingPool({ pkhValidation }: { pkhValidation: string } ) {
-
+export default function CreateStakingPool( ) {
 
 	const walletStore = useStoreState(state => state.wallet)
 
@@ -181,7 +175,6 @@ export default function CreateStakingPool({ pkhValidation }: { pkhValidation: st
 				swDummyStakingPool: swDummyStakingPool,
 
 				pkh: walletStore.pkh,
-				pkhValidation: pkhValidation,
 
 				masters: masters,
 				poolID_TxOutRef: poolID_TxOutRef,
@@ -240,7 +233,7 @@ export default function CreateStakingPool({ pkhValidation }: { pkhValidation: st
 
 	const splitUTxOsAction = async () => {
 
-		console.log("CreateStakingPool - Split UTxOs")
+		console.log("CreateStakingPool - Split Wallet UTxOs")
 
 		setActionMessage("Creating Transfer, please wait...")
 
@@ -253,8 +246,8 @@ export default function CreateStakingPool({ pkhValidation }: { pkhValidation: st
 			setActionMessage("Waiting for confirmation, please wait...")
 			setActionHash(txHash)
 
-			await awaitTx(lucid!, txHash, eUTxO_for_consuming)
-
+			await awaitTx (lucid!, txHash, eUTxO_for_consuming, getUTxOsFromWallet, false) 
+			
 			setIsWorking("")
 
 			return txHash.toString();
@@ -265,40 +258,7 @@ export default function CreateStakingPool({ pkhValidation }: { pkhValidation: st
 		}
 	}
 
-	const awaitTx = async (lucid: Lucid, txhash: string, eUTxO_for_consuming : EUTxO []) => {
-		//------------------
-		const now = new Date()
-		//------------------
-		for (let i = 0; i < eUTxO_for_consuming.length; i++) {
-            eUTxO_for_consuming[i].isConsuming = new Maybe<POSIXTime>(BigInt(now.getTime()));
-            await apiUpdateEUTxODB(eUTxO_for_consuming[i]);
-        }
-		async function clearIsConsuming (){
-			console.log ("awaitTx - clearIsConsuming")
-			for (let i = 0; i < eUTxO_for_consuming.length; i++) {
-				// eUTxO_for_consuming[i].isConsuming = new Maybe<POSIXTime>();
-				// apiUpdateEUTxODB(eUTxO_for_consuming[i]);
-				await apiDeleteEUTxODB(eUTxO_for_consuming[i]);
-
-			}
-		}
-		//------------------
-        const timeOut = setTimeout(clearIsConsuming, isConsumingTime);
-		//------------------
-		if(await lucid.awaitTx(txhash)){
-			console.log("awaitTx - Tx confirmed")
-			//------------------
-			for (let i = 0; i < eUTxO_for_consuming.length; i++) {
-				await apiDeleteEUTxODB(eUTxO_for_consuming[i]);
-			}
-			//------------------
-			getUTxOsFromWallet()
-		}else{
-			console.log("awaitTx - Tx not confirmed")
-		}
-		//------------------
-	}
-
+	
 	return (
 		<>
 
@@ -386,7 +346,7 @@ export default function CreateStakingPool({ pkhValidation }: { pkhValidation: st
 												<div>
 
 													<li className="info">You have {uTxOsAtWalllet.length} UTxOs available.</li>
-													<li className="info">Use the Split UTxOs button to generate more UTxo available in your wallet.</li>
+													<li className="info">Use the Split Wallet UTxOs button to generate more UTxo available in your wallet.</li>
 												</div>
 											}
 											<br></br>
@@ -489,7 +449,7 @@ export default function CreateStakingPool({ pkhValidation }: { pkhValidation: st
 										<ActionModalBtn action={splitUTxOsAction} swHash={true} 
 											enabled={walletStore.connected} 
 											show={true}
-											actionName="Split UTxOs" actionIdx="1" messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
+											actionName="Split Wallet UTxOs" actionIdx="1" messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
 
 									</div>
 								</div>
@@ -502,3 +462,5 @@ export default function CreateStakingPool({ pkhValidation }: { pkhValidation: st
 		</>
 	)
 }
+
+

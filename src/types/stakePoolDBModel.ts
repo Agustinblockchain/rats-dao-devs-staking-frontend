@@ -21,6 +21,7 @@ export interface StakingPoolDBInterface {
 	closedAt: Date | undefined,
 	swTerminated: boolean,
 	swZeroFunds: boolean,
+	swPoolReadyForDelete: boolean,
 
 	beginAt: Date,
 	deadline: Date,
@@ -118,6 +119,7 @@ const stakingPoolDBSchema = new Schema<StakingPoolDBInterface>({
 	closedAt: { type: Date, required: false },
 	swTerminated: { type: Boolean, required: true },
 	swZeroFunds: { type: Boolean, required: true },
+	swPoolReadyForDelete : { type: Boolean, required: true },
 
 	beginAt: { type: Date, required: true },
 	deadline: { type: Date, required: true },
@@ -206,7 +208,7 @@ export function getStakingPoolDBModel (){
 }
 
 
-export async function getAllStakingPoolsForAdminFromDB (pkh? : string | undefined) : Promise <StakingPoolDBInterface []> {
+export async function getAllStakingPoolsForAdminFromDB (pkh? : string | undefined, swAdmin? : boolean | undefined) : Promise <StakingPoolDBInterface []> {
 
 	// const stakingPoolsDB = await StakingPoolDBModel.find({swShowOnSite : true})
 		
@@ -233,13 +235,11 @@ export async function getAllStakingPoolsForAdminFromDB (pkh? : string | undefine
 	
 	if(pkh){
 
-		const pkhAdmins = process.env.pkhAdmins?.split (",") || [];
-
 		for (let i = 0; i < stakingPoolsDB_.length; i++) {
 			const stakingPoolDB = stakingPoolsDB_[i];
 			// console.log("getAllStakingPoolsForAdminFromDB - stakingPoolDB: ", stakingPoolDB)
 
-			if (stakingPoolDB.masters.includes(pkh) || pkhAdmins.includes(pkh)){
+			if (stakingPoolDB.masters.includes(pkh) || swAdmin === true){
 				stakingPoolsDB.push(stakingPoolDB)
 			}
 		}
@@ -301,13 +301,11 @@ export async function getAllStakingPoolsForHomeFromDB (pkh? : string | undefined
 		
 		if(pkh){
 
-			const pkhAdmins = process.env.pkhAdmins?.split (",") || [];
-
 			const address = stakingPoolDB.scriptAddress
 			//const eUTxOByPkh = await apiGetEUTxOsDBByAddressAndPkh(address, pkh)
 			const eUTxOByPkh : EUTxO [] = await getEUTxOsFromDBByAddressAndPkh(address, pkh);
 			// if (eUTxOByPkh.length > 0 || (stakingPoolDB.swShowOnHome && stakingPoolDB.swPreparado && stakingPoolDB.swIniciado && stakingPoolDB.swFunded && !stakingPoolDB.swTerminated)) {
-			if (eUTxOByPkh.length > 0 || pkhAdmins.includes(pkh)) {
+			if (eUTxOByPkh.length > 0 ) {
 				stakingPoolsDB.push(stakingPoolDB)
 			}
 		}else{
@@ -349,7 +347,7 @@ export async function getStakingPoolFromDBByName (name_ : string) : Promise <Sta
 	
 }
 
-export async function getStakingPools(forHome: boolean = true, pkh? : string | undefined) : Promise <StakingPoolDBInterface []> {
+export async function getStakingPools(forHome: boolean = true, pkh? : string | undefined, swAdmin? : boolean | undefined) : Promise <StakingPoolDBInterface []> {
 
 	console.log("getStakingPools - Init - forHome: " + forHome + " - pkh: " + pkh);
 
@@ -358,7 +356,7 @@ export async function getStakingPools(forHome: boolean = true, pkh? : string | u
 	if (forHome) {
 		stakingPoolsDB = await getAllStakingPoolsForHomeFromDB(pkh);
 	} else {
-		stakingPoolsDB = await getAllStakingPoolsForAdminFromDB(pkh);
+		stakingPoolsDB = await getAllStakingPoolsForAdminFromDB(pkh, swAdmin);
 	}
 
 	return stakingPoolsDB;

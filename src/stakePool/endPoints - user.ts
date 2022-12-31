@@ -16,17 +16,16 @@ import {
     txID_User_Withdraw_TN, txID_User_Harvest_TN, txID_User_Deposit_For_User_TN, tokenNameLenght, maxDiffTokensForUserDatum
 } from "../types/constantes";
 import { userDepositTx, userHarvestPoolTx, userWithdrawTx } from "./endPointsTx - user";
-import { addAssets, createValue_Adding_Tokens_Of_AC_Lucid, subsAssets, addAssetsList, apiGetEUTxOsDBByAddress, apiUpdateEUTxODB, apiDeleteEUTxODB } from '../utils/cardano-helpers';
+import { addAssets, createValue_Adding_Tokens_Of_AC_Lucid, subsAssets, addAssetsList, apiGetEUTxOsDBByAddress } from '../utils/cardano-helpers';
 import {
     getAvailaibleFunds_In_EUTxO_With_FundDatum, getRewardsPerInvest, getTotalAvailaibleFunds,
     selectFundDatum_WithEnoughValueToClaim, sortFundDatum
 } from "./helpersStakePool";
 import { mkUpdated_FundDatum_With_NewClaimRewards } from './helpersDatums';
 import {
-    getEUTxOs_With_FundDatum_InEUxTOList, getEUTxOs_With_UserDatum_InEUxTOList,
-    getEUTxO_With_PoolDatum_InEUxTOList
+    getEUTxOs_With_FundDatum_InEUxTOList, getEUTxO_With_PoolDatum_InEUxTOList
 } from './helpersScripts';
-import { makeTx, makeTx_And_UpdateEUTxOsIsPreparing } from '../utils/cardano-helpersTx';
+import { makeTx_And_UpdateEUTxOsIsPreparing } from '../utils/cardano-helpersTx';
 import { calculateMinAda, calculateMinAdaOfAssets } from "../utils/cardano-helpers";
 
 //--------------------------------------

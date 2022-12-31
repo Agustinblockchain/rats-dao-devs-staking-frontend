@@ -53,8 +53,7 @@ export default function useStatePoolData(poolInfo: StakingPoolDBInterface) {
     const [swClosed, setSwClosed] = useState<string | 0 | boolean>(poolInfo.swClosed ? poolInfo.swClosed : ui_loading)
     const [swTerminated, setSwTerminated] = useState<string | 0 | boolean>(poolInfo.swTerminated ? poolInfo.swTerminated : ui_loading)
     const [swZeroFunds, setSwZeroFunds] = useState<string | 0 | boolean>(poolInfo.swZeroFunds ? poolInfo.swZeroFunds : ui_loading)
-
-    const [swPoolReadyForDelete, setSwPoolReadyForDelete] = useState<boolean>(false)
+    const [swPoolReadyForDelete, setSwPoolReadyForDelete] = useState<string | 0 | boolean>(poolInfo.swPoolReadyForDelete ? poolInfo.swPoolReadyForDelete : ui_loading)
 
     const [closedAt, setClosedAt] = useState<string | 0 | Date | undefined>(poolInfo.closedAt !== undefined ? poolInfo.closedAt : ui_loading)
 
@@ -136,8 +135,7 @@ export default function useStatePoolData(poolInfo: StakingPoolDBInterface) {
         setSwClosed(poolInfo.swClosed ? poolInfo.swClosed : ui)
         setSwTerminated(poolInfo.swTerminated ? poolInfo.swTerminated : ui)
         setSwZeroFunds(poolInfo.swZeroFunds ? poolInfo.swZeroFunds : ui)
-
-        setSwPoolReadyForDelete(false)
+        setSwPoolReadyForDelete(poolInfo.swPoolReadyForDelete ? poolInfo.swPoolReadyForDelete : ui)
 
         setClosedAt(poolInfo.closedAt !== undefined ? poolInfo.closedAt : ui)
 
@@ -246,8 +244,7 @@ export default function useStatePoolData(poolInfo: StakingPoolDBInterface) {
         var swClosed = poolInfo.swClosed
         var swTerminated = poolInfo.swTerminated
         var swZeroFunds = poolInfo.swZeroFunds
-        //----
-        var swPoolReadyForDelete = false
+        var swPoolReadyForDelete = poolInfo.swPoolReadyForDelete
         //----
         var closedAt = poolInfo.closedAt
         //------------------
@@ -493,13 +490,7 @@ export default function useStatePoolData(poolInfo: StakingPoolDBInterface) {
             }
         }
 
-        if (eUTxO_With_PoolDatum === undefined || poolDatum === undefined) {
-            swPoolReadyForDelete = true
-        }else{
-            const masterFunders = poolDatum.pdMasterFunders
-            const allMasterFundersClaimed = masterFunders.every((masterFunder) => masterFunder.mfClaimedFund === poolDatum_ClaimedFund)   
-            swPoolReadyForDelete = allMasterFundersClaimed && (eUTxOs_With_FundDatum.length === 0) && (eUTxOs_With_UserDatum.length === 0)
-        }
+       
 
         var eUTxO_With_ScriptDatum: EUTxO | undefined = poolInfo.eUTxO_With_ScriptDatum
         if (eUTxO_With_ScriptDatum === undefined) {
@@ -752,6 +743,31 @@ export default function useStatePoolData(poolInfo: StakingPoolDBInterface) {
             // console.log("useStatePoolData - " + poolInfo.name + " - loadPoolData: DB UTxO with Script 'TxID User Withdraw_Datum: " + eUTxO_With_Script_TxID_User_Withdraw_Datum.uTxO.txHash + "#" + eUTxO_With_Script_TxID_User_Withdraw_Datum.uTxO.outputIndex)
         }
 
+        if (eUTxO_With_PoolDatum === undefined || poolDatum === undefined) {
+            swPoolReadyForDelete = true
+        }else{
+            const masterFunders = poolDatum.pdMasterFunders
+            const allMasterFundersClaimed = masterFunders.every((masterFunder) => masterFunder.mfClaimedFund === poolDatum_ClaimedFund)   
+
+            const scriptsMasters = (typeof eUTxO_With_Script_TxID_Master_Fund_Datum === "object" ||
+                typeof eUTxO_With_Script_TxID_Master_FundAndMerge_Datum === "object" ||
+                typeof eUTxO_With_Script_TxID_Master_SplitFund_Datum === "object" ||
+                typeof eUTxO_With_Script_TxID_Master_ClosePool_Datum === "object" ||
+                typeof eUTxO_With_Script_TxID_Master_TerminatePool_Datum === "object" ||
+                typeof eUTxO_With_Script_TxID_Master_DeleteFund_Datum === "object" ||
+                typeof eUTxO_With_Script_TxID_Master_SendBackFund_Datum === "object" ||
+                typeof eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum === "object")
+
+            const scriptsUser = (typeof eUTxO_With_Script_TxID_User_Deposit_Datum === "object" ||
+                typeof eUTxO_With_Script_TxID_User_Withdraw_Datum === "object" ||
+                typeof eUTxO_With_Script_TxID_User_Harvest_Datum === "object")
+
+                                            
+            swPoolReadyForDelete = allMasterFundersClaimed && (eUTxOs_With_FundDatum.length === 0) && (eUTxOs_With_UserDatum.length === 0) && !scriptsMasters && !scriptsUser
+        }
+        // console.log ("swPoolReadyForDelete: " + swPoolReadyForDelete)
+
+
         // console.log ("useStatePoolData - " + poolInfo.name + " - swClosed: " + swClosed + " - setSwTerminated: " + swTerminated) 
 
         // console.log ("useStatePoolData - " + poolInfo.name + " - beginAt: " + poolInfo.beginAt.toLocaleTimeString() + " - now: " + now.toLocaleTimeString()) 
@@ -769,7 +785,6 @@ export default function useStatePoolData(poolInfo: StakingPoolDBInterface) {
         setSwClosed(swClosed)
         setSwTerminated(swTerminated)
         setSwZeroFunds(swZeroFunds)
-
         setSwPoolReadyForDelete(swPoolReadyForDelete)
 
         var terminatedAt_: Date
@@ -819,6 +834,12 @@ export default function useStatePoolData(poolInfo: StakingPoolDBInterface) {
             swUpdate = true
         }
 
+        if (poolInfo.swPoolReadyForDelete != swPoolReadyForDelete) {
+            poolInfo.swPoolReadyForDelete = swPoolReadyForDelete
+            swUpdate = true
+        }
+
+
         //if (poolInfo.eUTxO_With_PoolDatum != eUTxO_With_PoolDatum) { swUpdate = true }
 
 
@@ -844,6 +865,8 @@ export default function useStatePoolData(poolInfo: StakingPoolDBInterface) {
                 swTerminated: swTerminated,
 
                 swZeroFunds: swZeroFunds,
+                swPoolReadyForDelete: swPoolReadyForDelete,
+                
                 //eUTxO_With_PoolDatum: eUTxO_With_PoolDatum? toJson(eUTxO_With_PoolDatum) : "",
 
                 eUTxO_With_ScriptDatum: eUTxO_With_ScriptDatum ? toJson(eUTxO_With_ScriptDatum) : "",

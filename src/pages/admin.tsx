@@ -15,6 +15,12 @@ import { useStoreState } from '../utils/walletProvider';
 import { StakingPoolDBInterface, getStakingPools } from '../types/stakePoolDBModel'
 import { createContext, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
+import { getSession } from 'next-auth/react'
+
+
+// import { getCsrfToken, signIn } from 'next-auth/react'
+// import { apiSignIn } from '../utils/auth'
+
 // import StakingPoolAdmin from '../components/StakingPoolAdmin';
 
 //--------------------------------------
@@ -75,27 +81,45 @@ const Admin : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> =
 		</Layout>
 	)
 }
-
-export async function getServerSideProps(query : any) { 
+export async function getServerSideProps(context : any) { 
 
 	try {
 		
-		console.log ("Admin getServerSideProps - init - query.query?.pkh:", query.query?.pkh);
+		console.log ("Admin getServerSideProps - init - context.query?.pkh:", context.query?.pkh);
 
 		await connect();
 
 		var rawDataStakingPools : StakingPoolDBInterface []
-		if (query.query?.pkh != undefined) {
-			// console.log ("Admin getServerSideProps - init - query.query?.pkh:", query.query?.pkh);
-			if(query.query?.pkh != ""){
-				// console.log ("Admin getServerSideProps - init - query.query?.pkh:", query.query?.pkh);
-				rawDataStakingPools  = await getStakingPools(false, query.query?.pkh)
+		if (context.query?.pkh != undefined) {
+			// console.log ("Admin getServerSideProps - init - context.query?.pkh:", context.query?.pkh);
+			if(context.query?.pkh != ""){
+
+				const session = await getSession(context)
+				if (session) {
+					console.log ("Admin getServerSideProps - init - session:", toJson (session));
+
+					if (session.user.pkh === context.query?.pkh) {
+						rawDataStakingPools  = await getStakingPools(false, context.query?.pkh, session?.user.swAdmin)
+					}else{
+						rawDataStakingPools = []
+					}
+
+				}else{
+					console.log ("Admin getServerSideProps - init - session: undefined");
+					rawDataStakingPools = []
+				}
+
+				// console.log ("Admin getServerSideProps - init - context.query?.pkh:", context.query?.pkh);
+
+				// const csrfToken = await getCsrfToken({ req: query.req })
+				// await apiSignIn(context.query?.pkh, csrfToken!)
+
 			}else{
-				// console.log ("Admin getServerSideProps - init - query.query?.pkh:", query.query?.pkh);
+				// console.log ("Admin getServerSideProps - init - context.query?.pkh:", context.query?.pkh);
 				rawDataStakingPools = []
 			}
 	 	}else{
-			// console.log ("Admin getServerSideProps - init - query.query?.pkh:", query.query?.pkh);
+			// console.log ("Admin getServerSideProps - init - context.query?.pkh:", context.query?.pkh);
 			rawDataStakingPools = []
 		}
 

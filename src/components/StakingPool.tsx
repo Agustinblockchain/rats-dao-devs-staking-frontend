@@ -3,37 +3,26 @@ import Image from 'next/image';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 //--------------------------------------
-import { Address, Assets, Lucid, UTxO } from 'lucid-cardano';
+import { Assets } from 'lucid-cardano';
 //--------------------------------------
 import ActionModalBtn from './ActionModalBtn';
-import FundsModalBtn from './FundsModalBtn';
 //--------------------------------------
-import { useStoreActions, useStoreDispatch, useStoreState } from '../utils/walletProvider';
+import { useStoreActions, useStoreState } from '../utils/walletProvider';
 //--------------------------------------
-import {
-	masterPreparePool, masterFundAndMerge,
-	masterNewFund, masterClosePool, masterGetBackFund, masterMergeFunds, masterSendBackFund,
-	masterSendBackDeposit, masterTerminatePool, masterSplitFund, masterDeleteFunds} from '../stakePool/endPoints - master';
+import { useRouter } from 'next/router';
+import { useEffect, useRef, useState } from 'react';
 import { splitUTxOs } from "../stakePool/endPoints - splitUTxOs";
-import {
-    masterAddScriptsMasterClosePool, masterAddScriptsMasterTerminatePool, masterAddScriptsMasterFund, masterAddScriptsMasterFundAndMerge,
-    masterAddScriptsUserWithdraw, masterAddScriptsUserHarvest, masterAddScriptsUserDeposit, masterDeleteScriptsMasterAll, masterDeleteScriptsUserAll, masterAddScriptsMasterSendBackFund, masterAddScriptsMasterSendBackDeposit, masterAddScriptsMasterDeleteFund, masterAddScriptsMasterSplitFund, masterAddScriptsMasterDeleteScripts
-} from "../stakePool/endPoints - master - scripts";
-import { EUTxO, InterestRate, Master, Maybe, POSIXTime, UTxO_Simple } from '../types';
-import { StakingPoolDBInterface } from '../types/stakePoolDBModel'
-import useStatePoolData from '../stakePool/useStatePoolData';
-import { useEffect, useState, useRef, createContext, useContext } from 'react';
-import { copyToClipboard, searchValueInArray, strToHex, toJson } from '../utils/utils';
+import { userDeposit, userHarvest, userWithdraw } from '../stakePool/endPoints - user';
 import { explainError } from "../stakePool/explainError";
 import { stakingPoolDBParser } from "../stakePool/helpersStakePool";
-import { isConsumingTime, maxTokensWithDifferentNames, scriptID_Master_AddScripts_TN, scriptID_Master_ClosePool_TN, scriptID_Master_DeleteFund_TN, scriptID_Master_DeleteScripts_TN, scriptID_Master_FundAndMerge_TN, scriptID_Master_Fund_TN, scriptID_Master_SendBackDeposit_TN, scriptID_Master_SendBackFund_TN, scriptID_Master_SplitFund_TN, scriptID_Master_TerminatePool_TN, scriptID_User_Deposit_TN, scriptID_User_Harvest_TN, scriptID_User_Withdraw_TN, scriptID_Validator_TN, txID_Master_AddScripts_TN, txID_User_Deposit_For_User_TN } from '../types/constantes';
-import { getEUTxO_With_ScriptDatum_InEUxTOList, getExtendedUTxOsWith_Datum } from '../stakePool/helpersScripts';
+import useStatePoolData from '../stakePool/useStatePoolData';
+import { EUTxO } from '../types';
+import { maxTokensWithDifferentNames, txID_User_Deposit_For_User_TN } from '../types/constantes';
+import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
+import { apiDeleteEUTxODB } from '../utils/cardano-helpers';
+import { awaitTx } from '../utils/cardano-helpersTx';
 import { pushSucessNotification, pushWarningNotification } from "../utils/pushNotification";
-import UsersModalBtn from './UsersModalBtn';
-import MasterModalBtn from './MastersModalBtn';
-import { apiDeleteEUTxODB, apiGetEUTxOsDBByAddress, apiUpdateEUTxODB } from '../utils/cardano-helpers';
-import { useRouter } from 'next/router';
-import { userDeposit, userHarvest, userWithdraw } from '../stakePool/endPoints - user';
+import { copyToClipboard, toJson } from '../utils/utils';
 import LoadingSpinner from './LoadingSpinner';
 //--------------------------------------
 
@@ -95,6 +84,7 @@ export default function StakingPool({ stakingPoolInfo }: { stakingPoolInfo: Stak
 		swPreparado, swIniciado, swFunded,
 		swClosed, closedAt, swTerminated, terminatedAt,
 		swZeroFunds,
+		swPoolReadyForDelete,
 
 		eUTxOs_With_Datum, countEUTxOs_With_Datum,
 		eUTxO_With_PoolDatum,
@@ -285,7 +275,7 @@ export default function StakingPool({ stakingPoolInfo }: { stakingPoolInfo: Stak
 			if (!isWorkingInABuffer.current) setActionMessage("Waiting for confirmation, please wait...")
 			setActionHash(txHash)
 
-			await awaitTx(lucid!, txHash, eUTxO_for_consuming)
+			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
 
 			if (!isWorkingInABuffer.current) setIsWorking("")
 
@@ -321,7 +311,7 @@ export default function StakingPool({ stakingPoolInfo }: { stakingPoolInfo: Stak
 			setActionMessage("Waiting for confirmation, please wait...")
 			setActionHash(txHash)
 
-			await awaitTx(lucid!, txHash, eUTxO_for_consuming)
+			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
 
 			setIsWorking("")
 
@@ -356,7 +346,7 @@ export default function StakingPool({ stakingPoolInfo }: { stakingPoolInfo: Stak
 			setActionMessage("Waiting for confirmation, please wait...")
 			setActionHash(txHash)
 
-			await awaitTx(lucid!, txHash, eUTxO_for_consuming)
+			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
 
 			setIsWorking("")
 
@@ -377,7 +367,7 @@ export default function StakingPool({ stakingPoolInfo }: { stakingPoolInfo: Stak
 	
 	const splitUTxOsAction = async () => {
 
-		console.log("StakingPool - Split UTxOs")
+		console.log("StakingPool - Split Wallet UTxOs")
 
 		setActionMessage("Creating Transfer, please wait...")
 
@@ -391,7 +381,7 @@ export default function StakingPool({ stakingPoolInfo }: { stakingPoolInfo: Stak
 			setActionHash(txHash)
 
 			// await new Promise(r => setTimeout(r, 5000));
-			await awaitTx(lucid!, txHash, eUTxO_for_consuming)
+			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
 
 			if (!isWorkingInABuffer.current) setIsWorking("")
 
@@ -409,45 +399,6 @@ export default function StakingPool({ stakingPoolInfo }: { stakingPoolInfo: Stak
 		var poolInfo_ = await loadPoolData(false)
 		setPoolInfo(poolInfo_)
 		await loadWalletData(walletStore)
-	}
-
-	//--------------------------------------
-
-	const awaitTx = async (lucid: Lucid, txhash: string, eUTxO_for_consuming : EUTxO []) => {
-		//------------------
-		const now = new Date()
-		//------------------
-		for (let i = 0; i < eUTxO_for_consuming.length; i++) {
-            eUTxO_for_consuming[i].isConsuming = new Maybe<POSIXTime>(BigInt(now.getTime()));
-            await apiUpdateEUTxODB(eUTxO_for_consuming[i]);
-        }
-		async function clearIsConsuming (){
-			console.log ("awaitTx - clearIsConsuming")
-			for (let i = 0; i < eUTxO_for_consuming.length; i++) {
-				// eUTxO_for_consuming[i].isConsuming = new Maybe<POSIXTime>();
-				// apiUpdateEUTxODB(eUTxO_for_consuming[i]);
-				await apiDeleteEUTxODB(eUTxO_for_consuming[i]);
-
-			}
-		}
-		//------------------
-        const timeOut = setTimeout(clearIsConsuming, isConsumingTime);
-		//------------------
-		if(await lucid.awaitTx(txhash)){
-			console.log("awaitTx - Tx confirmed")
-			//------------------
-			for (let i = 0; i < eUTxO_for_consuming.length; i++) {
-				await apiDeleteEUTxODB(eUTxO_for_consuming[i]);
-			}
-			//------------------
-			if (!isWorkingInABuffer.current) 
-				updatePage()
-			else
-				await updatePage()
-			//------------------
-		}else{
-			console.log("awaitTx - Tx not confirmed")
-		}
 	}
 
 	//--------------------------------------
@@ -662,7 +613,7 @@ export default function StakingPool({ stakingPoolInfo }: { stakingPoolInfo: Stak
 							/>
 						</div>
 						<div className="pool__stat">
-							<ActionModalBtn action={splitUTxOsAction} swHash={true} enabled={walletStore.connected && isPoolDataLoaded} show={true} actionName="Split UTxOs" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
+							<ActionModalBtn action={splitUTxOsAction} swHash={true} enabled={walletStore.connected && isPoolDataLoaded} show={true} actionName="Split Wallet UTxOs" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
 						</div>
 					</div>
 				</div>
@@ -670,5 +621,6 @@ export default function StakingPool({ stakingPoolInfo }: { stakingPoolInfo: Stak
 		</div>
 	)
 }
+
 
 
