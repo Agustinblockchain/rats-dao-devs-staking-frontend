@@ -1,20 +1,11 @@
 //--------------------------------------
-import { useEffect, useState } from "react"
-//--------------------------------------
-import { C, WalletApi } from 'lucid-cardano'
-//--------------------------------------
-import { initializeLucid, initializeLucidWithWalletFromPrivateKey, initializeLucidWithWalletFromSeed } from "../utils/initializeLucid"
-
-
-//--------------------------------------
-import { useStoreActions, useStoreState } from '../utils/walletProvider'
-
-//--------------------------------------
-import { searchKeyInObject, searchValueInArray, toJson } from "../utils/utils"
-import { addrToPubKeyHash, pubKeyHashToAddress } from "../utils/cardano-utils"
-import { useLocalStorage } from "../utils/useLocalStorage";
-import Skeleton from "react-loading-skeleton"
 import { signIn, signOut } from "next-auth/react"
+import { useEffect, useState } from "react"
+import Skeleton from "react-loading-skeleton"
+import { initializeLucid, initializeLucidWithWalletFromSeed } from "../utils/initializeLucid"
+import { useLocalStorage } from "../utils/useLocalStorage"
+import { searchValueInArray } from "../utils/utils"
+import { useStoreActions, useStoreState } from '../utils/walletProvider'
 //--------------------------------------
 
 export default function WalletModalBtn() {

@@ -1,9 +1,9 @@
 import { Assets, PaymentKeyHash } from "lucid-cardano";
-import { BIGINT, EUTxO, FundDatum, InterestRate, Master, Maybe, PoolDatum, POSIXTime, UserDatum, UTxO_Simple } from "../types";
-import { strToHex, toJson } from "../utils/utils";
+import { BIGINT, EUTxO, FundDatum, InterestRate, Master, Maybe, PoolDatum, POSIXTime, UserDatum } from "../types";
 import { maxRewards, poolDatum_ClaimedFund, txID_User_Withdraw_TN } from "../types/constantes";
 import { StakingPoolDBInterface } from "../types/stakePoolDBModel";
-import { sumTokensAmt_From_AC_Lucid, addAssetsList } from "../utils/cardano-helpers";
+import { addAssetsList, sumTokensAmt_From_AC_Lucid } from "../utils/cardano-helpers";
+import { strToHex, toJson } from "../utils/utils";
 
 //---------------------------------------------------------------
 
@@ -109,9 +109,10 @@ export function stakingPoolDBParser(stakingPoolDB: any) {
     return stakingPoolDB_;
 
 }
+
 //----------------------------------------------------------------------
 
-export async function getEstadoDeployAPI(nombrePool: string, swFrontEnd: boolean = true) {
+export async function getEstadoDeployAPI(nombrePool: string) {
 
     let data = {
         nombrePool: nombrePool
@@ -136,13 +137,152 @@ export async function getEstadoDeployAPI(nombrePool: string, swFrontEnd: boolean
         case 400:
             console.error("getEstadoDeploy - api/getEstadoDeploy - Error: " + message);
             throw message;
-        case 201:
+        default:
+            console.error("getEstadoDeploy - api/getEstadoDeploy: Error Unknown")
+            throw "Error Unknown";
         case 200:
             console.log("getEstadoDeploy - api/getEstadoDeploy: " + message);
             return message;
-        default:
     }
 }
+
+//----------------------------------------------------------------------
+
+export async function apiCreateStakingPoolDB(data: any) {
+
+    const urlApi = "/api/createStakingPool"
+
+    const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: toJson(data)
+    };
+
+    const response = await fetch(urlApi, requestOptions)
+    const json = await response.json()
+    const message = json.msg
+    const stakingPool = json.stakingPool
+
+    switch (response.status) {
+        case 500:
+            console.error("apiCreateStakingPoolDB - api/createStakingPool: Error 500")
+            throw "Error 500";
+        case 400:
+            console.error("apiCreateStakingPoolDB - api/createStakingPool - Error: " + message)
+            throw message;
+        default:
+            console.error("apiCreateStakingPoolDB - api/createStakingPool: Error Unknown")
+            throw "Error Unknown";
+        case 200:
+            console.log("apiCreateStakingPoolDB - api/createStakingPool: " + message)
+            return [message, stakingPool] as const;
+    }
+}
+
+
+export async function apiUpdateStakingPoolShowOnHomeDB(nombrePool: string, swShowOnHome: boolean = true) {
+
+    let data = {
+        nombrePool: nombrePool,
+        swShowOnHome: swShowOnHome,
+    }
+
+    const urlApi = "/api/updateStakingPoolShowOnHome";
+
+    const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: toJson(data)
+    };
+
+    const response = await fetch(urlApi, requestOptions);
+    const json = await response.json();
+    const message = json.msg;
+
+    switch (response.status) {
+        case 500:
+            console.error("apiUpdateStakingPoolShowOnHomeDB - /api/updateStakingPoolShowOnHome - Error 500");
+            throw "Error 500";
+        case 400:
+            console.error("apiUpdateStakingPoolShowOnHomeDB - /api/updateStakingPoolShowOnHome - Error: " + message);
+            throw message;
+        default:
+            console.error("apiUpdateStakingPoolShowOnHomeDB - api/updateStakingPoolShowOnHome: Error Unknown")
+            throw "Error Unknown";
+        case 200:
+            //console.log("apiUpdateStakingPoolShowOnHomeDB - /api/updateStakingPoolShowOnHome: " + message)
+            return message;
+    }
+
+}
+
+export async function apiUpdateStakingPoolDB(data: any) {
+
+    const urlApi = "/api/updateStakingPool";
+
+    const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: toJson(data)
+    };
+
+    const response = await fetch(urlApi, requestOptions);
+    const json = await response.json();
+    const message = json.msg;
+
+    switch (response.status) {
+        case 500:
+            console.error("apiUpdateStakingPoolDB - /api/updateStakingPool - Error 500");
+            throw "Error 500";
+        case 400:
+            console.error("apiUpdateStakingPoolDB - /api/updateStakingPool - Error: " + message);
+            throw message;
+        default:
+            console.error("apiUpdateStakingPoolDB - api/updateStakingPool: Error Unknown")
+            throw "Error Unknown";
+        case 200:
+            //console.log("apiUpdateStakingPoolDB - /api/updateStakingPool: " + message)
+            return message;
+    }
+
+}
+
+
+export async function apiDeleteStakingPoolDB(nombrePool: string) {
+
+    let data = {
+        nombrePool: nombrePool
+    };
+
+    const urlApi = "/api/deleteStakingPool";
+
+    const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: toJson(data)
+    };
+
+    const response = await fetch(urlApi, requestOptions);
+    const json = await response.json();
+    const message = json.msg;
+
+    switch (response.status) {
+        case 500:
+            console.error("apiDeleteStakingPool - /api/deleteStakingPool - Error 500");
+            throw "Error 500";
+        case 400:
+            console.error("apiDeleteStakingPool - /api/deleteStakingPool - Error: " + message);
+            throw message;
+        default:
+            console.error("apiDeleteStakingPool - api/deleteStakingPool: Error Unknown")
+            throw "Error Unknown";
+        case 200:
+            //console.log("apiDeleteStakingPool - /api/deleteStakingPool: " + message)
+            return message;
+    }
+}
+
+//----------------------------------------------------------------------
 
 export function getRewardsPerInvest(poolInfo: StakingPoolDBInterface, closedAt: POSIXTime | undefined, interestRates: InterestRate[], lastClaim: Maybe<POSIXTime>, now: POSIXTime, depositTime: POSIXTime, invest: BIGINT, rewardsNotClaimed: BIGINT): BIGINT {
     // console.log ("getRewardsPerInvest - Init")  

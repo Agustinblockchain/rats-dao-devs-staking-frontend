@@ -1,25 +1,14 @@
 //--------------------------------------
-import { useEffect, useState } from "react";
-// import UseAnimations from 'react-useanimations';
-// import alertTriangle from 'react-useanimations/lib/alertTriangle'
-// import loading from 'react-useanimations/lib/loading'
-// import success from 'react-useanimations/lib/checkmark'
-//--------------------------------------
-import { toJson } from '../utils/utils';
-import { StakingPoolDBInterface } from '../types/stakePoolDBModel'
 import { Assets } from "lucid-cardano";
-import Skeleton from "react-loading-skeleton";
+import { useEffect, useState } from "react";
+import { getFundAmountsRemains_ForMaster } from "../stakePool/helpersStakePool";
 import useStatePoolData from '../stakePool/useStatePoolData';
-import LoadingSpinner from "./LoadingSpinner";
-import ActionModalBtn from "./ActionModalBtn";
-import { useStoreActions, useStoreDispatch, useStoreState } from '../utils/walletProvider';
 import { EUTxO, Master, Master_Funder } from "../types";
 import { maxTokensWithDifferentNames, poolDatum_ClaimedFund } from "../types/constantes";
-import {
-    getFundAmount_In_EUTxO_With_FundDatum, getAvailaibleFunds_In_EUTxO_With_FundDatum, getRewardsToPay_In_EUTxO_With_UserDatum, getTotalCashedOut,
-    getTotalFundAmount, getTotalAvailaibleFunds, getTotalRewardsToPay_In_EUTxOs_With_UserDatum, getTotalStakedAmount, getStakedAmount_In_EUTxO_With_UserDatum,
-    getTotalUserActive, getTotalUserRegistered, getFundAmountsRemains_ForMaster
-} from "../stakePool/helpersStakePool";
+import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
+import { useStoreState } from '../utils/walletProvider';
+import ActionModalBtn from "./ActionModalBtn";
+import LoadingSpinner from "./LoadingSpinner";
 //--------------------------------------
 
 type ActionState = "loading" | "success" | "error" | "idle"
@@ -85,7 +74,7 @@ export default function MasterModalBtn(
         masterFunders,
 		totalFundsAvailable, totalFundAmount, totalFundAmountsRemains_ForMaster,
 		totalStaked, totalRewardsPaid, totalRewardsToPay, totalMastersMinAda,
-		loadPoolData } = statePoolData
+		isPoolDataLoading, loadPoolData } = statePoolData
 
 	useEffect(() => {
 		// console.log("FundsModalBtn - " + poolInfo.name + " - useEffect - walletStore.connected: " + walletStore.connected + " - isWalletDataLoaded: " + isWalletDataLoaded)
@@ -269,15 +258,38 @@ export default function MasterModalBtn(
                         {masterFunders_Selected.length>0?masterFunders_Selected[0].mfMaster:undefined}
                         {swZeroFunds} */}
 
+						
+
 						<div className="modal__content_btns">
 							<ActionModalBtn action={masterGetBackFundAction} swHash={true} poolInfo={poolInfo} 
-								enabled={walletStore.connected && isPoolDataLoaded && swTerminated === true && swZeroFunds === true} 
-								show={swPreparado === true && swTerminated === true  }
+								enabled={walletStore.connected && isPoolDataLoaded && swPreparado === true && swTerminated === true && swZeroFunds === true} 
+								show={true }
 								actionName="Get Back Fund" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
 							<ActionModalBtn action={masterSendBackFundAction} swHash={true} master_Selected={masterFunders_Selected.length>0?masterFunders_Selected[0].mfMaster:undefined }  poolInfo={poolInfo} 
-								enabled={walletStore.connected && isPoolDataLoaded &&  masterFunders_Selected.length == 1 && swTerminated === true && swZeroFunds === true} 
-								show={swPreparado === true && swTerminated === true }
+								enabled={walletStore.connected && isPoolDataLoaded &&  masterFunders_Selected.length == 1 && swPreparado === true && swTerminated === true && swZeroFunds === true} 
+								show={true}
 								actionName="Send Back Fund" actionIdx={poolInfo.name + "-MasterModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
+							<div className="modal__action_separator">
+								<br></br>
+								<button className="btn"
+									onClick={(e) => {
+										e.preventDefault()
+										loadPoolData ()
+									}
+									}
+									disabled={isPoolDataLoading}
+								>
+									Refresh
+									{isPoolDataLoading ?
+										<>
+											<LoadingSpinner size={25} border={5} />
+										</>
+									:
+										<>
+										</>
+									}
+								</button>
+							</div>
 							<div className="modal__action_separator">
 								<br></br>
 								<button className="btn"

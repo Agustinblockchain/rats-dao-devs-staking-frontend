@@ -1,16 +1,10 @@
 //--------------------------------------
-import Image from 'next/image';
-import Skeleton from 'react-loading-skeleton';
-import 'react-loading-skeleton/dist/skeleton.css';
-//--------------------------------------
 import { Assets } from 'lucid-cardano';
-//--------------------------------------
-import ActionModalBtn from './ActionModalBtn';
-//--------------------------------------
-import { useStoreActions, useStoreState } from '../utils/walletProvider';
-//--------------------------------------
+import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 import { splitUTxOs } from "../stakePool/endPoints - splitUTxOs";
 import { userDeposit, userHarvest, userWithdraw } from '../stakePool/endPoints - user';
 import { explainError } from "../stakePool/explainError";
@@ -19,10 +13,11 @@ import useStatePoolData from '../stakePool/useStatePoolData';
 import { EUTxO } from '../types';
 import { maxTokensWithDifferentNames, txID_User_Deposit_For_User_TN } from '../types/constantes';
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
-import { apiDeleteEUTxODB } from '../utils/cardano-helpers';
-import { awaitTx } from '../utils/cardano-helpersTx';
+import { newTransaction } from '../utils/cardano-helpersTx';
 import { pushSucessNotification, pushWarningNotification } from "../utils/pushNotification";
 import { copyToClipboard, toJson } from '../utils/utils';
+import { useStoreActions, useStoreState } from '../utils/walletProvider';
+import ActionModalBtn from './ActionModalBtn';
 import LoadingSpinner from './LoadingSpinner';
 //--------------------------------------
 
@@ -79,7 +74,7 @@ export default function StakingPool({ stakingPoolInfo }: { stakingPoolInfo: Stak
 	const statePoolData = useStatePoolData(poolInfo)
 
 	const { 
-		swFromDB,
+		// swFromDB,
 		swShowOnHome,
 		swPreparado, swIniciado, swFunded,
 		swClosed, closedAt, swTerminated, terminatedAt,
@@ -128,7 +123,7 @@ export default function StakingPool({ stakingPoolInfo }: { stakingPoolInfo: Stak
 		totalStaked, totalRewardsPaid, totalRewardsToPay,
 
 		isPoolDataLoading, isPoolDataLoaded,
-		setLoading,
+
 		loadPoolData ,
 
 		userStakedDatas, swUserRegistered
@@ -194,7 +189,7 @@ export default function StakingPool({ stakingPoolInfo }: { stakingPoolInfo: Stak
 		// console.log("StakingPool - " + poolInfo.name + " - useEffect2 - walletStore.connected: " + walletStore.connected + " - isWalletDataLoaded: " + isWalletDataLoaded)
 
 		if (walletStore.connected) {
-			loadPoolData(true)
+			loadPoolData()
 		} 
 
 	}, [walletStore.connected])
@@ -216,9 +211,29 @@ export default function StakingPool({ stakingPoolInfo }: { stakingPoolInfo: Stak
 		}
 	}
 
+	const updateStakingPool = async () => {
+		var poolInfo_ = await loadPoolData()
+		setPoolInfo(poolInfo_)
+		await loadWalletData(walletStore)
+	}
+
 	//--------------------------------------
 
-	const userDepositBatchAction = async (poolInfo?: StakingPoolDBInterface, _?: EUTxO[] | undefined, assets?: Assets) => {
+	const userDepositAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
+		return await newTransaction ("StakingPool - Deposit Pool", walletStore, poolInfo, userDeposit, isWorkingInABuffer.current, setActionMessage, setActionHash, setIsWorking, updateStakingPool, eUTxOs_Selected, assets) 
+	}
+
+	const userHarvestAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[], assets?: Assets) => {
+		return await newTransaction ("StakingPool - Harvest Pool", walletStore, poolInfo, userHarvest, isWorkingInABuffer.current, setActionMessage, setActionHash, setIsWorking, updateStakingPool, eUTxOs_Selected, assets) 
+	}
+
+	const userWithdrawAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[], assets?: Assets) => {
+		return await newTransaction ("StakingPool - Withdraw Pool", walletStore, poolInfo, userWithdraw, isWorkingInABuffer.current, setActionMessage, setActionHash, setIsWorking, updateStakingPool, eUTxOs_Selected, assets) 
+	}
+
+	//--------------------------------------
+
+	const userDepositBatchAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
 
 		console.log("StakingPool - Deposit Batch - " + toJson(poolInfo?.name))
 
@@ -229,14 +244,14 @@ export default function StakingPool({ stakingPoolInfo }: { stakingPoolInfo: Stak
 		for (let i = 1; i <= 50 && !isCancelling.current; i++) {
 			try {
 				setActionMessage("Deposit " + i + " of "+ 50 + ", please wait..."+ (isCancelling.current ? " (Canceling when this Tx finishes)" : ""))
-				const txHash = await userDepositAction(poolInfo, _, assets);
+				const txHash = await userDepositAction(poolInfo, eUTxOs_Selected, assets);
 				pushSucessNotification("Deposit " + i + " of "+ 50, txHash, true);
 				setActionHash("")
 			} catch (error: any) {
 				const error_explained = explainError(error)
 				pushWarningNotification("Deposit " + i + " of "+ 50, error_explained);
 				swErrors = true
-				await updatePage()
+				await updateStakingPool()
 				// await new Promise(r => setTimeout(r, 2000));
 			}
 		}
@@ -256,151 +271,11 @@ export default function StakingPool({ stakingPoolInfo }: { stakingPoolInfo: Stak
 	}
 
 	//--------------------------------------
-
-	const userDepositAction = async (poolInfo?: StakingPoolDBInterface, _?: EUTxO[] | undefined, assets?: Assets) => {
-
-		console.log("StakingPool - Deposit Pool - PoolInfo: " + toJson(poolInfo?.name) + " - Assets: " + toJson(assets))
-
-		if (!isWorkingInABuffer.current) setActionMessage("Creating Transfer, please wait...")
-
-		const lucid = walletStore.lucid
-
-		var eUTxO_for_consuming_ : EUTxO [] = []
-
-		try {
-
-			const [txHash, eUTxO_for_consuming] = await userDeposit(walletStore!, poolInfo!, assets!, walletStore.pkh!);
-			eUTxO_for_consuming_ = eUTxO_for_consuming
-
-			if (!isWorkingInABuffer.current) setActionMessage("Waiting for confirmation, please wait...")
-			setActionHash(txHash)
-
-			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
-
-			if (!isWorkingInABuffer.current) setIsWorking("")
-
-			return txHash.toString();
-
-		} catch (error: any) {
-			if (!isWorkingInABuffer.current) setIsWorking("")
-			for (let i = 0; i < eUTxO_for_consuming_.length; i++) {
-				await apiDeleteEUTxODB(eUTxO_for_consuming_[i]);
-			}
-			updatePage()
-			throw error
-		}
-
-	}
-
-	//--------------------------------------
-
-	const userHarvestAction = async (poolInfo?: StakingPoolDBInterface, userEUTxO?: EUTxO[], assets?: Assets) => {
-
-		console.log("StakingPool - Harvest Pool - PoolInfo: " + toJson(poolInfo?.name) + " - Assets: " + toJson(assets))
-
-		setActionMessage("Creating Transfer, please wait...")
-
-		const lucid = walletStore.lucid
-		var eUTxO_for_consuming_ : EUTxO [] = []
-
-		try {
-
-			const [txHash, eUTxO_for_consuming] = await userHarvest(walletStore!, poolInfo!, assets!, walletStore.pkh!, userEUTxO![0]);
-			eUTxO_for_consuming_ = eUTxO_for_consuming
-
-			setActionMessage("Waiting for confirmation, please wait...")
-			setActionHash(txHash)
-
-			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
-
-			setIsWorking("")
-
-			return txHash.toString();
-
-		} catch (error: any) {
-			if (!isWorkingInABuffer.current) setIsWorking("")
-			for (let i = 0; i < eUTxO_for_consuming_.length; i++) {
-				await apiDeleteEUTxODB(eUTxO_for_consuming_[i]);
-			}
-			updatePage()
-			throw error
-		}
-
-	}
-	//--------------------------------------
-
-	const userWithdrawAction = async (poolInfo?: StakingPoolDBInterface, userEUTxO?: EUTxO[]) => {
-
-		console.log("StakingPool - Withdraw Pool - PoolInfo: " + toJson(poolInfo?.name))
-
-		setActionMessage("Creating Transfer, please wait...")
-
-		const lucid = walletStore.lucid
-		var eUTxO_for_consuming_ : EUTxO [] = []
-
-		try {
-
-			const [txHash, eUTxO_for_consuming] = await userWithdraw(walletStore!, poolInfo!, walletStore.pkh!, userEUTxO![0]);
-			eUTxO_for_consuming_ = eUTxO_for_consuming
-
-			setActionMessage("Waiting for confirmation, please wait...")
-			setActionHash(txHash)
-
-			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
-
-			setIsWorking("")
-
-			return txHash.toString();
-
-		} catch (error: any) {
-			if (!isWorkingInABuffer.current) setIsWorking("")
-			for (let i = 0; i < eUTxO_for_consuming_.length; i++) {
-				await apiDeleteEUTxODB(eUTxO_for_consuming_[i]);
-			}
-			updatePage()
-			throw error
-		}
-
-	}
-
-	//--------------------------------------
 	
-	const splitUTxOsAction = async () => {
-
-		console.log("StakingPool - Split Wallet UTxOs")
-
-		setActionMessage("Creating Transfer, please wait...")
-
-		const lucid = walletStore.lucid
-
-		try {
-
-			const [txHash, eUTxO_for_consuming] =  await splitUTxOs(walletStore!, walletStore.pkh!);
-
-			setActionMessage("Waiting for confirmation, please wait...")
-			setActionHash(txHash)
-
-			// await new Promise(r => setTimeout(r, 5000));
-			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
-
-			if (!isWorkingInABuffer.current) setIsWorking("")
-
-			return txHash.toString();
-
-		} catch (error: any) {
-			if (!isWorkingInABuffer.current) setIsWorking("")
-			throw error
-		}
+	const splitUTxOsAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
+		return await newTransaction ("StakingPool - Split Wallet UTxOs", walletStore, poolInfo, splitUTxOs, isWorkingInABuffer.current, setActionMessage, setActionHash, setIsWorking, updateStakingPool, eUTxOs_Selected, assets) 
 	}
-
-	//--------------------------------------
-
-	const updatePage = async () => {
-		var poolInfo_ = await loadPoolData(false)
-		setPoolInfo(poolInfo_)
-		await loadWalletData(walletStore)
-	}
-
+	
 	//--------------------------------------
 
 	return (
@@ -414,7 +289,7 @@ export default function StakingPool({ stakingPoolInfo }: { stakingPoolInfo: Stak
 				</div>
 
 				<div className="pool__data_item">
-					<h4 className="pool_title">{poolInfo.name}
+					<h4 className="pool_title">{poolInfo.name}&nbsp;
 						{isPoolDataLoading?
 							<>
 								<br></br>
@@ -424,7 +299,8 @@ export default function StakingPool({ stakingPoolInfo }: { stakingPoolInfo: Stak
 							</>
 						:
 							<>
-								<button onClick={() => { if (walletStore.connected) { updatePage() } }} className='btn__ghost icon' style={walletStore.connected ? { cursor: 'pointer' } : { cursor: 'default' }} >
+								<button onClick={() => { if (walletStore.connected) { updateStakingPool() } }} className='btn__ghost icon' style={walletStore.connected ? { cursor: 'pointer' } : { cursor: 'default' }} >
+									
 									<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" className="bi bi-arrow-repeat" viewBox="0 0 16 16">
 										<path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z" />
 										<path fillRule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z" />
@@ -439,9 +315,16 @@ export default function StakingPool({ stakingPoolInfo }: { stakingPoolInfo: Stak
 					<div>Pool Closed:  {(swClosed === false) ? "No" : (swClosed === true) ? "Yes" : swClosed || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
 					<div>Pool Terminated: {(swTerminated === false) ? "No" : (swTerminated === true) ? "Yes" : swTerminated || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
 					<br></br>
-					<div>EUTxOs {swFromDB? "DB" : ""} At Contract : {countEUTxOs_With_Datum || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</div>
-					<br></br>
 
+					{process.env.NODE_ENV==="development"?
+							<>
+								<div>EUTxOs At Contract: {countEUTxOs_With_Datum || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</div>
+								<br></br>
+							</>
+						:
+							<></>
+					}
+					
 					<p><>Begin At: {new Date(parseInt(poolInfo.pParams.ppBegintAt.toString())).toString()}</></p>
 					<br></br>
 
@@ -606,11 +489,15 @@ export default function StakingPool({ stakingPoolInfo }: { stakingPoolInfo: Stak
 						</div>
 						<div className="pool__stat">
 							<ActionModalBtn action={userDepositAction} swHash={true} poolInfo={poolInfo} showInput={true} inputUnitForLucid={poolInfo.staking_Lucid} inputUnitForShowing={poolInfo.staking_UI} inputMax={maxStakingAmount} enabled={walletStore.connected && isPoolDataLoaded && swFunded === true} show={true} actionName="Deposit" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
-
-							<ActionModalBtn action={userDepositBatchAction} swHash={false} poolInfo={poolInfo} showInput={true} inputUnitForLucid={poolInfo.staking_Lucid} inputUnitForShowing={poolInfo.staking_UI} inputMax={maxStakingAmount} enabled={walletStore.connected && isPoolDataLoaded && swFunded === true} show={true} actionName="Deposit Batch" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-							callback={handleCallback} 
-							cancel={handleCancel}
-							/>
+											
+							{process.env.NODE_ENV==="development"?
+								<ActionModalBtn action={userDepositBatchAction} swHash={false} poolInfo={poolInfo} showInput={true} inputUnitForLucid={poolInfo.staking_Lucid} inputUnitForShowing={poolInfo.staking_UI} inputMax={maxStakingAmount} enabled={walletStore.connected && isPoolDataLoaded && swFunded === true} show={true} actionName="Deposit Batch" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
+								callback={handleCallback} 
+								cancel={handleCancel}
+								/>
+							:
+								<></>
+							}
 						</div>
 						<div className="pool__stat">
 							<ActionModalBtn action={splitUTxOsAction} swHash={true} enabled={walletStore.connected && isPoolDataLoaded} show={true} actionName="Split Wallet UTxOs" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />

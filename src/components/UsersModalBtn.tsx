@@ -1,25 +1,14 @@
 //--------------------------------------
-import { useEffect, useState } from "react";
-// import UseAnimations from 'react-useanimations';
-// import alertTriangle from 'react-useanimations/lib/alertTriangle'
-// import loading from 'react-useanimations/lib/loading'
-// import success from 'react-useanimations/lib/checkmark'
-//--------------------------------------
-import { toJson } from '../utils/utils';
-import { StakingPoolDBInterface } from '../types/stakePoolDBModel'
 import { Assets } from "lucid-cardano";
-import Skeleton from "react-loading-skeleton";
+import { useEffect, useState } from "react";
+import { getRewardsToPay_In_EUTxO_With_UserDatum } from "../stakePool/helpersStakePool";
 import useStatePoolData from '../stakePool/useStatePoolData';
-import LoadingSpinner from "./LoadingSpinner";
-import ActionModalBtn from "./ActionModalBtn";
-import { useStoreActions, useStoreDispatch, useStoreState } from '../utils/walletProvider';
 import { EUTxO } from "../types";
 import { maxTokensWithDifferentNames } from "../types/constantes";
-import {
-    getFundAmount_In_EUTxO_With_FundDatum, getAvailaibleFunds_In_EUTxO_With_FundDatum, getRewardsToPay_In_EUTxO_With_UserDatum, getTotalCashedOut,
-    getTotalFundAmount, getTotalAvailaibleFunds, getTotalRewardsToPay_In_EUTxOs_With_UserDatum, getTotalStakedAmount, getStakedAmount_In_EUTxO_With_UserDatum,
-    getTotalUserActive, getTotalUserRegistered
-} from "../stakePool/helpersStakePool";
+import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
+import { useStoreState } from '../utils/walletProvider';
+import ActionModalBtn from "./ActionModalBtn";
+import LoadingSpinner from "./LoadingSpinner";
 //--------------------------------------
 
 type ActionState = "loading" | "success" | "error" | "idle"
@@ -81,7 +70,7 @@ export default function UsersModalBtn(
 		eUTxO_With_Script_TxID_User_Withdraw_Datum,
 		totalFundsAvailable,
 		totalStaked, totalRewardsPaid, totalRewardsToPay, totalUsersMinAda,
-		loadPoolData } = statePoolData
+		isPoolDataLoading, loadPoolData } = statePoolData
 
 	useEffect(() => {
 		// console.log("FundsModalBtn - " + poolInfo.name + " - useEffect - walletStore.connected: " + walletStore.connected + " - isWalletDataLoaded: " + isWalletDataLoaded)
@@ -264,13 +253,34 @@ export default function UsersModalBtn(
 									</table>
 								</div>
 						}
+
 						{/* {toJson(eUTxOs_With_UserDatum)} */}
 						<div className="modal__content_btns">
 							<ActionModalBtn action={masterSendBackDepositAction} swHash={true} eUTxOs_Selected={eUTxOs_UserDatum_Selected} poolInfo={poolInfo} 
-							enabled={walletStore.connected && isPoolDataLoaded && eUTxOs_UserDatum_Selected.length == 1} 
-							show={swPreparado === true}
-							actionName="Send Back Deposit" actionIdx={poolInfo.name + "-UserModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
-
+								enabled={walletStore.connected && isPoolDataLoaded && swPreparado === true && swTerminated === true && eUTxOs_UserDatum_Selected.length == 1 } 
+								show={true}
+								actionName="Send Back Deposit" actionIdx={poolInfo.name + "-UserModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
+							<div className="modal__action_separator">
+								<br></br>
+								<button className="btn"
+									onClick={(e) => {
+										e.preventDefault()
+										loadPoolData ()
+									}
+									}
+									disabled={isPoolDataLoading}
+									>
+									Refresh
+									{isPoolDataLoading ?
+										<>
+											<LoadingSpinner size={25} border={5} />
+										</>
+									:
+										<>
+										</>
+									}
+								</button>
+							</div>
 							<div className="modal__action_separator">
 								<br></br>
 								<button className="btn"

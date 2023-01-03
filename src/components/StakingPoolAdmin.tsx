@@ -1,45 +1,37 @@
 //--------------------------------------
+import { Address, Assets, UTxO } from 'lucid-cardano';
 import Image from 'next/image';
+import { useRouter } from 'next/router';
+import { useEffect, useRef, useState } from 'react';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
-//--------------------------------------
-import { Address, Assets, UTxO } from 'lucid-cardano';
-//--------------------------------------
-import ActionModalBtn from './ActionModalBtn';
-import FundsModalBtn from './FundsModalBtn';
-//--------------------------------------
-import { useStoreActions, useStoreState } from '../utils/walletProvider';
-//--------------------------------------
+import { masterClosePool, masterDeleteFunds, masterFundAndMerge, masterGetBackFund, masterMergeFunds, masterNewFund, masterPreparePool, masterSendBackDeposit, masterSendBackFund, masterSplitFund, masterTerminatePool } from '../stakePool/endPoints - master';
 import {
-	masterPreparePool, masterFundAndMerge,
-	masterNewFund, masterClosePool, masterGetBackFund, masterMergeFunds, masterSendBackFund,
-	masterSendBackDeposit, masterTerminatePool, masterSplitFund, masterDeleteFunds
-} from '../stakePool/endPoints - master';
-import { splitUTxOs } from "../stakePool/endPoints - splitUTxOs";
-import {
-	masterAddScriptsMasterClosePool, masterAddScriptsMasterTerminatePool, masterAddScriptsMasterFund, masterAddScriptsMasterFundAndMerge,
-	masterAddScriptsUserWithdraw, masterAddScriptsUserHarvest, masterAddScriptsUserDeposit, masterDeleteScriptsMasterAll, masterDeleteScriptsUserAll, masterAddScriptsMasterSendBackFund, masterAddScriptsMasterSendBackDeposit, masterAddScriptsMasterDeleteFund, masterAddScriptsMasterSplitFund, masterAddScriptsMasterDeleteScripts
+	masterAddScriptsMasterClosePool, masterAddScriptsMasterDeleteFund, masterAddScriptsMasterDeleteScripts, masterAddScriptsMasterFund, masterAddScriptsMasterFundAndMerge, masterAddScriptsMasterSendBackDeposit, masterAddScriptsMasterSendBackFund, masterAddScriptsMasterSplitFund, masterAddScriptsMasterTerminatePool, masterAddScriptsUserDeposit, masterAddScriptsUserHarvest, masterAddScriptsUserWithdraw, masterDeleteScriptsMaster, masterDeleteScriptsUser
 } from "../stakePool/endPoints - master - scripts";
-import { EUTxO, Master } from '../types';
-import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
-import useStatePoolData from '../stakePool/useStatePoolData';
-import { useEffect, useState, useRef } from 'react';
-import { copyToClipboard, searchValueInArray, strToHex, toJson } from '../utils/utils';
+import { splitUTxOs } from "../stakePool/endPoints - splitUTxOs";
 import { explainError } from "../stakePool/explainError";
-import { stakingPoolDBParser } from "../stakePool/helpersStakePool";
-import { maxTokensWithDifferentNames, scriptID_Master_AddScripts_TN, scriptID_Master_ClosePool_TN, scriptID_Master_DeleteFund_TN, scriptID_Master_DeleteScripts_TN, scriptID_Master_FundAndMerge_TN, scriptID_Master_Fund_TN, scriptID_Master_SendBackDeposit_TN, scriptID_Master_SendBackFund_TN, scriptID_Master_SplitFund_TN, scriptID_Master_TerminatePool_TN, scriptID_User_Deposit_TN, scriptID_User_Harvest_TN, scriptID_User_Withdraw_TN, scriptID_Validator_TN, txID_Master_AddScripts_TN, txID_User_Deposit_For_User_TN } from '../types/constantes';
 import { getEUTxO_With_ScriptDatum_InEUxTOList } from '../stakePool/helpersScripts';
-import { pushSucessNotification, pushWarningNotification } from "../utils/pushNotification";
-import UsersModalBtn from './UsersModalBtn';
-import MasterModalBtn from './MastersModalBtn';
+import { apiDeleteStakingPoolDB, apiUpdateStakingPoolDB, apiUpdateStakingPoolShowOnHomeDB, stakingPoolDBParser } from "../stakePool/helpersStakePool";
+import useStatePoolData from '../stakePool/useStatePoolData';
+import { EUTxO, Master } from '../types';
+import { maxTokensWithDifferentNames, scriptID_Master_ClosePool_TN, scriptID_Master_DeleteFund_TN, scriptID_Master_FundAndMerge_TN, scriptID_Master_Fund_TN, scriptID_Master_SendBackDeposit_TN, scriptID_Master_SendBackFund_TN, scriptID_Master_SplitFund_TN, scriptID_Master_TerminatePool_TN, scriptID_User_Deposit_TN, scriptID_User_Harvest_TN, scriptID_User_Withdraw_TN, txID_Master_AddScripts_TN, txID_User_Deposit_For_User_TN } from '../types/constantes';
+import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
 import { apiDeleteEUTxOsDBByAddress, apiGetEUTxOsDBByAddress } from '../utils/cardano-helpers';
-import { useRouter } from 'next/router';
+import { newTransaction } from '../utils/cardano-helpersTx';
+import { pushSucessNotification, pushWarningNotification } from "../utils/pushNotification";
+import { copyToClipboard, searchValueInArray, strToHex, toJson } from '../utils/utils';
+import { useStoreActions, useStoreState } from '../utils/walletProvider';
+import ActionModalBtn from './ActionModalBtn';
+import EUTxOsModalBtn from './EUTxOsModalBtn';
+import FundsModalBtn from './FundsModalBtn';
 import LoadingSpinner from './LoadingSpinner';
-import { awaitTx } from '../utils/cardano-helpersTx';
+import MasterModalBtn from './MastersModalBtn';
+import UsersModalBtn from './UsersModalBtn';
 //--------------------------------------
 
-export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo: StakingPoolDBInterface } ) {
-    // console.log("StakingPoolAdmin - " + stakingPoolInfo.name + " - INIT")
+export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo: StakingPoolDBInterface }) {
+	// console.log("StakingPoolAdmin - " + stakingPoolInfo.name + " - INIT")
 
 	//string '0' shows 0 in UI, Number 0 shows loading skeleton for dynamic values
 	const ui_loading = 0
@@ -92,8 +84,8 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 
 	const statePoolData = useStatePoolData(poolInfo)
 
-	const { 
-		swFromDB,
+	const {
+		// swFromDB,
 		swShowOnHome,
 		swPreparado, swIniciado, swFunded,
 		swClosed, closedAt, swTerminated, terminatedAt,
@@ -142,10 +134,10 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 		totalStaked, totalRewardsPaid, totalRewardsToPay,
 
 		isPoolDataLoading, isPoolDataLoaded,
-		setLoading,
-		loadPoolData 
-	
-		} = statePoolData
+
+		loadPoolData
+
+	} = statePoolData
 
 	useEffect(() => {
 		// console.log("StakingPoolAdmin - " + poolInfo.name + " - useEffect - walletStore.connected: " + walletStore.connected + " - isWalletDataLoaded: " + isWalletDataLoaded)
@@ -209,8 +201,8 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 		// console.log("StakingPoolAdmin - " + poolInfo.name + " - useEffect2 - walletStore.connected: " + walletStore.connected + " - isWalletDataLoaded: " + isWalletDataLoaded)
 
 		if (walletStore.connected) {
-			loadPoolData(true)
-		} 
+			loadPoolData()
+		}
 
 	}, [walletStore.connected])
 
@@ -225,214 +217,284 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 
 	const handleCancel = async () => {
 		console.log("StakingPoolAdmin - " + poolInfo.name + " - handleCancel")
-		if (!isCancelling.current && isWorkingInABuffer.current ){
+		if (!isCancelling.current && isWorkingInABuffer.current) {
 			setActionMessage(actionMessage + " (Canceling when this Tx finishes)")
 			setIsCanceling(true)
 		}
 	}
 
+	const updateStakingPool = async () => {
+		var poolInfo_ = await loadPoolData()
+		setPoolInfo(poolInfo_)
+		await loadWalletData(walletStore)
+	}
 	//--------------------------------------
 
-	const masterPreparePoolAction = async (poolInfo?: StakingPoolDBInterface) => {
-
-		console.log("StakingPoolAdmin - Create Pool - " + toJson(poolInfo?.name))
-
-		setActionMessage("Creating Transfer, please wait...")
-
-		const lucid = walletStore.lucid
-
-		try {
-
-			const [txHash, eUTxO_for_consuming] =  await masterPreparePool(walletStore!, poolInfo!, walletStore.pkh!);
-
-			setActionMessage("Waiting for confirmation, please wait...")
-			setActionHash(txHash)
-
-			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
-
-			//await updateUTxO_With_PoolDatum(poolInfo!, txHash);
-
-			if (!isWorkingInABuffer.current) setIsWorking("")
-
-			return txHash.toString();
-
-		} catch (error: any) {
-			if (!isWorkingInABuffer.current) setIsWorking("")
-			updatePage()
-			throw error
-		}
-
+	const masterPreparePoolAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
+		return await newTransaction("StakingPoolAdmin - Create Pool", walletStore, poolInfo, masterPreparePool, isWorkingInABuffer.current, setActionMessage, setActionHash, setIsWorking, updateStakingPool, eUTxOs_Selected, assets)
 	}
 
 	//--------------------------------------
 
-	const masterAddScriptsMasterAllAction = async (poolInfo?: StakingPoolDBInterface) => {
+	const mastertAddScriptsMasterFundAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
+		return await newTransaction("StakingPoolAdmin - Add Scripts Master Fund", walletStore, poolInfo, masterAddScriptsMasterFund, isWorkingInABuffer.current, setActionMessage, setActionHash, setIsWorking, updateStakingPool, eUTxOs_Selected, assets)
+	}
+
+	const masterAddScriptsMasterFundAndMergeAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
+		return await newTransaction("StakingPoolAdmin - Add Scripts Master Fund And Merge", walletStore, poolInfo, masterAddScriptsMasterFundAndMerge, isWorkingInABuffer.current, setActionMessage, setActionHash, setIsWorking, updateStakingPool, eUTxOs_Selected, assets)
+	}
+
+	const masterAddScriptsMasterSplitFundAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
+		return await newTransaction("StakingPoolAdmin - Add Scripts Master Split Fund", walletStore, poolInfo, masterAddScriptsMasterSplitFund, isWorkingInABuffer.current, setActionMessage, setActionHash, setIsWorking, updateStakingPool, eUTxOs_Selected, assets)
+	}
+
+	const masterAddScriptsMasterCloseAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
+		return await newTransaction("StakingPoolAdmin - Add Scripts Master Close Pool", walletStore, poolInfo, masterAddScriptsMasterClosePool, isWorkingInABuffer.current, setActionMessage, setActionHash, setIsWorking, updateStakingPool, eUTxOs_Selected, assets)
+	}
+
+	const masterAddScriptsMasterTerminateAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
+		return await newTransaction("StakingPoolAdmin - Add Scripts Master Terminate Pool", walletStore, poolInfo, masterAddScriptsMasterTerminatePool, isWorkingInABuffer.current, setActionMessage, setActionHash, setIsWorking, updateStakingPool, eUTxOs_Selected, assets)
+	}
+
+	const masterAddScriptsMasterDeleteFundAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
+		return await newTransaction("StakingPoolAdmin - Add Scripts Master Delete Fund", walletStore, poolInfo, masterAddScriptsMasterDeleteFund, isWorkingInABuffer.current, setActionMessage, setActionHash, setIsWorking, updateStakingPool, eUTxOs_Selected, assets)
+	}
+
+	const masterAddScriptsMasterDeleteScriptsAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
+		return await newTransaction("StakingPoolAdmin - Add Scripts Master Delete Scripts", walletStore, poolInfo, masterAddScriptsMasterDeleteScripts, isWorkingInABuffer.current, setActionMessage, setActionHash, setIsWorking, updateStakingPool, eUTxOs_Selected, assets)
+	}
+
+	const masterAddScriptsMasterSendBackFundAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
+		return await newTransaction("StakingPoolAdmin - Add Scripts Master Send Back Fund", walletStore, poolInfo, masterAddScriptsMasterSendBackFund, isWorkingInABuffer.current, setActionMessage, setActionHash, setIsWorking, updateStakingPool, eUTxOs_Selected, assets)
+	}
+
+	const masterAddScriptsMasterSendBackDepositAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
+		return await newTransaction("StakingPoolAdmin - Add Scripts Master Send Back Deposit", walletStore, poolInfo, masterAddScriptsMasterSendBackDeposit, isWorkingInABuffer.current, setActionMessage, setActionHash, setIsWorking, updateStakingPool, eUTxOs_Selected, assets)
+	}
+
+	const masterAddScriptsUserDepositAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
+		return await newTransaction("StakingPoolAdmin - Add Scripts User Deposit", walletStore, poolInfo, masterAddScriptsUserDeposit, isWorkingInABuffer.current, setActionMessage, setActionHash, setIsWorking, updateStakingPool, eUTxOs_Selected, assets)
+	}
+
+	const masterAddScriptsUserHarvestAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
+		return await newTransaction("StakingPoolAdmin - Add Scripts User Harvest", walletStore, poolInfo, masterAddScriptsUserHarvest, isWorkingInABuffer.current, setActionMessage, setActionHash, setIsWorking, updateStakingPool, eUTxOs_Selected, assets)
+	}
+
+	const masterAddScriptsUserWithdrawAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
+		return await newTransaction("StakingPoolAdmin - Add Scripts User Withdraw", walletStore, poolInfo, masterAddScriptsUserWithdraw, isWorkingInABuffer.current, setActionMessage, setActionHash, setIsWorking, updateStakingPool, eUTxOs_Selected, assets)
+	}
+
+	const mastertDeleteScriptsMaster = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
+		return await newTransaction("StakingPoolAdmin - Delete Scripts Master", walletStore, poolInfo, masterDeleteScriptsMaster, isWorkingInABuffer.current, setActionMessage, setActionHash, setIsWorking, updateStakingPool, eUTxOs_Selected, assets)
+	}
+
+	const mastertDeleteScriptsUser = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
+		return await newTransaction("StakingPoolAdmin - Delete Scripts User", walletStore, poolInfo, masterDeleteScriptsUser, isWorkingInABuffer.current, setActionMessage, setActionHash, setIsWorking, updateStakingPool, eUTxOs_Selected, assets)
+	}
+
+	//--------------------------------------
+
+	const masterNewFundAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
+		return await newTransaction("StakingPoolAdmin - New Fund", walletStore, poolInfo, masterNewFund, isWorkingInABuffer.current, setActionMessage, setActionHash, setIsWorking, updateStakingPool, eUTxOs_Selected, assets)
+	}
+
+	const masterFundAndMergeAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
+		return await newTransaction("StakingPoolAdmin - Fund And Merge", walletStore, poolInfo, masterFundAndMerge, isWorkingInABuffer.current, setActionMessage, setActionHash, setIsWorking, updateStakingPool, eUTxOs_Selected, assets)
+	}
+
+	const masterMergeFundsAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
+		return await newTransaction("StakingPoolAdmin - Merge Funds", walletStore, poolInfo, masterMergeFunds, isWorkingInABuffer.current, setActionMessage, setActionHash, setIsWorking, updateStakingPool, eUTxOs_Selected, assets)
+	}
+
+	const masterSplitFundAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
+		return await newTransaction("StakingPoolAdmin - Split Fund", walletStore, poolInfo, masterSplitFund, isWorkingInABuffer.current, setActionMessage, setActionHash, setIsWorking, updateStakingPool, eUTxOs_Selected, assets)
+	}
+
+	const masterDeleteFundsAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
+		return await newTransaction("StakingPoolAdmin - Delete Funds", walletStore, poolInfo, masterDeleteFunds, isWorkingInABuffer.current, setActionMessage, setActionHash, setIsWorking, updateStakingPool, eUTxOs_Selected, assets)
+	}
+
+	const masterClosePoolAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
+		return await newTransaction("StakingPoolAdmin - Close Pool", walletStore, poolInfo, masterClosePool, isWorkingInABuffer.current, setActionMessage, setActionHash, setIsWorking, updateStakingPool, eUTxOs_Selected, assets)
+	}
+
+	const masterTerminatePoolAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
+		return await newTransaction("StakingPoolAdmin - Terminate Pool", walletStore, poolInfo, masterTerminatePool, isWorkingInABuffer.current, setActionMessage, setActionHash, setIsWorking, updateStakingPool, eUTxOs_Selected, assets)
+	}
+
+	const masterGetBackFundAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
+		return await newTransaction("StakingPoolAdmin - Get Back Funds", walletStore, poolInfo, masterGetBackFund, isWorkingInABuffer.current, setActionMessage, setActionHash, setIsWorking, updateStakingPool, eUTxOs_Selected, assets)
+	}
+
+	const masterSendBackFundAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets | undefined, master_Selected?: Master) => {
+		return await newTransaction("StakingPoolAdmin - Send Back Funds", walletStore, poolInfo, masterSendBackFund, isWorkingInABuffer.current, setActionMessage, setActionHash, setIsWorking, updateStakingPool, eUTxOs_Selected, assets, master_Selected)
+	}
+
+	const masterSendBackDepositAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[], assets?: Assets) => {
+		return await newTransaction("StakingPoolAdmin - Send Back Invests", walletStore, poolInfo, masterSendBackDeposit, isWorkingInABuffer.current, setActionMessage, setActionHash, setIsWorking, updateStakingPool, eUTxOs_Selected, assets)
+	}
+
+	//--------------------------------------
+
+	const masterAddScriptsMasterAllAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
 
 		console.log("StakingPoolAdmin - Add Scripts Master All - " + toJson(poolInfo?.name))
 
 		setActionMessage("Creating Transfer, please wait...")
 		setIsWorkingInABuffer(true)
+		setIsCanceling(false)
 		var swErrors = false
 
 		try {
-			setActionMessage("Adding Script Master Fund, please wait..."+ (isCancelling.current ? " (Canceling when this Tx finishes)" : ""))
-			const txHash =  await mastertAddScriptsMasterFundAction(poolInfo)
+			setActionMessage("Adding Script Master Fund, please wait..." + (isCancelling.current ? " (Canceling when this Tx finishes)" : ""))
+			const txHash = await mastertAddScriptsMasterFundAction(poolInfo)
 			pushSucessNotification("Add Scripts Master Fund", txHash, true);
 			setActionHash("")
 		} catch (error: any) {
 			const error_explained = explainError(error)
 			pushWarningNotification("Add Scripts Master Fund", error_explained);
+			await new Promise(r => setTimeout(r, 2000));
 			swErrors = true
-			await updatePage()
 		}
-		if(isCancelling.current) { 
+		if (isCancelling.current) {
 			setIsWorkingInABuffer(false)
-			setIsWorking("")
 			setIsCanceling(false)
+			setIsWorking("")
 			return "You have cancel the operations"
 		}
-		await new Promise(r => setTimeout(r, 2000));
 		try {
-			setActionMessage("Adding Script Master Fund And Merge, please wait..."+ (isCancelling.current ? " (Canceling when this Tx finishes)" : ""))
-			const txHash =  await masterAddScriptsMasterFundAndMergeAction(poolInfo)
+			setActionMessage("Adding Script Master Fund And Merge, please wait..." + (isCancelling.current ? " (Canceling when this Tx finishes)" : ""))
+			const txHash = await masterAddScriptsMasterFundAndMergeAction(poolInfo)
 			pushSucessNotification("Add Scripts Master Fund And Merge", txHash, true);
 			setActionHash("")
 		} catch (error: any) {
 			const error_explained = explainError(error)
 			pushWarningNotification("Add Scripts Master Fund And Merge", error_explained);
+			await new Promise(r => setTimeout(r, 2000));
 			swErrors = true
-			await updatePage()
 		}
-		if(isCancelling.current) { 
+		if (isCancelling.current) {
 			setIsWorkingInABuffer(false)
-			setIsWorking("")
 			setIsCanceling(false)
+			setIsWorking("")
 			return "You have cancel the operations"
 		}
-		await new Promise(r => setTimeout(r, 2000));
 		try {
-			setActionMessage("Adding Script Master Split Fund, please wait..."+ (isCancelling.current ? " (Canceling when this Tx finishes)" : ""))
-			const txHash =  await masterAddScriptsMasterSplitFundAction(poolInfo)
+			setActionMessage("Adding Script Master Split Fund, please wait..." + (isCancelling.current ? " (Canceling when this Tx finishes)" : ""))
+			const txHash = await masterAddScriptsMasterSplitFundAction(poolInfo)
 			pushSucessNotification("Add Scripts Master Split Fund", txHash, true);
 			setActionHash("")
 		} catch (error: any) {
 			const error_explained = explainError(error)
 			pushWarningNotification("Add Scripts Master Split Fund", error_explained);
+			await new Promise(r => setTimeout(r, 2000));
 			swErrors = true
-			await updatePage()
 		}
-		if(isCancelling.current) { 
+		if (isCancelling.current) {
 			setIsWorkingInABuffer(false)
-			setIsWorking("")
 			setIsCanceling(false)
+			setIsWorking("")
 			return "You have cancel the operations"
 		}
-		await new Promise(r => setTimeout(r, 2000));
 		try {
-			setActionMessage("Adding Script Master Close Pool, please wait..."+ (isCancelling.current ? " (Canceling when this Tx finishes)" : ""))
-			const txHash =  await masterAddScriptsMasterCloseAction(poolInfo)
+			setActionMessage("Adding Script Master Close Pool, please wait..." + (isCancelling.current ? " (Canceling when this Tx finishes)" : ""))
+			const txHash = await masterAddScriptsMasterCloseAction(poolInfo)
 			pushSucessNotification("Add Scripts Master Close Pool", txHash, true);
 			setActionHash("")
 		} catch (error: any) {
 			const error_explained = explainError(error)
 			pushWarningNotification("Add Scripts Master Close Pool", error_explained);
+			await new Promise(r => setTimeout(r, 2000));
 			swErrors = true
-			await updatePage()
 		}
-		if(isCancelling.current) { 
+		if (isCancelling.current) {
 			setIsWorkingInABuffer(false)
-			setIsWorking("")
 			setIsCanceling(false)
+			setIsWorking("")
 			return "You have cancel the operations"
 		}
-		await new Promise(r => setTimeout(r, 2000));
 		try {
-			setActionMessage("Adding Script Master Terminate Pool, please wait..."+ (isCancelling.current ? " (Canceling when this Tx finishes)" : ""))
-			const txHash =  await masterAddScriptsMasterTerminateAction(poolInfo)
+			setActionMessage("Adding Script Master Terminate Pool, please wait..." + (isCancelling.current ? " (Canceling when this Tx finishes)" : ""))
+			const txHash = await masterAddScriptsMasterTerminateAction(poolInfo)
 			pushSucessNotification("Add Scripts Master Terminate Pool", txHash, true);
 			setActionHash("")
 		} catch (error: any) {
 			const error_explained = explainError(error)
 			pushWarningNotification("Add Scripts Master Terminate Pool", error_explained);
+			await new Promise(r => setTimeout(r, 2000));
 			swErrors = true
-			await updatePage()
 		}
-		if(isCancelling.current) { 
+		if (isCancelling.current) {
 			setIsWorkingInABuffer(false)
-			setIsWorking("")
 			setIsCanceling(false)
+			setIsWorking("")
 			return "You have cancel the operations"
 		}
-		await new Promise(r => setTimeout(r, 2000));
 		try {
-			setActionMessage("Adding Script Master Delete Fund, please wait..."+ (isCancelling.current ? " (Canceling when this Tx finishes)" : ""))
-			const txHash =  await masterAddScriptsMasterDeleteFundAction(poolInfo)
+			setActionMessage("Adding Script Master Delete Fund, please wait..." + (isCancelling.current ? " (Canceling when this Tx finishes)" : ""))
+			const txHash = await masterAddScriptsMasterDeleteFundAction(poolInfo)
 			pushSucessNotification("Add Scripts Master Delete Fund", txHash, true);
 			setActionHash("")
 		} catch (error: any) {
 			const error_explained = explainError(error)
 			pushWarningNotification("Add Scripts Master Delete Fund", error_explained);
+			await new Promise(r => setTimeout(r, 2000));
 			swErrors = true
-			await updatePage()
 		}
-		if(isCancelling.current) { 
+		if (isCancelling.current) {
 			setIsWorkingInABuffer(false)
-			setIsWorking("")
 			setIsCanceling(false)
+			setIsWorking("")
 			return "You have cancel the operations"
 		}
-		await new Promise(r => setTimeout(r, 2000));
 		try {
-			setActionMessage("Adding Script Master Delete Scripts, please wait..."+ (isCancelling.current ? " (Canceling when this Tx finishes)" : ""))
-			const txHash =  await masterAddScriptsMasterDeleteScriptsAction(poolInfo)
+			setActionMessage("Adding Script Master Delete Scripts, please wait..." + (isCancelling.current ? " (Canceling when this Tx finishes)" : ""))
+			const txHash = await masterAddScriptsMasterDeleteScriptsAction(poolInfo)
 			pushSucessNotification("Add Scripts Master Delete Scripts", txHash, true);
 			setActionHash("")
 		} catch (error: any) {
 			const error_explained = explainError(error)
 			pushWarningNotification("Add Scripts Master Delete Scripts", error_explained);
+			await new Promise(r => setTimeout(r, 2000));
 			swErrors = true
-			await updatePage()
 		}
-		if(isCancelling.current) { 
+		if (isCancelling.current) {
 			setIsWorkingInABuffer(false)
-			setIsWorking("")
 			setIsCanceling(false)
+			setIsWorking("")
 			return "You have cancel the operations"
 		}
-		await new Promise(r => setTimeout(r, 2000));
 		try {
-			setActionMessage("Adding Script Master Send Back Fund, please wait..."+ (isCancelling.current ? " (Canceling when this Tx finishes)" : ""))
-			const txHash =  await masterAddScriptsMasterSendBackFundAction(poolInfo)
+			setActionMessage("Adding Script Master Send Back Fund, please wait..." + (isCancelling.current ? " (Canceling when this Tx finishes)" : ""))
+			const txHash = await masterAddScriptsMasterSendBackFundAction(poolInfo)
 			pushSucessNotification("Add Scripts Master Send Back Fund", txHash, true);
 			setActionHash("")
 		} catch (error: any) {
 			const error_explained = explainError(error)
 			pushWarningNotification("Add Scripts Master Send Back Fund", error_explained);
+			await new Promise(r => setTimeout(r, 2000));
 			swErrors = true
-			await updatePage()
 		}
-		if(isCancelling.current) { 
+		if (isCancelling.current) {
 			setIsWorkingInABuffer(false)
-			setIsWorking("")
 			setIsCanceling(false)
+			setIsWorking("")
 			return "You have cancel the operations"
 		}
-		await new Promise(r => setTimeout(r, 2000));
 		try {
-			setActionMessage("Adding Script Master Send Back Deposit, please wait..."+ (isCancelling.current ? " (Canceling when this Tx finishes)" : ""))
-			const txHash =  await masterAddScriptsMasterSendBackDepositAction(poolInfo)
+			setActionMessage("Adding Script Master Send Back Deposit, please wait..." + (isCancelling.current ? " (Canceling when this Tx finishes)" : ""))
+			const txHash = await masterAddScriptsMasterSendBackDepositAction(poolInfo)
 			pushSucessNotification("Add Scripts Master Send Back Deposit", txHash, true);
 			setActionHash("")
 		} catch (error: any) {
 			const error_explained = explainError(error)
 			pushWarningNotification("Add Scripts Master Send Back Deposit", error_explained);
+			await new Promise(r => setTimeout(r, 2000));
 			swErrors = true
-			await updatePage()
 		}
-
 		setIsWorkingInABuffer(false)
-		setIsWorking("")
 		setIsCanceling(false)
+		setIsWorking("")
 		if (swErrors) {
 			throw "Error executing some of the transactions"
 		} else {
@@ -443,329 +505,184 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 
 	//--------------------------------------
 
-	const masterDeleteScriptsMasterAllAction = async (poolInfo?: StakingPoolDBInterface) => {
+	const masterDeleteScriptsMasterAllAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
 		//------------------
 		console.log("StakingPoolAdmin - Delete Scripts Master All - " + toJson(poolInfo?.name))
 		//------------------
 		const scriptAddress: Address = poolInfo!.scriptAddress
 		//------------------
+		const lucid = walletStore.lucid
+		//------------------
+		const txID_Master_AddScripts_CS = poolInfo!.txID_Master_AddScripts_CS
+		const txID_Master_AddScripts_TN_Hex = strToHex(txID_Master_AddScripts_TN)
+		const txID_Master_AddScripts_AC_Lucid = txID_Master_AddScripts_CS + txID_Master_AddScripts_TN_Hex;
+		//------------------
+		const scriptID_Master_Fund_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_Master_Fund_TN)
+		const scriptID_Master_FundAndMerge_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_Master_FundAndMerge_TN)
+		const scriptID_Master_SplitFund_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_Master_SplitFund_TN)
+		const scriptID_Master_ClosePool_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_Master_ClosePool_TN)
+		const scriptID_Master_TerminatePool_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_Master_TerminatePool_TN)
+		const scriptID_Master_DeleteFund_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_Master_DeleteFund_TN)
+		const scriptID_Master_SendBackFund_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_Master_SendBackFund_TN)
+		const scriptID_Master_SendBackDeposit_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_Master_SendBackDeposit_TN)
+		//------------------
+		async function getMasterScripts(txID_Master_AddScripts_AC_Lucid: string, scriptID_Master_Fund_AC_Lucid: string, scriptID_Master_FundAndMerge_AC_Lucid: string, scriptID_Master_SplitFund_AC_Lucid: string, scriptID_Master_ClosePool_AC_Lucid: string, scriptID_Master_TerminatePool_AC_Lucid: string, scriptID_Master_DeleteFund_AC_Lucid: string, scriptID_Master_SendBackFund_AC_Lucid: string, scriptID_Master_SendBackDeposit_AC_Lucid: string) {
+			const eUTxOs_With_Datum = await apiGetEUTxOsDBByAddress(scriptAddress);
+			console.log("StakingPoolAdmin - Delete Scripts Master All - uTxOs At Script - length: " + eUTxOs_With_Datum.length);
+			//------------------
+			var uTxOsWithScripts: UTxO[] = [];
+			//------------------
+			var eUTxO_With_Script_TxID_Master_Fund_Datum = getEUTxO_With_ScriptDatum_InEUxTOList(txID_Master_AddScripts_AC_Lucid, scriptID_Master_Fund_AC_Lucid, eUTxOs_With_Datum, true);
+			if (eUTxO_With_Script_TxID_Master_Fund_Datum) {
+				uTxOsWithScripts.push(eUTxO_With_Script_TxID_Master_Fund_Datum!.uTxO);
+			}
+			var eUTxO_With_Script_TxID_Master_FundAndMerge_Datum = getEUTxO_With_ScriptDatum_InEUxTOList(txID_Master_AddScripts_AC_Lucid, scriptID_Master_FundAndMerge_AC_Lucid, eUTxOs_With_Datum, true);
+			if (eUTxO_With_Script_TxID_Master_FundAndMerge_Datum) {
+				uTxOsWithScripts.push(eUTxO_With_Script_TxID_Master_FundAndMerge_Datum!.uTxO);
+			}
+			var eUTxO_With_Script_TxID_Master_SplitFund_Datum = getEUTxO_With_ScriptDatum_InEUxTOList(txID_Master_AddScripts_AC_Lucid, scriptID_Master_SplitFund_AC_Lucid, eUTxOs_With_Datum, true);
+			if (eUTxO_With_Script_TxID_Master_SplitFund_Datum) {
+				uTxOsWithScripts.push(eUTxO_With_Script_TxID_Master_SplitFund_Datum!.uTxO);
+			}
+			var eUTxO_With_Script_TxID_Master_ClosePool_Datum = getEUTxO_With_ScriptDatum_InEUxTOList(txID_Master_AddScripts_AC_Lucid, scriptID_Master_ClosePool_AC_Lucid, eUTxOs_With_Datum, true);
+			if (eUTxO_With_Script_TxID_Master_ClosePool_Datum) {
+				uTxOsWithScripts.push(eUTxO_With_Script_TxID_Master_ClosePool_Datum!.uTxO);
+			}
+			var eUTxO_With_Script_TxID_Master_TerminatePool_Datum = getEUTxO_With_ScriptDatum_InEUxTOList(txID_Master_AddScripts_AC_Lucid, scriptID_Master_TerminatePool_AC_Lucid, eUTxOs_With_Datum, true);
+			if (eUTxO_With_Script_TxID_Master_TerminatePool_Datum) {
+				uTxOsWithScripts.push(eUTxO_With_Script_TxID_Master_TerminatePool_Datum!.uTxO);
+			}
+			var eUTxO_With_Script_TxID_Master_DeleteFund_Datum = getEUTxO_With_ScriptDatum_InEUxTOList(txID_Master_AddScripts_AC_Lucid, scriptID_Master_DeleteFund_AC_Lucid, eUTxOs_With_Datum, true);
+			if (eUTxO_With_Script_TxID_Master_DeleteFund_Datum) {
+				uTxOsWithScripts.push(eUTxO_With_Script_TxID_Master_DeleteFund_Datum!.uTxO);
+			}
+			var eUTxO_With_Script_TxID_Master_SendBackFund_Datum = getEUTxO_With_ScriptDatum_InEUxTOList(txID_Master_AddScripts_AC_Lucid, scriptID_Master_SendBackFund_AC_Lucid, eUTxOs_With_Datum, true);
+			if (eUTxO_With_Script_TxID_Master_SendBackFund_Datum) {
+				uTxOsWithScripts.push(eUTxO_With_Script_TxID_Master_SendBackFund_Datum!.uTxO);
+			}
+			var eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum = getEUTxO_With_ScriptDatum_InEUxTOList(txID_Master_AddScripts_AC_Lucid, scriptID_Master_SendBackDeposit_AC_Lucid, eUTxOs_With_Datum, true);
+			if (eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum) {
+				uTxOsWithScripts.push(eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum!.uTxO);
+			}
+			return { uTxOsWithScripts };
+		}
+		//------------------
 		setActionMessage("Creating Transfer, please wait...")
 		setIsWorkingInABuffer(true)
-		try {
-			// const uTxOsAtScript = await walletStore.lucid!.utxosAt(scriptAddress)
-			// //------------------
-			// //try to search for the datum and save in the list of EUTxOs
-			// var eUTxOs_With_Datum = await getExtendedUTxOsWith_Datum(walletStore.lucid!, uTxOsAtScript)
-			const eUTxOs_With_Datum = await apiGetEUTxOsDBByAddress(scriptAddress)
-			console.log("StakingPoolAdmin - Delete Scripts Master All - uTxOs At Script - length: " + eUTxOs_With_Datum.length)
-			//------------------
-			const lucid = walletStore.lucid
-			//------------------
-			const txID_Master_AddScripts_CS = poolInfo!.txID_Master_AddScripts_CS
-			const txID_Master_AddScripts_TN_Hex = strToHex(txID_Master_AddScripts_TN)
-			const txID_Master_AddScripts_AC_Lucid = txID_Master_AddScripts_CS + txID_Master_AddScripts_TN_Hex;
-			//------------------
-			const scriptID_Validator_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_Validator_TN)
-			const scriptID_Master_Fund_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_Master_Fund_TN)
-			const scriptID_Master_FundAndMerge_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_Master_FundAndMerge_TN)
-			const scriptID_Master_SplitFund_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_Master_SplitFund_TN)
-			const scriptID_Master_ClosePool_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_Master_ClosePool_TN)
-			const scriptID_Master_TerminatePool_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_Master_TerminatePool_TN)
-			const scriptID_Master_DeleteFund_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_Master_DeleteFund_TN)
-			const scriptID_Master_SendBackFund_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_Master_SendBackFund_TN)
-			const scriptID_Master_SendBackDeposit_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_Master_SendBackDeposit_TN)
-			const scriptID_Master_AddScripts_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_Master_AddScripts_TN)
-			const scriptID_Master_DeleteScripts_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_Master_DeleteScripts_TN)
-			const scriptID_User_Deposit_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_User_Deposit_TN)
-			const scriptID_User_Harvest_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_User_Harvest_TN)
-			const scriptID_User_Withdraw_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_User_Withdraw_TN)
-			//------------------
-			var uTxOsWithScripts: UTxO[] = []
-			//------------------
-			var eUTxO_With_Script_TxID_Master_Fund_Datum = getEUTxO_With_ScriptDatum_InEUxTOList(txID_Master_AddScripts_AC_Lucid, scriptID_Master_Fund_AC_Lucid, eUTxOs_With_Datum, true)
-			if (eUTxO_With_Script_TxID_Master_Fund_Datum) {
-				uTxOsWithScripts.push(eUTxO_With_Script_TxID_Master_Fund_Datum!.uTxO)
-			}
-			var eUTxO_With_Script_TxID_Master_FundAndMerge_Datum = getEUTxO_With_ScriptDatum_InEUxTOList(txID_Master_AddScripts_AC_Lucid, scriptID_Master_FundAndMerge_AC_Lucid, eUTxOs_With_Datum, true)
-			if (eUTxO_With_Script_TxID_Master_FundAndMerge_Datum) {
-				uTxOsWithScripts.push(eUTxO_With_Script_TxID_Master_FundAndMerge_Datum!.uTxO)
-			}
-			var eUTxO_With_Script_TxID_Master_SplitFund_Datum = getEUTxO_With_ScriptDatum_InEUxTOList(txID_Master_AddScripts_AC_Lucid, scriptID_Master_SplitFund_AC_Lucid, eUTxOs_With_Datum, true)
-			if (eUTxO_With_Script_TxID_Master_SplitFund_Datum) {
-				uTxOsWithScripts.push(eUTxO_With_Script_TxID_Master_SplitFund_Datum!.uTxO)
-			}
-			var eUTxO_With_Script_TxID_Master_ClosePool_Datum = getEUTxO_With_ScriptDatum_InEUxTOList(txID_Master_AddScripts_AC_Lucid, scriptID_Master_ClosePool_AC_Lucid, eUTxOs_With_Datum, true)
-			if (eUTxO_With_Script_TxID_Master_ClosePool_Datum) {
-				uTxOsWithScripts.push(eUTxO_With_Script_TxID_Master_ClosePool_Datum!.uTxO)
-			}
-			var eUTxO_With_Script_TxID_Master_TerminatePool_Datum = getEUTxO_With_ScriptDatum_InEUxTOList(txID_Master_AddScripts_AC_Lucid, scriptID_Master_TerminatePool_AC_Lucid, eUTxOs_With_Datum, true)
-			if (eUTxO_With_Script_TxID_Master_TerminatePool_Datum) {
-				uTxOsWithScripts.push(eUTxO_With_Script_TxID_Master_TerminatePool_Datum!.uTxO)
-			}
-			var eUTxO_With_Script_TxID_Master_DeleteFund_Datum = getEUTxO_With_ScriptDatum_InEUxTOList(txID_Master_AddScripts_AC_Lucid, scriptID_Master_DeleteFund_AC_Lucid, eUTxOs_With_Datum, true)
-			if (eUTxO_With_Script_TxID_Master_DeleteFund_Datum) {
-				uTxOsWithScripts.push(eUTxO_With_Script_TxID_Master_DeleteFund_Datum!.uTxO)
-			}
-			var eUTxO_With_Script_TxID_Master_SendBackFund_Datum = getEUTxO_With_ScriptDatum_InEUxTOList(txID_Master_AddScripts_AC_Lucid, scriptID_Master_SendBackFund_AC_Lucid, eUTxOs_With_Datum, true)
-			if (eUTxO_With_Script_TxID_Master_SendBackFund_Datum) {
-				uTxOsWithScripts.push(eUTxO_With_Script_TxID_Master_SendBackFund_Datum!.uTxO)
-			}
-			var eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum = getEUTxO_With_ScriptDatum_InEUxTOList(txID_Master_AddScripts_AC_Lucid, scriptID_Master_SendBackDeposit_AC_Lucid, eUTxOs_With_Datum, true)
-			if (eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum) {
-				uTxOsWithScripts.push(eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum!.uTxO)
-			}
-			//------------------
-			if (uTxOsWithScripts.length == 0) {
-				setIsWorking("")
-				return "No scripts found to remove"
-			}
-			//------------------
-			// setIsCanceling(false)
-			var swErrors = false
-			while (uTxOsWithScripts.length > 0 && !isCancelling.current) {
+		setIsCanceling(false)
+		//------------------
+		var { uTxOsWithScripts }: { uTxOsWithScripts: UTxO[] } =
+			await getMasterScripts(txID_Master_AddScripts_AC_Lucid, scriptID_Master_Fund_AC_Lucid, scriptID_Master_FundAndMerge_AC_Lucid, scriptID_Master_SplitFund_AC_Lucid, scriptID_Master_ClosePool_AC_Lucid, scriptID_Master_TerminatePool_AC_Lucid, scriptID_Master_DeleteFund_AC_Lucid, scriptID_Master_SendBackFund_AC_Lucid, scriptID_Master_SendBackDeposit_AC_Lucid);
+		//------------------
+		if (uTxOsWithScripts.length == 0) {
+			setIsWorkingInABuffer(false)
+			setIsCanceling(false)
+			setIsWorking("")
+			return "No scripts found to remove"
+		}
+		//------------------
+		var swErrors = false
+		//------------------
+		while (uTxOsWithScripts.length > 0 && !isCancelling.current) {
+			try {
 				setActionMessage("Creating Transfer, please wait..." + (isCancelling.current ? " (Canceling when this Tx finishes)" : ""))
+				const txHash = await mastertDeleteScriptsMaster(poolInfo)
+				pushSucessNotification("Delete Scripts Master", txHash, true);
 				setActionHash("")
-				try {
-					const [txHash, eUTxO_for_consuming] =  await masterDeleteScriptsMasterAll(walletStore!, poolInfo!, walletStore.pkh!);
-
-					setActionMessage("Waiting for confirmation, please wait..." + (isCancelling.current ? " (Canceling when this Tx finishes)" : ""))
-					setActionHash(txHash)
-
-					await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
-
-					pushSucessNotification("Delete Scripts Master", txHash, true);
-					setActionHash("")
-
-				} catch (error: any) {
-					const error_explained = explainError(error)
-					pushWarningNotification("Delete Scripts Master", error_explained);
-					swErrors = true
-					await updatePage()
-				}
-				//------------------
-				// const uTxOsAtScript = await walletStore.lucid!.utxosAt(scriptAddress)
-				// console.log("StakingPoolAdmin - Delete Scripts Master All - uTxOs At Script - length: " + uTxOsAtScript.length)
-				// //------------------
-				// //try to search for the datum and save in the list of EUTxOs
-				// eUTxOs_With_Datum = await getExtendedUTxOsWith_Datum(walletStore.lucid!, uTxOsAtScript)
-				const eUTxOs_With_Datum = await apiGetEUTxOsDBByAddress(scriptAddress)
-				console.log("StakingPoolAdmin - Delete Scripts Master All - uTxOs At Script - length: " + eUTxOs_With_Datum.length)
-				//------------------
-				uTxOsWithScripts = []
-				//------------------
-				var eUTxO_With_Script_TxID_Master_Fund_Datum = getEUTxO_With_ScriptDatum_InEUxTOList(txID_Master_AddScripts_AC_Lucid, scriptID_Master_Fund_AC_Lucid, eUTxOs_With_Datum)
-				if (eUTxO_With_Script_TxID_Master_Fund_Datum) {
-					uTxOsWithScripts.push(eUTxO_With_Script_TxID_Master_Fund_Datum!.uTxO)
-				}
-				var eUTxO_With_Script_TxID_Master_FundAndMerge_Datum = getEUTxO_With_ScriptDatum_InEUxTOList(txID_Master_AddScripts_AC_Lucid, scriptID_Master_FundAndMerge_AC_Lucid, eUTxOs_With_Datum)
-				if (eUTxO_With_Script_TxID_Master_FundAndMerge_Datum) {
-					uTxOsWithScripts.push(eUTxO_With_Script_TxID_Master_FundAndMerge_Datum!.uTxO)
-				}
-				var eUTxO_With_Script_TxID_Master_SplitFund_Datum = getEUTxO_With_ScriptDatum_InEUxTOList(txID_Master_AddScripts_AC_Lucid, scriptID_Master_SplitFund_AC_Lucid, eUTxOs_With_Datum)
-				if (eUTxO_With_Script_TxID_Master_SplitFund_Datum) {
-					uTxOsWithScripts.push(eUTxO_With_Script_TxID_Master_SplitFund_Datum!.uTxO)
-				}
-				var eUTxO_With_Script_TxID_Master_ClosePool_Datum = getEUTxO_With_ScriptDatum_InEUxTOList(txID_Master_AddScripts_AC_Lucid, scriptID_Master_ClosePool_AC_Lucid, eUTxOs_With_Datum)
-				if (eUTxO_With_Script_TxID_Master_ClosePool_Datum) {
-					uTxOsWithScripts.push(eUTxO_With_Script_TxID_Master_ClosePool_Datum!.uTxO)
-				}
-				var eUTxO_With_Script_TxID_Master_TerminatePool_Datum = getEUTxO_With_ScriptDatum_InEUxTOList(txID_Master_AddScripts_AC_Lucid, scriptID_Master_TerminatePool_AC_Lucid, eUTxOs_With_Datum)
-				if (eUTxO_With_Script_TxID_Master_TerminatePool_Datum) {
-					uTxOsWithScripts.push(eUTxO_With_Script_TxID_Master_TerminatePool_Datum!.uTxO)
-				}
-				var eUTxO_With_Script_TxID_Master_DeleteFund_Datum = getEUTxO_With_ScriptDatum_InEUxTOList(txID_Master_AddScripts_AC_Lucid, scriptID_Master_DeleteFund_AC_Lucid, eUTxOs_With_Datum)
-				if (eUTxO_With_Script_TxID_Master_DeleteFund_Datum) {
-					uTxOsWithScripts.push(eUTxO_With_Script_TxID_Master_DeleteFund_Datum!.uTxO)
-				}
-				var eUTxO_With_Script_TxID_Master_SendBackFund_Datum = getEUTxO_With_ScriptDatum_InEUxTOList(txID_Master_AddScripts_AC_Lucid, scriptID_Master_SendBackFund_AC_Lucid, eUTxOs_With_Datum)
-				if (eUTxO_With_Script_TxID_Master_SendBackFund_Datum) {
-					uTxOsWithScripts.push(eUTxO_With_Script_TxID_Master_SendBackFund_Datum!.uTxO)
-				}
-				var eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum = getEUTxO_With_ScriptDatum_InEUxTOList(txID_Master_AddScripts_AC_Lucid, scriptID_Master_SendBackDeposit_AC_Lucid, eUTxOs_With_Datum)
-				if (eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum) {
-					uTxOsWithScripts.push(eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum!.uTxO)
-				}
-				//------------------	
-				let data = {
-					nombrePool: poolInfo!.name,
-
-					swShowOnSite: poolInfo!.swShowOnSite,
-
-					swShowOnHome: poolInfo!.swShowOnHome,
-
-					swPreparado: (swPreparado === true) ? true : false,
-
-					swIniciado: (swIniciado === true) ? true : false,
-					swFunded: (swFunded === true) ? true : false,
-
-					swClosed: (swClosed === true) ? true : false,
-
-					closedAt: (typeof closedAt === "object") ? closedAt.getTime() : undefined,
-
-					swTerminated: (swTerminated === true) ? true : false,
-
-					//eUTxO_With_PoolDatum: poolInfo!.eUTxO_With_PoolDatum? toJson(poolInfo!.eUTxO_With_PoolDatum) : "",
-					eUTxO_With_ScriptDatum: poolInfo!.eUTxO_With_ScriptDatum ? toJson(poolInfo!.eUTxO_With_ScriptDatum) : "",
-
-					eUTxO_With_Script_TxID_Master_Fund_Datum: eUTxO_With_Script_TxID_Master_Fund_Datum ? toJson(eUTxO_With_Script_TxID_Master_Fund_Datum) : "",
-					eUTxO_With_Script_TxID_Master_FundAndMerge_Datum: eUTxO_With_Script_TxID_Master_FundAndMerge_Datum ? toJson(eUTxO_With_Script_TxID_Master_FundAndMerge_Datum) : "",
-					eUTxO_With_Script_TxID_Master_SplitFund_Datum: eUTxO_With_Script_TxID_Master_SplitFund_Datum ? toJson(eUTxO_With_Script_TxID_Master_SplitFund_Datum) : "",
-					eUTxO_With_Script_TxID_Master_ClosePool_Datum: eUTxO_With_Script_TxID_Master_ClosePool_Datum ? toJson(eUTxO_With_Script_TxID_Master_ClosePool_Datum) : "",
-					eUTxO_With_Script_TxID_Master_TerminatePool_Datum: eUTxO_With_Script_TxID_Master_TerminatePool_Datum ? toJson(eUTxO_With_Script_TxID_Master_TerminatePool_Datum) : "",
-					eUTxO_With_Script_TxID_Master_DeleteFund_Datum: eUTxO_With_Script_TxID_Master_DeleteFund_Datum ? toJson(eUTxO_With_Script_TxID_Master_DeleteFund_Datum) : "",
-					eUTxO_With_Script_TxID_Master_SendBackFund_Datum: eUTxO_With_Script_TxID_Master_SendBackFund_Datum ? toJson(eUTxO_With_Script_TxID_Master_SendBackFund_Datum) : "",
-					eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum: eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum ? toJson(eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum) : "",
-					
-					eUTxO_With_Script_TxID_Master_AddScripts_Datum: poolInfo!.eUTxO_With_Script_TxID_Master_AddScripts_Datum ? toJson(poolInfo!.eUTxO_With_Script_TxID_Master_AddScripts_Datum) : "",
-					eUTxO_With_Script_TxID_Master_DeleteScripts_Datum: poolInfo!.eUTxO_With_Script_TxID_Master_DeleteScripts_Datum ? toJson(poolInfo!.eUTxO_With_Script_TxID_Master_DeleteScripts_Datum) : "",
-
-					eUTxO_With_Script_TxID_User_Deposit_Datum: poolInfo!.eUTxO_With_Script_TxID_User_Deposit_Datum ? toJson(poolInfo!.eUTxO_With_Script_TxID_User_Deposit_Datum) : "",
-					eUTxO_With_Script_TxID_User_Harvest_Datum: poolInfo!.eUTxO_With_Script_TxID_User_Harvest_Datum ? toJson(poolInfo!.eUTxO_With_Script_TxID_User_Harvest_Datum) : "",
-					eUTxO_With_Script_TxID_User_Withdraw_Datum: poolInfo!.eUTxO_With_Script_TxID_User_Withdraw_Datum ? toJson(poolInfo!.eUTxO_With_Script_TxID_User_Withdraw_Datum) : "",
-
-				}
-
-				const urlApi = "/api/updateStakingPool" 
-
-				const requestOptions = {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: toJson(data)
-				};
-
-				const response = await fetch(urlApi, requestOptions)
-				const json = await response.json()
-				const message = json.msg
-
-				switch (response.status) {
-					case 500:
-						console.error("StakingPoolAdmin - Delete Scripts Master All - /api/updateStakingPool - Error 500")
-						throw "Error 500";
-					case 400:
-						console.error("StakingPoolAdmin - Delete Scripts Master All - /api/updateStakingPool - Error: " + message)
-						throw message;
-					case 200:
-						console.log("StakingPoolAdmin - Delete Scripts Master All - /api/updateStakingPool: " + message)
-						break;
-					default:
-				}
-				//------------------	
-				poolInfo!.eUTxO_With_Script_TxID_Master_Fund_Datum = eUTxO_With_Script_TxID_Master_Fund_Datum
-				poolInfo!.eUTxO_With_Script_TxID_Master_FundAndMerge_Datum = eUTxO_With_Script_TxID_Master_FundAndMerge_Datum
-				poolInfo!.eUTxO_With_Script_TxID_Master_SplitFund_Datum = eUTxO_With_Script_TxID_Master_SplitFund_Datum
-				poolInfo!.eUTxO_With_Script_TxID_Master_ClosePool_Datum = eUTxO_With_Script_TxID_Master_ClosePool_Datum
-				poolInfo!.eUTxO_With_Script_TxID_Master_TerminatePool_Datum = eUTxO_With_Script_TxID_Master_TerminatePool_Datum
-				poolInfo!.eUTxO_With_Script_TxID_Master_DeleteFund_Datum = eUTxO_With_Script_TxID_Master_DeleteFund_Datum
-				poolInfo!.eUTxO_With_Script_TxID_Master_SendBackFund_Datum = eUTxO_With_Script_TxID_Master_SendBackFund_Datum
-				poolInfo!.eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum = eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum
-				setEUTxO_With_Script_TxID_Master_Fund_Datum(eUTxO_With_Script_TxID_Master_Fund_Datum)
-				setEUTxO_With_Script_TxID_Master_FundAndMerge_Datum(eUTxO_With_Script_TxID_Master_FundAndMerge_Datum)
-				setEUTxO_With_Script_TxID_Master_SplitFund_Datum(eUTxO_With_Script_TxID_Master_SplitFund_Datum)
-				setEUTxO_With_Script_TxID_Master_ClosePool_Datum(eUTxO_With_Script_TxID_Master_ClosePool_Datum)
-				setEUTxO_With_Script_TxID_Master_TerminatePool_Datum(eUTxO_With_Script_TxID_Master_TerminatePool_Datum)
-				setEUTxO_With_Script_TxID_Master_DeleteFund_Datum(eUTxO_With_Script_TxID_Master_DeleteFund_Datum)
-				setEUTxO_With_Script_TxID_Master_SendBackFund_Datum(eUTxO_With_Script_TxID_Master_SendBackFund_Datum)
-				setEUTxO_With_Script_TxID_Master_SendBackDeposit_Datum(eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum)
-				//------------------	
-				setPoolInfo(poolInfo!)
-				//------------------	
-				if (uTxOsWithScripts.length == 0) {
-					setIsWorkingInABuffer(false)
-					setIsWorking("")
-					setIsCanceling(false)
-					if (swErrors) {
-						throw "Error executing some of the transactions"
-					} else {
-						return "No more scripts found to remove"
-					}
-				}
+			} catch (error: any) {
+				const error_explained = explainError(error)
+				pushWarningNotification("Delete Scripts Master", error_explained);
 				await new Promise(r => setTimeout(r, 2000));
+				swErrors = true
 			}
-			setIsWorkingInABuffer(false)
-			setIsWorking("")
+			//------------------
+			var { uTxOsWithScripts }: { uTxOsWithScripts: UTxO[] } =
+				await getMasterScripts(txID_Master_AddScripts_AC_Lucid, scriptID_Master_Fund_AC_Lucid, scriptID_Master_FundAndMerge_AC_Lucid, scriptID_Master_SplitFund_AC_Lucid, scriptID_Master_ClosePool_AC_Lucid, scriptID_Master_TerminatePool_AC_Lucid, scriptID_Master_DeleteFund_AC_Lucid, scriptID_Master_SendBackFund_AC_Lucid, scriptID_Master_SendBackDeposit_AC_Lucid);
+
+		}
+
+		setIsWorkingInABuffer(false)
+		setIsWorking("")
+
+		if (isCancelling.current) {
 			setIsCanceling(false)
-			return "You have cancel the operation"
-		} catch (error) {
-			setIsCanceling(false)
-			setIsWorkingInABuffer(false)
-			setIsWorking("")
-			console.error("StakingPoolAdmin - Delete Scripts Master All - Error: " + error)
-			await updatePage()
-			throw error
+			return "You have cancel the operations"
+		}
+		if (uTxOsWithScripts.length == 0) {
+			if (swErrors) {
+				throw "Error executing some of the transactions"
+			} else {
+				return "No more scripts found to remove"
+			}
 		}
 	}
 
 	//--------------------------------------
 
-	const masterAddScriptsUserAllAction = async (poolInfo?: StakingPoolDBInterface) => {
+	const masterAddScriptsUserAllAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
 
 		console.log("StakingPoolAdmin - Add Scripts User All - " + toJson(poolInfo?.name))
 
 		setActionMessage("Creating Transfer, please wait...")
 
 		setIsWorkingInABuffer(true)
+		setIsCanceling(false)
+
 		var swErrors = false
 
 		try {
-			setActionMessage("Adding Script User Deposit, please wait..."+ (isCancelling.current ? " (Canceling when this Tx finishes)" : ""))
-			const txHash =  await masterAddScriptsUserDepositAction(poolInfo)
+			setActionMessage("Adding Script User Deposit, please wait..." + (isCancelling.current ? " (Canceling when this Tx finishes)" : ""))
+			const txHash = await masterAddScriptsUserDepositAction(poolInfo)
 			pushSucessNotification("Add Scripts User Deposit", txHash, true);
 			setActionHash("")
 		} catch (error: any) {
 			const error_explained = explainError(error)
 			pushWarningNotification("Add Scripts User Deposit", error_explained);
+			await new Promise(r => setTimeout(r, 2000));
 			swErrors = true
-			await updatePage()
 		}
-		if(isCancelling.current) { 
+		if (isCancelling.current) {
 			setIsWorkingInABuffer(false)
-			setIsWorking("")
 			setIsCanceling(false)
+			setIsWorking("")
 			return "You have cancel the operations"
 		}
-		await new Promise(r => setTimeout(r, 2000));
 		try {
-			setActionMessage("Adding Script User Harvest, please wait..."+ (isCancelling.current ? " (Canceling when this Tx finishes)" : ""))
-			const txHash =  await masterAddScriptsUserHarvestAction(poolInfo)
+			setActionMessage("Adding Script User Harvest, please wait..." + (isCancelling.current ? " (Canceling when this Tx finishes)" : ""))
+			const txHash = await masterAddScriptsUserHarvestAction(poolInfo)
 			pushSucessNotification("Add Scripts User Harvest", txHash, true);
 			setActionHash("")
 		} catch (error: any) {
 			const error_explained = explainError(error)
 			pushWarningNotification("Add Scripts User Harvest", error_explained);
+			await new Promise(r => setTimeout(r, 2000));
 			swErrors = true
-			await updatePage()
 		}
-		if(isCancelling.current) { 
+		if (isCancelling.current) {
 			setIsWorkingInABuffer(false)
-			setIsWorking("")
 			setIsCanceling(false)
+			setIsWorking("")
 			return "You have cancel the operations"
 		}
-		await new Promise(r => setTimeout(r, 2000));
 		try {
-			setActionMessage("Adding Script User Withdraw, please wait..."+ (isCancelling.current ? " (Canceling when this Tx finishes)" : ""))
-			const txHash =  await masterAddScriptsUserWithdrawAction(poolInfo)
+			setActionMessage("Adding Script User Withdraw, please wait..." + (isCancelling.current ? " (Canceling when this Tx finishes)" : ""))
+			const txHash = await masterAddScriptsUserWithdrawAction(poolInfo)
 			pushSucessNotification("Add Scripts User Withdraw", txHash, true);
 			setActionHash("")
 		} catch (error: any) {
 			const error_explained = explainError(error)
 			pushWarningNotification("Add Scripts User Withdraw", error_explained);
 			swErrors = true
-			// setIsWorkingInABuffer(false)
-			// setIsWorking ("")
-			//throw error
-			await updatePage()
 		}
-		if(isCancelling.current) { 
+		if (isCancelling.current) {
 			setIsWorkingInABuffer(false)
-			setIsWorking("")
 			setIsCanceling(false)
+			setIsWorking("")
 			return "You have cancel the operations"
 		}
-
 		setIsWorkingInABuffer(false)
-		setIsWorking("")
 		setIsCanceling(false)
+		setIsWorking("")
 		if (swErrors) {
 			throw "Error executing some of the transactions"
 		} else {
@@ -775,45 +692,25 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 
 	//--------------------------------------
 
-	const masterDeleteScriptsUserAllAction = async (poolInfo?: StakingPoolDBInterface) => {
+	const masterDeleteScriptsUserAllAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
 		//------------------
 		console.log("StakingPoolAdmin - Delete Scripts User All - " + toJson(poolInfo?.name))
 		//------------------
 		const scriptAddress: Address = poolInfo!.scriptAddress
 		//------------------
-		setActionMessage("Creating Transfer, please wait...")
-		setIsWorkingInABuffer(true)
+		const txID_Master_AddScripts_CS = poolInfo!.txID_Master_AddScripts_CS
+		const txID_Master_AddScripts_TN_Hex = strToHex(txID_Master_AddScripts_TN)
+		const txID_Master_AddScripts_AC_Lucid = txID_Master_AddScripts_CS + txID_Master_AddScripts_TN_Hex;
 		//------------------
-		try{
-			//const uTxOsAtScript = await walletStore.lucid!.utxosAt(scriptAddress)
-			//try to search for the datum and save in the list of EUTxOs
-			// var eUTxOs_With_Datum = await getExtendedUTxOsWith_Datum(walletStore.lucid!, uTxOsAtScript)
+		const scriptID_User_Deposit_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_User_Deposit_TN)
+		const scriptID_User_Harvest_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_User_Harvest_TN)
+		const scriptID_User_Withdraw_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_User_Withdraw_TN)
+		//------------------
+		async function getUserScripts(txID_Master_AddScripts_AC_Lucid: string, scriptID_User_Deposit_AC_Lucid: string, scriptID_User_Harvest_AC_Lucid: string, scriptID_User_Withdraw_AC_Lucid: string) {
+			const eUTxOs_With_Datum = await apiGetEUTxOsDBByAddress(scriptAddress);
+			console.log("StakingPoolAdmin - Delete Scripts User All - uTxOs At Script - length: " + eUTxOs_With_Datum.length);
 			//------------------
-			const eUTxOs_With_Datum = await apiGetEUTxOsDBByAddress(scriptAddress)
-			console.log("StakingPoolAdmin - Delete Scripts Master All - uTxOs At Script - length: " + eUTxOs_With_Datum.length)
-			//------------------
-			const lucid = walletStore.lucid
-			//------------------
-			const txID_Master_AddScripts_CS = poolInfo!.txID_Master_AddScripts_CS
-			const txID_Master_AddScripts_TN_Hex = strToHex(txID_Master_AddScripts_TN)
-			const txID_Master_AddScripts_AC_Lucid = txID_Master_AddScripts_CS + txID_Master_AddScripts_TN_Hex;
-			//------------------
-			const scriptID_Validator_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_Validator_TN)
-			const scriptID_Master_Fund_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_Master_Fund_TN)
-			const scriptID_Master_FundAndMerge_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_Master_FundAndMerge_TN)
-			const scriptID_Master_SplitFund_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_Master_SplitFund_TN)
-			const scriptID_Master_ClosePool_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_Master_ClosePool_TN)
-			const scriptID_Master_TerminatePool_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_Master_TerminatePool_TN)
-			const scriptID_Master_DeleteFund_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_Master_DeleteFund_TN)
-			const scriptID_Master_SendBackFund_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_Master_SendBackFund_TN)
-			const scriptID_Master_SendBackDeposit_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_Master_SendBackDeposit_TN)
-			const scriptID_Master_AddScripts_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_Master_AddScripts_TN)
-			const scriptID_Master_DeleteScripts_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_Master_DeleteScripts_TN)
-			const scriptID_User_Deposit_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_User_Deposit_TN)
-			const scriptID_User_Harvest_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_User_Harvest_TN)
-			const scriptID_User_Withdraw_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_User_Withdraw_TN)
-			//------------------
-			var uTxOsWithScripts: UTxO[] = []
+			var uTxOsWithScripts: UTxO[] = [];
 			//------------------
 			var eUTxO_With_Script_TxID_User_Deposit_Datum = getEUTxO_With_ScriptDatum_InEUxTOList(txID_Master_AddScripts_AC_Lucid, scriptID_User_Deposit_AC_Lucid, eUTxOs_With_Datum, true)
 			if (eUTxO_With_Script_TxID_User_Deposit_Datum) {
@@ -827,612 +724,90 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 			if (eUTxO_With_Script_TxID_User_Withdraw_Datum) {
 				uTxOsWithScripts.push(eUTxO_With_Script_TxID_User_Withdraw_Datum!.uTxO)
 			}
-			//------------------
-			if (uTxOsWithScripts.length == 0) {
-				setIsWorking("")
-				return "No scripts found to remove"
-			}
-			//------------------
-			// setIsCanceling(false)
-			var swErrors = false
-			while (uTxOsWithScripts.length > 0 && !isCancelling.current) {
+			return { uTxOsWithScripts };
+		}
+		//------------------
+		setActionMessage("Creating Transfer, please wait...")
+		setIsWorkingInABuffer(true)
+		setIsCanceling(false)
+		//------------------
+		var { uTxOsWithScripts }: { uTxOsWithScripts: UTxO[] } =
+			await getUserScripts(txID_Master_AddScripts_AC_Lucid, scriptID_User_Deposit_AC_Lucid, scriptID_User_Harvest_AC_Lucid, scriptID_User_Withdraw_AC_Lucid);
+		//------------------
+		if (uTxOsWithScripts.length == 0) {
+			setIsWorkingInABuffer(false)
+			setIsCanceling(false)
+			setIsWorking("")
+			return "No scripts found to remove"
+		}
+		//------------------
+		var swErrors = false
+		while (uTxOsWithScripts.length > 0 && !isCancelling.current) {
+			try {
 				setActionMessage("Creating Transfer, please wait..." + (isCancelling.current ? " (Canceling when this Tx finishes)" : ""))
-				try {
-
-					const [txHash, eUTxO_for_consuming] =  await masterDeleteScriptsUserAll(walletStore!, poolInfo!, walletStore.pkh!);
-
-					setActionMessage("Waiting for confirmation, please wait..." + (isCancelling.current ? " (Canceling when this Tx finishes)" : ""))
-					setActionHash(txHash)
-
-					await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
-
-					pushSucessNotification("Delete Scripts User", txHash, true);
-					// setActionHash("")
-
-				} catch (error: any) {
-					const error_explained = explainError(error)
-					pushWarningNotification("Delete Scripts User", error_explained);
-					await updatePage()
-					swErrors = true
-				}
-				//------------------
-				// const uTxOsAtScript = await walletStore.lucid!.utxosAt(scriptAddress)
-				// console.log("StakingPoolAdmin - Delete Scripts Master All - uTxOs At Script - length: " + uTxOsAtScript.length)
-				// //------------------
-				// //try to search for the datum and save in the list of EUTxOs
-				// eUTxOs_With_Datum = await getExtendedUTxOsWith_Datum(walletStore.lucid!, uTxOsAtScript)
-				const eUTxOs_With_Datum = await apiGetEUTxOsDBByAddress(scriptAddress)
-				console.log("StakingPoolAdmin - Delete Scripts User All - uTxOs At Script - length: " + eUTxOs_With_Datum.length)
-				//------------------
-				uTxOsWithScripts = []
-				//------------------
-				var eUTxO_With_Script_TxID_User_Deposit_Datum = getEUTxO_With_ScriptDatum_InEUxTOList(txID_Master_AddScripts_AC_Lucid, scriptID_User_Deposit_AC_Lucid, eUTxOs_With_Datum)
-				if (eUTxO_With_Script_TxID_User_Deposit_Datum) {
-					uTxOsWithScripts.push(eUTxO_With_Script_TxID_User_Deposit_Datum!.uTxO)
-				}
-				var eUTxO_With_Script_TxID_User_Harvest_Datum = getEUTxO_With_ScriptDatum_InEUxTOList(txID_Master_AddScripts_AC_Lucid, scriptID_User_Harvest_AC_Lucid, eUTxOs_With_Datum)
-				if (eUTxO_With_Script_TxID_User_Harvest_Datum) {
-					uTxOsWithScripts.push(eUTxO_With_Script_TxID_User_Harvest_Datum!.uTxO)
-				}
-				var eUTxO_With_Script_TxID_User_Withdraw_Datum = getEUTxO_With_ScriptDatum_InEUxTOList(txID_Master_AddScripts_AC_Lucid, scriptID_User_Withdraw_AC_Lucid, eUTxOs_With_Datum)
-				if (eUTxO_With_Script_TxID_User_Withdraw_Datum) {
-					uTxOsWithScripts.push(eUTxO_With_Script_TxID_User_Withdraw_Datum!.uTxO)
-				}
-				//------------------	
-				let data = {
-					nombrePool: poolInfo!.name,
-
-					swShowOnSite: poolInfo!.swShowOnSite,
-
-					swShowOnHome: poolInfo!.swShowOnHome,
-
-					swPreparado: (swPreparado === true) ? true : false,
-
-					swIniciado: (swIniciado === true) ? true : false,
-					swFunded: (swFunded === true) ? true : false,
-
-					swClosed: (swClosed === true) ? true : false,
-
-					closedAt: (typeof closedAt === "object") ? closedAt.getTime() : undefined,
-
-					swTerminated: (swTerminated === true) ? true : false,
-
-					//eUTxO_With_PoolDatum: poolInfo!.eUTxO_With_PoolDatum? toJson(poolInfo!.eUTxO_With_PoolDatum) : "",
-					eUTxO_With_ScriptDatum: poolInfo!.eUTxO_With_ScriptDatum ? toJson(poolInfo!.eUTxO_With_ScriptDatum) : "",
-
-					eUTxO_With_Script_TxID_Master_Fund_Datum: poolInfo!.eUTxO_With_Script_TxID_Master_Fund_Datum ? toJson(poolInfo!.eUTxO_With_Script_TxID_Master_Fund_Datum) : "",
-					eUTxO_With_Script_TxID_Master_FundAndMerge_Datum: poolInfo!.eUTxO_With_Script_TxID_Master_FundAndMerge_Datum ? toJson(poolInfo!.eUTxO_With_Script_TxID_Master_FundAndMerge_Datum) : "",
-					eUTxO_With_Script_TxID_Master_SplitFund_Datum: poolInfo!.eUTxO_With_Script_TxID_Master_SplitFund_Datum ? toJson(poolInfo!.eUTxO_With_Script_TxID_Master_SplitFund_Datum) : "",
-					eUTxO_With_Script_TxID_Master_ClosePool_Datum: poolInfo!.eUTxO_With_Script_TxID_Master_ClosePool_Datum ? toJson(poolInfo!.eUTxO_With_Script_TxID_Master_ClosePool_Datum) : "",
-					eUTxO_With_Script_TxID_Master_TerminatePool_Datum: poolInfo!.eUTxO_With_Script_TxID_Master_TerminatePool_Datum ? toJson(poolInfo!.eUTxO_With_Script_TxID_Master_TerminatePool_Datum) : "",
-					eUTxO_With_Script_TxID_Master_DeleteFund_Datum: poolInfo!.eUTxO_With_Script_TxID_Master_DeleteFund_Datum ? toJson(poolInfo!.eUTxO_With_Script_TxID_Master_DeleteFund_Datum) : "",
-					eUTxO_With_Script_TxID_Master_SendBackFund_Datum: poolInfo!.eUTxO_With_Script_TxID_Master_SendBackFund_Datum ? toJson(poolInfo!.eUTxO_With_Script_TxID_Master_SendBackFund_Datum) : "",
-					eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum: poolInfo!.eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum ? toJson(poolInfo!.eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum) : "",
-					
-					eUTxO_With_Script_TxID_Master_AddScripts_Datum: poolInfo!.eUTxO_With_Script_TxID_Master_AddScripts_Datum ? toJson(poolInfo!.eUTxO_With_Script_TxID_Master_AddScripts_Datum) : "",
-					eUTxO_With_Script_TxID_Master_DeleteScripts_Datum: poolInfo!.eUTxO_With_Script_TxID_Master_DeleteScripts_Datum ? toJson(poolInfo!.eUTxO_With_Script_TxID_Master_DeleteScripts_Datum) : "",
-
-					eUTxO_With_Script_TxID_User_Deposit_Datum: eUTxO_With_Script_TxID_User_Deposit_Datum? toJson(eUTxO_With_Script_TxID_User_Deposit_Datum) : "",
-					eUTxO_With_Script_TxID_User_Harvest_Datum: eUTxO_With_Script_TxID_User_Harvest_Datum? toJson(eUTxO_With_Script_TxID_User_Harvest_Datum) : "",
-					eUTxO_With_Script_TxID_User_Withdraw_Datum: eUTxO_With_Script_TxID_User_Withdraw_Datum? toJson(eUTxO_With_Script_TxID_User_Withdraw_Datum) : ""
-
-				}
-				
-				const urlApi = "/api/updateStakingPool" 
-
-				const requestOptions = {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: toJson(data)
-				};
-
-				const response = await fetch(urlApi, requestOptions)
-				const json = await response.json()
-				const message = json.msg
-
-				switch (response.status) {
-					case 500:
-						console.error("StakingPoolAdmin - Delete Scripts User All - /api/updateStakingPool - Error 500")
-						throw "Error 500";
-					case 400:
-						console.error("StakingPoolAdmin - Delete Scripts User All - /api/updateStakingPool - Error: " + message)
-						throw message;
-					case 200:
-						console.log("StakingPoolAdmin - Delete Scripts User All - /api/updateStakingPool: " + message)
-						break;
-					default:
-				}
-				//------------------	
-				poolInfo!.eUTxO_With_Script_TxID_User_Deposit_Datum = eUTxO_With_Script_TxID_User_Deposit_Datum
-				poolInfo!.eUTxO_With_Script_TxID_User_Harvest_Datum = eUTxO_With_Script_TxID_User_Harvest_Datum
-				poolInfo!.eUTxO_With_Script_TxID_User_Withdraw_Datum = eUTxO_With_Script_TxID_User_Withdraw_Datum
-				setEUTxO_With_Script_TxID_User_Deposit_Datum (eUTxO_With_Script_TxID_User_Deposit_Datum)
-        		setEUTxO_With_Script_TxID_User_Harvest_Datum (eUTxO_With_Script_TxID_User_Harvest_Datum)
-        		setEUTxO_With_Script_TxID_User_Withdraw_Datum (eUTxO_With_Script_TxID_User_Withdraw_Datum)
-				//------------------	
-				setPoolInfo(poolInfo!)
-				//------------------	
-				if (uTxOsWithScripts.length == 0) {
-					setIsWorkingInABuffer(false)
-					setIsWorking("")
-					setIsCanceling(false)
-					if (swErrors) {
-						throw "Error executing some of the transactions"
-					} else {
-						return "No more scripts found to remove"
-					}
-				}
+				const txHash = await mastertDeleteScriptsUser(poolInfo)
+				pushSucessNotification("Delete Scripts User", txHash, true);
+				setActionHash("")
+			} catch (error: any) {
+				const error_explained = explainError(error)
+				pushWarningNotification("Delete Scripts User", error_explained);
 				await new Promise(r => setTimeout(r, 2000));
+				swErrors = true
 			}
-			setIsWorkingInABuffer(false)
-			setIsWorking("")
+			//------------------
+			var { uTxOsWithScripts }: { uTxOsWithScripts: UTxO[] } =
+				await getUserScripts(txID_Master_AddScripts_AC_Lucid, scriptID_User_Deposit_AC_Lucid, scriptID_User_Harvest_AC_Lucid, scriptID_User_Withdraw_AC_Lucid);
+
+		}
+
+		setIsWorkingInABuffer(false)
+		setIsWorking("")
+		if (isCancelling.current) {
 			setIsCanceling(false)
-			return "You have cancel the operation"
-		} catch (error) {
-			setIsCanceling(false)
-			setIsWorkingInABuffer(false)
-			setIsWorking("")
-			console.error("StakingPoolAdmin - Delete Scripts User All - Error: " + error)
-			await updatePage()
-			throw error
+			return "You have cancel the operations"
 		}
-	}
-
-	//--------------------------------------
-
-	const mastertAddScriptsMasterFundAction = async (poolInfo?: StakingPoolDBInterface) => {
-
-		console.log("StakingPoolAdmin - Add Scripts Master Fund - " + toJson(poolInfo?.name))
-
-		if (!isWorkingInABuffer.current) {
-			setActionMessage("Creating Transfer, please wait...")
-		}
-
-		const lucid = walletStore.lucid
-
-		try {
-
-			const [txHash, eUTxO_for_consuming] =  await masterAddScriptsMasterFund(walletStore!, poolInfo!, walletStore.pkh!);
-
-			if (!isWorkingInABuffer.current) {
-				setActionMessage("Waiting for confirmation, please wait...")
-				setActionHash(txHash)
+		if (uTxOsWithScripts.length == 0) {
+			if (swErrors) {
+				throw "Error executing some of the transactions"
+			} else {
+				return "No more scripts found to remove"
 			}
-
-			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
-
-			if (!isWorkingInABuffer.current) setIsWorking("")
-
-			return txHash.toString();
-
-		} catch (error: any) {
-			if (!isWorkingInABuffer.current) setIsWorking("")
-			updatePage()
-			throw error
 		}
-
 	}
 
 	//--------------------------------------
 
-	const masterAddScriptsMasterFundAndMergeAction = async (poolInfo?: StakingPoolDBInterface) => {
-
-		console.log("StakingPoolAdmin - Add Scripts Master Fund And Merge - " + toJson(poolInfo?.name))
-
-		if (!isWorkingInABuffer.current) {
-			setActionMessage("Creating Transfer, please wait...")
-		}
-
-		const lucid = walletStore.lucid
-
-		try {
-
-			const [txHash, eUTxO_for_consuming] =  await masterAddScriptsMasterFundAndMerge(walletStore!, poolInfo!, walletStore.pkh!);
-
-			if (!isWorkingInABuffer.current) {
-				setActionMessage("Waiting for confirmation, please wait...")
-				setActionHash(txHash)
-			}
-
-			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
-
-			if (!isWorkingInABuffer.current) setIsWorking("")
-
-			return txHash.toString();
-
-		} catch (error: any) {
-			if (!isWorkingInABuffer.current) setIsWorking("")
-			updatePage()
-			throw error
-		}
-
-	}
-
-	//--------------------------------------
-
-	const masterAddScriptsMasterSplitFundAction = async (poolInfo?: StakingPoolDBInterface) => {
-
-		console.log("StakingPoolAdmin - Add Scripts Master Split Fund - " + toJson(poolInfo?.name))
-
-		if (!isWorkingInABuffer.current) {
-			setActionMessage("Creating Transfer, please wait...")
-		}
-
-		const lucid = walletStore.lucid
-
-		try {
-
-			const [txHash, eUTxO_for_consuming] =  await masterAddScriptsMasterSplitFund(walletStore!, poolInfo!, walletStore.pkh!);
-
-			if (!isWorkingInABuffer.current) {
-				setActionMessage("Waiting for confirmation, please wait...")
-				setActionHash(txHash)
-			}
-
-			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
-
-			if (!isWorkingInABuffer.current) setIsWorking("")
-
-			return txHash.toString();
-
-		} catch (error: any) {
-			if (!isWorkingInABuffer.current) setIsWorking("")
-			updatePage()
-			throw error
-		}
-
-	}
-
-	//--------------------------------------
-
-	const masterAddScriptsMasterCloseAction = async (poolInfo?: StakingPoolDBInterface) => {
-
-		console.log("StakingPoolAdmin - Add Scripts Master Close Pool - " + toJson(poolInfo?.name))
-
-		if (!isWorkingInABuffer.current) {
-			setActionMessage("Creating Transfer, please wait...")
-		}
-
-		const lucid = walletStore.lucid
-
-		try {
-
-			const [txHash, eUTxO_for_consuming] =  await masterAddScriptsMasterClosePool(walletStore!, poolInfo!, walletStore.pkh!);
-
-			if (!isWorkingInABuffer.current) {
-				setActionMessage("Waiting for confirmation, please wait...")
-				setActionHash(txHash)
-			}
-
-			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
-
-			if (!isWorkingInABuffer.current) setIsWorking("")
-
-			return txHash.toString();
-
-		} catch (error: any) {
-			if (!isWorkingInABuffer.current) setIsWorking("")
-			updatePage()
-			throw error
-		}
-
-	}
-
-	//--------------------------------------
-
-	const masterAddScriptsMasterTerminateAction = async (poolInfo?: StakingPoolDBInterface) => {
-
-		console.log("StakingPoolAdmin - Add Scripts Master Terminate Pool - " + toJson(poolInfo?.name))
-
-		if (!isWorkingInABuffer.current) {
-			setActionMessage("Creating Transfer, please wait...")
-		}
-
-		const lucid = walletStore.lucid
-
-		try {
-
-			const [txHash, eUTxO_for_consuming] =  await masterAddScriptsMasterTerminatePool(walletStore!, poolInfo!, walletStore.pkh!);
-
-			if (!isWorkingInABuffer.current) {
-				setActionMessage("Waiting for confirmation, please wait...")
-				setActionHash(txHash)
-			}
-
-			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
-
-			if (!isWorkingInABuffer.current) setIsWorking("")
-
-			return txHash.toString();
-
-		} catch (error: any) {
-			if (!isWorkingInABuffer.current) setIsWorking("")
-			updatePage()
-			throw error
-		}
-
-	}
-
-	//--------------------------------------
-
-	const masterAddScriptsMasterDeleteFundAction = async (poolInfo?: StakingPoolDBInterface) => {
-
-		console.log("StakingPoolAdmin - Add Scripts Master Delete Fund - " + toJson(poolInfo?.name))
-
-		if (!isWorkingInABuffer.current) {
-			setActionMessage("Creating Transfer, please wait...")
-		}
-
-		const lucid = walletStore.lucid
-
-		try {
-
-			const [txHash, eUTxO_for_consuming] =  await masterAddScriptsMasterDeleteFund(walletStore!, poolInfo!, walletStore.pkh!);
-
-			if (!isWorkingInABuffer.current) {
-				setActionMessage("Waiting for confirmation, please wait...")
-				setActionHash(txHash)
-			}
-
-			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
-
-			if (!isWorkingInABuffer.current) setIsWorking("")
-
-			return txHash.toString();
-
-		} catch (error: any) {
-			if (!isWorkingInABuffer.current) setIsWorking("")
-			updatePage()
-			throw error
-		}
-
-	}
-
-	//--------------------------------------
-
-	const masterAddScriptsMasterDeleteScriptsAction = async (poolInfo?: StakingPoolDBInterface) => {
-
-		console.log("StakingPoolAdmin - Add Scripts Master Delete Scripts - " + toJson(poolInfo?.name))
-
-		if (!isWorkingInABuffer.current) {
-			setActionMessage("Creating Transfer, please wait...")
-		}
-
-		const lucid = walletStore.lucid
-
-		try {
-
-			const [txHash, eUTxO_for_consuming] =  await masterAddScriptsMasterDeleteScripts(walletStore!, poolInfo!, walletStore.pkh!);
-
-			if (!isWorkingInABuffer.current) {
-				setActionMessage("Waiting for confirmation, please wait...")
-				setActionHash(txHash)
-			}
-
-			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
-
-			if (!isWorkingInABuffer.current) setIsWorking("")
-
-			return txHash.toString();
-
-		} catch (error: any) {
-			if (!isWorkingInABuffer.current) setIsWorking("")
-			updatePage()
-			throw error
-		}
-
-	}
-
-	//--------------------------------------
-
-	const masterAddScriptsMasterSendBackFundAction = async (poolInfo?: StakingPoolDBInterface) => {
-
-		console.log("StakingPoolAdmin - Add Scripts Master Send Back Fund - " + toJson(poolInfo?.name))
-
-		if (!isWorkingInABuffer.current) {
-			setActionMessage("Creating Transfer, please wait...")
-		}
-
-		const lucid = walletStore.lucid
-
-		try {
-
-			const [txHash, eUTxO_for_consuming] =  await masterAddScriptsMasterSendBackFund(walletStore!, poolInfo!, walletStore.pkh!);
-
-			if (!isWorkingInABuffer.current) {
-				setActionMessage("Waiting for confirmation, please wait...")
-				setActionHash(txHash)
-			}
-
-			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
-
-			if (!isWorkingInABuffer.current) setIsWorking("")
-
-			return txHash.toString();
-
-		} catch (error: any) {
-			if (!isWorkingInABuffer.current) setIsWorking("")
-			updatePage()
-			throw error
-		}
-
-	}
-
-	//--------------------------------------
-
-	const masterAddScriptsMasterSendBackDepositAction = async (poolInfo?: StakingPoolDBInterface) => {
-
-		console.log("StakingPoolAdmin - Add Scripts Master Send Back Deposit - " + toJson(poolInfo?.name))
-
-		if (!isWorkingInABuffer.current) {
-			setActionMessage("Creating Transfer, please wait...")
-		}
-
-		const lucid = walletStore.lucid
-
-		try {
-
-			const [txHash, eUTxO_for_consuming] =  await masterAddScriptsMasterSendBackDeposit(walletStore!, poolInfo!, walletStore.pkh!);
-
-			if (!isWorkingInABuffer.current) {
-				setActionMessage("Waiting for confirmation, please wait...")
-				setActionHash(txHash)
-			}
-
-			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
-
-			if (!isWorkingInABuffer.current) setIsWorking("")
-
-			return txHash.toString();
-
-		} catch (error: any) {
-			if (!isWorkingInABuffer.current) setIsWorking("")
-			updatePage()
-			throw error
-		}
-
-	}
-
-	//--------------------------------------
-
-	const masterAddScriptsUserDepositAction = async (poolInfo?: StakingPoolDBInterface) => {
-
-		console.log("StakingPoolAdmin - Add Scripts User Deposit - " + toJson(poolInfo?.name))
-
-		if (!isWorkingInABuffer.current) {
-			setActionMessage("Creating Transfer, please wait...")
-		}
-
-		const lucid = walletStore.lucid
-
-		//alert ("StakingPoolAdmin - Add Scripts User Deposit: " + isWorkingInABuffer)
-
-		try {
-
-			const [txHash, eUTxO_for_consuming] =  await masterAddScriptsUserDeposit(walletStore!, poolInfo!, walletStore.pkh!);
-
-			if (!isWorkingInABuffer.current) {
-				setActionMessage("Waiting for confirmation, please wait...")
-				setActionHash(txHash)
-			}
-
-			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
-
-			if (!isWorkingInABuffer.current) setIsWorking("")
-
-
-			return txHash.toString();
-
-		} catch (error: any) {
-			if (!isWorkingInABuffer.current) setIsWorking("")
-			updatePage()
-			throw error
-		}
-
-	}
-
-	//--------------------------------------
-
-	const masterAddScriptsUserHarvestAction = async (poolInfo?: StakingPoolDBInterface) => {
-
-		console.log("StakingPoolAdmin - Add Scripts User Harvest - " + toJson(poolInfo?.name))
-
-		if (!isWorkingInABuffer.current) {
-			setActionMessage("Creating Transfer, please wait...")
-		}
-
-		const lucid = walletStore.lucid
-
-		try {
-
-			const [txHash, eUTxO_for_consuming] =  await masterAddScriptsUserHarvest(walletStore!, poolInfo!, walletStore.pkh!);
-
-			if (!isWorkingInABuffer.current) {
-				setActionMessage("Waiting for confirmation, please wait...")
-				setActionHash(txHash)
-			}
-
-			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
-
-			if (!isWorkingInABuffer.current) setIsWorking("")
-
-
-			return txHash.toString();
-
-		} catch (error: any) {
-			if (!isWorkingInABuffer.current) setIsWorking("")
-			updatePage()
-			throw error
-		}
-
-	}
-
-	//--------------------------------------
-
-	const masterAddScriptsUserWithdrawAction = async (poolInfo?: StakingPoolDBInterface) => {
-
-		console.log("StakingPoolAdmin - Add Scripts User Withdraw - " + toJson(poolInfo?.name))
-
-		if (!isWorkingInABuffer.current) {
-			setActionMessage("Creating Transfer, please wait...")
-		}
-
-		const lucid = walletStore.lucid
-
-		try {
-
-			const [txHash, eUTxO_for_consuming] =  await masterAddScriptsUserWithdraw(walletStore!, poolInfo!, walletStore.pkh!);
-
-			if (!isWorkingInABuffer.current) {
-				setActionMessage("Waiting for confirmation, please wait...")
-				setActionHash(txHash)
-			}
-
-			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
-
-			if (!isWorkingInABuffer.current) setIsWorking("")
-
-
-			return txHash.toString();
-
-		} catch (error: any) {
-			if (!isWorkingInABuffer.current) setIsWorking("")
-			updatePage()
-			throw error
-		}
-
-	}
-
-	//--------------------------------------
-
-	const masterNewFundsBatchAction = async (poolInfo?: StakingPoolDBInterface, _?: EUTxO[] | undefined, assets?: Assets) => {
+	const masterNewFundsBatchAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
 
 		console.log("StakingPoolAdmin - New Funds Batch - " + toJson(poolInfo?.name))
 
 		setActionMessage("Creating Transfer, please wait...")
-		setIsWorkingInABuffer(true)
-		var swErrors = false
 
+		setIsWorkingInABuffer(true)
+		setIsCanceling(false)
+
+		var swErrors = false
 		for (let i = 1; i <= 50 && !isCancelling.current; i++) {
 			try {
-				setActionMessage("Fund " + i + " of "+ 50 +", please wait..."+ (isCancelling.current ? " (Canceling when this Tx finishes)" : ""))
-				const txHash =  await masterNewFundAction(poolInfo, _, assets);
-				pushSucessNotification("Fund " + i + " of "+ 50, txHash, true);
+				setActionMessage("Fund " + i + " of " + 50 + ", please wait..." + (isCancelling.current ? " (Canceling when this Tx finishes)" : ""))
+				const txHash = await masterNewFundAction(poolInfo, eUTxOs_Selected, assets);
+				pushSucessNotification("Fund " + i + " of " + 50, txHash, true);
 				setActionHash("")
 			} catch (error: any) {
 				const error_explained = explainError(error)
-				pushWarningNotification("Fund " + i + " of "+ 50, error_explained);
+				pushWarningNotification("Fund " + i + " of " + 50, error_explained);
+				await new Promise(r => setTimeout(r, 2000));
 				swErrors = true
-				// await new Promise(r => setTimeout(r, 2000));
-				await updatePage()
 			}
 		}
+
 		setIsWorkingInABuffer(false)
 		setIsWorking("")
-		if(isCancelling.current){
+
+		if (isCancelling.current) {
 			setIsCanceling(false)
 			return "You have cancel the operation"
-		}else{
+		} else {
 			if (swErrors) {
 				throw "Error executing some of the transactions"
 			} else {
@@ -1441,165 +816,37 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 		}
 	}
 
-	//--------------------------------------
-
-	const masterNewFundAction = async (poolInfo?: StakingPoolDBInterface, _?: EUTxO[] | undefined, assets?: Assets) => {
-
-		console.log("StakingPoolAdmin - New Fund - " + toJson(poolInfo?.name) + " - Assets: " + toJson(assets))
-
-		if (!isWorkingInABuffer.current) setActionMessage("Creating Transfer, please wait...")
-
-		const lucid = walletStore.lucid
-
-		try {
-
-			const [txHash, eUTxO_for_consuming] =  await masterNewFund(walletStore!, poolInfo!, assets!, walletStore.pkh!);
-
-			if (!isWorkingInABuffer.current) setActionMessage("Waiting for confirmation, please wait...")
-			setActionHash(txHash)
-
-			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
-
-			if (!isWorkingInABuffer.current) setIsWorking("")
-
-			return txHash.toString();
-
-		} catch (error: any) {
-			if (!isWorkingInABuffer.current) setIsWorking("")
-			updatePage()
-			throw error
-		}
-
-	}
-
-	//--------------------------------------
-
-	const masterFundAndMergeAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
-
-		console.log("StakingPoolAdmin - Fund And Merge - " + toJson(poolInfo?.name) + " - Assets: " + toJson(assets))
-
-		setActionMessage("Creating Transfer, please wait...")
-
-		const lucid = walletStore.lucid
-
-		try {
-
-			const [txHash, eUTxO_for_consuming] =  await masterFundAndMerge(walletStore!, poolInfo!, eUTxOs_Selected!, assets!, walletStore.pkh!);
-
-			setActionMessage("Waiting for confirmation, please wait...")
-
-			setActionHash(txHash)
-
-			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
-
-			if (!isWorkingInABuffer.current) setIsWorking("")
-
-
-			return txHash.toString();
-
-		} catch (error: any) {
-			if (!isWorkingInABuffer.current) setIsWorking("")
-			updatePage()
-			throw error
-		}
-
-	}
-
-	//--------------------------------------
-
-	const masterMergeFundsAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined) => {
-
-		console.log("StakingPoolAdmin - Merge Funds - " + toJson(poolInfo?.name))
-
-		setActionMessage("Creating Transfer, please wait...")
-
-		const lucid = walletStore.lucid
-
-		try {
-
-			const [txHash, eUTxO_for_consuming] =  await masterMergeFunds(walletStore!, poolInfo!, eUTxOs_Selected!, walletStore.pkh!);
-
-			setActionMessage("Waiting for confirmation, please wait...")
-
-			setActionHash(txHash)
-
-			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
-
-			if (!isWorkingInABuffer.current) setIsWorking("")
-
-
-			return txHash.toString();
-
-		} catch (error: any) {
-			if (!isWorkingInABuffer.current) setIsWorking("")
-			updatePage()
-			throw error
-		}
-
-	}
-
-	//--------------------------------------
-
-	const masterSplitFundAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
-
-		console.log("StakingPoolAdmin - Split Fund - " + toJson(poolInfo?.name))
-
-		setActionMessage("Creating Transfer, please wait...")
-
-		const lucid = walletStore.lucid
-
-		try {
-
-			const [txHash, eUTxO_for_consuming] =  await masterSplitFund(walletStore!, poolInfo!, eUTxOs_Selected!, assets!, walletStore.pkh!);
-
-			setActionMessage("Waiting for confirmation, please wait...")
-
-			setActionHash(txHash)
-
-			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
-
-			if (!isWorkingInABuffer.current) setIsWorking("")
-
-
-			return txHash.toString();
-
-		} catch (error: any) {
-			if (!isWorkingInABuffer.current) setIsWorking("")
-			updatePage()
-			throw error
-		}
-
-	}
-
-	//--------------------------------------
-
-	const masterDeleteFundsBatchAction = async (poolInfo?: StakingPoolDBInterface, _?: EUTxO[] | undefined, assets?: Assets) => {
+	const masterDeleteFundsBatchAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
 
 		console.log("StakingPoolAdmin - Delete Funds Batch - " + toJson(poolInfo?.name))
 
 		setActionMessage("Creating Transfer, please wait...")
+
 		setIsWorkingInABuffer(true)
+
 		var swErrors = false
+
 		for (var i = 0; i < eUTxOs_With_FundDatum!.length && !isCancelling.current; i++) {
 			try {
-				setActionMessage("Delete " + (i+1) + " of " + eUTxOs_With_FundDatum!.length + ", please wait..."+ (isCancelling.current ? " (Canceling when this Tx finishes)" : ""))
+				setActionMessage("Delete " + (i + 1) + " of " + eUTxOs_With_FundDatum!.length + ", please wait..." + (isCancelling.current ? " (Canceling when this Tx finishes)" : ""))
 				const txHash = await masterDeleteFundsAction(poolInfo, [eUTxOs_With_FundDatum[i]]);
-				pushSucessNotification("Delete " + (i+1) + " of " + eUTxOs_With_FundDatum!.length, txHash, true);
+				pushSucessNotification("Delete " + (i + 1) + " of " + eUTxOs_With_FundDatum!.length, txHash, true);
 				setActionHash("")
 			} catch (error: any) {
 				const error_explained = explainError(error)
-				pushWarningNotification("Delete " + (i+1) + " of " + eUTxOs_With_FundDatum!.length, error_explained);
+				pushWarningNotification("Delete " + (i + 1) + " of " + eUTxOs_With_FundDatum!.length, error_explained);
+				await new Promise(r => setTimeout(r, 2000));
 				swErrors = true
-				// await new Promise(r => setTimeout(r, 2000));
-				await updatePage()
 			}
 		}
+
 		setIsWorkingInABuffer(false)
 		setIsWorking("")
-		if(isCancelling.current){
+
+		if (isCancelling.current) {
 			setIsCanceling(false)
 			return "You have cancel the operation"
-		}else{
+		} else {
 			if (swErrors) {
 				throw "Error executing some of the transactions"
 			} else {
@@ -1610,293 +857,34 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 
 	//--------------------------------------
 
-	const masterDeleteFundsAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined) => {
-
-		console.log("StakingPoolAdmin - Delete Funds - " + toJson(poolInfo?.name))
-
-		setActionMessage("Creating Transfer, please wait...")
-
-		const lucid = walletStore.lucid
-
-		try {
-
-			const [txHash, eUTxO_for_consuming] =  await masterDeleteFunds(walletStore!, poolInfo!, eUTxOs_Selected!, walletStore.pkh!);
-
-			setActionMessage("Waiting for confirmation, please wait...")
-
-			setActionHash(txHash)
-
-			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
-
-			if (!isWorkingInABuffer.current) setIsWorking("")
-
-
-			return txHash.toString();
-
-		} catch (error: any) {
-			if (!isWorkingInABuffer.current) setIsWorking("")
-			updatePage()
-			throw error
-		}
-
-	}
-
-	//--------------------------------------
-
-	const masterClosePoolAction = async (poolInfo?: StakingPoolDBInterface) => {
-
-		console.log("StakingPoolAdmin - Close Pool - " + toJson(poolInfo?.name))
-
-		setActionMessage("Creating Transfer, please wait...")
-
-		const lucid = walletStore.lucid
-
-		try {
-
-			const [txHash, eUTxO_for_consuming] =  await masterClosePool(walletStore!, poolInfo!, walletStore.pkh!);
-
-			setActionMessage("Waiting for confirmation, please wait...")
-
-			setActionHash(txHash)
-
-			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
-
-			if (!isWorkingInABuffer.current) setIsWorking("")
-
-			return txHash.toString();
-
-		} catch (error: any) {
-			if (!isWorkingInABuffer.current) setIsWorking("")
-			updatePage()
-			throw error
-		}
-
-	}
-
-	//--------------------------------------
-
-	const masterTerminatePoolAction = async (poolInfo?: StakingPoolDBInterface) => {
-
-		console.log("StakingPoolAdmin - Terminate Pool - " + toJson(poolInfo?.name))
-
-		setActionMessage("Creating Transfer, please wait...")
-
-		const lucid = walletStore.lucid
-
-		try {
-
-			const [txHash, eUTxO_for_consuming] =  await masterTerminatePool(walletStore!, poolInfo!, walletStore.pkh!);
-
-			setActionMessage("Waiting for confirmation, please wait...")
-
-			setActionHash(txHash)
-
-			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
-
-			if (!isWorkingInABuffer.current) setIsWorking("")
-
-
-			return txHash.toString();
-
-		} catch (error: any) {
-			if (!isWorkingInABuffer.current) setIsWorking("")
-			updatePage()
-			throw error
-		}
-
-	}
-
-	//--------------------------------------
-
-	const masterGetBackFundAction = async (poolInfo?: StakingPoolDBInterface) => {
-
-		console.log("StakingPoolAdmin - Get Back Funds - " + toJson(poolInfo?.name))
-
-		setActionMessage("Creating Transfer, please wait...")
-
-		const lucid = walletStore.lucid
-
-		try {
-
-			const [txHash, eUTxO_for_consuming] =  await masterGetBackFund(walletStore!, poolInfo!, walletStore.pkh!);
-
-			setActionMessage("Waiting for confirmation, please wait...")
-
-			setActionHash(txHash)
-
-			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
-
-			if (!isWorkingInABuffer.current) setIsWorking("")
-
-
-			return txHash.toString();
-
-		} catch (error: any) {
-			if (!isWorkingInABuffer.current) setIsWorking("")
-			updatePage()
-			throw error
-		}
-
-	}
-
-	//--------------------------------------
-
-	const masterSendBackFundAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets | undefined, master_Selected?: Master) => {
-
-		console.log("StakingPoolAdmin - Send Back Funds - " + toJson(poolInfo?.name) + " - Master Selected: " + toJson(master_Selected))	
-
-		setActionMessage("Creating Transfer, please wait...")
-
-		const lucid = walletStore.lucid
-
-		try {
-
-			const [txHash, eUTxO_for_consuming] =  await masterSendBackFund(walletStore!, poolInfo!, walletStore.pkh!, master_Selected!);
-
-			setActionMessage("Waiting for confirmation, please wait...")
-
-			setActionHash(txHash)
-
-			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
-
-			if (!isWorkingInABuffer.current) setIsWorking("")
-
-
-			return txHash.toString();
-
-		} catch (error: any) {
-			if (!isWorkingInABuffer.current) setIsWorking("")
-			updatePage()
-			throw error
-		}
-
-	}
-
-	//--------------------------------------
-
-	const masterSendBackDepositAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[]) => {
-
-		console.log("StakingPoolAdmin - Send Back Invests - " + toJson(poolInfo?.name))
-
-		setActionMessage("Creating Transfer, please wait...")
-
-		const lucid = walletStore.lucid
-
-		try {
-
-			const [txHash, eUTxO_for_consuming] =  await masterSendBackDeposit(walletStore!, poolInfo!, eUTxOs_Selected!, walletStore.pkh!);
-
-			setActionMessage("Waiting for confirmation, please wait...")
-
-			setActionHash(txHash)
-
-			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
-
-			if (!isWorkingInABuffer.current) setIsWorking("")
-
-
-			return txHash.toString();
-
-		} catch (error: any) {
-			if (!isWorkingInABuffer.current) setIsWorking("")
-			updatePage()
-			throw error
-		}
-
-	}
-
-	//--------------------------------------
-
-	const masterShowPoolAction = async (poolInfo?: StakingPoolDBInterface) => {
+	const masterShowPoolAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
 
 		console.log("StakingPoolAdmin - Show Pool - " + toJson(poolInfo?.name))
-
-		const swShowOnHome = !poolInfo!.swShowOnHome
-		console.log("StakingPoolAdmin - Show Pool - swShowOnHome: " + swShowOnHome)
-		console.log("StakingPoolAdmin - Show Pool - closedAt: " + toJson(closedAt))
 
 		setActionMessage("Cambiando estado de la Pool, please wait...")
 
 		try {
 
-			let data = {
-				nombrePool: poolInfo!.name,
+			const swShowOnHome = !poolInfo!.swShowOnHome
 
-				swShowOnSite: poolInfo!.swShowOnSite,
+			await apiUpdateStakingPoolShowOnHomeDB(poolInfo!.name, swShowOnHome)
 
-				swShowOnHome: swShowOnHome,
+			poolInfo!.swShowOnHome = swShowOnHome
 
-				swPreparado: (swPreparado === true) ? true : false,
+			setPoolInfo(poolInfo!)
 
-				swIniciado: (swIniciado === true) ? true : false,
-				swFunded: (swFunded === true) ? true : false,
+			if (!isWorkingInABuffer.current) setIsWorking("")
 
-				swClosed: (swClosed === true) ? true : false,
+			return "Updated Staking Pool";
 
-				closedAt: (typeof closedAt === "object") ? closedAt.getTime() : undefined,
-
-				swTerminated: (swTerminated === true) ? true : false,
-
-				//eUTxO_With_PoolDatum: eUTxO_With_PoolDatum? toJson(eUTxO_With_PoolDatum) : "",
-
-				eUTxO_With_ScriptDatum: eUTxO_With_ScriptDatum ? toJson(eUTxO_With_ScriptDatum) : "",
-
-				eUTxO_With_Script_TxID_Master_Fund_Datum: eUTxO_With_Script_TxID_Master_Fund_Datum ? toJson(eUTxO_With_Script_TxID_Master_Fund_Datum) : "",
-				eUTxO_With_Script_TxID_Master_FundAndMerge_Datum: eUTxO_With_Script_TxID_Master_FundAndMerge_Datum ? toJson(eUTxO_With_Script_TxID_Master_FundAndMerge_Datum) : "",
-				eUTxO_With_Script_TxID_Master_SplitFund_Datum: eUTxO_With_Script_TxID_Master_SplitFund_Datum ? toJson(eUTxO_With_Script_TxID_Master_SplitFund_Datum) : "",
-				eUTxO_With_Script_TxID_Master_ClosePool_Datum: eUTxO_With_Script_TxID_Master_ClosePool_Datum ? toJson(eUTxO_With_Script_TxID_Master_ClosePool_Datum) : "",
-				eUTxO_With_Script_TxID_Master_TerminatePool_Datum: eUTxO_With_Script_TxID_Master_TerminatePool_Datum ? toJson(eUTxO_With_Script_TxID_Master_TerminatePool_Datum) : "",
-				eUTxO_With_Script_TxID_Master_DeleteFund_Datum: eUTxO_With_Script_TxID_Master_DeleteFund_Datum ? toJson(eUTxO_With_Script_TxID_Master_DeleteFund_Datum) : "",
-				eUTxO_With_Script_TxID_Master_SendBackFund_Datum: eUTxO_With_Script_TxID_Master_SendBackFund_Datum ? toJson(eUTxO_With_Script_TxID_Master_SendBackFund_Datum) : "",
-				eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum: eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum ? toJson(eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum) : "",
-				eUTxO_With_Script_TxID_Master_AddScripts_Datum: eUTxO_With_Script_TxID_Master_AddScripts_Datum ? toJson(eUTxO_With_Script_TxID_Master_AddScripts_Datum) : "",
-				eUTxO_With_Script_TxID_Master_DeleteScripts_Datum: eUTxO_With_Script_TxID_Master_DeleteScripts_Datum ? toJson(eUTxO_With_Script_TxID_Master_DeleteScripts_Datum) : "",
-
-				eUTxO_With_Script_TxID_User_Deposit_Datum: eUTxO_With_Script_TxID_User_Deposit_Datum ? toJson(eUTxO_With_Script_TxID_User_Deposit_Datum) : "",
-				eUTxO_With_Script_TxID_User_Harvest_Datum: eUTxO_With_Script_TxID_User_Harvest_Datum ? toJson(eUTxO_With_Script_TxID_User_Harvest_Datum) : "",
-				eUTxO_With_Script_TxID_User_Withdraw_Datum: eUTxO_With_Script_TxID_User_Withdraw_Datum ? toJson(eUTxO_With_Script_TxID_User_Withdraw_Datum) : "",
-
-			}
-
-			const urlApi = "/api/updateStakingPool" 
-
-			const requestOptions = {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: toJson(data)
-			};
-
-			const response = await fetch(urlApi, requestOptions)
-			const json = await response.json()
-			const message = json.msg
-
-			switch (response.status) {
-				case 500:
-					console.error("StakingPoolAdmin - Show Pool - /api/updateStakingPool - Error 500")
-					throw "Error 500";
-				case 400:
-					console.error("StakingPoolAdmin - Show Pool - /api/updateStakingPool - Error: " + message)
-					throw message
-				case 200:
-					console.log("StakingPoolAdmin - Show Pool - /api/updateStakingPool: " + message)
-					// updatePage()
-					poolInfo!.swShowOnHome = swShowOnHome
-					setPoolInfo(poolInfo!)
-					if (!isWorkingInABuffer.current) setIsWorking("")
-					return message;
-				default:
-			}
 		} catch (error: any) {
 			if (!isWorkingInABuffer.current) setIsWorking("")
-			updatePage()
 			throw error
 		}
 
 	}
 
-	//--------------------------------------
-
-	const masterDeletePoolAction = async (poolInfo?: StakingPoolDBInterface) => {
+	const masterDeletePoolAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
 
 		console.log("StakingPoolAdmin - Delete Pool - " + toJson(poolInfo?.name))
 
@@ -1904,53 +892,23 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 
 		try {
 
-			let data = {
-				nombrePool: poolInfo!.name,
-				time: new Date().getTime(),
+			await apiDeleteStakingPoolDB(poolInfo!.name)
 
-				
-			}
+			setActionMessage("Staking Pool deleted, refreshing page...")
 
-			const urlApi = "/api/deleteStakingPool" 
+			setTimeout(router.replace, 3000, router.asPath);
 
-			const requestOptions = {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: toJson(data)
-			};
+			if (!isWorkingInABuffer.current) setIsWorking("")
 
-			const response = await fetch(urlApi, requestOptions)
-			const json = await response.json()
-			const message = json.msg
-
-			switch (response.status) {
-				case 500:
-					console.error("StakingPoolAdmin - Delete Pool - /api/deleteStakingPool - Error 500")
-					throw "Error 500";
-				case 400:
-					console.error("StakingPoolAdmin - Delete Pool - /api/deleteStakingPool - Error: " + message)
-					throw message
-				case 200:
-					console.log("StakingPoolAdmin - Delete Pool - /api/deleteStakingPool: " + message)
-					setActionMessage("Staking Pool deleted, refreshing page...")
-					//if (!isWorkingInABuffer.current) setIsWorking("")
-					// router.replace(router.asPath);
-					setTimeout(router.replace, 3000, router.asPath);
-					return message;
-				default:
-			}
+			return "Deleted Staking Pool";
 
 		} catch (error: any) {
 			if (!isWorkingInABuffer.current) setIsWorking("")
-			updatePage()
 			throw error
 		}
-
 	}
 
-	//--------------------------------------
-
-	const masterUpdateEUTxODBAction = async (poolInfo?: StakingPoolDBInterface) => {
+	const masterUpdateEUTxODBAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
 
 		console.log("StakingPoolAdmin - Update EUTxOs in DB - " + toJson(poolInfo?.name))
 
@@ -1959,92 +917,24 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 		try {
 
 			await apiDeleteEUTxOsDBByAddress(poolInfo!.scriptAddress)
-			console.log("StakingPoolAdmin - Update EUTxOs in DB - /api/deleteEUTxOsByAddress: Updated EUTxOs in DB, refreshing page...")
-			setActionMessage("Updated EUTxOs in DB, refreshing page...")
-			if (!isWorkingInABuffer.current) setIsWorking("")
-			// // router.replace(router.asPath);
-			// setTimeout(router.replace, 5000, router.asPath);
-			await updatePage()
-			return "Updated EUTxOs in DB, refreshing page...";
 
-			// let data = {
-			// 	address: poolInfo!.scriptAddress
-			// }
-
-			// const urlApi = "/api/deleteEUTxOsByAddress" 
-
-			// const requestOptions = {
-			// 	method: 'POST',
-			// 	headers: { 'Content-Type': 'application/json' },
-			// 	body: toJson(data)
-			// };
-
-			// const response = await fetch(urlApi, requestOptions)
-			// const json = await response.json()
-			// const message = json.msg
-
-			// switch (response.status) {
-			// 	case 500:
-			// 		console.error("StakingPoolAdmin - Update EUTxOs in DB - /api/deleteEUTxOsByAddress - Error 500")
-			// 		throw "Error 500";
-			// 	case 400:
-			// 		console.error("StakingPoolAdmin - Update EUTxOs in DB - /api/deleteEUTxOsByAddress - Error: " + message)
-			// 		throw message
-			// 	case 200:
-			// 		console.log("StakingPoolAdmin - Update EUTxOs in DB - /api/deleteEUTxOsByAddress: " + message)
-			// 		setActionMessage("Updated EUTxOs in DB, refreshing page...")
-			// 		if (!isWorkingInABuffer.current) setIsWorking("")
-			// 		// // router.replace(router.asPath);
-			// 		// setTimeout(router.replace, 5000, router.asPath);
-			// 		await updatePage()
-			// 		return message;
-			// 	default:
-			// }
-
-		} catch (error: any) {
-			if (!isWorkingInABuffer.current) setIsWorking("")
-			updatePage()
-			throw error
-		}
-
-	}
-	
-	//--------------------------------------
-
-	const splitUTxOsAction = async () => {
-
-		console.log("StakingPoolAdmin - Split Wallet UTxOs")
-
-		setActionMessage("Creating Transfer, please wait...")
-
-		const lucid = walletStore.lucid
-
-		try {
-
-			const [txHash, eUTxO_for_consuming] =  await splitUTxOs(walletStore!, walletStore.pkh!);
-
-			setActionMessage("Waiting for confirmation, please wait...")
-			setActionHash(txHash)
-
-			// await new Promise(r => setTimeout(r, 5000));
-			await awaitTx (lucid!, txHash, eUTxO_for_consuming, updatePage, isWorkingInABuffer.current) 
-
+			updateStakingPool()
+			
 			if (!isWorkingInABuffer.current) setIsWorking("")
 
-			return txHash.toString();
+			return "Updated EUTxOs in DB";
 
 		} catch (error: any) {
 			if (!isWorkingInABuffer.current) setIsWorking("")
 			throw error
 		}
+
 	}
 
 	//--------------------------------------
 
-	const updatePage = async () => {
-		var poolInfo = await loadPoolData(false)
-		setPoolInfo(poolInfo)
-		await loadWalletData(walletStore)
+	const splitUTxOsAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
+		return await newTransaction("StakingPoolAdmin - Split Wallet UTxOs", walletStore, poolInfo, splitUTxOs, isWorkingInABuffer.current, setActionMessage, setActionHash, setIsWorking, updateStakingPool, eUTxOs_Selected, assets)
 	}
 
 	//--------------------------------------
@@ -2056,21 +946,23 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 			<div className="pool__data">
 				<div className="pool__image ">
 					<Image width={126} height={126} src={poolInfo.imageSrc} />
+					{/* Working:
+					{isWorking} */}
 				</div>
 
 				<div className="pool__data_item">
 					<div className="pool__stat">
-						<h4 className="pool_title">{poolInfo.name}
-							{isPoolDataLoading?
+						<h4 className="pool_title">{poolInfo.name}&nbsp;
+							{isPoolDataLoading ?
 								<>
 									<br></br>
 									<br></br>
 									<LoadingSpinner size={25} border={5} />
 									<br></br>
 								</>
-							:
-								<>
-									<button onClick={() => { if (walletStore.connected) { updatePage() } }} className='btn__ghost icon' style={walletStore.connected ? { cursor: 'pointer' } : { cursor: 'default' }} >
+								:
+								<>	
+									<button onClick={() => { if (walletStore.connected) { updateStakingPool() } }} className='btn__ghost icon' style={walletStore.connected ? { cursor: 'pointer' } : { cursor: 'default' }} >
 										<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" className="bi bi-arrow-repeat" viewBox="0 0 16 16">
 											<path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z" />
 											<path fillRule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z" />
@@ -2112,8 +1004,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 						<div>Pool can be Deleted: {(swPoolReadyForDelete === false) ? "No" : (swPoolReadyForDelete === true) ? "Yes" : swPoolReadyForDelete || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
 						<br></br>
 
-						
-						<div>EUTxOs {swFromDB? "DB" : ""} At Contract : {countEUTxOs_With_Datum || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</div>
+						<div>EUTxOs At Contract: {countEUTxOs_With_Datum || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</div>
 						<br></br>
 
 						{/* <p style={{color: 'black', fontSize: 12}}>
@@ -2186,7 +1077,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 							Staking Unit In Wallet: {(walletStakingAmount === ui_loading || walletStakingAmount === ui_notConnected ? walletStakingAmount : Number(walletStakingAmount).toLocaleString("en-US") + " " + poolInfo.staking_UI) || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}
 						</div>
 						<div>
-							Harvest Unit In Wallet: {(walletHarvestAmount === ui_loading || walletHarvestAmount === ui_notConnected ? walletHarvestAmount :  Number(walletHarvestAmount).toLocaleString("en-US") + " " + poolInfo.harvest_UI) || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}
+							Harvest Unit In Wallet: {(walletHarvestAmount === ui_loading || walletHarvestAmount === ui_notConnected ? walletHarvestAmount : Number(walletHarvestAmount).toLocaleString("en-US") + " " + poolInfo.harvest_UI) || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}
 						</div>
 						<br></br>
 
@@ -2214,7 +1105,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 							</a>
 						</div>
 						<p>User Deposit TokenName: {txID_User_Deposit_For_User_TN}</p>
-						<br></br>	
+						<br></br>
 						<div className='pool__contract_address'>
 							Contract Address
 							<button onClick={() => copyToClipboard(poolInfo.scriptAddress)} className='btn__ghost icon' style={{ cursor: 'pointer' }}>
@@ -2235,7 +1126,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 						<div className="pool__stat">
 							<div className="pool__column">
 								<ActionModalBtn action={masterPreparePoolAction} swHash={true} poolInfo={poolInfo}
-									enabled={walletStore.connected && isPoolDataLoaded && swPreparado === false} 
+									enabled={walletStore.connected && isPoolDataLoaded && swPreparado === false}
 									show={swPreparado !== true}
 									actionName="Prepare Pool" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
 
@@ -2252,10 +1143,10 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 											typeof eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum !== "object"
 										)}
 									show={swPreparado === true}
-									actionName="Add Scripts Master" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-									callback={handleCallback} 
+									actionName="Add Scripts Master" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking}
+									callback={handleCallback}
 									cancel={handleCancel}
-									/>
+								/>
 
 								<ActionModalBtn action={masterDeleteScriptsMasterAllAction} swHash={false} poolInfo={poolInfo}
 									enabled={walletStore.connected && isPoolDataLoaded &&
@@ -2268,12 +1159,12 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 											typeof eUTxO_With_Script_TxID_Master_DeleteFund_Datum === "object" ||
 											typeof eUTxO_With_Script_TxID_Master_SendBackFund_Datum === "object" ||
 											typeof eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum === "object"
-										)} 
-										show={swPreparado === true}
-										actionName="Delete Scripts Master" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-										callback={handleCallback} 
-										cancel={handleCancel}
-										/>
+										)}
+									show={swPreparado === true}
+									actionName="Delete Scripts Master" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking}
+									callback={handleCallback}
+									cancel={handleCancel}
+								/>
 
 								{/* 
 								
@@ -2303,12 +1194,12 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 											typeof eUTxO_With_Script_TxID_User_Deposit_Datum !== "object" ||
 											typeof eUTxO_With_Script_TxID_User_Withdraw_Datum !== "object" ||
 											typeof eUTxO_With_Script_TxID_User_Harvest_Datum !== "object"
-										)} 
-										show={swPreparado === true}
-										actionName="Add Scripts User" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-										callback={handleCallback}
-										cancel={handleCancel}
-										/>
+										)}
+									show={swPreparado === true}
+									actionName="Add Scripts User" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking}
+									callback={handleCallback}
+									cancel={handleCancel}
+								/>
 
 								<ActionModalBtn action={masterDeleteScriptsUserAllAction} swHash={false} poolInfo={poolInfo}
 									enabled={walletStore.connected && isPoolDataLoaded &&
@@ -2316,12 +1207,12 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 											typeof eUTxO_With_Script_TxID_User_Deposit_Datum === "object" ||
 											typeof eUTxO_With_Script_TxID_User_Withdraw_Datum === "object" ||
 											typeof eUTxO_With_Script_TxID_User_Harvest_Datum === "object"
-										)} 
-										show={swPreparado === true}
-										actionName="Delete Scripts User" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-										callback={handleCallback} 
-										cancel={handleCancel}
-										/>
+										)}
+									show={swPreparado === true}
+									actionName="Delete Scripts User" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking}
+									callback={handleCallback}
+									cancel={handleCancel}
+								/>
 
 								{/* <ActionModalBtn action={addScriptsUserDepositAction} swHash={true} poolInfo={poolInfo} 
 								enabled={walletStore.connected && isPoolDataLoaded && typeof eUTxO_With_Script_TxID_User_Deposit_Datum !== "object" } actionName="Add Scripts User Deposit" actionIdx={poolInfo.name}  messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback}/>
@@ -2330,29 +1221,36 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 								<ActionModalBtn action={addScriptsUserHarvestAction} swHash={true} poolInfo={poolInfo}
 								enabled={walletStore.connected && isPoolDataLoaded &&  typeof eUTxO_With_Script_TxID_User_Harvest_Datum !== "object" } actionName="Add Scripts User Harvest" actionIdx={poolInfo.name}  messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback}/> */}
 
+								<EUTxOsModalBtn
+									poolInfo={poolInfo}
+									statePoolData={statePoolData}
+									enabled={walletStore.connected && isPoolDataLoaded}
+									show={swPreparado === true}
+									actionName="View EUTxOs in DB" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorkingFromParent={isWorking} callback={handleCallback} />
+
 								<ActionModalBtn action={masterUpdateEUTxODBAction} swHash={false} poolInfo={poolInfo}
-									enabled={walletStore.connected && isPoolDataLoaded} 
+									enabled={walletStore.connected && isPoolDataLoaded}
 									show={swPreparado === true}
 									actionName="Update EUTxOs in DB" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
-										
+
 							</div>
 						</div>
 						<div className="pool__stat">
 							<div className="pool__column">
-								<ActionModalBtn action={masterNewFundAction} swHash={true} poolInfo={poolInfo} 
-									showInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={maxHarvestAmount} 
-									enabled={walletStore.connected && isPoolDataLoaded && swPreparado === true} 
+								<ActionModalBtn action={masterNewFundAction} swHash={true} poolInfo={poolInfo}
+									showInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={maxHarvestAmount}
+									enabled={walletStore.connected && isPoolDataLoaded && swPreparado === true}
 									show={swPreparado === true && swTerminated === false}
 									actionName="New Fund" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
-								<ActionModalBtn 
-									action={masterNewFundsBatchAction} swHash={false} poolInfo={poolInfo} 
-									showInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={maxHarvestAmount} 
-									enabled={walletStore.connected && isPoolDataLoaded && swPreparado === true} 
+								<ActionModalBtn
+									action={masterNewFundsBatchAction} swHash={false} poolInfo={poolInfo}
+									showInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={maxHarvestAmount}
+									enabled={walletStore.connected && isPoolDataLoaded && swPreparado === true}
 									show={swPreparado === true && swTerminated === false}
-									actionName="New Funds Batch" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-									callback={handleCallback} 
+									actionName="New Funds Batch" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking}
+									callback={handleCallback}
 									cancel={handleCancel}
-									/>
+								/>
 								<FundsModalBtn
 									masterNewFundAction={masterNewFundAction}
 									masterNewFundsBatchAction={masterNewFundsBatchAction}
@@ -2361,77 +1259,78 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 									masterSplitFundAction={masterSplitFundAction}
 									masterDeleteFundsAction={masterDeleteFundsAction}
 									masterDeleteFundsBatchAction={masterDeleteFundsBatchAction}
-									poolInfo={poolInfo} 
-									statePoolData={statePoolData}											
+									poolInfo={poolInfo}
+									statePoolData={statePoolData}
 									enabled={walletStore.connected && isPoolDataLoaded}
 									show={swPreparado === true}
-									actionName="View Funds" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorkingFromParent={isWorking} 
+									actionName="View Funds" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorkingFromParent={isWorking}
 									callback={handleCallback}
 									cancel={handleCancel} />
 								<UsersModalBtn
 									masterSendBackDepositAction={masterSendBackDepositAction}
-									poolInfo={poolInfo} 
-									statePoolData={statePoolData}											
-									enabled={walletStore.connected && isPoolDataLoaded} 
+									poolInfo={poolInfo}
+									statePoolData={statePoolData}
+									enabled={walletStore.connected && isPoolDataLoaded}
 									show={swPreparado === true}
 									actionName="View Deposits" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorkingFromParent={isWorking} callback={handleCallback} />
 								<MasterModalBtn
 									masterGetBackFundAction={masterGetBackFundAction}
 									masterSendBackFundAction={masterSendBackFundAction}
-									poolInfo={poolInfo} 
-									statePoolData={statePoolData}											
-									enabled={walletStore.connected && isPoolDataLoaded} 
+									poolInfo={poolInfo}
+									statePoolData={statePoolData}
+									enabled={walletStore.connected && isPoolDataLoaded}
 									show={swPreparado === true}
 									actionName="View Masters" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorkingFromParent={isWorking} callback={handleCallback} />
-								<ActionModalBtn action={splitUTxOsAction} swHash={true} 
-									enabled={walletStore.connected && isPoolDataLoaded} 
+								
+								<ActionModalBtn action={splitUTxOsAction} swHash={true}
+									enabled={walletStore.connected && isPoolDataLoaded}
 									show={swPreparado === true}
 									actionName="Split Wallet UTxOs" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
-							
+
 							</div>
 						</div>
 						<div className="pool__stat">
 							<div className="pool__column">
-								<ActionModalBtn action={masterShowPoolAction} swHash={false} poolInfo={poolInfo} 
-									enabled={true} actionName="Show / Hide" 
+								<ActionModalBtn action={masterShowPoolAction} swHash={false} poolInfo={poolInfo}
+									enabled={true} actionName="Show / Hide"
 									show={true}
 									actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
 								<li className="info">Show or hide the Home Pool.</li>
-								<ActionModalBtn action={masterClosePoolAction} swHash={true} poolInfo={poolInfo} 
-									enabled={walletStore.connected && isPoolDataLoaded && swPreparado === true && swClosed === false} 
+								<ActionModalBtn action={masterClosePoolAction} swHash={true} poolInfo={poolInfo}
+									enabled={walletStore.connected && isPoolDataLoaded && swPreparado === true && swClosed === false}
 									show={swPreparado === true && swClosed === false}
 									actionName="Close Pool" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
-								{swPreparado === true && swClosed === false?
+								{swPreparado === true && swClosed === false ?
 									<>
 										<li className="info">Close the Pool at this time, instead of waiting for the Deadline.</li>
 										<li className="info">Users will only be able to collect rewards accumulated so far.</li>
 										<li className="info">Masters can keep adding Funds so there are funds to pay rewards.</li>
 										<li className="info">After Grace Time the Pool will be finished.</li>
 									</>
-								:
+									:
 									<>
 									</>
 								}
-								<ActionModalBtn action={masterTerminatePoolAction} swHash={true} poolInfo={poolInfo} 
-									enabled={walletStore.connected && isPoolDataLoaded && swPreparado === true && swTerminated === false}  
+								<ActionModalBtn action={masterTerminatePoolAction} swHash={true} poolInfo={poolInfo}
+									enabled={walletStore.connected && isPoolDataLoaded && swPreparado === true && swTerminated === false}
 									show={swPreparado === true && swTerminated === false}
 									actionName="Terminate Pool" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
-								{swPreparado === true && swTerminated === false?
+								{swPreparado === true && swTerminated === false ?
 									<>
 										<li className="info">Finish the Pool now, instead of waiting for Deadline and Grace Time.</li>
 										<li className="info">Users will not be able to collect any more rewards.</li>
 										<li className="info">After Deleteing all Funds, Masters can recover any funds left over, proportionally to what each one has put in.</li>
 									</>
-								:
+									:
 									<>
 									</>
 								}
-								
-								<ActionModalBtn action={masterDeletePoolAction} swHash={false} poolInfo={poolInfo} 
-									enabled={walletStore.connected && isPoolDataLoaded && swPoolReadyForDelete === true} actionName="Delete Pool" 
+
+								<ActionModalBtn action={masterDeletePoolAction} swHash={false} poolInfo={poolInfo}
+									enabled={walletStore.connected && isPoolDataLoaded && swPoolReadyForDelete === true} actionName="Delete Pool"
 									show={true}
 									actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
-								<li className="info">You can delete the Pool only if there are no registered users and no remaining funds.</li>
+								<li className="info">You can delete the Pool only if there are no registered users, no remaining funds and no scripts.</li>
 							</div>
 						</div>
 					</div>

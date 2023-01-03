@@ -1,4 +1,4 @@
-import { Address, Assets, Lucid, PaymentKeyHash, UTxO } from 'lucid-cardano';
+import { Address, Assets, Lucid, UTxO } from 'lucid-cardano';
 import { EUTxO, PoolDatum, Redeemer_Burn_TxID, Redeemer_Master_DeleteScripts, Redeemer_Mint_TxID, ScriptDatum } from '../types';
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
 import { createTx, fixTx } from '../utils/cardano-helpersTx';
@@ -8,7 +8,7 @@ import { getHexFrom_Redeemer_TxID, getHexFrom_Validator_Datum, getHexFrom_Valida
 
 
 export async function masterAddScriptsMasterFundTx(
-    lucid: Lucid, protocolParameters: any, poolInfo: StakingPoolDBInterface, pkhf: PaymentKeyHash, addressWallet: Address,
+    lucid: Lucid, protocolParameters: any, poolInfo: StakingPoolDBInterface, addressWallet: Address,
     eUTxO_With_Script_TxID_Master_AddScripts_Datum: EUTxO | undefined,
     redeemer_For_Mint_TxID_Master_AddScripts: Redeemer_Mint_TxID, value_For_Mint_TxID_Master_AddScripts: Assets,
     script_TxID_Master_Fund_Datum: ScriptDatum
@@ -28,15 +28,15 @@ export async function masterAddScriptsMasterFundTx(
     // const until = now + (validTimeRange) - (5 * 60 * 1000) 
     //------------------
     var tx = lucid.newTx();
-    var txComplete = createTx(lucid, protocolParameters, tx);
+    var tx_Building = createTx(lucid, protocolParameters, tx);
     //------------------
     if (eUTxO_With_Script_TxID_Master_AddScripts_Datum) {
-        txComplete = await txComplete.readFrom([eUTxO_With_Script_TxID_Master_AddScripts_Datum.uTxO]);
+        tx_Building = await tx_Building.readFrom([eUTxO_With_Script_TxID_Master_AddScripts_Datum.uTxO]);
     } else {
-        txComplete = await txComplete.attachMintingPolicy(poolInfo.txID_Master_AddScripts_Script);
+        tx_Building = await tx_Building.attachMintingPolicy(poolInfo.txID_Master_AddScripts_Script);
     }
     //------------------
-    txComplete = await txComplete
+    tx_Building = await tx_Building
         .mintAssets(value_For_Mint_TxID_Master_AddScripts, redeemer_For_Mint_TxID_Master_AddScripts_Hex)
 
         .payToContract(scriptAddress, {
@@ -47,13 +47,13 @@ export async function masterAddScriptsMasterFundTx(
     // .validFrom(from)
     // .validTo(until)
     //------------------
-    const txComplete_FIXED = await fixTx(txComplete, lucid, protocolParameters);
+    const txComplete_FIXED = await fixTx(tx_Building, lucid, protocolParameters);
     return txComplete_FIXED;
 }
 //--------------------------------------
 
 export async function masterAddScriptsMasterFundAndMergeTx(
-    lucid: Lucid, protocolParameters: any, poolInfo: StakingPoolDBInterface, pkhf: PaymentKeyHash, addressWallet: Address,
+    lucid: Lucid, protocolParameters: any, poolInfo: StakingPoolDBInterface, addressWallet: Address,
     eUTxO_With_Script_TxID_Master_AddScripts_Datum: EUTxO | undefined,
     redeemer_For_Mint_TxID_Master_AddScripts: Redeemer_Mint_TxID, value_For_Mint_TxID_Master_AddScripts: Assets,
     script_TxID_Master_FundAndMerge_Datum: ScriptDatum
@@ -73,15 +73,15 @@ export async function masterAddScriptsMasterFundAndMergeTx(
     // const until = now + (validTimeRange) - (5 * 60 * 1000) 
     //------------------
     var tx = lucid.newTx();
-    var txComplete = createTx(lucid, protocolParameters, tx);
+    var tx_Building = createTx(lucid, protocolParameters, tx);
     //------------------
     if (eUTxO_With_Script_TxID_Master_AddScripts_Datum) {
-        txComplete = await txComplete.readFrom([eUTxO_With_Script_TxID_Master_AddScripts_Datum.uTxO]);
+        tx_Building = await tx_Building.readFrom([eUTxO_With_Script_TxID_Master_AddScripts_Datum.uTxO]);
     } else {
-        txComplete = await txComplete.attachMintingPolicy(poolInfo.txID_Master_AddScripts_Script);
+        tx_Building = await tx_Building.attachMintingPolicy(poolInfo.txID_Master_AddScripts_Script);
     }
     //------------------
-    txComplete = await txComplete
+    tx_Building = await tx_Building
         .mintAssets(value_For_Mint_TxID_Master_AddScripts, redeemer_For_Mint_TxID_Master_AddScripts_Hex)
 
         .payToContract(scriptAddress, {
@@ -92,13 +92,13 @@ export async function masterAddScriptsMasterFundAndMergeTx(
     // .validFrom(from)
     // .validTo(until)
     //------------------
-    const txComplete_FIXED = await fixTx(txComplete, lucid, protocolParameters);
+    const txComplete_FIXED = await fixTx(tx_Building, lucid, protocolParameters);
     return txComplete_FIXED;
 }
 //--------------------------------------
 
 export async function masterAddScriptsMasterSplitFundTx(
-    lucid: Lucid, protocolParameters: any, poolInfo: StakingPoolDBInterface, pkhf: PaymentKeyHash, addressWallet: Address,
+    lucid: Lucid, protocolParameters: any, poolInfo: StakingPoolDBInterface, addressWallet: Address,
     eUTxO_With_Script_TxID_Master_AddScripts_Datum: EUTxO | undefined,
     redeemer_For_Mint_TxID_Master_AddScripts: Redeemer_Mint_TxID, value_For_Mint_TxID_Master_AddScripts: Assets,
     script_TxID_Master_SplitFund_Datum: ScriptDatum
@@ -119,15 +119,15 @@ export async function masterAddScriptsMasterSplitFundTx(
     // const until = now + (validTimeRange) - (5 * 60 * 1000) 
     //------------------
     var tx = lucid.newTx();
-    var txComplete = createTx(lucid, protocolParameters, tx);
+    var tx_Building = createTx(lucid, protocolParameters, tx);
     //------------------
     if (eUTxO_With_Script_TxID_Master_AddScripts_Datum) {
-        txComplete = await txComplete.readFrom([eUTxO_With_Script_TxID_Master_AddScripts_Datum.uTxO]);
+        tx_Building = await tx_Building.readFrom([eUTxO_With_Script_TxID_Master_AddScripts_Datum.uTxO]);
     } else {
-        txComplete = await txComplete.attachMintingPolicy(poolInfo.txID_Master_AddScripts_Script);
+        tx_Building = await tx_Building.attachMintingPolicy(poolInfo.txID_Master_AddScripts_Script);
     }
     //------------------
-    txComplete = await txComplete
+    tx_Building = await tx_Building
         .mintAssets(value_For_Mint_TxID_Master_AddScripts, redeemer_For_Mint_TxID_Master_AddScripts_Hex)
 
         .payToContract(scriptAddress, {
@@ -138,13 +138,13 @@ export async function masterAddScriptsMasterSplitFundTx(
     // .validFrom(from)
     // .validTo(until)
     //------------------
-    const txComplete_FIXED = await fixTx(txComplete, lucid, protocolParameters);
+    const txComplete_FIXED = await fixTx(tx_Building, lucid, protocolParameters);
     return txComplete_FIXED;
 }
 //--------------------------------------
 
 export async function masterAddScriptsMasterClosePoolTx(
-    lucid: Lucid, protocolParameters: any, poolInfo: StakingPoolDBInterface, pkhf: PaymentKeyHash, addressWallet: Address,
+    lucid: Lucid, protocolParameters: any, poolInfo: StakingPoolDBInterface, addressWallet: Address,
     eUTxO_With_Script_TxID_Master_AddScripts_Datum: EUTxO | undefined,
     redeemer_For_Mint_TxID_Master_AddScripts: Redeemer_Mint_TxID, value_For_Mint_TxID_Master_AddScripts: Assets,
     script_TxID_Master_ClosePool_Datum: ScriptDatum
@@ -164,15 +164,15 @@ export async function masterAddScriptsMasterClosePoolTx(
     // const until = now + (validTimeRange) - (5 * 60 * 1000) 
     //------------------
     var tx = lucid.newTx();
-    var txComplete = createTx(lucid, protocolParameters, tx);
+    var tx_Building = createTx(lucid, protocolParameters, tx);
     //------------------
     if (eUTxO_With_Script_TxID_Master_AddScripts_Datum) {
-        txComplete = await txComplete.readFrom([eUTxO_With_Script_TxID_Master_AddScripts_Datum.uTxO]);
+        tx_Building = await tx_Building.readFrom([eUTxO_With_Script_TxID_Master_AddScripts_Datum.uTxO]);
     } else {
-        txComplete = await txComplete.attachMintingPolicy(poolInfo.txID_Master_AddScripts_Script);
+        tx_Building = await tx_Building.attachMintingPolicy(poolInfo.txID_Master_AddScripts_Script);
     }
     //------------------
-    txComplete = await txComplete
+    tx_Building = await tx_Building
         .mintAssets(value_For_Mint_TxID_Master_AddScripts, redeemer_For_Mint_TxID_Master_AddScripts_Hex)
 
         .payToContract(scriptAddress, {
@@ -183,13 +183,13 @@ export async function masterAddScriptsMasterClosePoolTx(
     // .validFrom(from)
     // .validTo(until)
     //------------------
-    const txComplete_FIXED = await fixTx(txComplete, lucid, protocolParameters);
+    const txComplete_FIXED = await fixTx(tx_Building, lucid, protocolParameters);
     return txComplete_FIXED;
 }
 //--------------------------------------
 
 export async function masterAddScriptsMasterTerminatePoolTx(
-    lucid: Lucid, protocolParameters: any, poolInfo: StakingPoolDBInterface, pkhf: PaymentKeyHash, addressWallet: Address,
+    lucid: Lucid, protocolParameters: any, poolInfo: StakingPoolDBInterface, addressWallet: Address,
     eUTxO_With_Script_TxID_Master_AddScripts_Datum: EUTxO | undefined,
     redeemer_For_Mint_TxID_Master_AddScripts: Redeemer_Mint_TxID, value_For_Mint_TxID_Master_AddScripts: Assets,
     script_TxID_Master_TerminatePool_Datum: ScriptDatum
@@ -209,15 +209,15 @@ export async function masterAddScriptsMasterTerminatePoolTx(
     // const until = now + (validTimeRange) - (5 * 60 * 1000) 
     //------------------
     var tx = lucid.newTx();
-    var txComplete = createTx(lucid, protocolParameters, tx);
+    var tx_Building = createTx(lucid, protocolParameters, tx);
     //------------------
     if (eUTxO_With_Script_TxID_Master_AddScripts_Datum) {
-        txComplete = await txComplete.readFrom([eUTxO_With_Script_TxID_Master_AddScripts_Datum.uTxO]);
+        tx_Building = await tx_Building.readFrom([eUTxO_With_Script_TxID_Master_AddScripts_Datum.uTxO]);
     } else {
-        txComplete = await txComplete.attachMintingPolicy(poolInfo.txID_Master_AddScripts_Script);
+        tx_Building = await tx_Building.attachMintingPolicy(poolInfo.txID_Master_AddScripts_Script);
     }
     //------------------
-    txComplete = await txComplete
+    tx_Building = await tx_Building
         .mintAssets(value_For_Mint_TxID_Master_AddScripts, redeemer_For_Mint_TxID_Master_AddScripts_Hex)
 
         .payToContract(scriptAddress, {
@@ -228,13 +228,13 @@ export async function masterAddScriptsMasterTerminatePoolTx(
     // .validFrom(from)
     // .validTo(until)
     //------------------
-    const txComplete_FIXED = await fixTx(txComplete, lucid, protocolParameters);
+    const txComplete_FIXED = await fixTx(tx_Building, lucid, protocolParameters);
     return txComplete_FIXED;
 }
 //--------------------------------------
 
 export async function masterAddScriptsMasterDeleteFundTx(
-    lucid: Lucid, protocolParameters: any, poolInfo: StakingPoolDBInterface, pkhf: PaymentKeyHash, addressWallet: Address,
+    lucid: Lucid, protocolParameters: any, poolInfo: StakingPoolDBInterface, addressWallet: Address,
     eUTxO_With_Script_TxID_Master_AddScripts_Datum: EUTxO | undefined,
     redeemer_For_Mint_TxID_Master_AddScripts: Redeemer_Mint_TxID, value_For_Mint_TxID_Master_AddScripts: Assets,
     script_TxID_Master_DeleteFund_Datum: ScriptDatum
@@ -254,15 +254,15 @@ export async function masterAddScriptsMasterDeleteFundTx(
     // const until = now + (validTimeRange) - (5 * 60 * 1000) 
     //------------------
     var tx = lucid.newTx();
-    var txComplete = createTx(lucid, protocolParameters, tx);
+    var tx_Building = createTx(lucid, protocolParameters, tx);
     //------------------
     if (eUTxO_With_Script_TxID_Master_AddScripts_Datum) {
-        txComplete = await txComplete.readFrom([eUTxO_With_Script_TxID_Master_AddScripts_Datum.uTxO]);
+        tx_Building = await tx_Building.readFrom([eUTxO_With_Script_TxID_Master_AddScripts_Datum.uTxO]);
     } else {
-        txComplete = await txComplete.attachMintingPolicy(poolInfo.txID_Master_AddScripts_Script);
+        tx_Building = await tx_Building.attachMintingPolicy(poolInfo.txID_Master_AddScripts_Script);
     }
     //------------------
-    txComplete = await txComplete
+    tx_Building = await tx_Building
         .mintAssets(value_For_Mint_TxID_Master_AddScripts, redeemer_For_Mint_TxID_Master_AddScripts_Hex)
 
         .payToContract(scriptAddress, {
@@ -273,13 +273,13 @@ export async function masterAddScriptsMasterDeleteFundTx(
     // .validFrom(from)
     // .validTo(until)
     //------------------
-    const txComplete_FIXED = await fixTx(txComplete, lucid, protocolParameters);
+    const txComplete_FIXED = await fixTx(tx_Building, lucid, protocolParameters);
     return txComplete_FIXED;
 }
 //--------------------------------------
 
 export async function masterAddScriptsMasterDeleteScriptsTx(
-    lucid: Lucid, protocolParameters: any, poolInfo: StakingPoolDBInterface, pkhf: PaymentKeyHash, addressWallet: Address,
+    lucid: Lucid, protocolParameters: any, poolInfo: StakingPoolDBInterface, addressWallet: Address,
     eUTxO_With_Script_TxID_Master_AddScripts_Datum: EUTxO | undefined,
     redeemer_For_Mint_TxID_Master_AddScripts: Redeemer_Mint_TxID, value_For_Mint_TxID_Master_AddScripts: Assets,
     script_TxID_Master_DeleteScriptsDatum: ScriptDatum
@@ -299,15 +299,15 @@ export async function masterAddScriptsMasterDeleteScriptsTx(
     // const until = now + (validTimeRange) - (5 * 60 * 1000) 
     //------------------
     var tx = lucid.newTx();
-    var txComplete = createTx(lucid, protocolParameters, tx);
+    var tx_Building = createTx(lucid, protocolParameters, tx);
     //------------------
     if (eUTxO_With_Script_TxID_Master_AddScripts_Datum) {
-        txComplete = await txComplete.readFrom([eUTxO_With_Script_TxID_Master_AddScripts_Datum.uTxO]);
+        tx_Building = await tx_Building.readFrom([eUTxO_With_Script_TxID_Master_AddScripts_Datum.uTxO]);
     } else {
-        txComplete = await txComplete.attachMintingPolicy(poolInfo.txID_Master_AddScripts_Script);
+        tx_Building = await tx_Building.attachMintingPolicy(poolInfo.txID_Master_AddScripts_Script);
     }
     //------------------
-    txComplete = await txComplete
+    tx_Building = await tx_Building
         .mintAssets(value_For_Mint_TxID_Master_AddScripts, redeemer_For_Mint_TxID_Master_AddScripts_Hex)
 
         .payToContract(scriptAddress, {
@@ -318,13 +318,13 @@ export async function masterAddScriptsMasterDeleteScriptsTx(
     // .validFrom(from)
     // .validTo(until)
     //------------------
-    const txComplete_FIXED = await fixTx(txComplete, lucid, protocolParameters);
+    const txComplete_FIXED = await fixTx(tx_Building, lucid, protocolParameters);
     return txComplete_FIXED;
 }
 //--------------------------------------
 
 export async function masterAddScriptsMasterSendBackFundTx(
-    lucid: Lucid, protocolParameters: any, poolInfo: StakingPoolDBInterface, pkhf: PaymentKeyHash, addressWallet: Address,
+    lucid: Lucid, protocolParameters: any, poolInfo: StakingPoolDBInterface, addressWallet: Address,
     eUTxO_With_Script_TxID_Master_AddScripts_Datum: EUTxO | undefined,
     redeemer_For_Mint_TxID_Master_AddScripts: Redeemer_Mint_TxID, value_For_Mint_TxID_Master_AddScripts: Assets,
     script_TxID_Master_SendBackFund_Datum: ScriptDatum
@@ -344,15 +344,15 @@ export async function masterAddScriptsMasterSendBackFundTx(
     // const until = now + (validTimeRange) - (5 * 60 * 1000) 
     //------------------
     var tx = lucid.newTx();
-    var txComplete = createTx(lucid, protocolParameters, tx);
+    var tx_Building = createTx(lucid, protocolParameters, tx);
     //------------------
     if (eUTxO_With_Script_TxID_Master_AddScripts_Datum) {
-        txComplete = await txComplete.readFrom([eUTxO_With_Script_TxID_Master_AddScripts_Datum.uTxO]);
+        tx_Building = await tx_Building.readFrom([eUTxO_With_Script_TxID_Master_AddScripts_Datum.uTxO]);
     } else {
-        txComplete = await txComplete.attachMintingPolicy(poolInfo.txID_Master_AddScripts_Script);
+        tx_Building = await tx_Building.attachMintingPolicy(poolInfo.txID_Master_AddScripts_Script);
     }
     //------------------
-    txComplete = await txComplete
+    tx_Building = await tx_Building
         .mintAssets(value_For_Mint_TxID_Master_AddScripts, redeemer_For_Mint_TxID_Master_AddScripts_Hex)
 
         .payToContract(scriptAddress, {
@@ -363,13 +363,13 @@ export async function masterAddScriptsMasterSendBackFundTx(
     // .validFrom(from)
     // .validTo(until)
     //------------------
-    const txComplete_FIXED = await fixTx(txComplete, lucid, protocolParameters);
+    const txComplete_FIXED = await fixTx(tx_Building, lucid, protocolParameters);
     return txComplete_FIXED;
 }
 //--------------------------------------
 
 export async function masterAddScriptsMasterSendBackDepositTx(
-    lucid: Lucid, protocolParameters: any, poolInfo: StakingPoolDBInterface, pkhf: PaymentKeyHash, addressWallet: Address,
+    lucid: Lucid, protocolParameters: any, poolInfo: StakingPoolDBInterface, addressWallet: Address,
     eUTxO_With_Script_TxID_Master_AddScripts_Datum: EUTxO | undefined,
     redeemer_For_Mint_TxID_Master_AddScripts: Redeemer_Mint_TxID, value_For_Mint_TxID_Master_AddScripts: Assets,
     script_TxID_Master_SendBackDeposit_Datum: ScriptDatum
@@ -389,15 +389,15 @@ export async function masterAddScriptsMasterSendBackDepositTx(
     // const until = now + (validTimeRange) - (5 * 60 * 1000) 
     //------------------
     var tx = lucid.newTx();
-    var txComplete = createTx(lucid, protocolParameters, tx);
+    var tx_Building = createTx(lucid, protocolParameters, tx);
     //------------------
     if (eUTxO_With_Script_TxID_Master_AddScripts_Datum) {
-        txComplete = await txComplete.readFrom([eUTxO_With_Script_TxID_Master_AddScripts_Datum.uTxO]);
+        tx_Building = await tx_Building.readFrom([eUTxO_With_Script_TxID_Master_AddScripts_Datum.uTxO]);
     } else {
-        txComplete = await txComplete.attachMintingPolicy(poolInfo.txID_Master_AddScripts_Script);
+        tx_Building = await tx_Building.attachMintingPolicy(poolInfo.txID_Master_AddScripts_Script);
     }
     //------------------
-    txComplete = await txComplete
+    tx_Building = await tx_Building
         .mintAssets(value_For_Mint_TxID_Master_AddScripts, redeemer_For_Mint_TxID_Master_AddScripts_Hex)
 
         .payToContract(scriptAddress, {
@@ -408,13 +408,13 @@ export async function masterAddScriptsMasterSendBackDepositTx(
     // .validFrom(from)
     // .validTo(until)
     //------------------
-    const txComplete_FIXED = await fixTx(txComplete, lucid, protocolParameters);
+    const txComplete_FIXED = await fixTx(tx_Building, lucid, protocolParameters);
     return txComplete_FIXED;
 }
 //--------------------------------------
 
 export async function masterAddScriptsUserDepositTx(
-    lucid: Lucid, protocolParameters: any, poolInfo: StakingPoolDBInterface, pkhf: PaymentKeyHash, addressWallet: Address,
+    lucid: Lucid, protocolParameters: any, poolInfo: StakingPoolDBInterface, addressWallet: Address,
     eUTxO_With_Script_TxID_Master_AddScripts_Datum: EUTxO | undefined,
     redeemer_For_Mint_TxID_Master_AddScripts: Redeemer_Mint_TxID, value_For_Mint_TxID_Master_AddScripts: Assets,
     script_TxID_User_Deposit_Datum: ScriptDatum
@@ -434,15 +434,15 @@ export async function masterAddScriptsUserDepositTx(
     // const until = now + (validTimeRange) - (5 * 60 * 1000) 
     //------------------
     var tx = lucid.newTx();
-    var txComplete = createTx(lucid, protocolParameters, tx);
+    var tx_Building = createTx(lucid, protocolParameters, tx);
     //------------------
     if (eUTxO_With_Script_TxID_Master_AddScripts_Datum) {
-        txComplete = await txComplete.readFrom([eUTxO_With_Script_TxID_Master_AddScripts_Datum.uTxO]);
+        tx_Building = await tx_Building.readFrom([eUTxO_With_Script_TxID_Master_AddScripts_Datum.uTxO]);
     } else {
-        txComplete = await txComplete.attachMintingPolicy(poolInfo.txID_Master_AddScripts_Script);
+        tx_Building = await tx_Building.attachMintingPolicy(poolInfo.txID_Master_AddScripts_Script);
     }
     //------------------
-    txComplete = await txComplete
+    tx_Building = await tx_Building
         .mintAssets(value_For_Mint_TxID_Master_AddScripts, redeemer_For_Mint_TxID_Master_AddScripts_Hex)
 
         .payToContract(scriptAddress, {
@@ -453,13 +453,13 @@ export async function masterAddScriptsUserDepositTx(
     // .validFrom(from)
     // .validTo(until)
     //------------------
-    const txComplete_FIXED = await fixTx(txComplete, lucid, protocolParameters);
+    const txComplete_FIXED = await fixTx(tx_Building, lucid, protocolParameters);
     return txComplete_FIXED;
 }
 //------------------
 
 export async function masterAddScriptsUserHarvestTx(
-    lucid: Lucid, protocolParameters: any, poolInfo: StakingPoolDBInterface, pkhf: PaymentKeyHash, addressWallet: Address,
+    lucid: Lucid, protocolParameters: any, poolInfo: StakingPoolDBInterface, addressWallet: Address,
     eUTxO_With_Script_TxID_Master_AddScripts_Datum: EUTxO | undefined,
     redeemer_For_Mint_TxID_Master_AddScripts: Redeemer_Mint_TxID, value_For_Mint_TxID_Master_AddScripts: Assets,
     script_TxID_User_Harvest_Datum: ScriptDatum
@@ -479,15 +479,15 @@ export async function masterAddScriptsUserHarvestTx(
     // const until = now + (validTimeRange) - (5 * 60 * 1000) 
     //------------------
     var tx = lucid.newTx();
-    var txComplete = createTx(lucid, protocolParameters, tx);
+    var tx_Building = createTx(lucid, protocolParameters, tx);
     //------------------
     if (eUTxO_With_Script_TxID_Master_AddScripts_Datum) {
-        txComplete = await txComplete.readFrom([eUTxO_With_Script_TxID_Master_AddScripts_Datum.uTxO]);
+        tx_Building = await tx_Building.readFrom([eUTxO_With_Script_TxID_Master_AddScripts_Datum.uTxO]);
     } else {
-        txComplete = await txComplete.attachMintingPolicy(poolInfo.txID_Master_AddScripts_Script);
+        tx_Building = await tx_Building.attachMintingPolicy(poolInfo.txID_Master_AddScripts_Script);
     }
     //------------------
-    txComplete = await txComplete
+    tx_Building = await tx_Building
         .mintAssets(value_For_Mint_TxID_Master_AddScripts, redeemer_For_Mint_TxID_Master_AddScripts_Hex)
 
         .payToContract(scriptAddress, {
@@ -498,13 +498,13 @@ export async function masterAddScriptsUserHarvestTx(
     // .validFrom(from)
     // .validTo(until)
     //------------------
-    const txComplete_FIXED = await fixTx(txComplete, lucid, protocolParameters);
+    const txComplete_FIXED = await fixTx(tx_Building, lucid, protocolParameters);
     return txComplete_FIXED;
 }
 //------------------
 
 export async function masterAddScriptsUserWithdrawTx(
-    lucid: Lucid, protocolParameters: any, poolInfo: StakingPoolDBInterface, pkhf: PaymentKeyHash, addressWallet: Address,
+    lucid: Lucid, protocolParameters: any, poolInfo: StakingPoolDBInterface, addressWallet: Address,
     eUTxO_With_Script_TxID_Master_AddScripts_Datum: EUTxO | undefined,
     redeemer_For_Mint_TxID_Master_AddScripts: Redeemer_Mint_TxID, value_For_Mint_TxID_Master_AddScripts: Assets,
     script_TxID_User_Withdraw_Datum: ScriptDatum
@@ -524,15 +524,15 @@ export async function masterAddScriptsUserWithdrawTx(
     // const until = now + (validTimeRange) - (5 * 60 * 1000) 
     //------------------
     var tx = lucid.newTx();
-    var txComplete = createTx(lucid, protocolParameters, tx);
+    var tx_Building = createTx(lucid, protocolParameters, tx);
     //------------------
     if (eUTxO_With_Script_TxID_Master_AddScripts_Datum) {
-        txComplete = await txComplete.readFrom([eUTxO_With_Script_TxID_Master_AddScripts_Datum.uTxO]);
+        tx_Building = await tx_Building.readFrom([eUTxO_With_Script_TxID_Master_AddScripts_Datum.uTxO]);
     } else {
-        txComplete = await txComplete.attachMintingPolicy(poolInfo.txID_Master_AddScripts_Script);
+        tx_Building = await tx_Building.attachMintingPolicy(poolInfo.txID_Master_AddScripts_Script);
     }
     //------------------
-    txComplete = await txComplete
+    tx_Building = await tx_Building
         .mintAssets(value_For_Mint_TxID_Master_AddScripts, redeemer_For_Mint_TxID_Master_AddScripts_Hex)
 
         .payToContract(scriptAddress, {
@@ -543,13 +543,13 @@ export async function masterAddScriptsUserWithdrawTx(
     // .validFrom(from)
     // .validTo(until)
     //------------------
-    const txComplete_FIXED = await fixTx(txComplete, lucid, protocolParameters);
+    const txComplete_FIXED = await fixTx(tx_Building, lucid, protocolParameters);
     return txComplete_FIXED;
 }
 //--------------------------------------
 
 export async function masterDeleteScriptsTx(
-    lucid: Lucid, protocolParameters: any, poolInfo: StakingPoolDBInterface, pkhf: PaymentKeyHash, addressWallet: Address,
+    lucid: Lucid, protocolParameters: any, poolInfo: StakingPoolDBInterface, addressWallet: Address,
     eUTxO_With_ScriptDatum: EUTxO | undefined,
     eUTxO_With_Script_TxID_Master_AddScripts_Datum: EUTxO | undefined,
     eUTxO_With_Script_TxID_Master_DeleteScripts_Datum: EUTxO | undefined,
@@ -580,27 +580,27 @@ export async function masterDeleteScriptsTx(
     // const until = now + (validTimeRange) - (5 * 60 * 1000) 
     //------------------
     var tx = lucid.newTx();
-    var txComplete = createTx(lucid, protocolParameters, tx);
+    var tx_Building = createTx(lucid, protocolParameters, tx);
     //------------------
     if (eUTxO_With_ScriptDatum) {
-        txComplete = await txComplete.readFrom([eUTxO_With_ScriptDatum.uTxO]);
+        tx_Building = await tx_Building.readFrom([eUTxO_With_ScriptDatum.uTxO]);
     } else {
-        txComplete = await txComplete.attachMintingPolicy(poolInfo.script);
+        tx_Building = await tx_Building.attachMintingPolicy(poolInfo.script);
     }
     //------------------
     if (eUTxO_With_Script_TxID_Master_AddScripts_Datum) {
-        txComplete = await txComplete.readFrom([eUTxO_With_Script_TxID_Master_AddScripts_Datum.uTxO]);
+        tx_Building = await tx_Building.readFrom([eUTxO_With_Script_TxID_Master_AddScripts_Datum.uTxO]);
     } else {
-        txComplete = await txComplete.attachMintingPolicy(poolInfo.txID_Master_AddScripts_Script);
+        tx_Building = await tx_Building.attachMintingPolicy(poolInfo.txID_Master_AddScripts_Script);
     }
     //------------------
     if (eUTxO_With_Script_TxID_Master_DeleteScripts_Datum) {
-        txComplete = await txComplete.readFrom([eUTxO_With_Script_TxID_Master_DeleteScripts_Datum.uTxO]);
+        tx_Building = await tx_Building.readFrom([eUTxO_With_Script_TxID_Master_DeleteScripts_Datum.uTxO]);
     } else {
-        txComplete = await txComplete.attachMintingPolicy(poolInfo.txID_Master_DeleteScripts_Script);
+        tx_Building = await tx_Building.attachMintingPolicy(poolInfo.txID_Master_DeleteScripts_Script);
     }
     //------------------
-    txComplete = await txComplete
+    tx_Building = await tx_Building
         .mintAssets(value_For_Mint_TxID_Master_DeleteScripts, redeemer_For_Mint_TxID_Master_DeleteScripts_Hex)
         .mintAssets(value_For_Burn_ScriptIDs, redeemer_For_Burn_ScriptIDs_Hex)
         .collectFrom([utxoAtScript_With_PoolDatum], redeemer_For_Consuming_PoolDatum_Hex)
@@ -608,15 +608,15 @@ export async function masterDeleteScriptsTx(
         .collectFrom(uTxOsWithScripts, redeemer_For_Consuming_Scripts_Datum_Hex);
     //------------------
     for (const addrAndValue_For_Masters_Wallets of addrsAndValues_For_Masters_Wallets) {
-        txComplete = await txComplete
+        tx_Building = await tx_Building
             .payToAddress(addrAndValue_For_Masters_Wallets.addr, addrAndValue_For_Masters_Wallets.value);
     }
     //------------------
-    txComplete = await txComplete
+    tx_Building = await tx_Building
         .addSigner(addressWallet);
     // .validFrom(from)
     // .validTo(until)
     //------------------
-    const txComplete_FIXED = await fixTx(txComplete, lucid, protocolParameters);
+    const txComplete_FIXED = await fixTx(tx_Building, lucid, protocolParameters);
     return txComplete_FIXED;
 }

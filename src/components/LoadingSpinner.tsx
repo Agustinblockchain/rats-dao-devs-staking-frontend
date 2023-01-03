@@ -1,10 +1,6 @@
 import React from "react";
 
-// import UseAnimations from 'react-useanimations';
-
-// import loadingAnimation from 'react-useanimations/lib/loading'
-// import checkmarkAnimation  from 'react-useanimations/lib/checkmark'
-// import alertTriangleAnimation from 'react-useanimations/lib/alertTriangle'
+//--------------------------------------
 
 type ActionStatus = "loading" | "success" | "error" | "idle" 
 

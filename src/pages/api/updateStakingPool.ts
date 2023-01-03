@@ -26,13 +26,10 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
     
 	const nombrePool = req.body.nombrePool
 
-	const swShowOnSite = req.body.swShowOnSite
-
-	const swShowOnHome = req.body.swShowOnHome
-
 	const swPreparado = req.body.swPreparado
 
 	const swIniciado = req.body.swIniciado
+
 	const swFunded = req.body.swFunded
 
 	const swClosed = req.body.swClosed
@@ -42,6 +39,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 	const swTerminated = req.body.swTerminated
 
 	const swZeroFunds = req.body.swZeroFunds
+
     const swPoolReadyForDelete = req.body.swPoolReadyForDelete
 
 	const eUTxO_With_ScriptDatum = req.body.eUTxO_With_ScriptDatum
@@ -64,7 +62,6 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 	await connect();
 
 	console.log("/api/updateStakingPool - Request: " + toJson(req.body.nombrePool));
-	console.log("/api/updateStakingPool - swShowOnHome: " + swShowOnHome);
 
     try {
         const stakingPoolWithSameName = await getStakingPoolFromDBByName (nombrePool)
@@ -79,26 +76,18 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
             return 
         } else {
             const stakingPool = stakingPoolWithSameName[0]
-            if (!stakingPool.masters.includes(sesionPkh!)){
-                console.error("/api/updateStakingPool - You aren't master of this Staking Pool"); 
-                res.status(400).json({ msg: "You aren't master of this Staking Pool"})
-                return 
-            }
 
             // console.log("/api/updateStakingPool - staking pool found");
         
             var StakingPoolDBModel = getStakingPoolDBModel()
 
             const filter = {name : nombrePool};
+            
             const update = { 
-
-                swShowOnSite: swShowOnSite, 
-
-                swShowOnHome: swShowOnHome, 
-
                 swPreparado: swPreparado, 
 
                 swIniciado: swIniciado, 
+
                 swFunded: swFunded,
 
                 swClosed: swClosed,
@@ -108,6 +97,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
                 swTerminated: swTerminated,
 
                 swZeroFunds: swZeroFunds,
+
                 swPoolReadyForDelete: swPoolReadyForDelete,
 
                 eUTxO_With_ScriptDatum: eUTxO_With_ScriptDatum,
@@ -130,18 +120,10 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
             };
 
             await StakingPoolDBModel.findOneAndUpdate(filter, update)
-            // , undefined, (function(error: any){
-            //     if(error) {
-            //         console.error("/api/updateStakingPool - Can't update StakingPool in Database - Error: " + error);
-            //         res.status(400).json({ msg: "Can't update StakingPool in Database - Error: " + error})
-            //         return
-            //     }else{
+           
             console.log("/api/updateStakingPool - StakingPool updated in Database!"); 
             res.status(200).json({ msg: "StakingPool Updated in Database!"})
             return
-            //     }
-            // }));
-
         }
 
     } catch (error) {

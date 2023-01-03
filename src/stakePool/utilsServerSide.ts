@@ -1,10 +1,8 @@
+import path from 'path';
 import { InterestRate, Maybe } from '../types';
 import { strToHex, toJson } from '../utils/utils';
-import { getAllStakingPoolsForAdminFromDB, getAllStakingPoolsForHomeFromDB } from '../types/stakePoolDBModel';
-import path from 'path';
 //---------------------------------------------------------------
 const fs = require('fs/promises');
-
 //---------------------------------------------------------------
 export async function getPABPoolParamsFromFile(filename: string) {
 

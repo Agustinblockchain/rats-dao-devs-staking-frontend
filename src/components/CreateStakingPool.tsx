@@ -1,29 +1,22 @@
 //--------------------------------------
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
-
-import 'react-loading-skeleton/dist/skeleton.css';
-//---------------------------------------
 import TextField from '@mui/material/TextField';
 import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { format } from 'date-fns';
-//--------------------------------------
-import { UTxO } from 'lucid-cardano';
-//--------------------------------------
-import ActionModalBtn from './ActionModalBtn';
-import LoadingSpinner from "./LoadingSpinner";
-//--------------------------------------
-import { useStoreState } from '../utils/walletProvider';
-//--------------------------------------
+import { Assets, UTxO } from 'lucid-cardano';
+import 'react-loading-skeleton/dist/skeleton.css';
 import { splitUTxOs } from "../stakePool/endPoints - splitUTxOs";
-import { getEstadoDeployAPI } from "../stakePool/helpersStakePool";
+import { apiCreateStakingPoolDB, getEstadoDeployAPI } from "../stakePool/helpersStakePool";
 import { maxMasters } from '../types/constantes';
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
 import { pushSucessNotification } from "../utils/pushNotification";
-import { toJson } from '../utils/utils';
-
-import { awaitTx } from '../utils/cardano-helpersTx';
+import { useStoreState } from '../utils/walletProvider';
+import ActionModalBtn from './ActionModalBtn';
+import LoadingSpinner from "./LoadingSpinner";
+import { EUTxO } from '../types';
+import { newTransaction } from '../utils/cardano-helpersTx';
 
 //--------------------------------------
 
@@ -136,8 +129,10 @@ export default function CreateStakingPool( ) {
 		// setIsWorkingStakingPool(isWorking)
 		return isWorking
 	}
+	
+	//--------------------------------------
 
-	const IniciarPoolAction = async (poolInfo?: StakingPoolDBInterface) => {
+	const IniciarPoolAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
 
 		console.log("CreateStakingPool - Iniciar Pool Action")
 
@@ -157,17 +152,17 @@ export default function CreateStakingPool( ) {
 
 		setActionMessage("Creating Smart Contracts, please wait...")
 
+		const timeoutGetEstadoDeploy = setInterval(async function () {
+			const message = await getEstadoDeployAPI(nombrePool)
+			setActionMessage("Creating Smart Contracts: " + message)
+
+			if (message.includes("Done!")) {
+				clearInterval(timeoutGetEstadoDeploy)
+				setActionMessage("Smart Contracts created!")
+			}
+		}, 4000);
+
 		try {
-
-			const timeoutGetEstadoDeploy = setInterval(async function () {
-				const message = await getEstadoDeployAPI(nombrePool)
-				setActionMessage("Creating Smart Contracts: " + message)
-
-				if (message.includes("Done!")) {
-					clearInterval(timeoutGetEstadoDeploy)
-					setActionMessage("Smart Contracts created!")
-				}
-			}, 4000);
 
 			let data = {
 				nombrePool: nombrePool,
@@ -190,40 +185,19 @@ export default function CreateStakingPool( ) {
 				interest: interest
 			}
 
-			const urlApi = "/api/createStakingPool"
+			const [message, stakingPool] = await apiCreateStakingPoolDB(data)
 
-			const requestOptions = {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: toJson(data)
-			};
+			setActionMessage("Smart Contracts created!")
 
-			const response = await fetch(urlApi, requestOptions)
-			const json = await response.json()
-			const message = json.msg
-			const stakingPool = json.stakingPool
+            pushSucessNotification("Creating Smart Contracts ", message, false);
 
-			switch (response.status) {
-				case 500:
-					clearInterval(timeoutGetEstadoDeploy)
-					console.error("CreateStakingPool - api/deploy: Error 500")
-					throw "Error 500";
-				case 400:
-					clearInterval(timeoutGetEstadoDeploy)
-					console.error("CreateStakingPool - api/deploy - Error: " + message)
-					throw message;
-				case 200:
-					console.log("CreateStakingPool - api/deploy: " + message)
-					setActionMessage("Smart Contracts created!")
-					clearInterval(timeoutGetEstadoDeploy)
-					pushSucessNotification("Creating Smart Contracts ", message, false);
-					setTimeout(setStakingPoolCreated, 3000, stakingPool);
-					setIsWorking("")
-					return message
-				default:
-			}
+            setTimeout(setStakingPoolCreated, 3000, stakingPool);
+
+            clearInterval(timeoutGetEstadoDeploy)
+            setIsWorking("")
 
 		} catch (error) {
+			clearInterval(timeoutGetEstadoDeploy)
 			setIsWorking("")
 			throw error
 		}
@@ -231,33 +205,13 @@ export default function CreateStakingPool( ) {
 
 	}
 
-	const splitUTxOsAction = async () => {
+	//--------------------------------------
 
-		console.log("CreateStakingPool - Split Wallet UTxOs")
-
-		setActionMessage("Creating Transfer, please wait...")
-
-		const lucid = walletStore.lucid
-
-		try {
-
-			const [txHash, eUTxO_for_consuming] =  await splitUTxOs(walletStore!, walletStore.pkh!);
-
-			setActionMessage("Waiting for confirmation, please wait...")
-			setActionHash(txHash)
-
-			await awaitTx (lucid!, txHash, eUTxO_for_consuming, getUTxOsFromWallet, false) 
-			
-			setIsWorking("")
-
-			return txHash.toString();
-
-		} catch (error: any) {
-			setIsWorking("")
-			throw error
-		}
+	const splitUTxOsAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
+		await newTransaction ("CreateStakingPool - Split Wallet UTxOs", walletStore, poolInfo, splitUTxOs, false, setActionMessage, setActionHash, setIsWorking, getUTxOsFromWallet, eUTxOs_Selected, assets) 
 	}
 
+	//--------------------------------------
 	
 	return (
 		<>

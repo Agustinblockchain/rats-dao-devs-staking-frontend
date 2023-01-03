@@ -1,4 +1,4 @@
-import { Address, Assets, Lucid, PaymentKeyHash, UTxO } from 'lucid-cardano';
+import { Address, Assets, Lucid, UTxO } from 'lucid-cardano';
 import { EUTxO, FundDatum, PoolDatum, Redeemer_Burn_TxID, Redeemer_Mint_TxID, Redeemer_User_Harvest, Redeemer_User_Withdraw, UserDatum } from '../types';
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
 import { createTx, fixTx } from '../utils/cardano-helpersTx';
@@ -7,7 +7,7 @@ import { getHexFrom_Redeemer_TxID, getHexFrom_Validator_Datum, getHexFrom_Valida
 //--------------------------------------
 
 export async function userDepositTx(
-    lucid: Lucid, protocolParameters: any, poolInfo: StakingPoolDBInterface, pkhf: PaymentKeyHash, addressWallet: Address,
+    lucid: Lucid, protocolParameters: any, poolInfo: StakingPoolDBInterface, addressWallet: Address,
     eUTxO_With_ScriptDatum: EUTxO | undefined,
     eUTxO_With_Script_TxID_User_Deposit_Datum: EUTxO | undefined,
     utxoAtScript_With_PoolDatum: UTxO,
@@ -30,21 +30,21 @@ export async function userDepositTx(
     // const until = now + (validTimeRange) - (5 * 60 * 1000) 
     //------------------
     var tx = lucid.newTx();
-    var txComplete = createTx(lucid, protocolParameters, tx);
+    var tx_Building = createTx(lucid, protocolParameters, tx);
     //------------------
     if (eUTxO_With_Script_TxID_User_Deposit_Datum) {
-        txComplete = await txComplete.readFrom([eUTxO_With_Script_TxID_User_Deposit_Datum.uTxO]);
+        tx_Building = await tx_Building.readFrom([eUTxO_With_Script_TxID_User_Deposit_Datum.uTxO]);
     } else {
-        txComplete = await txComplete.attachMintingPolicy(poolInfo.txID_User_Deposit_Script);
+        tx_Building = await tx_Building.attachMintingPolicy(poolInfo.txID_User_Deposit_Script);
     }
     //------------------
     if (eUTxO_With_ScriptDatum) {
-        txComplete = await txComplete.readFrom([eUTxO_With_ScriptDatum.uTxO]);
+        tx_Building = await tx_Building.readFrom([eUTxO_With_ScriptDatum.uTxO]);
     } else {
-        txComplete = await txComplete.attachMintingPolicy(poolInfo.script);
+        tx_Building = await tx_Building.attachMintingPolicy(poolInfo.script);
     }
     //------------------
-    txComplete = await txComplete
+    tx_Building = await tx_Building
         .mintAssets(value_For_Mint_TxID_User_Deposit, redeemer_For_Mint_TxID_User_Deposit_Hex)
         .mintAssets(value_For_Mint_UserID, redeemer_For_Mint_TxID_User_Deposit_Hex)
         .readFrom([utxoAtScript_With_PoolDatum])
@@ -54,13 +54,13 @@ export async function userDepositTx(
     // .validFrom(from)
     // .validTo(until) 
     //------------------
-    const txComplete_FIXED = await fixTx(txComplete, lucid, protocolParameters);
+    const txComplete_FIXED = await fixTx(tx_Building, lucid, protocolParameters);
     return txComplete_FIXED;
 }
 //--------------------------------------
 
 export async function userHarvestPoolTx(
-    lucid: Lucid, protocolParameters: any, poolInfo: StakingPoolDBInterface, pkhf: PaymentKeyHash, addressWallet: Address,
+    lucid: Lucid, protocolParameters: any, poolInfo: StakingPoolDBInterface, addressWallet: Address,
     eUTxO_With_ScriptDatum: EUTxO | undefined,
     eUTxO_With_Script_TxID_User_Harvest_Datum: EUTxO | undefined,
     utxoAtScript_With_PoolDatum: UTxO,
@@ -95,45 +95,45 @@ export async function userHarvestPoolTx(
     // const until = now + (validTimeRange) - (5 * 60 * 1000) 
     //------------------
     var tx = lucid.newTx();
-    var txComplete = createTx(lucid, protocolParameters, tx);
+    var tx_Building = createTx(lucid, protocolParameters, tx);
     //------------------
     if (eUTxO_With_ScriptDatum) {
-        txComplete = await txComplete.readFrom([eUTxO_With_ScriptDatum.uTxO]);
+        tx_Building = await tx_Building.readFrom([eUTxO_With_ScriptDatum.uTxO]);
     } else {
-        txComplete = await txComplete.attachMintingPolicy(poolInfo.script);
+        tx_Building = await tx_Building.attachMintingPolicy(poolInfo.script);
     }
     //------------------
     if (eUTxO_With_Script_TxID_User_Harvest_Datum) {
-        txComplete = await txComplete.readFrom([eUTxO_With_Script_TxID_User_Harvest_Datum.uTxO]);
+        tx_Building = await tx_Building.readFrom([eUTxO_With_Script_TxID_User_Harvest_Datum.uTxO]);
     } else {
-        txComplete = await txComplete.attachMintingPolicy(poolInfo.txID_User_Harvest_Script);
+        tx_Building = await tx_Building.attachMintingPolicy(poolInfo.txID_User_Harvest_Script);
     }
     //------------------
-    txComplete = await txComplete
+    tx_Building = await tx_Building
         .mintAssets(value_For_Mint_TxID_User_Harvest, redeemer_For_Mint_TxID_User_Harvest_Hex)
         .readFrom([utxoAtScript_With_PoolDatum])
         .collectFrom(uTxOsAtScript_With_FundDatum, redeemer_For_Consuming_FundDatum_Hex)
         .collectFrom([utxoAtScript_With_UserDatum], redeemer_For_Consuming_UserDatum_Hex);
     //------------------
     for (const datum_hex_and_value_for_FundDatum of datum_hex_and_values_for_FundDatum) {
-        txComplete = await txComplete
+        tx_Building = await tx_Building
             .payToContract(scriptAddress, { inline: datum_hex_and_value_for_FundDatum.datum_hex }, datum_hex_and_value_for_FundDatum.value);
     }
     //------------------
-    txComplete = await txComplete
+    tx_Building = await tx_Building
         .payToContract(scriptAddress, { inline: userDatum_Out_Hex }, value_For_UserDatum)
         .payToAddress(addressWallet, value_For_User_Wallet)
         .addSigner(addressWallet);
     // .validFrom(from)
     // .validTo(until) 
     //------------------
-    const txComplete_FIXED = await fixTx(txComplete, lucid, protocolParameters);
+    const txComplete_FIXED = await fixTx(tx_Building, lucid, protocolParameters);
     return txComplete_FIXED;
 }
 //--------------------------------------
 
 export async function userWithdrawTx(
-    lucid: Lucid, protocolParameters: any, poolInfo: StakingPoolDBInterface, pkhf: PaymentKeyHash, addressWallet: Address,
+    lucid: Lucid, protocolParameters: any, poolInfo: StakingPoolDBInterface, addressWallet: Address,
     eUTxO_With_ScriptDatum: EUTxO | undefined,
     eUTxO_With_Script_TxID_User_Withdraw_Datum: EUTxO | undefined,
     eUTxO_With_Script_TxID_User_Deposit_Datum: EUTxO | undefined,
@@ -162,31 +162,31 @@ export async function userWithdrawTx(
     // const until = now + (validTimeRange) - (5 * 60 * 1000) 
     //------------------
     var tx = lucid.newTx();
-    var txComplete = createTx(lucid, protocolParameters, tx);
+    var tx_Building = createTx(lucid, protocolParameters, tx);
     //------------------
     if (eUTxO_With_ScriptDatum) {
-        txComplete = await txComplete.readFrom([eUTxO_With_ScriptDatum.uTxO]);
+        tx_Building = await tx_Building.readFrom([eUTxO_With_ScriptDatum.uTxO]);
     } else {
-        txComplete = await txComplete.attachMintingPolicy(poolInfo.script);
+        tx_Building = await tx_Building.attachMintingPolicy(poolInfo.script);
     }
     //------------------
     if (eUTxO_With_Script_TxID_User_Withdraw_Datum) {
-        txComplete = await txComplete.readFrom([eUTxO_With_Script_TxID_User_Withdraw_Datum.uTxO]);
+        tx_Building = await tx_Building.readFrom([eUTxO_With_Script_TxID_User_Withdraw_Datum.uTxO]);
     } else {
-        txComplete = await txComplete.attachMintingPolicy(poolInfo.txID_User_Withdraw_Script);
+        tx_Building = await tx_Building.attachMintingPolicy(poolInfo.txID_User_Withdraw_Script);
     }
     //------------------
     if (eUTxO_With_Script_TxID_User_Deposit_Datum) {
-        txComplete = await txComplete.readFrom([eUTxO_With_Script_TxID_User_Deposit_Datum.uTxO]);
+        tx_Building = await tx_Building.readFrom([eUTxO_With_Script_TxID_User_Deposit_Datum.uTxO]);
     } else {
-        txComplete = await txComplete.attachMintingPolicy(poolInfo.txID_User_Deposit_Script);
+        tx_Building = await tx_Building.attachMintingPolicy(poolInfo.txID_User_Deposit_Script);
     }
     //------------------
     if (poolDatum_Out !== undefined) {
         const poolDatum_Out_Hex = await getHexFrom_Validator_Datum(poolDatum_Out, true);
         const redeemer_For_Consuming_PoolDatum_Hex = await getHexFrom_Validator_Redeemer(redeemer_For_Consuming_PoolDatum!, true);
         //------------------
-        txComplete = await txComplete
+        tx_Building = await tx_Building
             .mintAssets(value_For_Mint_TxID_User_Withdraw, redeemer_For_Mint_TxID_User_Withdraw_Hex)
             .mintAssets(value_For_Burn_UserID, redeemer_Burn_UserID_Hex)
             .mintAssets(value_For_Burn_TxID_User_Deposit, redeemer_Burn_UserID_Hex)
@@ -198,13 +198,13 @@ export async function userWithdrawTx(
         // .validFrom(from)
         // .validTo(until) 
         //------------------
-        const txComplete_FIXED = await fixTx(txComplete, lucid, protocolParameters);
+        const txComplete_FIXED = await fixTx(tx_Building, lucid, protocolParameters);
         return txComplete_FIXED;
     } else {
         const fundDatum_Out_Hex = await getHexFrom_Validator_Datum(fundDatum_Out!, true);
         const redeemer_For_Consuming_FundDatum_Hex = await getHexFrom_Validator_Redeemer(redeemer_For_Consuming_FundDatum!, true);
         //------------------
-        txComplete = await txComplete
+        tx_Building = await tx_Building
             .mintAssets(value_For_Mint_TxID_User_Withdraw, redeemer_For_Mint_TxID_User_Withdraw_Hex)
             .mintAssets(value_For_Burn_UserID, redeemer_Burn_UserID_Hex)
             .mintAssets(value_For_Burn_TxID_User_Deposit, redeemer_Burn_UserID_Hex)
@@ -217,7 +217,7 @@ export async function userWithdrawTx(
         // .validFrom(from)
         // .validTo(until) 
         //------------------
-        const txComplete_FIXED = await fixTx(txComplete, lucid, protocolParameters);
+        const txComplete_FIXED = await fixTx(tx_Building, lucid, protocolParameters);
         return txComplete_FIXED;
     }
 }

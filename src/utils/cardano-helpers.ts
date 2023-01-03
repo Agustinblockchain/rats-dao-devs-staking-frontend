@@ -4,7 +4,6 @@ import { searchValueInArray, toJson } from "./utils";
 
 //---------------------------------------------------------------
 
-
 //for adding two Assets into one
 export function addAssets(as1: Assets, as2: Assets) {
 
@@ -304,20 +303,20 @@ export function find_EUTxO_In_EUTxOs(eUTxO: EUTxO, eUTxOs: EUTxO[]) {
 export async function findDatumIfMissing(lucid: Lucid, uTxO: UTxO): Promise<UTxO> {
     //console.log ("findDatumIfMissing")
     if (uTxO.datumHash && !uTxO.datum) {
-        //console.log ("findDatumIfMissing - searching datumHash in Database: " + uTxO.datumHash)
+        console.log ("findDatumIfMissing - searching datumHash in Database: " + uTxO.datumHash)
         const datum = await apiGetDatumDB(uTxO.datumHash);
         if (datum) {
-            //console.log ("findDatumIfMissing - datum in Database: " + uTxO.datum)
+            console.log ("findDatumIfMissing - datum in Database: " + uTxO.datum)
             uTxO.datum = datum;
         } else {
-            //console.log ("findDatumIfMissing - looking for datumHash in lucid")
+            console.log ("findDatumIfMissing - looking for datumHash in lucid")
             uTxO.datum = await lucid.provider.getDatum(uTxO.datumHash);
             if (uTxO.datum) {
                 //console.log ("findDatumIfMissing - datum in lucid: " + uTxO.datum )
-                //console.log ("findDatumIfMissing - saving datumHash in Database")
+                console.log ("findDatumIfMissing - saving datumHash in Database")
                 await apiSaveDatumDB(uTxO.datumHash, uTxO.datum);
             } else {
-                //console.error ("findDatumIfMissing - datumHash not found in lucid" )
+                console.error ("findDatumIfMissing - datumHash not found in lucid" )
             }
         }
         return uTxO;
@@ -343,18 +342,20 @@ export async function apiGetDatumDB(datumHash: string) {
     const datum = json.datum;
     switch (response.status) {
         case 500:
-            console.error ("apiGetDatumDB - /api/getDatum - Error 500")
+            console.error("apiGetDatumDB - /api/getDatum - Error 500")
             throw "Error 500";
         case 400:
-            console.error ("apiGetDatumDB - /api/getDatum - Error: " + message)
+            console.error("apiGetDatumDB - /api/getDatum - Error: " + message)
             throw message;
+        default:
+            console.error("apiGetDatumDB - /api/getDatum: Error Unknown")
+            throw "Error Unknown";
         case 201:
             //console.log ("apiGetDatumDB - /api/getDatum: " + message)
             return undefined;
         case 200:
             //console.log ("apiGetDatumDB - /api/getDatum: " + message)
             return datum;
-        default:
     }
 }
 
@@ -377,18 +378,20 @@ export async function apiSaveDatumDB(datumHash: string, datum: string) {
 
     switch (response.status) {
         case 500:
-            console.error ("apiSaveDatumDB - /api/saveDatum - Error 500")
+            console.error("apiSaveDatumDB - /api/saveDatum - Error 500")
             throw "Error 500";
         case 400:
-            console.error ("apiSaveDatumDB - /api/saveDatum - Error: " + message)
+            console.error("apiSaveDatumDB - /api/saveDatum - Error: " + message)
             throw message;
+        default:
+            console.error("apiSaveDatumDB - /api/saveDatum: Error Unknown")
+            throw "Error Unknown";
         case 201:
             // console.log ("apiSaveDatumDB - /api/saveDatum: " + message)
             return
         case 200:
             //console.log ("apiSaveDatumDB - /api/saveDatum: " + message)
             return;
-        default:
     }
 }
 
@@ -398,7 +401,7 @@ export async function apiGetEUTxOsDBByAddress(address: string) {
     let data = {
         address: address
     };
-    const urlApi = "/api/getEUTxOsByAddress"; 
+    const urlApi = "/api/getEUTxOsByAddress";
     const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -410,11 +413,14 @@ export async function apiGetEUTxOsDBByAddress(address: string) {
     const eUTxOs = json.eUTxOs;
     switch (response.status) {
         case 500:
-            console.error ("apiGetEUTxOsDBByAddress - /api/getEUTxOsByAddress - Error 500")
+            console.error("apiGetEUTxOsDBByAddress - /api/getEUTxOsByAddress - Error 500")
             throw "Error 500";
         case 400:
-            console.error ("apiGetEUTxOsDBByAddress - /api/getEUTxOsByAddress - Error: " + message)
+            console.error("apiGetEUTxOsDBByAddress - /api/getEUTxOsByAddress - Error: " + message)
             throw message;
+        default:
+            console.error("apiGetEUTxOsDBByAddress - /api/getEUTxOsByAddress: Error Unknown")
+            throw "Error Unknown";
         case 201:
             // console.log ("apiGetEUTxOsDBByAddress - /api/getEUTxOsByAddress: " + message)
             return [];
@@ -438,11 +444,11 @@ export async function apiGetEUTxOsDBByAddress(address: string) {
                     var pdClosedAt
                     if (eUTxOs[i].datum.pdClosedAt.plutusDataIndex == 0) {
                         pdClosedAt = new Maybe(BigInt(eUTxOs[i].datum.pdClosedAt.val))
-                    }else{
+                    } else {
                         pdClosedAt = new Maybe<POSIXTime>()
                     }
-                    
-                    var masterFunders : Master_Funder [] = []
+
+                    var masterFunders: Master_Funder[] = []
                     for (var j = 0; j < eUTxOs[i].datum.pdMasterFunders.length; j++) {
                         masterFunders.push(new Master_Funder(
                             eUTxOs[i].datum.pdMasterFunders[j].mfMaster,
@@ -459,20 +465,20 @@ export async function apiGetEUTxOsDBByAddress(address: string) {
                         pdClosedAt,
                         Number(eUTxOs[i].datum.pdIsTerminated),
                         BigInt(eUTxOs[i].datum.pdMinAda),
-                    ) 
+                    )
                 }
                 if (eUTxOs[i].datum.plutusDataIndex == FundDatum.plutusDataIndex) {
                     eUTxOs[i].datum = new FundDatum(
-                         BigInt(eUTxOs[i].datum.fdFundAmount),
-                         BigInt(eUTxOs[i].datum.fdCashedOut),
-                         BigInt(eUTxOs[i].datum.fdMinAda)
+                        BigInt(eUTxOs[i].datum.fdFundAmount),
+                        BigInt(eUTxOs[i].datum.fdCashedOut),
+                        BigInt(eUTxOs[i].datum.fdMinAda)
                     )
                 }
                 if (eUTxOs[i].datum.plutusDataIndex == UserDatum.plutusDataIndex) {
                     var udLastClaimAt
                     if (eUTxOs[i].datum.udLastClaimAt.plutusDataIndex == 0) {
                         udLastClaimAt = new Maybe(BigInt(eUTxOs[i].datum.udLastClaimAt.val))
-                    }else{
+                    } else {
                         udLastClaimAt = new Maybe<POSIXTime>()
                     }
                     eUTxOs[i].datum = new UserDatum(
@@ -490,7 +496,6 @@ export async function apiGetEUTxOsDBByAddress(address: string) {
                 }
             }
             return eUTxOs;
-        default:
     }
 }
 
@@ -501,7 +506,7 @@ export async function apiGetEUTxOsDBByAddressAndPkh(address: string, pkh: string
         address: address,
         pkh: pkh
     };
-    const urlApi = "/api/getEUTxOsByAddressAndPkh2"; 
+    const urlApi = "/api/getEUTxOsByAddressAndPkh";
     const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -513,11 +518,14 @@ export async function apiGetEUTxOsDBByAddressAndPkh(address: string, pkh: string
     const eUTxOs = json.eUTxOs;
     switch (response.status) {
         case 500:
-            console.error ("apiGetEUTxOsDBByAddressAndPkh - /api/getEUTxOsByAddressAndPkh - Error 500")
+            console.error("apiGetEUTxOsDBByAddressAndPkh - /api/getEUTxOsByAddressAndPkh - Error 500")
             throw "Error 500";
         case 400:
-            console.error ("apiGetEUTxOsDBByAddressAndPkh - /api/getEUTxOsByAddressAndPkh - Error: " + message)
+            console.error("apiGetEUTxOsDBByAddressAndPkh - /api/getEUTxOsByAddressAndPkh - Error: " + message)
             throw message;
+        default:
+            console.error("apiGetEUTxOsDBByAddressAndPkh - /api/getEUTxOsByAddressAndPkh: Error Unknown")
+            throw "Error Unknown";
         case 201:
             // console.log ("apiGetEUTxOsDBByAddressAndPkh - /api/getEUTxOsByAddressAndPkh: " + message)
             return [];
@@ -541,11 +549,11 @@ export async function apiGetEUTxOsDBByAddressAndPkh(address: string, pkh: string
                     var pdClosedAt
                     if (eUTxOs[i].datum.pdClosedAt.plutusDataIndex == 0) {
                         pdClosedAt = new Maybe(BigInt(eUTxOs[i].datum.pdClosedAt.val))
-                    }else{
+                    } else {
                         pdClosedAt = new Maybe<POSIXTime>()
                     }
-                    
-                    var masterFunders : Master_Funder [] = []
+
+                    var masterFunders: Master_Funder[] = []
                     for (var j = 0; j < eUTxOs[i].datum.pdMasterFunders.length; j++) {
                         masterFunders.push(new Master_Funder(
                             eUTxOs[i].datum.pdMasterFunders[j].mfMaster,
@@ -562,20 +570,20 @@ export async function apiGetEUTxOsDBByAddressAndPkh(address: string, pkh: string
                         pdClosedAt,
                         Number(eUTxOs[i].datum.pdIsTerminated),
                         BigInt(eUTxOs[i].datum.pdMinAda),
-                    ) 
+                    )
                 }
                 if (eUTxOs[i].datum.plutusDataIndex == FundDatum.plutusDataIndex) {
                     eUTxOs[i].datum = new FundDatum(
-                         BigInt(eUTxOs[i].datum.fdFundAmount),
-                         BigInt(eUTxOs[i].datum.fdCashedOut),
-                         BigInt(eUTxOs[i].datum.fdMinAda)
+                        BigInt(eUTxOs[i].datum.fdFundAmount),
+                        BigInt(eUTxOs[i].datum.fdCashedOut),
+                        BigInt(eUTxOs[i].datum.fdMinAda)
                     )
                 }
                 if (eUTxOs[i].datum.plutusDataIndex == UserDatum.plutusDataIndex) {
                     var udLastClaimAt
                     if (eUTxOs[i].datum.udLastClaimAt.plutusDataIndex == 0) {
                         udLastClaimAt = new Maybe(BigInt(eUTxOs[i].datum.udLastClaimAt.val))
-                    }else{
+                    } else {
                         udLastClaimAt = new Maybe<POSIXTime>()
                     }
                     eUTxOs[i].datum = new UserDatum(
@@ -593,7 +601,6 @@ export async function apiGetEUTxOsDBByAddressAndPkh(address: string, pkh: string
                 }
             }
             return eUTxOs;
-        default:
     }
 }
 
@@ -614,27 +621,29 @@ export async function apiSaveEUTxODB(eUTxO: EUTxO) {
     const message = json.msg;
     switch (response.status) {
         case 500:
-            console.error ("apiSaveEUTxODB - /api/saveEUTxO - Error 500")
+            console.error("apiSaveEUTxODB - /api/saveEUTxO - Error 500")
             throw "Error 500";
         case 400:
-            console.error ("apiSaveEUTxODB - /api/saveEUTxO - Error: " + message)
+            console.error("apiSaveEUTxODB - /api/saveEUTxO - Error: " + message)
             throw message;
+        default:
+            console.error("apiSaveEUTxODB - /api/saveEUTxO: Error Unknown")
+            throw "Error Unknown";
         case 201:
             // console.log ("apiSaveEUTxODB - /api/saveEUTxO: " + message)
             return
         case 200:
             // console.log ("apiSaveEUTxODB - /api/saveEUTxOs: " + message)
             return;
-        default:
     }
 }
 
 
-export async function apiUpdateEUTxODB(eUTxO: EUTxO) {
+export async function apiUpdateEUTxODBIsPreparing(eUTxO: EUTxO) {
     let data = {
         eUTxO: eUTxO,
     };
-    const urlApi = "/api/updateEUTxO";
+    const urlApi = "/api/updateEUTxOIsPreparing";
     const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -645,15 +654,52 @@ export async function apiUpdateEUTxODB(eUTxO: EUTxO) {
     const message = json.msg;
     switch (response.status) {
         case 500:
-            console.error ("apiUpdateEUTxODB - /api/updateEUTxO - Error 500")
+            console.error("apiUpdateEUTxODBIsPreparing - /api/updateEUTxOIsPreparing - Error 500")
             throw "Error 500";
         case 400:
-            console.error ("apiUpdateEUTxODB - /api/updateEUTxO - Error: " + message)
+            console.error("apiUpdateEUTxODBIsPreparing - /api/updateEUTxOIsPreparing - Error: " + message)
             throw message;
-        case 200:
-            // console.log ("apiUpdateEUTxODB - /api/updateEUTxO: " + message)
-            return;
         default:
+            console.error("apiUpdateEUTxODBIsPreparing - /api/updateEUTxOIsPreparing: Error Unknown")
+            throw "Error Unknown";
+        case 201:
+            // console.log ("apiUpdateEUTxODBIsPreparing - /api/updateEUTxOIsPreparing: " + message)
+            return;
+        case 200:
+            // console.log ("apiUpdateEUTxODBIsPreparing - /api/updateEUTxOIsPreparing: " + message)
+            return;
+    }
+}
+
+export async function apiUpdateEUTxODBIsConsuming(eUTxO: EUTxO) {
+    let data = {
+        eUTxO: eUTxO,
+    };
+    const urlApi = "/api/updateEUTxOIsConsuming";
+    const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: toJson(data)
+    };
+    const response = await fetch(urlApi, requestOptions);
+    const json = await response.json();
+    const message = json.msg;
+    switch (response.status) {
+        case 500:
+            console.error("apiUpdateEUTxODBIsConsuming - /api/updateEUTxOIsConsuming - Error 500")
+            throw "Error 500";
+        case 400:
+            console.error("apiUpdateEUTxODBIsConsuming - /api/updateEUTxOIsConsuming - Error: " + message)
+            throw message;
+        default:
+            console.error("apiUpdateEUTxODBIsConsuming - /api/updateEUTxOIsConsuming: Error Unknown")
+            throw "Error Unknown";
+        case 201:
+            // console.log ("apiUpdateEUTxODBIsConsuming - /api/updateEUTxOIsConsuming: " + message)
+            return;
+        case 200:
+            // console.log ("apiUpdateEUTxODBIsConsuming - /api/updateEUTxOIsConsuming: " + message)
+            return;
     }
 }
 
@@ -663,7 +709,7 @@ export async function apiDeleteEUTxOsDBPreparingOrConsumingByAddress(address: st
     let data = {
         address: address
     };
-    const urlApi = "/api/deleteEUTxOsPreparingOrConsumingByAddress"; 
+    const urlApi = "/api/deleteEUTxOsPreparingOrConsumingByAddress";
     const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -674,12 +720,14 @@ export async function apiDeleteEUTxOsDBPreparingOrConsumingByAddress(address: st
     const message = json.msg;
     switch (response.status) {
         case 400:
-            console.error ("apiDeleteEUTxOsDBPreparingOrConsumingByAddress - /api/deleteEUTxOsPreparingOrConsumingByAddress - Error: " + message)
+            console.error("apiDeleteEUTxOsDBPreparingOrConsumingByAddress - /api/deleteEUTxOsPreparingOrConsumingByAddress - Error: " + message)
             throw message;
+        default:
+            console.error("apiDeleteEUTxOsDBPreparingOrConsumingByAddress - /api/deleteEUTxOsPreparingOrConsumingByAddress: Error Unknown")
+            throw "Error Unknown";
         case 200:
             // console.log ("apiDeleteEUTxOsDBPreparingOrConsumingByAddress - /api/deleteEUTxOsPreparingOrConsumingByAddress: " + message)
             return
-        default:
     }
 }
 
@@ -689,7 +737,7 @@ export async function apiDeleteEUTxOsDBByAddress(address: string) {
     let data = {
         address: address
     };
-    const urlApi = "/api/deleteEUTxOsByAddress"; 
+    const urlApi = "/api/deleteEUTxOsByAddress";
     const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -700,12 +748,14 @@ export async function apiDeleteEUTxOsDBByAddress(address: string) {
     const message = json.msg;
     switch (response.status) {
         case 400:
-            console.error ("apiDeleteEUTxOsDBByAddress - /api/deleteEUTxOsByAddress - Error: " + message)
+            console.error("apiDeleteEUTxOsDBByAddress - /api/deleteEUTxOsByAddress - Error: " + message)
             throw message;
+        default:
+            console.error("apiDeleteEUTxOsDBByAddress - /api/deleteEUTxOsByAddress: Error Unknown")
+            throw "Error Unknown";
         case 200:
             // console.log ("apiDeleteEUTxOsDBByAddress - /api/deleteEUTxOsByAddress: " + message)
             return
-        default:
     }
 }
 
@@ -715,7 +765,7 @@ export async function apiDeleteEUTxODB(eUTxO: EUTxO) {
     let data = {
         eUTxO: eUTxO,
     };
-    const urlApi = "/api/deleteEUTxO"; 
+    const urlApi = "/api/deleteEUTxO";
     const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -726,12 +776,14 @@ export async function apiDeleteEUTxODB(eUTxO: EUTxO) {
     const message = json.msg;
     switch (response.status) {
         case 400:
-            console.error ("apiDeleteEUTxOsDB - /api/deleteEUTxO - Error: " + message)
+            console.error("apiDeleteEUTxOsDB - /api/deleteEUTxO - Error: " + message)
             throw message;
+        default:
+            console.error("apiDeleteEUTxOsDB - /api/deleteEUTxO: Error Unknown")
+            throw "Error Unknown";
         case 200:
             // console.log ("apiDeleteEUTxOsDB - /api/deleteEUTxO: " + message)
             return
-        default:
     }
 }
 

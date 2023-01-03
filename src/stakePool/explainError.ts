@@ -2,7 +2,6 @@ import { toJson } from "../utils/utils";
 
 //---------------------------------------------------------------
 
-
 export function explainError(errorIn: any): string {
     //search if substring 'ScriptFailures' is in error
     var res = "";
@@ -72,8 +71,6 @@ export function explainError(errorIn: any): string {
             if (error.includes("\"TERMINATED\"")) { res += sep + "The Pool is already finished"; sep = ", "; }
             if (error.includes("\"NOTTERMINATED\"")) { res += sep + "The Pool is not finished yet"; sep = ", "; }
             if (error.includes("\"CLOSED\"")) { res += sep + "The Pool is already closed"; sep = ", "; }
-
-
 
             if (error.includes("\"PPMSM\"")) { res += sep + "The signature of one of the Pool Masters is required"; sep = ", "; }
             if (error.includes("\"MSM\"")) { res += sep + "The signature of the master and the redeemer do not match"; sep = ", "; }

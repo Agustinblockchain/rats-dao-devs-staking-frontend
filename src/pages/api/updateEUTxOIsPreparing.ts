@@ -7,6 +7,7 @@ import { strToHex, toJson } from '../../utils/utils';
 
 import { getStakingPoolDBModel, getStakingPoolFromDBByName, StakingPoolDBInterface } from  '../../types/stakePoolDBModel'
 import { getEUTxODBModel, getEUTxOFromDBByTxHashAndIndex } from '../../types/eUTxODBModel';
+import { EUTxO } from '../../types';
 
 type Data = {
 	msg: string
@@ -14,21 +15,23 @@ type Data = {
 
 export default async function handler( req: NextApiRequest, res: NextApiResponse<Data | string>) {
 
-	const eUTxO = req.body.eUTxO
+	const eUTxO : EUTxO = req.body.eUTxO
 
 	await connect();
 
-	console.log("/api/updateEUTxO - Request: " + eUTxO.uTxO.txHash + " - " + eUTxO.uTxO.outputIndex);
+    const swSet = (eUTxO.isPreparing.val? "SET":"UNSET")
+
+	console.log("/api/updateEUTxOIsPreparing - " + swSet + " - Request: " + eUTxO.uTxO.txHash + " - " + eUTxO.uTxO.outputIndex);
 
 	try {
         const eUTxO_ = await getEUTxOFromDBByTxHashAndIndex (eUTxO.uTxO.txHash, eUTxO.uTxO.outputIndex)
 
         if (eUTxO_.length == 0 ){
-            console.error("/api/updateEUTxO - Can't update EUTxO in Database - Error: EUTxO not Exist: " + eUTxO.uTxO.txHash + " - " + eUTxO.uTxO.outputIndex);
-            res.status(400).json({ msg: "Can't update EUTxO in Database - Error: EUTxO not Exist: " + eUTxO.uTxO.txHash + " - " + eUTxO.uTxO.outputIndex})
+            console.error("/api/updateEUTxOIsPreparing - Can't update EUTxO in Database - Error: EUTxO not Exist: " + eUTxO.uTxO.txHash + " - " + eUTxO.uTxO.outputIndex);
+            res.status(201).json({ msg: "Can't update EUTxO in Database - Error: EUTxO not Exist: " + eUTxO.uTxO.txHash + " - " + eUTxO.uTxO.outputIndex})
             return
         // } else {
-            // console.log("/api/updateEUTxO - EUTxO Exist: " + eUTxO.uTxO.txHash + " - " + eUTxO.uTxO.outputIndex);
+            // console.log("/api/updateEUTxOIsPreparing - EUTxO Exist: " + eUTxO.uTxO.txHash + " - " + eUTxO.uTxO.outputIndex);
         }
 
         var EUTxODBModel = getEUTxODBModel()
@@ -39,19 +42,13 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
         }
 
         await EUTxODBModel.findOneAndUpdate(filter, update)
-            // , undefined, (function(error: any){
-            // if(error) {
-            //     console.error("/api/updateEUTxO - Can't update EUTxO in Database - Error: " + error);
-            //     res.status(400).json({ msg: "Can't update EUTxO in Database - Error: " + error})
-            //     return
-            // }else{
-        console.log("/api/updateEUTxO - EUTxO updated in Database!"); 
+          
+        // console.log("/api/updateEUTxOIsPreparing - EUTxO updated in Database!"); 
         res.status(200).json({ msg: "EUTxO Updated in Database!"})
         return
-        //     }
-        //  }));
+       
     } catch (error) {
-        console.error("/api/updateEUTxO - Can't update EUTxO in Database - Error: " + error);
+        console.error("/api/updateEUTxOIsPreparing - Can't update EUTxO in Database - Error: " + error);
         res.status(400).json({ msg: "Can't update EUTxO in Database - Error: " + error})
         return
     }

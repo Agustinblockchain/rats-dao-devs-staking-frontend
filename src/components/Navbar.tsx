@@ -1,8 +1,6 @@
-import dynamic from 'next/dynamic';
-import Link from 'next/link';
-import WalletModalBtn from './WalletModalBtn';
 import { useStoreState } from '../utils/walletProvider';
-
+import WalletModalBtn from './WalletModalBtn';
+//--------------------------------------
 export default function Navbar() {
 	//const WalletModalBtn = dynamic(() => import('./WalletModalBtn'), { ssr: false })
 	const walletStore = useStoreState(state => state.wallet)

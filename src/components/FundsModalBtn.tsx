@@ -1,25 +1,14 @@
 //--------------------------------------
-import { useEffect, useState } from "react";
-// import UseAnimations from 'react-useanimations';
-// import alertTriangle from 'react-useanimations/lib/alertTriangle'
-// import loading from 'react-useanimations/lib/loading'
-// import success from 'react-useanimations/lib/checkmark'
-//--------------------------------------
-import { toJson } from '../utils/utils';
-import { StakingPoolDBInterface } from '../types/stakePoolDBModel'
 import { Assets } from "lucid-cardano";
-import Skeleton from "react-loading-skeleton";
+import { useEffect, useState } from "react";
+import { getAvailaibleFunds_In_EUTxO_With_FundDatum, getFundAmount_In_EUTxO_With_FundDatum } from "../stakePool/helpersStakePool";
 import useStatePoolData from '../stakePool/useStatePoolData';
-import LoadingSpinner from "./LoadingSpinner";
-import ActionModalBtn from "./ActionModalBtn";
-import { useStoreActions, useStoreDispatch, useStoreState } from '../utils/walletProvider';
 import { EUTxO } from "../types";
 import { maxTokensWithDifferentNames } from "../types/constantes";
-import {
-    getFundAmount_In_EUTxO_With_FundDatum, getAvailaibleFunds_In_EUTxO_With_FundDatum, getRewardsToPay_In_EUTxO_With_UserDatum, getTotalCashedOut,
-    getTotalFundAmount, getTotalAvailaibleFunds, getTotalRewardsToPay_In_EUTxOs_With_UserDatum, getTotalStakedAmount, getStakedAmount_In_EUTxO_With_UserDatum,
-    getTotalUserActive, getTotalUserRegistered
-} from "../stakePool/helpersStakePool";
+import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
+import { useStoreState } from '../utils/walletProvider';
+import ActionModalBtn from "./ActionModalBtn";
+import LoadingSpinner from "./LoadingSpinner";
 //--------------------------------------
 
 type ActionState = "loading" | "success" | "error" | "idle"
@@ -101,6 +90,7 @@ export default function FundsModalBtn(
 
 		totalStaked, totalRewardsPaid, totalRewardsToPay,
 
+		isPoolDataLoading,
 		loadPoolData } = statePoolData
 
 	useEffect(() => {
@@ -227,56 +217,56 @@ export default function FundsModalBtn(
 				<div className="modal__content">
 					<div className="modal__content_item" >
 						<h3>List of UTxOs With Funds</h3>
-						{
-							// (!isPoolDataLoaded) ?
-							// 	<>
-							// 		<LoadingSpinner size={25} border={5} />
-							// 	</>
-							// 	:
-								<div className="tableContainerFunds" style={{ maxHeight: 300 }}>
-									<table>
-										<thead>
-											<tr>
-												<th></th>
-												<th>Tx Hash # Index</th>
-												<th>Starting Fund Amount</th>
-												<th>Rewards Haversted</th>
-												<th>Availaible Funds</th>
+						
+							
+						<div className="tableContainerFunds" style={{ maxHeight: 300 }}>
+							<table>
+								<thead>
+									<tr>
+										<th></th>
+										<th>Tx Hash # Index</th>
+										<th>Availaible EUTxO</th>
+										<th>Starting Fund Amount</th>
+										<th>Rewards Haversted</th>
+										<th>Availaible Funds</th>
+									</tr>
+								</thead>
+								<tbody>
+									{eUTxOs_With_FundDatum.map(
+										eUTxO =>
+											<tr key={eUTxO.uTxO.txHash + "#" + eUTxO.uTxO.outputIndex}>
+												<td>
+													<input type="checkbox" key={eUTxO.uTxO.txHash + "#" + eUTxO.uTxO.outputIndex}
+														onChange={(e) => {
+															//console.log(e.target.checked)
+															if (e.target.checked) {
+																setEUTxOs_FundDatum_Selected(eUTxOs_FundDatum_Selected.concat(eUTxO))
+															} else {
+																setEUTxOs_FundDatum_Selected(eUTxOs_FundDatum_Selected.filter(eUTxO_FundDatum => eUTxO_FundDatum.uTxO.txHash !== eUTxO.uTxO.txHash || eUTxO_FundDatum.uTxO.outputIndex !== eUTxO.uTxO.outputIndex))
+															}
+														}}
+													/>
+												</td>
+												<td>{eUTxO.uTxO.txHash + "#" + eUTxO.uTxO.outputIndex}</td>
+												<td>{eUTxO.isPreparing.val !== undefined || eUTxO.isConsuming.val !== undefined? "No":"Yes"}</td>
+												<td>{Number(getFundAmount_In_EUTxO_With_FundDatum(eUTxO)).toLocaleString("en-US") + " " + poolInfo.harvest_UI}</td>
+												<td>{Number(eUTxO.datum.fdCashedOut).toLocaleString("en-US") + " " + poolInfo.harvest_UI}</td>
+												<td>{Number(getAvailaibleFunds_In_EUTxO_With_FundDatum(eUTxO)).toLocaleString("en-US") + " " + poolInfo.harvest_UI}</td>
 											</tr>
-										</thead>
-										<tbody>
-											{eUTxOs_With_FundDatum.map(
-												eUTxO =>
-													<tr key={eUTxO.uTxO.txHash + "#" + eUTxO.uTxO.outputIndex}>
-														<td>
-															<input type="checkbox" key={eUTxO.uTxO.txHash + "#" + eUTxO.uTxO.outputIndex}
-																onChange={(e) => {
-																	//console.log(e.target.checked)
-																	if (e.target.checked) {
-																		setEUTxOs_FundDatum_Selected(eUTxOs_FundDatum_Selected.concat(eUTxO))
-																	} else {
-																		setEUTxOs_FundDatum_Selected(eUTxOs_FundDatum_Selected.filter(eUTxO_FundDatum => eUTxO_FundDatum.uTxO.txHash !== eUTxO.uTxO.txHash || eUTxO_FundDatum.uTxO.outputIndex !== eUTxO.uTxO.outputIndex))
-																	}
-																}}
-															/>
-														</td>
-														<td>{eUTxO.uTxO.txHash + "#" + eUTxO.uTxO.outputIndex}</td>
-														<td>{Number(getFundAmount_In_EUTxO_With_FundDatum(eUTxO)).toLocaleString("en-US") + " " + poolInfo.harvest_UI}</td>
-														<td>{Number(eUTxO.datum.fdCashedOut).toLocaleString("en-US") + " " + poolInfo.harvest_UI}</td>
-														<td>{Number(getAvailaibleFunds_In_EUTxO_With_FundDatum(eUTxO)).toLocaleString("en-US") + " " + poolInfo.harvest_UI}</td>
-													</tr>
-											)}
-											<tr >
-												<td>{eUTxOs_With_FundDatum.length}</td>
-												<td>Total</td>
-												<td>{Number(totalFundAmount).toLocaleString("en-US") + " " + poolInfo.harvest_UI}</td>
-												<td>{Number(totalRewardsPaid).toLocaleString("en-US") + " " + poolInfo.harvest_UI}</td>
-												<td>{Number(totalFundsAvailable).toLocaleString("en-US") + " " + poolInfo.harvest_UI}</td>
-											</tr>
-										</tbody>
-									</table>
-								</div>
-						}
+									)}
+									<tr >
+										<td>{eUTxOs_With_FundDatum.length}</td>
+										<td></td>
+										<td>Total</td>
+										<td>{Number(totalFundAmount).toLocaleString("en-US") + " " + poolInfo.harvest_UI}</td>
+										<td>{Number(totalRewardsPaid).toLocaleString("en-US") + " " + poolInfo.harvest_UI}</td>
+										<td>{Number(totalFundsAvailable).toLocaleString("en-US") + " " + poolInfo.harvest_UI}</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+							
+					
 
 						{/* {toJson(eUTxOs_FundDatum_Selected)} */}
 
@@ -284,13 +274,13 @@ export default function FundsModalBtn(
 							<ActionModalBtn action={masterNewFundAction} swHash={true} poolInfo={poolInfo} 
 								showInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={maxHarvestAmount} 
 								enabled={walletStore.connected && isPoolDataLoaded && swPreparado === true} 
-								show={swPreparado === true && swTerminated === false}
+								show={isPoolDataLoaded === true && swPreparado === true && swTerminated === false}
 								actionName="New Fund" actionIdx={poolInfo.name + "-FundModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
 							<ActionModalBtn 
 									action={masterNewFundsBatchAction} swHash={false} poolInfo={poolInfo} 
 									showInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={maxHarvestAmount} 
 									enabled={walletStore.connected && isPoolDataLoaded && swPreparado === true} 
-									show={swPreparado === true && swTerminated === false}
+									show={isPoolDataLoaded === true && swPreparado === true && swTerminated === false}
 									actionName="New Funds Batch" actionIdx={poolInfo.name + "-FundModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
 									callback={handleCallback} 
 									cancel={handleCancel}
@@ -298,28 +288,49 @@ export default function FundsModalBtn(
 							<ActionModalBtn action={masterFundAndMergeAction} swHash={true} eUTxOs_Selected={eUTxOs_FundDatum_Selected} poolInfo={poolInfo} 
 								showInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={maxHarvestAmount} 
 								enabled={walletStore.connected && isPoolDataLoaded && swFunded === true && swTerminated === false && eUTxOs_FundDatum_Selected.length > 0} 
-								show={swPreparado === true && swFunded === true && swTerminated === false}
+								show={isPoolDataLoaded === true && swPreparado === true && swFunded === true && swTerminated === false}
 								actionName="Fund And Merge" actionIdx={poolInfo.name + "-FundModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
 							<ActionModalBtn action={masterMergeFundsAction} swHash={true} eUTxOs_Selected={eUTxOs_FundDatum_Selected} poolInfo={poolInfo} 
 								enabled={walletStore.connected && isPoolDataLoaded && swFunded === true && eUTxOs_FundDatum_Selected.length > 1} 
-								show={swPreparado === true && swFunded === true}
+								show={isPoolDataLoaded === true && swPreparado === true && swFunded === true}
 								actionName="Merge Funds" actionIdx={poolInfo.name + "-FundModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
 							<ActionModalBtn action={masterSplitFundAction} swHash={true} eUTxOs_Selected={eUTxOs_FundDatum_Selected} poolInfo={poolInfo} 
 								showInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={maxHarvestAmount} 
 								enabled={walletStore.connected && isPoolDataLoaded && swFunded === true && eUTxOs_FundDatum_Selected.length == 1} 
-								show={swPreparado === true && swFunded === true && swTerminated === false}
+								show={isPoolDataLoaded === true && swPreparado === true && swFunded === true && swTerminated === false}
 								actionName="Split Fund" actionIdx={poolInfo.name + "-FundModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
 							<ActionModalBtn action={masterDeleteFundsAction} swHash={true} eUTxOs_Selected={eUTxOs_FundDatum_Selected} poolInfo={poolInfo} 
 								enabled={walletStore.connected && isPoolDataLoaded && swFunded === true && eUTxOs_FundDatum_Selected.length > 0 && swTerminated === true} 
-								show={swPreparado === true && swFunded === true && swTerminated === true}
+								show={isPoolDataLoaded === true && swPreparado === true && swFunded === true && swTerminated === true}
 								actionName="Delete Funds" actionIdx={poolInfo.name + "-FundModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
 							<ActionModalBtn 
 								action={masterDeleteFundsBatchAction} swHash={false} poolInfo={poolInfo} 
 								enabled={walletStore.connected && isPoolDataLoaded && swFunded === true && swTerminated === true} actionName="Delete Funds Batch" actionIdx={poolInfo.name + "-FundModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-								show={swPreparado === true && swFunded === true && swTerminated === true}
+								show={isPoolDataLoaded === true && swPreparado === true && swFunded === true && swTerminated === true}
 								callback={handleCallback} 
 								cancel={handleCancel}
 								/>
+							<div className="modal__action_separator">
+								<br></br>
+								<button className="btn"
+									onClick={(e) => {
+										e.preventDefault()
+										loadPoolData ()
+									}
+									}
+								disabled={isPoolDataLoading}
+								>
+								Refresh
+								{isPoolDataLoading ?
+									<>
+										<LoadingSpinner size={25} border={5} />
+									</>
+								:
+									<>
+									</>
+								}
+							</button>
+							</div>
 							<div className="modal__action_separator">
 								<br></br>
 								<button className="btn"

@@ -1,7 +1,7 @@
 import { C, Lucid, PaymentKeyHash, UTxO } from "lucid-cardano";
 import { AC, EUTxO, FundDatum, Maybe, mkFundDatum_FromCbor, mkPoolDatum_FromCbor, mkScriptDatum_FromCbor, mkUserDatum_FromCbor, PoolDatum, POSIXTime, ScriptDatum, UserDatum } from "../types";
 import { StakingPoolDBInterface } from "../types/stakePoolDBModel";
-import { apiDeleteEUTxOsDBByAddress, apiDeleteEUTxOsDBPreparingOrConsumingByAddress, findDatumIfMissing, isNFT_With_AC_Lucid_InValue, isToken_With_AC_Lucid_InValue } from "../utils/cardano-helpers";
+import { apiDeleteEUTxOsDBByAddress, findDatumIfMissing, isNFT_With_AC_Lucid_InValue, isToken_With_AC_Lucid_InValue } from "../utils/cardano-helpers";
 import { objToPlutusData } from "../utils/cardano-utils";
 
 //----------------------------------------------------------------------
@@ -37,7 +37,8 @@ export async function getExtendedUTxOsWith_Datum(lucid: Lucid, utxos: UTxO[]): P
     const eUTxOs: EUTxO[] = []
 
     // console.log ("getExtendedUTxOsWith_Datum - init: " + toJson (utxos))
-    // console.log ("getExtendedUTxOsWith_Datum - init - length: " + utxos.length)
+    
+    console.log ("getExtendedUTxOsWith_Datum - init - length: " + utxos.length)
 
     for (var i = 0; i < utxos.length; i += 1) {
 
@@ -109,7 +110,91 @@ export async function getExtendedUTxOsWith_Datum(lucid: Lucid, utxos: UTxO[]): P
         }
     }
     // console.log ("getExtendedUTxOsWith_Datum - result:  " + toJson (eUTxOs))
-    // console.log ("getExtendedUTxOsWith_Datum - result length:  " + eUTxOs.length)
+    console.log ("getExtendedUTxOsWith_Datum - result length:  " + eUTxOs.length)
+    return eUTxOs
+}
+
+//---------------------------------------------------------------
+
+export async function getMissingEUTxOs(lucid: Lucid, utxos: UTxO[], eUTxOsDB: EUTxO[]): Promise<EUTxO[]> {
+    const eUTxOs: EUTxO[] = []
+
+    // console.log ("getMissingEUTxOs - init: " + toJson (utxos))
+    
+    console.log ("getMissingEUTxOs - init - length script: " + utxos.length + " - db length: " + eUTxOsDB.length)
+
+    for (var i = 0; i < utxos.length; i += 1) {
+
+        if (!eUTxOsDB.find(eUTxO => eUTxO.uTxO.txHash === utxos[i].txHash && eUTxO.uTxO.outputIndex === utxos[i].outputIndex)) {
+            const uTxO = await findDatumIfMissing(lucid, utxos[i])
+            if (uTxO.datum) {
+                try {
+                    const poolDatum: PoolDatum | void = mkPoolDatum_FromCbor(uTxO.datum)
+
+                    if (!uTxO.datumHash) {
+                        const plutusData = objToPlutusData(poolDatum)
+                        const hash = C.hash_plutus_data(plutusData)
+                        //uTxO.datumHash = showPtrInHex(hash)
+                        //console.log ("getMissingEUTxOs - datumHash calc")
+                    }
+
+                    const eUTxO: EUTxO = {
+                        datum: poolDatum,
+                        uTxO: uTxO,
+                        isPreparing: new Maybe<POSIXTime>(),
+                        isConsuming: new Maybe<POSIXTime>()
+                    }
+                    //console.log ("getMissingEUTxOs - poolDatum:  " + toJson (eUTxO))
+
+                    eUTxOs.push(eUTxO)
+                    continue;
+                }
+                catch (error) {
+                }
+                try {
+                    const fundDatum: FundDatum | void = mkFundDatum_FromCbor(uTxO.datum)
+                    const eUTxO: EUTxO = {
+                        datum: fundDatum,
+                        uTxO: uTxO,
+                        isPreparing: new Maybe<POSIXTime>(),
+                        isConsuming: new Maybe<POSIXTime>()
+                    }
+                    eUTxOs.push(eUTxO)
+                    continue;
+                }
+                catch (error) {
+                }
+                try {
+                    const userDatum: UserDatum | void = mkUserDatum_FromCbor(uTxO.datum)
+                    const eUTxO: EUTxO = {
+                        datum: userDatum,
+                        uTxO: uTxO,
+                        isPreparing: new Maybe<POSIXTime>(),
+                        isConsuming: new Maybe<POSIXTime>()
+                    }
+                    eUTxOs.push(eUTxO)
+                    continue;
+                }
+                catch (error) {
+                }
+                try {
+                    const scriptDatum: ScriptDatum | undefined = mkScriptDatum_FromCbor(uTxO.datum)
+                    const eUTxO: EUTxO = {
+                        datum: scriptDatum,
+                        uTxO: uTxO,
+                        isPreparing: new Maybe<POSIXTime>(),
+                        isConsuming: new Maybe<POSIXTime>()
+                    }
+                    eUTxOs.push(eUTxO)
+                    continue;
+                }
+                catch (error) {
+                }
+            }
+        }
+    }
+    // console.log ("getMissingEUTxOs - result:  " + toJson (eUTxOs))
+    console.log ("getMissingEUTxOs - result length:  " + eUTxOs.length)
     return eUTxOs
 }
 

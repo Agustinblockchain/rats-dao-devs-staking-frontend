@@ -1,11 +1,10 @@
-import Head from 'next/head'
-//import { Html, Head, Main, NextScript } from 'next/document'
 
-import Footer from './Footer'
-import dynamic from 'next/dynamic'
+import Footer from './Footer';
 import Navbar from './Navbar';
 
-import { useStoreActions, useStoreState} from '../utils/walletProvider'
+import { useStoreState } from '../utils/walletProvider';
+
+//--------------------------------------
 
 export default function Layout({
 	children,

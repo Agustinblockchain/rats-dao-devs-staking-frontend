@@ -1,7 +1,7 @@
 
 import { Schema, model, models } from 'mongoose';
 import { toJson } from '../utils/utils';
-import { isConsumingTime, isPreparingTime } from './constantes';
+import { txConsumingTime, txPreparingTime } from './constantes';
 import { EUTxO, UserDatum } from './types';
 
 // 1. Create an interface representing a document in MongoDB.
@@ -106,8 +106,8 @@ export async function deleteEUTxOsFromDBByAddress (address : string) : Promise<n
 export async function deleteEUTxOsFromDBPreparingOrConsumingByAddress (address : string) : Promise<number> {
 
 	const now = new Date()
-	const nowMinusIsPreparinTime = now.getTime() - isPreparingTime
-	const nowMinusIsConsumingTime = now.getTime() - isConsumingTime
+	const nowMinusTxPreparinTime = now.getTime() - txPreparingTime
+	const nowMinusTxConsumingTime = now.getTime() - txConsumingTime
 	//------------------
 
 	const EUTxODBModel = getEUTxODBModel()
@@ -116,8 +116,8 @@ export async function deleteEUTxOsFromDBPreparingOrConsumingByAddress (address :
 		{
 			"eUTxO.uTxO.address": address, 
 			"$or": [
-				{"eUTxO.isPreparing.plutusDataIndex":0, "eUTxO.isPreparing.val": {"$lte":nowMinusIsPreparinTime}},
-				{"eUTxO.isConsuming.plutusDataIndex":0, "eUTxO.isConsuming.val":  {"$lte":nowMinusIsConsumingTime}}
+				{"eUTxO.isPreparing.plutusDataIndex":0, "eUTxO.isPreparing.val": {"$lte":nowMinusTxPreparinTime}},
+				{"eUTxO.isConsuming.plutusDataIndex":0, "eUTxO.isConsuming.val":  {"$lte":nowMinusTxConsumingTime}}
 			] 
 		}
 		// , undefined, function(error: any){

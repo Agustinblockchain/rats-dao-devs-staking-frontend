@@ -1,6 +1,5 @@
 //--------------------------------------
-import { Blockfrost, Lucid, WalletApi } from 'lucid-cardano'
-//--------------------------------------
+import { Blockfrost, Lucid, WalletApi } from 'lucid-cardano';
 import { toJson } from './utils';
 //--------------------------------------
 

@@ -1,34 +1,21 @@
 //--------------------------------------
-import { useContext, useEffect, useState } from "react";
-
-
-//--------------------------------------
-import { copyToClipboard, toJson } from '../utils/utils';
-import { StakingPoolDBInterface } from '../types/stakePoolDBModel'
+import { useEffect, useState } from "react";
 import { Assets } from "lucid-cardano";
-import Skeleton from "react-loading-skeleton";
-
+import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
+import { copyToClipboard } from '../utils/utils';
 import { NumericFormat } from 'react-number-format';
-// import UseAnimations from 'react-useanimations';
-
-// import loadingAnimation from 'react-useanimations/lib/loading'
-// import checkmarkAnimation  from 'react-useanimations/lib/checkmark'
-// import alertTriangleAnimation from 'react-useanimations/lib/alertTriangle'
-
-import LoadingSpinner from "./LoadingSpinner";
-import { EUTxO, Master } from "../types";
-import { pushSucessNotification, pushWarningNotification } from "../utils/pushNotification";
-import { maxTokensWithDifferentNames } from "../types/constantes";
 import { explainError } from "../stakePool/explainError";
+import { EUTxO, Master } from "../types";
+import { maxTokensWithDifferentNames } from "../types/constantes";
+import { pushSucessNotification, pushWarningNotification } from "../utils/pushNotification";
+import LoadingSpinner from "./LoadingSpinner";
 //--------------------------------------
-
 
 type ActionStatus = "loading" | "success" | "error" | "idle"
 
 //--------------------------------------
 
 export default function ActionModalBtn(
-
 
 	{ actionName, enabled, show, actionIdx, action, poolInfo, eUTxOs_Selected, master_Selected, showInput, inputUnitForLucid, inputUnitForShowing, inputMax, swHash, messageFromParent, hashFromParent, isWorking, callback, cancel }:
 		{
@@ -149,8 +136,8 @@ export default function ActionModalBtn(
 				setHash("")
 			}
 
-			setTokenAmount("1")
-			setTokenAmountFormatedValue("1")
+			setTokenAmount("0")
+			setTokenAmountFormatedValue("0")
 
 		} catch (error: any) {
 			const error_explained = explainError(error)
@@ -163,8 +150,8 @@ export default function ActionModalBtn(
 			setHash("")
 
 			// no inicio los valores si hay error
-			// setTokenAmount("1")
-			// setTokenAmountFormatedValue("1")
+			setTokenAmount("0")
+			setTokenAmountFormatedValue("0")
 		}
 	}
 
@@ -186,7 +173,7 @@ export default function ActionModalBtn(
 				: null}</>
 
 			
-			{show?
+			{show ?
 				<>
 					<br></br>
 					{enabled && (isWorking === actionNameWithIdx || isWorking === "") ?
@@ -229,61 +216,56 @@ export default function ActionModalBtn(
 							</span>
 						</button>
 					}
-					<input
-						className="modal__toggle"
-						type="checkbox"
-						id={`${actionNameWithIdx}-modal-toggle`}
-
-						onChange={(e) => {
-
-							//console.log ("modal change: " + e.target.checked)
-
-							if (e.target.checked) {
-								//si es checked es porque esta abierto el modal
-
-
-								if (showInput) {
-									//el modal se abre y muestra inputs
-
-									//no quiero cambiar el status a menos que este en success o error, que ya paso el proceso anterior.
-									//en ese caso lo pongo en idle de nuevo
-									//si estaba loading, no hago nada, porque el proceso sigue corriendo
-
-									if (status === 'success' || status === 'error') {
-										setStatus('idle')
-
-										setTitle(actionName)
-										setMessage("")
-										setHash("")
-									}
-
-								} else {
-									//el modal se abre y ejecuta la accion directamente solo si esta en idle, success, o error, o sea, que no este en loading
-
-									if (status === "idle" || status === "success" || status === "error") {
-										if (poolInfo) {
-											// if (eUTxOs_Selected !== undefined) {
-											doAction(action, poolInfo, eUTxOs_Selected, undefined, master_Selected)
-											// } else {
-											// 	doAction(action, poolInfo)
-											// }
-										} else {
-											doAction(action)
-										}
-									}
-								}
-							} else {
-								//si no es checked es porque esta cerrado el modal
-
-								//setTitle("cuando ?")
-								//setStatus("idle")
-							}
-						}}
-					/>
+					
 				</>
 			:
 				<></>
 			}
+			<input
+				className="modal__toggle"
+				type="checkbox"
+				id={`${actionNameWithIdx}-modal-toggle`}
+				onChange={(e) => {
+					//console.log ("modal change: " + e.target.checked)
+					if (e.target.checked) {
+						//si es checked es porque esta abierto el modal
+						if (showInput) {
+							//el modal se abre y muestra inputs
+
+							//no quiero cambiar el status a menos que este en success o error, que ya paso el proceso anterior.
+							//en ese caso lo pongo en idle de nuevo
+							//si estaba loading, no hago nada, porque el proceso sigue corriendo
+
+							if (status === 'success' || status === 'error') {
+								setStatus('idle')
+
+								setTitle(actionName)
+								setMessage("")
+								setHash("")
+							}
+
+						} else {
+							//el modal se abre y ejecuta la accion directamente solo si esta en idle, success, o error, o sea, que no este en loading
+
+							if (status === "idle" || status === "success" || status === "error") {
+								if (poolInfo) {
+									// if (eUTxOs_Selected !== undefined) {
+									doAction(action, poolInfo, eUTxOs_Selected, undefined, master_Selected)
+									// } else {
+									// 	doAction(action, poolInfo)
+									// }
+								} else {
+									doAction(action)
+								}
+							}
+						}
+					} else {
+						//si no es checked es porque esta cerrado el modal
+						//setTitle("cuando ?")
+						//setStatus("idle")
+					}
+				}}
+			/>
 			<div id={`${actionNameWithIdx}-modal`} className="modal">
 				<label htmlFor={`${actionNameWithIdx}-modal-toggle`} className="modal__shade"></label>
 				<div className="modal__content">
@@ -514,7 +496,7 @@ export default function ActionModalBtn(
 											}
 											}
 										>
-											Close
+											Close X
 										</button>
 									</>
 

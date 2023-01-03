@@ -1,23 +1,19 @@
 //--------------------------------------
-import { useEffect, useRef, useState } from "react";
-//--------------------------------------
-import { useStoreState } from "../utils/walletProvider";
-//--------------------------------------
+import { useEffect, useState } from "react";
 import { EUTxO, Master_Funder, PoolDatum, UserDatum } from "../types";
 import { fundID_TN, poolDatum_ClaimedFund, poolID_TN, scriptID_Master_AddScripts_TN, scriptID_Master_ClosePool_TN, scriptID_Master_DeleteFund_TN, scriptID_Master_DeleteScripts_TN, scriptID_Master_FundAndMerge_TN, scriptID_Master_Fund_TN, scriptID_Master_SendBackDeposit_TN, scriptID_Master_SendBackFund_TN, scriptID_Master_SplitFund_TN, scriptID_Master_TerminatePool_TN, scriptID_User_Deposit_TN, scriptID_User_Harvest_TN, scriptID_User_Withdraw_TN, scriptID_Validator_TN, txID_Master_AddScripts_TN, userID_TN } from "../types/constantes";
 import { StakingPoolDBInterface } from "../types/stakePoolDBModel";
+import { apiDeleteEUTxOsDBPreparingOrConsumingByAddress, apiGetEUTxOsDBByAddress, apiSaveEUTxODB } from "../utils/cardano-helpers";
 import { strToHex, toJson } from "../utils/utils";
+import { useStoreState } from "../utils/walletProvider";
 import {
     getEUTxOs_With_FundDatum_InEUxTOList, getEUTxOs_With_UserDatum_InEUxTOList,
-    getEUTxOs_With_UserDatum_InEUxTOList_OfUser, getEUTxO_With_PoolDatum_InEUxTOList, getEUTxO_With_ScriptDatum_InEUxTOList, getExtendedUTxOsWith_Datum
+    getEUTxOs_With_UserDatum_InEUxTOList_OfUser, getEUTxO_With_PoolDatum_InEUxTOList, getEUTxO_With_ScriptDatum_InEUxTOList, getExtendedUTxOsWith_Datum, getMissingEUTxOs
 } from "./helpersScripts";
 import {
-    getFundAmountsRemains_ForMaster,
-    getIfUserRegistered, getTotalAvailaibleFunds, getTotalCashedOut, getTotalFundAmount, getTotalFundAmountsRemains_ForMasters, getTotalMastersMinAda_In_EUTxOs_With_UserDatum, getTotalRewardsToPay_In_EUTxOs_With_UserDatum, getTotalStakedAmount, getTotalUsersMinAda_In_EUTxOs_With_UserDatum, getUserRewardsPaid,
+    apiUpdateStakingPoolDB, getIfUserRegistered, getTotalAvailaibleFunds, getTotalCashedOut, getTotalFundAmount, getTotalFundAmountsRemains_ForMasters, getTotalMastersMinAda_In_EUTxOs_With_UserDatum, getTotalRewardsToPay_In_EUTxOs_With_UserDatum, getTotalStakedAmount, getTotalUsersMinAda_In_EUTxOs_With_UserDatum, getUserRewardsPaid,
     getUserRewardsToPay, getUserStaked, sortFundDatum
 } from "./helpersStakePool";
-import { apiDeleteEUTxOsDBPreparingOrConsumingByAddress, apiGetEUTxOsDBByAddress, apiSaveEUTxODB } from "../utils/cardano-helpers";
-import { useLocalStorage } from "../utils/useLocalStorage";
 //--------------------------------------
 export default function useStatePoolData(poolInfo: StakingPoolDBInterface) {
     // console.log("useStatePoolData - " + poolInfo.name + " - INIT")
@@ -43,7 +39,7 @@ export default function useStatePoolData(poolInfo: StakingPoolDBInterface) {
     // const setIsPoolDataLoading = (value: boolean) => {
 	// 	isPoolDataLoading.current = value
 	// }
-    const [swFromDB, setSwFromDB] = useState<string | 0 | boolean>(ui_loading)
+    // const [swFromDB, setSwFromDB] = useState<string | 0 | boolean>(ui_loading)
 
     const [swShowOnHome, setShowOnHome] = useState<string | 0 | boolean>(poolInfo.swShowOnHome ? poolInfo.swShowOnHome : ui_loading)
 
@@ -127,7 +123,7 @@ export default function useStatePoolData(poolInfo: StakingPoolDBInterface) {
 
         setIsPoolDataLoaded(false)
 
-        setSwFromDB(ui)
+        // setSwFromDB(ui)
         
         setSwPreparado(poolInfo.swPreparado ? poolInfo.swPreparado : ui)
         setSwIniciado(poolInfo.swIniciado ? poolInfo.swIniciado : ui)
@@ -227,9 +223,9 @@ export default function useStatePoolData(poolInfo: StakingPoolDBInterface) {
 
     }, [walletStore.connected])
     
-    const loadPoolData = async (fromDB? : boolean | undefined) => {
+    const loadPoolData = async () => {
         
-        console.log("useStatePoolData - " + poolInfo.name + " - loadPoolData - Init - fromDB: " + fromDB)
+        console.log("useStatePoolData - " + poolInfo.name + " - loadPoolData - Init")
         
         // console.log("useStatePoolData - " + poolInfo.name + " - loadPoolData - isPoolDataLoading: " + isPoolDataLoading)
         
@@ -237,7 +233,7 @@ export default function useStatePoolData(poolInfo: StakingPoolDBInterface) {
         setLoading(ui_loading)
 
         var swUpdate = false
-
+        //------------------
         var swPreparado = poolInfo.swPreparado
         var swIniciado = poolInfo.swIniciado
         var swFunded = poolInfo.swFunded
@@ -279,22 +275,33 @@ export default function useStatePoolData(poolInfo: StakingPoolDBInterface) {
         //------------------
         const now = new Date()
         //------------------
+        // elimino todas las eutxos que estan en la base de datos marcadas como preparadas o consumidas y que paso el tiempo de espera
+        await apiDeleteEUTxOsDBPreparingOrConsumingByAddress(scriptAddress)
+        //------------------
         var eUTxOs_With_Datum : EUTxO [] = []
-        if (fromDB == undefined || fromDB == false) {
-            setSwFromDB(false)
-            const lucid = walletStore.lucid
-            const uTxOsAtScript = await lucid!.utxosAt(scriptAddress)
+        eUTxOs_With_Datum = await apiGetEUTxOsDBByAddress(scriptAddress);
+        console.log("useStatePoolData - eUTxOs - DB - length: " + eUTxOs_With_Datum.length)
+        //------------------
+        const lucid = walletStore.lucid
+        console.log("useStatePoolData - eUTxOs - loading from lucid")
+        const uTxOsAtScript = await lucid!.utxosAt(scriptAddress)
+        console.log("useStatePoolData - eUTxOs - loaded from lucid")
+        //------------------
+        if (uTxOsAtScript.length != eUTxOs_With_Datum.length){
+            console.log("useStatePoolData - eUTxOs - AtScript not match - length: " + uTxOsAtScript.length)
+            var eUTxOs_With_Datum_Missing : EUTxO [] = await getMissingEUTxOs(lucid!, uTxOsAtScript, eUTxOs_With_Datum)   
             //------------------
-            // console.log("useStatePoolData - " + poolInfo.name + " - loadPoolData: uTxOsAtScript length: " + uTxOsAtScript.length)
-            console.log("useStatePoolData - uTxOsAtScript - length: " + uTxOsAtScript.length)
-            if (uTxOsAtScript.length == 0) {
-                // console.log("useStatePoolData - " + poolInfo.name + " - loadPoolData: UTxO list at Script is empty");
+            try{
+                for (let i = 0; i < eUTxOs_With_Datum_Missing.length; i++) {
+                    await apiSaveEUTxODB(eUTxOs_With_Datum_Missing[i])
+                }
+            } catch (error) {
+                console.error("useStatePoolData - eUTxOs - apiSaveEUTxODB - Error: " + error)
+                throw error
             }
-            //------------------
-            eUTxOs_With_Datum = await getExtendedUTxOsWith_Datum(lucid!, uTxOsAtScript)
-        }else{
-            setSwFromDB(true)
-            eUTxOs_With_Datum = await apiGetEUTxOsDBByAddress(scriptAddress);
+            //------------------ 
+            eUTxOs_With_Datum = eUTxOs_With_Datum.concat(eUTxOs_With_Datum_Missing)
+            console.log("useStatePoolData - eUTxOs - Updated - length: " + eUTxOs_With_Datum.length)
         }
         //------------------
         setEUTxOs_With_Datum(eUTxOs_With_Datum)
@@ -304,12 +311,14 @@ export default function useStatePoolData(poolInfo: StakingPoolDBInterface) {
 
         if (eUTxO_With_PoolDatum === undefined) {
             try{
-                eUTxO_With_PoolDatum = await getEUTxO_With_PoolDatum_InEUxTOList(poolInfo, poolID_AC_Lucid, eUTxOs_With_Datum, true)
+                eUTxO_With_PoolDatum = await getEUTxO_With_PoolDatum_InEUxTOList(poolInfo, poolID_AC_Lucid, eUTxOs_With_Datum, false)
             }catch(error){
                 eUTxO_With_PoolDatum = undefined
             }
             if (!eUTxO_With_PoolDatum) {
                 // console.log("useStatePoolData - " + poolInfo.name + " - loadPoolData: Can't find any UTxO with PoolDatum");
+
+                swPreparado = false
 
                 setEUTxO_With_PoolDatum(undefined)
 
@@ -340,7 +349,7 @@ export default function useStatePoolData(poolInfo: StakingPoolDBInterface) {
             } else {
                 swPreparado = true
 
-                // console.log("useStatePoolData - " + poolInfo.name + " - loadPoolData: UTxO with PoolDatum: " + eUTxO_With_PoolDatum.uTxO.txHash + "#" + eUTxO_With_PoolDatum.uTxO.outputIndex)
+                console.log("useStatePoolData - " + poolInfo.name + " - loadPoolData: UTxO with PoolDatum: " + eUTxO_With_PoolDatum.uTxO.txHash + "#" + eUTxO_With_PoolDatum.uTxO.outputIndex)
                 setEUTxO_With_PoolDatum(eUTxO_With_PoolDatum)
                 // console.log("useStatePoolData - " + poolInfo.name + " - loadPoolData: pdMaster_Funders: " + toJson(eUTxO_With_PoolDatum.datum))
 
@@ -358,7 +367,6 @@ export default function useStatePoolData(poolInfo: StakingPoolDBInterface) {
                 if (poolDatum.pdIsTerminated === 1) {
                     swClosed = true
                     swTerminated = true
-
                 } else {
                     if (poolDatum.pdClosedAt.val !== undefined || poolInfo.deadline < now) {
                         swClosed = true
@@ -367,8 +375,12 @@ export default function useStatePoolData(poolInfo: StakingPoolDBInterface) {
 
                         if (BigInt(poolInfo.deadline.getTime()) + BigInt(poolInfo.graceTime) < BigInt(now.getTime())) {
                             swTerminated = true
-
+                        }else{
+                            swTerminated = false
                         }
+                    }else{
+                        swClosed = false
+                        swTerminated = false
                     }
                 }
             }
@@ -388,12 +400,13 @@ export default function useStatePoolData(poolInfo: StakingPoolDBInterface) {
                 setCountEUTxOs_With_FundDatum('0')
                 setTotalAvailaibleFunds('0')
 
+                swFunded = false
                 swZeroFunds = true
             } else {
                 swFunded = true
                 swZeroFunds = false
 
-                // console.log("useStatePoolData - " + poolInfo.name + " - loadPoolData: UTxOs with FundDatum lenght: " + eUTxOs_With_FundDatum.length)
+                console.log("useStatePoolData - " + poolInfo.name + " - loadPoolData: UTxOs with FundDatum lenght: " + eUTxOs_With_FundDatum.length)
 
                 const sorted_EUTxOs_With_FundDatum = sortFundDatum(poolInfo, eUTxOs_With_FundDatum)
                 setEUTxOs_With_FundDatum(sorted_EUTxOs_With_FundDatum)
@@ -489,8 +502,6 @@ export default function useStatePoolData(poolInfo: StakingPoolDBInterface) {
                 }
             }
         }
-
-       
 
         var eUTxO_With_ScriptDatum: EUTxO | undefined = poolInfo.eUTxO_With_ScriptDatum
         if (eUTxO_With_ScriptDatum === undefined) {
@@ -765,8 +776,7 @@ export default function useStatePoolData(poolInfo: StakingPoolDBInterface) {
                                             
             swPoolReadyForDelete = allMasterFundersClaimed && (eUTxOs_With_FundDatum.length === 0) && (eUTxOs_With_UserDatum.length === 0) && !scriptsMasters && !scriptsUser
         }
-        // console.log ("swPoolReadyForDelete: " + swPoolReadyForDelete)
-
+        console.log ("useStatePoolData - " + poolInfo.name + " - swPoolReadyForDelete: " + swPoolReadyForDelete)
 
         // console.log ("useStatePoolData - " + poolInfo.name + " - swClosed: " + swClosed + " - setSwTerminated: " + swTerminated) 
 
@@ -777,7 +787,9 @@ export default function useStatePoolData(poolInfo: StakingPoolDBInterface) {
             swIniciado = true
         } else {
             // console.log ("useStatePoolData - " + poolInfo.name + " - NO swIniciado: " + swIniciado ) 
+            swIniciado = false
         }
+
         // console.log ("useStatePoolData - " + poolInfo.name + " - swZeroFunds: " + swZeroFunds ) 
         setSwPreparado(swPreparado)
         setSwIniciado(swIniciado)
@@ -850,25 +862,22 @@ export default function useStatePoolData(poolInfo: StakingPoolDBInterface) {
             let data = {
                 nombrePool: poolInfo.name,
 
-                swShowOnSite: poolInfo.swShowOnSite,
-
-                swShowOnHome: poolInfo.swShowOnHome,
-
                 swPreparado: swPreparado,
 
                 swIniciado: swIniciado,
+
                 swFunded: swFunded,
 
                 swClosed: swClosed,
+
                 closedAt: closedAt != undefined? closedAt.getTime() : undefined,
                 
                 swTerminated: swTerminated,
 
                 swZeroFunds: swZeroFunds,
+                
                 swPoolReadyForDelete: swPoolReadyForDelete,
                 
-                //eUTxO_With_PoolDatum: eUTxO_With_PoolDatum? toJson(eUTxO_With_PoolDatum) : "",
-
                 eUTxO_With_ScriptDatum: eUTxO_With_ScriptDatum ? toJson(eUTxO_With_ScriptDatum) : "",
 
                 eUTxO_With_Script_TxID_Master_Fund_Datum: eUTxO_With_Script_TxID_Master_Fund_Datum ? toJson(eUTxO_With_Script_TxID_Master_Fund_Datum) : "",
@@ -887,55 +896,21 @@ export default function useStatePoolData(poolInfo: StakingPoolDBInterface) {
                 eUTxO_With_Script_TxID_User_Withdraw_Datum: eUTxO_With_Script_TxID_User_Withdraw_Datum ? toJson(eUTxO_With_Script_TxID_User_Withdraw_Datum) : "",
 
             }
-
-            const urlApi = "/api/updateStakingPool"
-
-            const requestOptions = {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: toJson(data)
-            };
-
-            const response = await fetch(urlApi, requestOptions)
-            const json = await response.json()
-            const message = json.msg
-
-            switch (response.status) {
-                case 500:
-                    console.error("useStatePoolData - /api/updateStakingPool - Error 500")
-                    throw "Error 500";
-                case 400:
-                    console.error("useStatePoolData - /api/updateStakingPool - Error: " + message)
-                    throw message
-                case 200:
-                    console.log("useStatePoolData - /api/updateStakingPool: " + message)
-                    break;
-                default:
-            }
+            //------------------	
+            await apiUpdateStakingPoolDB(data)
+            //------------------	
         }
-        //------------------
-        await apiDeleteEUTxOsDBPreparingOrConsumingByAddress(scriptAddress)
-        //------------------
-        try{
-            for (let i = 0; i < eUTxOs_With_Datum.length; i++) {
-                await apiSaveEUTxODB(eUTxOs_With_Datum[i])
-            }
-        } catch (error) {
-            console.error("useStatePoolData - apiSaveEUTxODB - Error: " + error)
-            throw error
-        }
-        //------------------
+        
+        
         setIsPoolDataLoaded(true)
         setIsPoolDataLoading(false)
         //------------------
         return poolInfo
     }
 
-   
-
     return {
     
-        swFromDB,
+        // swFromDB,
         swShowOnHome,
         swPreparado, swIniciado, swFunded,
 
@@ -993,7 +968,7 @@ export default function useStatePoolData(poolInfo: StakingPoolDBInterface) {
 
         isPoolDataLoading,
         isPoolDataLoaded,
-        setLoading,
+
         loadPoolData
     }
 

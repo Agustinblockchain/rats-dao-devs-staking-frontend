@@ -9,8 +9,8 @@ import { strToHex } from "../utils/utils"
 export const validTimeRange = 15 * 60 * 1000 // = 15 minutos
 export const validTimeRangeInSlots = 15 * 60  // = 15 minutos
 
-export const isPreparingTime = 2 * 60 * 1000 // = 15 minutos
-export const isConsumingTime = 3 * 60 * 1000 // = 15 minutos
+export const txPreparingTime = 1 * 60 * 1000 // = 1 minutos
+export const txConsumingTime = 2 * 60 * 1000 // = 2 minutos
 
 //------------------------------------------
 

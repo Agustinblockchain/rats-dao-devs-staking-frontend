@@ -58,18 +58,11 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 
             const filter = {name : nombrePool};
             
-           // await StakingPoolDBModel.deleteOne(filter)
-            // , undefined, function(error: any){
-            //     if (error) {
-            //         console.error("/api/deleteStakingPool - Can't delete StakingPool in Database - Error: " + error);
-            //         res.status(400).json({ msg: "Can't delete StakingPool in Database - Error: " + error });
-            //         return;
-            //     }else{
+            await StakingPoolDBModel.deleteOne(filter)
+
             console.log("/api/deleteStakingPool - StakingPool deleted in Database!");
             res.status(200).json({ msg: "StakingPool Deleted!"})
             return
-            //     }
-            // });
 
         }
     } catch (error) {

@@ -1,11 +1,6 @@
-import { Assets, Lucid, PaymentKeyHash, UTxO, WalletApi  } from "lucid-cardano";
-import { computed, Computed, createTypedHooks, persist, Thunk } from 'easy-peasy';
-import { Action, action, thunk  } from 'easy-peasy';
-import { createStore } from 'easy-peasy';
-import { toJson } from "./utils";
+import { Action, action, computed, Computed, createStore, createTypedHooks, Thunk, thunk } from 'easy-peasy';
+import { Lucid, PaymentKeyHash, UTxO, WalletApi } from "lucid-cardano";
 import { BIGINT } from "../types";
-//import initializeLucid from "./initializeLucid";
-//import useStateWalletData from "./useStateWalletData";
 
 //------------------------------------
 
@@ -67,7 +62,7 @@ export const storeWallet = createStore<AppStoreModel> (({
 		
 		const utxosAtWallet = await lucid!.wallet?.getUtxos();
 		actions.setUTxOsAtWallet(utxosAtWallet!) 
-		console.log("storeWallet - loadWalletData - state.uTxOsAtWallet length: " + utxosAtWallet.length)
+		//console.log("storeWallet - loadWalletData - state.uTxOsAtWallet length: " + utxosAtWallet.length)
 		if (utxosAtWallet.length == 0) {
 			console.log("storeWallet - loadWalletData: There are no UTxOs available in your wallet");
 		}
@@ -173,7 +168,7 @@ export {
 	useStoreState,
 	useStoreDispatch,
 	useStore
-}
+};
 
 //------------------------------------
 

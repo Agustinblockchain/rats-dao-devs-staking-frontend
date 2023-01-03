@@ -1,10 +1,9 @@
-import { Address, Assets, Lucid, PaymentKeyHash } from 'lucid-cardano';
-import { showPtrInHex, toJson } from '../utils/utils';
+import { Address, Assets, Lucid } from 'lucid-cardano';
 import { createTx, fixTx } from '../utils/cardano-helpersTx';
-import { objToPlutusData } from '../utils/cardano-utils';
+import { toJson } from '../utils/utils';
 
 //--------------------------------------
-export async function splitUTxOsTx(lucid: Lucid, protocolParameters: any, pkh: PaymentKeyHash, addressWallet: Address, value_For_SplitUTxO: Assets) {
+export async function splitUTxOsTx(lucid: Lucid, protocolParameters: any, addressWallet: Address, value_For_SplitUTxO: Assets) {
     //------------------
     const functionName = "Split Wallet UTxOs Tx";
     //------------------
@@ -17,13 +16,13 @@ export async function splitUTxOsTx(lucid: Lucid, protocolParameters: any, pkh: P
     // const redeemer_Unit_Hex = showPtrInHex(plutusData)
     //------------------
     var tx = lucid.newTx();
-    var txComplete = createTx(lucid, protocolParameters, tx);
+    var tx_Building = createTx(lucid, protocolParameters, tx);
     //------------------
-    txComplete = await txComplete
+    tx_Building = await tx_Building
         .payToAddress(addressWallet, value_For_SplitUTxO)
         .payToAddress(addressWallet, value_For_SplitUTxO)
         .addSigner(addressWallet)
     //------------------
-    const txComplete_FIXED = await fixTx(txComplete, lucid, protocolParameters);
+    const txComplete_FIXED = await fixTx(tx_Building, lucid, protocolParameters);
     return txComplete_FIXED;
 }

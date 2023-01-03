@@ -1,9 +1,5 @@
 //--------------------------------------
-import { MintingPolicy, SpendingValidator, ScriptType, Script } from 'lucid-cardano'
-//--------------------------------------
-import { CurrencySymbol, PoolParams } from '../types'
-import { hexToStr } from './utils'
-
+import { Script } from 'lucid-cardano';
 import path from 'path';
 //---------------------------------------------------------------
 const fs = require('fs/promises');

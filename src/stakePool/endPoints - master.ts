@@ -5,66 +5,45 @@ import {
     AssetClass, EUTxO, FundDatum, Master, Master_Funder, Maybe, PoolDatum, POSIXTime,
     Redeemer_Burn_TxID,
     Redeemer_Master_AddScripts,
-    Redeemer_Master_ClosePool,
-    Redeemer_Master_Fund,
-    Redeemer_Master_FundAndMerge,
-    Redeemer_Master_DeleteFund,
-    Redeemer_Master_SplitFund,
-    Redeemer_Master_SendBackFund,
-    Redeemer_Master_SendBackDeposit,
-    Redeemer_Master_TerminatePool,
-    Redeemer_Mint_TxID,
-    UserDatum, ScriptDatum
+    Redeemer_Master_ClosePool, Redeemer_Master_DeleteFund, Redeemer_Master_Fund,
+    Redeemer_Master_FundAndMerge, Redeemer_Master_SendBackDeposit, Redeemer_Master_SendBackFund, Redeemer_Master_SplitFund, Redeemer_Master_TerminatePool,
+    Redeemer_Mint_TxID, ScriptDatum, UserDatum
 } from '../types';
+import {
+    fundID_TN, maxDiffTokensForPoolAndFundDatum, poolDatum_NotTerminated, poolID_TN, scriptID_Master_AddScripts_TN, scriptID_Validator_TN, tokenNameLenght, txID_Master_AddScripts_TN, txID_Master_ClosePool_TN, txID_Master_DeleteFund_TN, txID_Master_FundAndMerge_TN, txID_Master_SendBackDeposit_TN, txID_Master_SendBackFund_TN, txID_Master_SplitFund_TN, txID_Master_TerminatePool_TN, userID_TN
+} from "../types/constantes";
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
-import { strToHex, toJson } from '../utils/utils';
+import {
+    addAssets, addAssetsList, apiGetEUTxOsDBByAddress, calculateMinAda, calculateMinAdaOfAssets, createValue_Adding_Tokens_Of_AC_Lucid, find_EUTxO_In_EUTxOs, find_TxOutRef_In_UTxOs, subsAssets, sumTokensAmt_From_AC_Lucid
+} from '../utils/cardano-helpers';
+import { makeTx_And_UpdateEUTxOsIsPreparing } from '../utils/cardano-helpersTx';
 import { pubKeyHashToAddress } from "../utils/cardano-utils";
+import { strToHex, toJson } from '../utils/utils';
 import { Wallet } from '../utils/walletProvider';
 import {
-    fundID_TN, userID_TN,
-    txID_Master_AddScripts_TN, txID_Master_ClosePool_TN, txID_Master_FundAndMerge_TN,
-    txID_Master_SendBackFund_TN, txID_Master_SendBackDeposit_TN, txID_Master_TerminatePool_TN,
-    poolDatum_NotTerminated, poolID_TN,
-    maxDiffTokensForPoolAndFundDatum, tokenNameLenght, txID_Master_SplitFund_TN, txID_Master_DeleteFund_TN, scriptID_Master_AddScripts_TN, scriptID_Validator_TN
-} from "../types/constantes";
-import {
-    masterClosePoolTx, masterPreparePoolTx,
-    masterFundAndMergeTx, masterSendBackFundTx, masterSendBackDepositTx, masterTerminatePoolTx, masterSplitFundTx, masterDeleteFundsTx, masterNewFundTx
+    masterClosePoolTx, masterDeleteFundsTx, masterFundAndMergeTx, masterNewFundTx, masterPreparePoolTx, masterSendBackDepositTx, masterSendBackFundTx, masterSplitFundTx, masterTerminatePoolTx
 } from './endPointsTx - master';
-import {
-    addAssets, find_TxOutRef_In_UTxOs,
-    createValue_Adding_Tokens_Of_AC_Lucid, subsAssets, addAssetsList, find_EUTxO_In_EUTxOs, sumTokensAmt_From_AC_Lucid, apiGetEUTxOsDBByAddress
-} from '../utils/cardano-helpers';
-import {
-    getAvailaibleFunds_In_EUTxO_With_FundDatum, getFundAmountsRemains_ForMaster
-} from "./helpersStakePool";
-import {
-    mkUpdated_PoolDatum_With_ClosedAt, mkUpdated_PoolDatum_With_Terminated, mkUpdated_FundDatum_With_NewFundAmountAndMerging, mkUpdated_PoolDatum_With_NewFundAmountAndMerging,
-    mkUpdated_PoolDatum_With_NewFund,
-    mkUpdated_PoolDatum_With_SplitFundAmount,
-    mkUpdated_FundDatum_With_SplitFund,
-    mkUpdated_PoolDatum_With_DeletingFunds,
-    mkUpdated_PoolDatum_With_SendBackFund
-} from './helpersDatums';
+import { mkUpdated_FundDatum_With_NewFundAmountAndMerging, mkUpdated_FundDatum_With_SplitFund, mkUpdated_PoolDatum_With_ClosedAt, mkUpdated_PoolDatum_With_DeletingFunds, mkUpdated_PoolDatum_With_NewFund, mkUpdated_PoolDatum_With_NewFundAmountAndMerging, mkUpdated_PoolDatum_With_SendBackFund, mkUpdated_PoolDatum_With_SplitFundAmount, mkUpdated_PoolDatum_With_Terminated } from './helpersDatums';
 import {
     getEUTxOs_With_FundDatum_InEUxTOList, getEUTxOs_With_UserDatum_InEUxTOList,
     getEUTxO_With_PoolDatum_InEUxTOList
 } from './helpersScripts';
-import { makeTx_And_UpdateEUTxOsIsPreparing } from '../utils/cardano-helpersTx';
-import { calculateMinAda, calculateMinAdaOfAssets } from "../utils/cardano-helpers";
+import {
+    getAvailaibleFunds_In_EUTxO_With_FundDatum, getFundAmountsRemains_ForMaster
+} from "./helpersStakePool";
 
 //--------------------------------------
 
-export async function masterPreparePool(wallet: Wallet, poolInfo: StakingPoolDBInterface, pkh: Master) : Promise <[string, EUTxO []]> {
+export async function masterPreparePool(wallet: Wallet, poolInfo: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) : Promise <[string, EUTxO []]> {
     //------------------
     const functionName = "Master Prepare Pool"
     //------------------
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
     //------------------
-    if (!pkh) throw "I couldn't get your key hash. Try connecting your wallet again";
+    if (wallet?.pkh === undefined) throw "I couldn't get your key hash. Try connecting your wallet again";
     //------------------
-    const master = pkh;
+    const master = wallet.pkh!;
     const masterAddr = await lucid!.wallet.address();
     //------------------
     const poolID_CS = poolInfo.pParams.ppPoolID_CS;
@@ -138,8 +117,8 @@ export async function masterPreparePool(wallet: Wallet, poolInfo: StakingPoolDBI
     const redeemer_Master_AddScripts = new Redeemer_Master_AddScripts(master)
     const redeemer_For_Mint_ScriptIDs = new Redeemer_Mint_TxID(redeemer_Master_AddScripts)
     //------------------
-    var tx = masterPreparePoolTx(
-        lucid!, protocolParameters, poolInfo, pkh, masterAddr,
+   var tx_Binded = masterPreparePoolTx.bind(functionName,
+        lucid!, protocolParameters, poolInfo, masterAddr,
         poolDatum_Out, value_For_PoolDatum,
         poolID_UTxO, value_For_Mint_PoolID,
         redeemer_For_Mint_ScriptIDs, value_For_Mint_ScriptIDs,
@@ -149,22 +128,22 @@ export async function masterPreparePool(wallet: Wallet, poolInfo: StakingPoolDBI
     //------------------
     var eUTxO_for_consuming: EUTxO[] = [];
     //------------------
-    var txHash = await makeTx_And_UpdateEUTxOsIsPreparing(functionName, wallet, protocolParameters, tx, eUTxO_for_consuming)
-    return [txHash, eUTxO_for_consuming];
+    const [txHash, eUTxO_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxO_for_consuming)
+    return [txHash, eUTxO_for_consuming_];
 }
 
 //--------------------------------------
 
-export async function masterNewFund(wallet: Wallet, poolInfo: StakingPoolDBInterface, assets: Assets, pkh: Master) : Promise <[string, EUTxO []]> {
+export async function masterNewFund(wallet: Wallet, poolInfo: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) : Promise <[string, EUTxO []]> {
     //------------------
     const functionName = "New Fund"
     //------------------
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
     //------------------
-    if (!pkh) throw "I couldn't get your key hash. Try connecting your wallet again";
+    if (wallet?.pkh === undefined) throw "I couldn't get your key hash. Try connecting your wallet again";
     //------------------
-    const master = pkh;
+    const master = wallet.pkh!;
     //------------------
     const masterAddr = await lucid!.wallet.address();
     //------------------
@@ -259,8 +238,8 @@ export async function masterNewFund(wallet: Wallet, poolInfo: StakingPoolDBInter
     //-----------------
     const redeemer_For_Mint_FundID = new Redeemer_Mint_TxID(redeemer_For_Consuming_Validator_Datum)
     //------------------
-    var tx = masterNewFundTx(
-        lucid!, protocolParameters, poolInfo, pkh, masterAddr,
+   var tx_Binded = masterNewFundTx.bind(functionName,
+        lucid!, protocolParameters, poolInfo, masterAddr,
         eUTxO_With_ScriptDatum,
         eUTxO_With_Script_TxID_Master_Fund_Datum,
         eUTxO_With_PoolDatum.uTxO, redeemer_For_Consuming_Validator_Datum,
@@ -272,22 +251,22 @@ export async function masterNewFund(wallet: Wallet, poolInfo: StakingPoolDBInter
     var eUTxO_for_consuming: EUTxO[] = [];
     eUTxO_for_consuming.push(eUTxO_With_PoolDatum)   
     //------------------
-    var txHash = await makeTx_And_UpdateEUTxOsIsPreparing(functionName, wallet, protocolParameters, tx, eUTxO_for_consuming);
-    return [txHash, eUTxO_for_consuming];
+    const [txHash, eUTxO_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxO_for_consuming);
+    return [txHash, eUTxO_for_consuming_];
 }
 
 //--------------------------------------
 
-export async function masterFundAndMerge(wallet: Wallet, poolInfo: StakingPoolDBInterface, eUTxOs_Selected: EUTxO[], assets: Assets, pkh: Master) : Promise <[string, EUTxO []]> {
+export async function masterFundAndMerge(wallet: Wallet, poolInfo: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[], assets?: Assets) : Promise <[string, EUTxO []]> {
     //------------------
     const functionName = "Fund And Merge"
     //------------------
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
     //------------------
-    if (!pkh) throw "I couldn't get your key hash. Try connecting your wallet again";
+    if (wallet?.pkh === undefined) throw "I couldn't get your key hash. Try connecting your wallet again";
     //------------------
-    const master = pkh;
+    const master = wallet.pkh!;
     //------------------
     const masterAddr = await lucid!.wallet.address();
     //------------------
@@ -351,11 +330,11 @@ export async function masterFundAndMerge(wallet: Wallet, poolInfo: StakingPoolDB
     }
     console.log(functionName + " - UTxOs with FundDatum that are not being consumed - length: " + eUTxOs_With_FundDatum.length)
     //------------------
-    console.log(functionName + " - eUTxOs Selected - length: " + eUTxOs_Selected.length)
+    console.log(functionName + " - eUTxOs Selected - length: " + eUTxOs_Selected!.length)
     //------------------
     var eUTxOs_fundDatums_To_Merge: EUTxO[] = []
-    for (let i = 0; i < eUTxOs_Selected.length; i++) {
-        const eUTxO = eUTxOs_Selected[i];
+    for (let i = 0; i < eUTxOs_Selected!.length; i++) {
+        const eUTxO = eUTxOs_Selected![i];
         if (find_EUTxO_In_EUTxOs(eUTxO, eUTxOs_With_FundDatum) !== undefined) {
             eUTxOs_fundDatums_To_Merge.push(eUTxO)
         }
@@ -416,8 +395,8 @@ export async function masterFundAndMerge(wallet: Wallet, poolInfo: StakingPoolDB
     //-----------------
     const redeemer_For_Mint_TxID_Master_FundAndMerge = new Redeemer_Mint_TxID(redeemer_For_Consuming_Validator_Datum)
     //------------------
-    var tx = masterFundAndMergeTx(
-        lucid!, protocolParameters, poolInfo, pkh, masterAddr,
+   var tx_Binded = masterFundAndMergeTx.bind(functionName,
+        lucid!, protocolParameters, poolInfo, masterAddr,
         eUTxO_With_ScriptDatum,
         eUTxO_With_Script_TxID_Master_FundAndMerge_Datum,
         eUTxO_With_PoolDatum.uTxO, redeemer_For_Consuming_Validator_Datum,
@@ -433,22 +412,22 @@ export async function masterFundAndMerge(wallet: Wallet, poolInfo: StakingPoolDB
         eUTxO_for_consuming.push(eUTxOs_fundDatums_To_Merge[i]);
     } 
     //------------------
-    var txHash = await makeTx_And_UpdateEUTxOsIsPreparing(functionName, wallet, protocolParameters, tx, eUTxO_for_consuming)
-    return [txHash, eUTxO_for_consuming];
+    const [txHash, eUTxO_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxO_for_consuming)
+    return [txHash, eUTxO_for_consuming_];
 }
 
 //--------------------------------------
 
-export async function masterMergeFunds(wallet: Wallet, poolInfo: StakingPoolDBInterface, eUTxOs_Selected: EUTxO[], pkh: Master) : Promise <[string, EUTxO []]> {
+export async function masterMergeFunds(wallet: Wallet, poolInfo: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[], assets?: Assets) : Promise <[string, EUTxO []]> {
     //------------------
     const functionName = "Merge Funds"
     //------------------
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
     //------------------
-    if (!pkh) throw "I couldn't get your key hash. Try connecting your wallet again";
+    if (wallet?.pkh === undefined) throw "I couldn't get your key hash. Try connecting your wallet again";
     //------------------
-    const master = pkh;
+    const master = wallet.pkh!;
     //------------------
     const masterAddr = await lucid!.wallet.address();
     //------------------
@@ -512,11 +491,11 @@ export async function masterMergeFunds(wallet: Wallet, poolInfo: StakingPoolDBIn
     }
     console.log(functionName + " - UTxOs with FundDatum that are not being consumed - length: " + eUTxOs_With_FundDatum.length)
     //------------------
-    console.log(functionName + " - eUTxOs Selected - length: " + eUTxOs_Selected.length)
+    console.log(functionName + " - eUTxOs Selected - length: " + eUTxOs_Selected!.length)
     //------------------
     var eUTxOs_fundDatums_To_Merge: EUTxO[] = []
-    for (let i = 0; i < eUTxOs_Selected.length; i++) {
-        const eUTxO = eUTxOs_Selected[i];
+    for (let i = 0; i < eUTxOs_Selected!.length; i++) {
+        const eUTxO = eUTxOs_Selected![i];
         if (find_EUTxO_In_EUTxOs(eUTxO, eUTxOs_With_FundDatum) !== undefined) {
             eUTxOs_fundDatums_To_Merge.push(eUTxO)
         }
@@ -580,8 +559,8 @@ export async function masterMergeFunds(wallet: Wallet, poolInfo: StakingPoolDBIn
     //-----------------
     const redeemer_For_Mint_TxID_Master_FundAndMerge = new Redeemer_Mint_TxID(redeemer_For_Consuming_Validator_Datum)
     //------------------
-    var tx = masterFundAndMergeTx(
-        lucid!, protocolParameters, poolInfo, pkh, masterAddr,
+   var tx_Binded = masterFundAndMergeTx.bind(functionName,
+        lucid!, protocolParameters, poolInfo, masterAddr,
         eUTxO_With_ScriptDatum,
         eUTxO_With_Script_TxID_Master_FundAndMerge_Datum,
         eUTxO_With_PoolDatum.uTxO, redeemer_For_Consuming_Validator_Datum,
@@ -597,22 +576,22 @@ export async function masterMergeFunds(wallet: Wallet, poolInfo: StakingPoolDBIn
         eUTxO_for_consuming.push(eUTxOs_fundDatums_To_Merge[i]);
     } 
     //------------------
-    var txHash = await makeTx_And_UpdateEUTxOsIsPreparing(functionName, wallet, protocolParameters, tx, eUTxO_for_consuming)
-    return [txHash, eUTxO_for_consuming];
+    const [txHash, eUTxO_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxO_for_consuming)
+    return [txHash, eUTxO_for_consuming_];
 }
 
 //--------------------------------------
 
-export async function masterSplitFund(wallet: Wallet, poolInfo: StakingPoolDBInterface, eUTxOs_Selected: EUTxO[], assets: Assets, pkh: Master) : Promise <[string, EUTxO []]> {
+export async function masterSplitFund(wallet: Wallet, poolInfo: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[], assets?: Assets) : Promise <[string, EUTxO []]> {
     //------------------
     const functionName = "Split Fund"
     //------------------
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
     //------------------
-    if (!pkh) throw "I couldn't get your key hash. Try connecting your wallet again";
+    if (wallet?.pkh === undefined) throw "I couldn't get your key hash. Try connecting your wallet again";
     //------------------
-    const master = pkh;
+    const master = wallet.pkh!;
     //------------------
     const masterAddr = await lucid!.wallet.address();
     //------------------
@@ -683,11 +662,11 @@ export async function masterSplitFund(wallet: Wallet, poolInfo: StakingPoolDBInt
     }
     console.log(functionName + " - UTxOs with FundDatum that are not being consumed - length: " + eUTxOs_With_FundDatum.length)
     //------------------
-    console.log(functionName + " - eUTxOs Selected - length: " + eUTxOs_Selected.length)
+    console.log(functionName + " - eUTxOs Selected - length: " + eUTxOs_Selected!.length)
     //------------------
     var eUTxOs_fundDatums_To_Split: EUTxO[] = []
-    for (let i = 0; i < eUTxOs_Selected.length; i++) {
-        const eUTxO = eUTxOs_Selected[i];
+    for (let i = 0; i < eUTxOs_Selected!.length; i++) {
+        const eUTxO = eUTxOs_Selected![i];
         if (find_EUTxO_In_EUTxOs(eUTxO, eUTxOs_With_FundDatum) !== undefined) {
             eUTxOs_fundDatums_To_Split.push(eUTxO)
         }
@@ -756,8 +735,8 @@ export async function masterSplitFund(wallet: Wallet, poolInfo: StakingPoolDBInt
     const redeemer_For_Mint_TxID_Master_SplitFund = new Redeemer_Mint_TxID(redeemer_For_Consuming_Validator_Datum)
     const redeemer_For_Mint_Fund_ID = new Redeemer_Mint_TxID(redeemer_For_Consuming_Validator_Datum)
     //------------------
-    var tx = masterSplitFundTx(
-        lucid!, protocolParameters, poolInfo, pkh, masterAddr,
+   var tx_Binded = masterSplitFundTx.bind(functionName,
+        lucid!, protocolParameters, poolInfo, masterAddr,
         eUTxO_With_ScriptDatum,
         eUTxO_With_Script_TxID_Master_SplitFund_Datum,
         eUTxO_With_Script_TxID_Master_Fund_Datum,
@@ -774,22 +753,22 @@ export async function masterSplitFund(wallet: Wallet, poolInfo: StakingPoolDBInt
     eUTxO_for_consuming.push(eUTxO_With_PoolDatum)  
     eUTxO_for_consuming.push(eUTxO_fundDatum_To_Split);
     //------------------
-    var txHash = await makeTx_And_UpdateEUTxOsIsPreparing(functionName, wallet, protocolParameters, tx, eUTxO_for_consuming)
-    return [txHash, eUTxO_for_consuming];
+    const [txHash, eUTxO_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxO_for_consuming)
+    return [txHash, eUTxO_for_consuming_];
 }
 
 //--------------------------------------
 
-export async function masterClosePool(wallet: Wallet, poolInfo: StakingPoolDBInterface, pkh: Master) : Promise <[string, EUTxO []]> {
+export async function masterClosePool(wallet: Wallet, poolInfo: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) : Promise <[string, EUTxO []]> {
     //------------------
     const functionName = "Close Pool"
     //------------------
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
     //------------------
-    if (!pkh) throw "I couldn't get your key hash. Try connecting your wallet again";
+    if (wallet?.pkh === undefined) throw "I couldn't get your key hash. Try connecting your wallet again";
     //------------------
-    const master = pkh;
+    const master = wallet.pkh!;
     //------------------
     const masterAddr = await lucid!.wallet.address();
     //------------------
@@ -856,8 +835,8 @@ export async function masterClosePool(wallet: Wallet, poolInfo: StakingPoolDBInt
     //-----------------
     const redeemer_For_Mint_TxID_Master_ClosePool = new Redeemer_Mint_TxID(redeemer_For_Consuming_Validator_Datum)
     //------------------
-    var tx = masterClosePoolTx(
-        lucid!, protocolParameters, poolInfo, pkh, masterAddr,
+   var tx_Binded = masterClosePoolTx.bind(functionName,
+        lucid!, protocolParameters, poolInfo, masterAddr,
         eUTxO_With_ScriptDatum,
         eUTxO_With_Script_TxID_Master_ClosePool_Datum,
         eUTxO_With_PoolDatum.uTxO, redeemer_For_Consuming_Validator_Datum,
@@ -868,22 +847,22 @@ export async function masterClosePool(wallet: Wallet, poolInfo: StakingPoolDBInt
     var eUTxO_for_consuming: EUTxO[] = [];
     eUTxO_for_consuming.push(eUTxO_With_PoolDatum)  
     //------------------
-    var txHash = await makeTx_And_UpdateEUTxOsIsPreparing(functionName, wallet, protocolParameters, tx, eUTxO_for_consuming)
-    return [txHash, eUTxO_for_consuming];
+    const [txHash, eUTxO_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxO_for_consuming)
+    return [txHash, eUTxO_for_consuming_];
 }
 
 //--------------------------------------
 
-export async function masterTerminatePool(wallet: Wallet, poolInfo: StakingPoolDBInterface, pkh: Master) : Promise <[string, EUTxO []]> {
+export async function masterTerminatePool(wallet: Wallet, poolInfo: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) : Promise <[string, EUTxO []]> {
     //------------------
     const functionName = "Terminate Pool"
     //------------------
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
     //------------------
-    if (!pkh) throw "I couldn't get your key hash. Try connecting your wallet again";
+    if (wallet?.pkh === undefined) throw "I couldn't get your key hash. Try connecting your wallet again";
     //------------------
-    const master = pkh;
+    const master = wallet.pkh!;
     //------------------
     const masterAddr = await lucid!.wallet.address();
     //------------------
@@ -949,8 +928,8 @@ export async function masterTerminatePool(wallet: Wallet, poolInfo: StakingPoolD
     //-----------------
     const redeemer_For_Mint_TxID_Master_TerminatePool = new Redeemer_Mint_TxID(redeemer_For_Consuming_Validator_Datum)
     //------------------
-    var tx = masterTerminatePoolTx(
-        lucid!, protocolParameters, poolInfo, pkh, masterAddr,
+   var tx_Binded = masterTerminatePoolTx.bind(functionName,
+        lucid!, protocolParameters, poolInfo, masterAddr,
         eUTxO_With_ScriptDatum,
         eUTxO_With_Script_TxID_Master_TerminatePool_Datum,
         eUTxO_With_PoolDatum.uTxO, redeemer_For_Consuming_Validator_Datum,
@@ -961,22 +940,22 @@ export async function masterTerminatePool(wallet: Wallet, poolInfo: StakingPoolD
     var eUTxO_for_consuming: EUTxO[] = [];
     eUTxO_for_consuming.push(eUTxO_With_PoolDatum)  
     //------------------
-    var txHash = await makeTx_And_UpdateEUTxOsIsPreparing(functionName, wallet, protocolParameters, tx, eUTxO_for_consuming)
-    return [txHash, eUTxO_for_consuming];
+    const [txHash, eUTxO_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxO_for_consuming)
+    return [txHash, eUTxO_for_consuming_];
 }
 
 //--------------------------------------
 
-export async function masterDeleteFunds(wallet: Wallet, poolInfo: StakingPoolDBInterface, eUTxOs_Selected: EUTxO[], pkh: Master) : Promise <[string, EUTxO []]> {
+export async function masterDeleteFunds(wallet: Wallet, poolInfo: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) : Promise <[string, EUTxO []]> {
     //------------------
     const functionName = "Delete Funds"
     //------------------
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
     //------------------
-    if (!pkh) throw "I couldn't get your key hash. Try connecting your wallet again";
+    if (wallet?.pkh === undefined) throw "I couldn't get your key hash. Try connecting your wallet again";
     //------------------
-    const master = pkh;
+    const master = wallet.pkh!;
     //------------------
     const masterAddr = await lucid!.wallet.address();
     //------------------
@@ -1047,11 +1026,11 @@ export async function masterDeleteFunds(wallet: Wallet, poolInfo: StakingPoolDBI
     }
     console.log(functionName + " - UTxOs with FundDatum that are not being consumed - length: " + eUTxOs_With_FundDatum.length)
     //------------------
-    console.log(functionName + " - eUTxOs Selected - length: " + eUTxOs_Selected.length)
+    console.log(functionName + " - eUTxOs Selected - length: " + eUTxOs_Selected!.length)
     //------------------
     var eUTxOs_fundDatums_To_Delete: EUTxO[] = []
-    for (let i = 0; i < eUTxOs_Selected.length; i++) {
-        const eUTxO = eUTxOs_Selected[i];
+    for (let i = 0; i < eUTxOs_Selected!.length; i++) {
+        const eUTxO = eUTxOs_Selected![i];
         if (find_EUTxO_In_EUTxOs(eUTxO, eUTxOs_With_FundDatum) !== undefined) {
             eUTxOs_fundDatums_To_Delete.push(eUTxO)
         }
@@ -1109,8 +1088,8 @@ export async function masterDeleteFunds(wallet: Wallet, poolInfo: StakingPoolDBI
     const redeemer_For_Mint_TxID_Master_DeleteFund = new Redeemer_Mint_TxID(redeemer_For_Consuming_Validator_Datum)
     const redeemer_For_Burn_FundIDs = new Redeemer_Burn_TxID()
     //------------------
-    var tx = masterDeleteFundsTx(
-        lucid!, protocolParameters, poolInfo, pkh, masterAddr,
+   var tx_Binded = masterDeleteFundsTx.bind(functionName,
+        lucid!, protocolParameters, poolInfo, masterAddr,
         eUTxO_With_ScriptDatum,
         eUTxO_With_Script_TxID_Master_DeleteFund_Datum,
         eUTxO_With_Script_TxID_Master_Fund_Datum,
@@ -1127,22 +1106,22 @@ export async function masterDeleteFunds(wallet: Wallet, poolInfo: StakingPoolDBI
         eUTxO_for_consuming.push(eUTxOs_fundDatums_To_Delete[i]);
     }
     //------------------
-    var txHash = await makeTx_And_UpdateEUTxOsIsPreparing(functionName, wallet, protocolParameters, tx, eUTxO_for_consuming)
-    return [txHash, eUTxO_for_consuming];
+    const [txHash, eUTxO_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxO_for_consuming)
+    return [txHash, eUTxO_for_consuming_];
 }
 
 //--------------------------------------
 
-export async function masterGetBackFund(wallet: Wallet, poolInfo: StakingPoolDBInterface, pkh: Master) : Promise <[string, EUTxO []]> {
+export async function masterGetBackFund(wallet: Wallet, poolInfo: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) : Promise <[string, EUTxO []]> {
     //------------------
     const functionName = "Get Back Fund"
     //------------------
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
     //------------------
-    if (!pkh) throw "I couldn't get your key hash. Try connecting your wallet again";
+    if (wallet?.pkh === undefined) throw "I couldn't get your key hash. Try connecting your wallet again";
     //------------------
-    const master = pkh;
+    const master = wallet.pkh!;
     //------------------
     const masterAddr = await lucid!.wallet.address();
     //------------------
@@ -1246,8 +1225,8 @@ export async function masterGetBackFund(wallet: Wallet, poolInfo: StakingPoolDBI
     //-----------------
     const redeemer_For_Mint_TxID_Master_SendBackFund = new Redeemer_Mint_TxID(redeemer_For_Consuming_Validator_Datum)
     //------------------
-    var tx = masterSendBackFundTx(
-        lucid!, protocolParameters, poolInfo, pkh, masterAddr,
+   var tx_Binded = masterSendBackFundTx.bind(functionName,
+        lucid!, protocolParameters, poolInfo, masterAddr,
         eUTxO_With_ScriptDatum,
         eUTxO_With_Script_TxID_Master_SendBackFund_Datum,
         eUTxO_With_PoolDatum.uTxO, redeemer_For_Consuming_Validator_Datum,
@@ -1259,26 +1238,26 @@ export async function masterGetBackFund(wallet: Wallet, poolInfo: StakingPoolDBI
     var eUTxO_for_consuming: EUTxO[] = [];
     eUTxO_for_consuming.push(eUTxO_With_PoolDatum)  
     //------------------
-    var txHash = await makeTx_And_UpdateEUTxOsIsPreparing(functionName, wallet, protocolParameters, tx, eUTxO_for_consuming)
-    return [txHash, eUTxO_for_consuming];
+    const [txHash, eUTxO_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxO_for_consuming)
+    return [txHash, eUTxO_for_consuming_];
 }
 
 //--------------------------------------
 
-export async function masterSendBackFund(wallet: Wallet, poolInfo: StakingPoolDBInterface, pkh: Master, pkhMasterToSendBack: Master) : Promise <[string, EUTxO []]> {
+export async function masterSendBackFund(wallet: Wallet, poolInfo: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets, master_Selected?: Master) : Promise <[string, EUTxO []]> {
     //------------------
     const functionName = "Get Back Fund"
     //------------------
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
     //------------------
-    if (!pkh) throw "I couldn't get your key hash. Try connecting your wallet again";
+    if (wallet?.pkh === undefined) throw "I couldn't get your key hash. Try connecting your wallet again";
     //------------------
-    const master = pkh;
+    const master = wallet.pkh!;
     //------------------
     const masterAddr = await lucid!.wallet.address();
     //------------------
-    const masterToSendBack = pkhMasterToSendBack
+    const masterToSendBack = master_Selected
     const masterToSendBackAddr = pubKeyHashToAddress(masterToSendBack!, 0)
     console.log(functionName + " - Master To Send Back Addr: " + toJson(masterToSendBackAddr))
     //------------------
@@ -1349,7 +1328,7 @@ export async function masterSendBackFund(wallet: Wallet, poolInfo: StakingPoolDB
     // }
     //------------------
     //calculate fund amount to get back
-    const [getBackFundAmount, getBackMinAdaAmount] = getFundAmountsRemains_ForMaster(eUTxO_With_PoolDatum, eUTxOs_With_FundDatum, masterToSendBack)
+    const [getBackFundAmount, getBackMinAdaAmount] = getFundAmountsRemains_ForMaster(eUTxO_With_PoolDatum, eUTxOs_With_FundDatum, master_Selected!)
     const value_For_GetBackFundAmount = createValue_Adding_Tokens_Of_AC_Lucid([eUTxO_With_PoolDatum.uTxO], poolInfo!.harvest_Lucid, getBackFundAmount);
     const value_For_GetBackMinAda: Assets = { lovelace: getBackMinAdaAmount }
     console.log(functionName + " - value For Get Back Fund Amount: " + toJson(value_For_GetBackFundAmount))
@@ -1375,15 +1354,15 @@ export async function masterSendBackFund(wallet: Wallet, poolInfo: StakingPoolDB
     //------------------
     // Actualizando PoolDatum con nuevo FundId
     console.log(functionName + " - PoolDatum In: " + toJson(poolDatum_In))
-    const poolDatum_Out = mkUpdated_PoolDatum_With_SendBackFund(poolDatum_In, masterToSendBack)
+    const poolDatum_Out = mkUpdated_PoolDatum_With_SendBackFund(poolDatum_In, master_Selected!)
     console.log(functionName + " - PoolDatum Out: " + toJson(poolDatum_Out))
     //------------------
-    const redeemer_For_Consuming_Validator_Datum = new Redeemer_Master_SendBackFund(master, masterToSendBack)
+    const redeemer_For_Consuming_Validator_Datum = new Redeemer_Master_SendBackFund(master, master_Selected!)
     //-----------------
     const redeemer_For_Mint_TxID_Master_SendBackFund = new Redeemer_Mint_TxID(redeemer_For_Consuming_Validator_Datum)
     //------------------
-    var tx = masterSendBackFundTx(
-        lucid!, protocolParameters, poolInfo, pkh, masterAddr,
+   var tx_Binded = masterSendBackFundTx.bind(functionName,
+        lucid!, protocolParameters, poolInfo, masterAddr,
         eUTxO_With_ScriptDatum,
         eUTxO_With_Script_TxID_Master_SendBackFund_Datum,
         eUTxO_With_PoolDatum.uTxO, redeemer_For_Consuming_Validator_Datum,
@@ -1395,22 +1374,22 @@ export async function masterSendBackFund(wallet: Wallet, poolInfo: StakingPoolDB
     var eUTxO_for_consuming: EUTxO[] = [];
     eUTxO_for_consuming.push(eUTxO_With_PoolDatum)  
     //------------------
-    var txHash = await makeTx_And_UpdateEUTxOsIsPreparing(functionName, wallet, protocolParameters, tx, eUTxO_for_consuming)
-    return [txHash, eUTxO_for_consuming];
+    const [txHash, eUTxO_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxO_for_consuming)
+    return [txHash, eUTxO_for_consuming_];
 }
 
 //--------------------------------------
 
-export async function masterSendBackDeposit(wallet: Wallet, poolInfo: StakingPoolDBInterface, eUTxOs_Selected: EUTxO[], pkh: Master) : Promise <[string, EUTxO []]> {
+export async function masterSendBackDeposit(wallet: Wallet, poolInfo: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) : Promise <[string, EUTxO []]> {
     //------------------
     const functionName = "sendBackDeposit"
     //------------------
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
     //------------------
-    if (!pkh) throw "I couldn't get your key hash. Try connecting your wallet again";
+    if (wallet?.pkh === undefined) throw "I couldn't get your key hash. Try connecting your wallet again";
     //------------------
-    const master = pkh;
+    const master = wallet.pkh!;
     //------------------
     const masterAddr = await lucid!.wallet.address();
     //------------------
@@ -1487,11 +1466,11 @@ export async function masterSendBackDeposit(wallet: Wallet, poolInfo: StakingPoo
     }
     console.log(functionName + " - UTxOs with UserDatum that are not being consumed - length: " + eUTxOs_With_UserDatum.length)
     //------------------
-    console.log(functionName + " - eUTxOs Selected - length: " + eUTxOs_Selected.length)
+    console.log(functionName + " - eUTxOs Selected - length: " + eUTxOs_Selected!.length)
     //------------------
     var eUTxOs_userDatums_To_SendBackDeposit: EUTxO[] = []
-    for (let i = 0; i < eUTxOs_Selected.length; i++) {
-        const eUTxO = eUTxOs_Selected[i];
+    for (let i = 0; i < eUTxOs_Selected!.length; i++) {
+        const eUTxO = eUTxOs_Selected![i];
         if (find_EUTxO_In_EUTxOs(eUTxO, eUTxOs_With_UserDatum) !== undefined) {
             eUTxOs_userDatums_To_SendBackDeposit.push(eUTxO)
         }
@@ -1548,8 +1527,8 @@ export async function masterSendBackDeposit(wallet: Wallet, poolInfo: StakingPoo
         value_For_PoolDatum = subsAssets(value_For_PoolDatum, value_For_SendBackDeposit_To_User)
         console.log(functionName + " - value For PoolDatum: " + toJson(value_For_PoolDatum))
         //------------------
-        var tx = masterSendBackDepositTx(
-            lucid!, protocolParameters, poolInfo, pkh, masterAddr,
+       var tx_Binded = masterSendBackDepositTx.bind(functionName,
+            lucid!, protocolParameters, poolInfo, masterAddr,
             eUTxO_With_ScriptDatum,
             eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum,
             eUTxO_With_Script_TxID_User_Deposit_Datum,
@@ -1567,8 +1546,8 @@ export async function masterSendBackDeposit(wallet: Wallet, poolInfo: StakingPoo
         eUTxO_for_consuming.push(eUTxO_With_PoolDatum)  
         eUTxO_for_consuming.push(eUTxO_userDatums_To_SendBackDeposit)  
         //------------------
-        var txHash = await makeTx_And_UpdateEUTxOsIsPreparing(functionName, wallet, protocolParameters, tx, eUTxO_for_consuming)
-        return [txHash, eUTxO_for_consuming];
+        const [txHash, eUTxO_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxO_for_consuming)
+        return [txHash, eUTxO_for_consuming_];
     } else {
         //------------------
         // busco el utxo que tengan FundDatum validos
@@ -1591,8 +1570,8 @@ export async function masterSendBackDeposit(wallet: Wallet, poolInfo: StakingPoo
         value_For_FundDatum = subsAssets(value_For_FundDatum, value_For_SendBackDeposit_To_User)
         console.log(functionName + " - value For FundDatum: " + toJson(value_For_FundDatum))
         //------------------
-        var tx = masterSendBackDepositTx(
-            lucid!, protocolParameters, poolInfo, pkh, masterAddr,
+       var tx_Binded = masterSendBackDepositTx.bind(functionName,
+            lucid!, protocolParameters, poolInfo, masterAddr,
             eUTxO_With_ScriptDatum,
             eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum,
             eUTxO_With_Script_TxID_User_Deposit_Datum,
@@ -1610,8 +1589,8 @@ export async function masterSendBackDeposit(wallet: Wallet, poolInfo: StakingPoo
         eUTxO_for_consuming.push(eUTxO_With_FundDatum)  
         eUTxO_for_consuming.push(eUTxO_userDatums_To_SendBackDeposit)  
         //------------------
-        var txHash = await makeTx_And_UpdateEUTxOsIsPreparing(functionName, wallet, protocolParameters, tx, eUTxO_for_consuming)
-        return [txHash, eUTxO_for_consuming];
+        const [txHash, eUTxO_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxO_for_consuming)
+        return [txHash, eUTxO_for_consuming_];
     }
 }
 
