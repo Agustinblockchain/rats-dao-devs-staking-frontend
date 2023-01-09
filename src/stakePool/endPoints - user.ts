@@ -296,7 +296,7 @@ export async function userHarvest(wallet: Wallet, poolInfo: StakingPoolDBInterfa
     console.log(functionName + " - EUTxOs With FundDatum With Enough Value To Claim - length: " + eUTxOs_With_FundDatum_WithEnoughValueToClaim.length);
     //------------------
     if (eUTxOs_With_FundDatum_WithEnoughValueToClaim.length > maxTxFundDatumInputs) {
-        throw "Trying to use too many inputs with funds to cover your claim. Please try again later, ask managers of the Pool to create UTxOs with more funds or reduce the amount you want to claim";
+        throw "Trying to use too many inputs with funds to cover your claim. Please try again later, ask managers of the Pool to create UTxOs with more funds in each of them or reduce the amount you want to claim";
     }
     //------------------
     let datum_and_values_for_FundDatum: { datum: FundDatum; value: Assets; }[] = [];
