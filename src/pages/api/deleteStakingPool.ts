@@ -1,12 +1,9 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import type { NextApiRequest, NextApiResponse } from 'next'
 
-import { connect } from '../../utils/dbConnect'
-
-import { strToHex, toJson } from '../../utils/utils';
-
-import { getStakingPoolDBModel, getStakingPoolFromDBByName, StakingPoolDBInterface } from  '../../types/stakePoolDBModel'
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { connect } from '../../utils/dbConnect';
+import { toJson } from '../../utils/utils';
 import { getSession } from 'next-auth/react';
+import { getStakingPoolDBModel, getStakingPoolFromDBByName } from '../../types/stakePoolDBModel';
 
 type Data = {
 	msg: string
@@ -19,6 +16,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
     if (!session) {
         console.error("/api/deleteStakingPool - Must Connect to your Wallet"); 
         res.status(400).json({ msg: "Must Connect to your Wallet" })
+        return 
     }
     const sesionPkh = session?.user.pkh
     //--------------------------------
@@ -42,6 +40,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
             return 
         } else {
             const stakingPool = stakingPoolWithSameName[0]
+
             if (!stakingPool.masters.includes(sesionPkh!)){
                 console.error("/api/deleteStakingPool - You aren't master of this Staking Pool"); 
                 res.status(400).json({ msg: "You aren't master of this Staking Pool"})

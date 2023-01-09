@@ -8,50 +8,42 @@ import dynamic from 'next/dynamic'
 
 import { toJson } from '../utils/utils'
 import { connect } from '../utils/dbConnect'
-
-import path from 'path'
 import { useStoreState } from '../utils/walletProvider';
-
 import { StakingPoolDBInterface, getStakingPools } from '../types/stakePoolDBModel'
 import { createContext, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { getSession } from 'next-auth/react'
-// import StakingPoolAdmin from '../components/StakingPoolAdmin';
-
+import { stakingPoolDBParser } from '../stakePool/helpersStakePool'
 //--------------------------------------
 
-
-const Withdraw : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> =  ({stakingPools} : InferGetServerSidePropsType<typeof getServerSideProps>) =>  {
-	
-	//console.log("Withdraw")   
+const Withdraw : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> =  ({stakingPools, pkh} : InferGetServerSidePropsType<typeof getServerSideProps>) =>  {
 	
 	const router = useRouter();
 
 	const [isRefreshing, setIsRefreshing] = useState(true);
 
-	const [pkh, setPkh] = useState<string | undefined>("");
-
 	const walletStore = useStoreState(state => state.wallet)
 
+	const [stakingPoolsParsed, setStakingPoolsParsed] = useState<StakingPoolDBInterface [] > ([]);
+
 	const refreshData = (pkh : string | undefined) => {
-
-		console.log ("ROUTER WITHDRAW: pkh: "+ pkh + "walletStore.connected " + walletStore.connected + " router.asPath: " + router.asPath);
-
+		console.log ("Withdraw - refreshData - router.replace - pkh: "+ pkh + " - walletStore.connected " + walletStore.connected + " - router.asPath: " + router.asPath);
 		router.replace(router.basePath + "?pkh=" + pkh);
-
-		setPkh(pkh);
-
 		setIsRefreshing(true);
 	};
 
-
 	useEffect(() => {
 		setIsRefreshing(false);
+		if (stakingPools){
+			for (let i = 0; i < stakingPools.length; i++) {
+				stakingPools[i] = stakingPoolDBParser(stakingPools[i]);
+			}
+			setStakingPoolsParsed (stakingPools)
+		}
 	}, [stakingPools]);
 	
 	useEffect(() => {
 		// console.log("Withdraw - useEffect - walletStore.connected: " + walletStore.connected)
-		
 		if (walletStore.connected && pkh != walletStore.pkh) {
 			refreshData(walletStore.pkh)
 		}
@@ -69,7 +61,7 @@ const Withdraw : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>
 							sp => <StakingPool key={sp.name} stakingPoolInfo={sp}  />
 						)
 					:
-						<p>Can't find any Staking Pool that you have deposited into</p> 
+						<p>Can't find any Staking Pool that you have deposited into.</p> 
 			}
 		</Layout>
 	)
@@ -78,6 +70,7 @@ const Withdraw : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>
 export async function getServerSideProps(context : any) { 
 	try {
 		
+		console.log ("Withdraw getServerSideProps -------------------------------");
 		console.log ("Withdraw getServerSideProps - init - context.query?.pkh:", context.query?.pkh);
 
 		await connect();
@@ -99,7 +92,7 @@ export async function getServerSideProps(context : any) {
 					}
 
 				}else{
-					console.log ("Withdraw getServerSideProps - init - session: undefined");
+					//console.log ("Withdraw getServerSideProps - init - session: undefined");
 					rawDataStakingPools = []
 				}
 				
@@ -115,10 +108,10 @@ export async function getServerSideProps(context : any) {
 		console.log ("Withdraw getServerSideProps - stakingPool - length: " + rawDataStakingPools.length)
 		const stringifiedDataStakingPools = toJson(rawDataStakingPools);
 		const dataStakingPools : StakingPoolDBInterface [] = JSON.parse(stringifiedDataStakingPools);
-		//console.log ("Withdraw getServerSideProps - stakingPool length: " + dataStakingPools.length)
 		return {
 			props: {
-				stakingPools: dataStakingPools
+				stakingPools: dataStakingPools,
+				pkh: context.query?.pkh !== undefined ? context.query?.pkh : ""
 			}
 		};
 
@@ -126,7 +119,10 @@ export async function getServerSideProps(context : any) {
 		console.error (error)
 		const dataStakingPools : StakingPoolDBInterface [] = [];
 		return {
-			props: { stakingPools: dataStakingPools }
+			props: { 
+				stakingPools: dataStakingPools, 
+				pkh: context.query?.pkh !== undefined ? context.query?.pkh : ""
+			}
 		};
 	}
 }

@@ -1,8 +1,8 @@
 
-import { MintingPolicy, SpendingValidator, UTxO } from 'lucid-cardano';
-import { Schema, model, models } from 'mongoose';
-import { apiGetEUTxOsDBByAddressAndPkh } from '../utils/cardano-helpers';
-import { toJson } from '../utils/utils';
+import { MintingPolicy, SpendingValidator } from 'lucid-cardano';
+import { model, models, Schema } from 'mongoose';
+import { serverSide_updateStakingPool } from '../stakePool/helpersServerSide';
+import { stakingPoolDBParser } from '../stakePool/helpersStakePool';
 import { getEUTxOsFromDBByAddressAndPkh } from './eUTxODBModel';
 import { BIGINT, CurrencySymbol, EUTxO, PoolParams, TxOutRef, UTxO_Simple } from './types';
 
@@ -29,8 +29,6 @@ export interface StakingPoolDBInterface {
 	
 	masters: string [],
 
-	uTxO_With_PoolDatum: UTxO_Simple | undefined,
-
 	eUTxO_With_ScriptDatum: EUTxO | undefined,
 
 	eUTxO_With_Script_TxID_Master_Fund_Datum: EUTxO | undefined,
@@ -49,6 +47,7 @@ export interface StakingPoolDBInterface {
 	eUTxO_With_Script_TxID_User_Withdraw_Datum: EUTxO | undefined,
 
 	scriptAddress: string,
+
 	script: SpendingValidator,
 
 	staking_UI: string,
@@ -127,77 +126,75 @@ const stakingPoolDBSchema = new Schema<StakingPoolDBInterface>({
 
 	masters: { type: [String], required: true },
 
-	uTxO_With_PoolDatum : { type: String },
+	eUTxO_With_ScriptDatum: { type: Object },
+	
+	eUTxO_With_Script_TxID_Master_Fund_Datum: { type: Object },
+	eUTxO_With_Script_TxID_Master_FundAndMerge_Datum: { type: Object },
+	eUTxO_With_Script_TxID_Master_SplitFund_Datum: { type: Object },
+	eUTxO_With_Script_TxID_Master_ClosePool_Datum: { type: Object },
+	eUTxO_With_Script_TxID_Master_TerminatePool_Datum: { type: Object },
+	eUTxO_With_Script_TxID_Master_DeleteFund_Datum: { type: Object },
+	eUTxO_With_Script_TxID_Master_SendBackFund_Datum: { type: Object },
+	eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum: { type: Object },
+	eUTxO_With_Script_TxID_Master_AddScripts_Datum: { type: Object },
+	eUTxO_With_Script_TxID_Master_DeleteScripts_Datum: { type: Object },
 
-	eUTxO_With_ScriptDatum: { type: String },
-
-	eUTxO_With_Script_TxID_Master_Fund_Datum: { type: String },
-	eUTxO_With_Script_TxID_Master_FundAndMerge_Datum: { type: String },
-	eUTxO_With_Script_TxID_Master_SplitFund_Datum: { type: String },
-	eUTxO_With_Script_TxID_Master_ClosePool_Datum: { type: String },
-	eUTxO_With_Script_TxID_Master_TerminatePool_Datum: { type: String },
-	eUTxO_With_Script_TxID_Master_DeleteFund_Datum: { type: String },
-	eUTxO_With_Script_TxID_Master_SendBackFund_Datum: { type: String },
-	eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum: { type: String },
-	eUTxO_With_Script_TxID_Master_AddScripts_Datum: { type: String },
-	eUTxO_With_Script_TxID_Master_DeleteScripts_Datum: { type: String },
-
-	eUTxO_With_Script_TxID_User_Deposit_Datum: { type: String },
-	eUTxO_With_Script_TxID_User_Harvest_Datum: { type: String },
-	eUTxO_With_Script_TxID_User_Withdraw_Datum: { type: String },
+	eUTxO_With_Script_TxID_User_Deposit_Datum: { type: Object },
+	eUTxO_With_Script_TxID_User_Harvest_Datum: { type: Object },
+	eUTxO_With_Script_TxID_User_Withdraw_Datum: { type: Object },
 
 	scriptAddress: { type: String, required: true },
-	script: { type: String, required: true },
+	script: { type: Object, required: true },
 
 	staking_UI: { type: String, required: true },
 	harvest_UI: { type: String, required: true },
 	staking_Lucid: { type: String, required: true },
 	harvest_Lucid: { type: String, required: true },
 
-	pParams : { type: String, required: true },
+	pParams : { type: Object, required: true },
 
-	poolID_TxOutRef: { type: String, required: true },
+	poolID_TxOutRef: { type: Object, required: true },
 	poolID_CS: { type: String, required: true },
-	poolID_Script: { type: String, required: true },
+	poolID_Script: { type: Object, required: true },
 
 	txID_Master_Fund_CS: { type: String, required: true },
-	txID_Master_Fund_Script: { type: String, required: true },
+	txID_Master_Fund_Script: { type: Object, required: true },
 
 	txID_Master_FundAndMerge_CS: { type: String, required: true },
-	txID_Master_FundAndMerge_Script: { type: String, required: true },
+	txID_Master_FundAndMerge_Script: { type: Object, required: true },
 
 	txID_Master_SplitFund_CS: { type: String, required: true },
-	txID_Master_SplitFund_Script: { type: String, required: true },
+	txID_Master_SplitFund_Script: { type: Object, required: true },
 
 	txID_Master_ClosePool_CS: { type: String, required: true },
-	txID_Master_ClosePool_Script: { type: String, required: true },
+	txID_Master_ClosePool_Script: { type: Object, required: true },
 
 	txID_Master_TerminatePool_CS: { type: String, required: true },
-	txID_Master_TerminatePool_Script: { type: String, required: true },
+	txID_Master_TerminatePool_Script: { type: Object, required: true },
 
 	txID_Master_DeleteFund_CS: { type: String, required: true },
-	txID_Master_DeleteFund_Script: { type: String, required: true },
+	txID_Master_DeleteFund_Script: { type: Object, required: true },
 
 	txID_Master_SendBackFund_CS: { type: String, required: true },
-	txID_Master_SendBackFund_Script: { type: String, required: true },
+	txID_Master_SendBackFund_Script: { type: Object, required: true },
 
 	txID_Master_SendBackDeposit_CS: { type: String, required: true },
-	txID_Master_SendBackDeposit_Script: { type: String, required: true },
+	txID_Master_SendBackDeposit_Script: { type: Object, required: true },
 
 	txID_Master_AddScripts_CS: { type: String, required: true },
-	txID_Master_AddScripts_Script: { type: String, required: true },
+	txID_Master_AddScripts_Script: { type: Object, required: true },
 
 	txID_Master_DeleteScripts_CS: { type: String, required: true },
-	txID_Master_DeleteScripts_Script: { type: String, required: true },
+	txID_Master_DeleteScripts_Script: { type: Object, required: true },
 
 	txID_User_Deposit_CS: { type: String, required: true },
-	txID_User_Deposit_Script: { type: String, required: true },
+	txID_User_Deposit_Script: { type: Object, required: true },
 
 	txID_User_Harvest_CS: { type: String, required: true },
-	txID_User_Harvest_Script: { type: String, required: true },
+	txID_User_Harvest_Script: { type: Object, required: true },
 
 	txID_User_Withdraw_CS: { type: String, required: true },
-	txID_User_Withdraw_Script: { type: String, required: true }
+	txID_User_Withdraw_Script: { type: Object, required: true }
 
 });
 
@@ -210,19 +207,6 @@ export function getStakingPoolDBModel (){
 
 export async function getAllStakingPoolsForAdminFromDB (pkh? : string | undefined, swAdmin? : boolean | undefined) : Promise <StakingPoolDBInterface []> {
 
-	// const stakingPoolsDB = await StakingPoolDBModel.find({swShowOnSite : true})
-		
-	// // 	, undefined, undefined, function(error: any){
-	// // 	if(error) {
-	// // 		console.log("Error in getAllStakingPoolsForAdminFromDB: ", error)
-	// // 		throw error
-	// // 	}
-	// // });
-
-	// //const stakingPoolsDB = [{name : "RATS"},{name : "RATS"}]
-
-	// return stakingPoolsDB
-
 	const StakingPoolDBModel = getStakingPoolDBModel()
 
 	console.log ("getAllStakingPoolsForAdminFromDB - pkh: " + pkh )
@@ -234,63 +218,26 @@ export async function getAllStakingPoolsForAdminFromDB (pkh? : string | undefine
 	var stakingPoolsDB : StakingPoolDBInterface [] = []
 	
 	if(pkh){
-
 		for (let i = 0; i < stakingPoolsDB_.length; i++) {
-			const stakingPoolDB = stakingPoolsDB_[i];
-			// console.log("getAllStakingPoolsForAdminFromDB - stakingPoolDB: ", stakingPoolDB)
-
-			if (stakingPoolDB.masters.includes(pkh) || swAdmin === true){
-				stakingPoolsDB.push(stakingPoolDB)
+			const stakingPoolDB_Parsed = stakingPoolDBParser(stakingPoolsDB_[i]);
+			const stakingPoolDB_Updated = await serverSide_updateStakingPool (stakingPoolDB_Parsed)
+			if (stakingPoolDB_Updated.masters.includes(pkh) || swAdmin === true){
+				stakingPoolsDB.push(stakingPoolDB_Updated)
 			}
 		}
-	}else{
-		return []
 	}
-
-	// , undefined, undefined, function(error: any){
-	// 	if(error) {
-	// 		throw error
-	// 	}
-	// });
-
-	//const stakingPoolsDB = [{name : "RATS"},{name : "RATS"}]
-
-	// console.log ("getAllStakingPoolsForHomeFromDB - stakingPoolsDB: " + stakingPoolsDB[0].beginAt.toISOString() )
-
-	return stakingPoolsDB
 	
+	return stakingPoolsDB
 }
 
 export async function getAllStakingPoolsForHomeFromDB (pkh? : string | undefined) : Promise <StakingPoolDBInterface []> {
 
 	const StakingPoolDBModel = getStakingPoolDBModel()
 
-	// const now = new Date ()
-
 	console.log ("getAllStakingPoolsForHomeFromDB - pkh: " + pkh )
-	// console.log ("getAllStakingPoolsForHomeFromDB - now.toISOString(): " + now.toISOString() )
 	
 	const stakingPoolsDB_ : StakingPoolDBInterface [] = await StakingPoolDBModel.find({
-		swShowOnSite : true,
-
-		// swShowOnHome : true,
-
-		// swPreparado : true, 
-
-		// swIniciado : true, 
-
-		// swFunded: true, 
-
-		// swTerminated : false, 
-
-		// begintAt: {
-		//   $lte: now.toISOString() 
-		// },
-
-		// deadline: {
-		//   $lte: 'ISODate('+ now.toString()+ ')'
-		// }
-	
+		swShowOnSite : true
 	})
 
 	var stakingPoolsDB : StakingPoolDBInterface [] = []
@@ -298,52 +245,39 @@ export async function getAllStakingPoolsForHomeFromDB (pkh? : string | undefined
 	for (let i = 0; i < stakingPoolsDB_.length; i++) {
 		const stakingPoolDB = stakingPoolsDB_[i];
 		// console.log("getAllStakingPoolsForHomeFromDB - stakingPoolDB: ", stakingPoolDB)
-		
-		if(pkh){
 
-			const address = stakingPoolDB.scriptAddress
-			//const eUTxOByPkh = await apiGetEUTxOsDBByAddressAndPkh(address, pkh)
-			const eUTxOByPkh : EUTxO [] = await getEUTxOsFromDBByAddressAndPkh(address, pkh);
-			// if (eUTxOByPkh.length > 0 || (stakingPoolDB.swShowOnHome && stakingPoolDB.swPreparado && stakingPoolDB.swIniciado && stakingPoolDB.swFunded && !stakingPoolDB.swTerminated)) {
-			if (eUTxOByPkh.length > 0 ) {
-				stakingPoolsDB.push(stakingPoolDB)
-			}
-		}else{
-			if (stakingPoolDB.swShowOnHome && stakingPoolDB.swPreparado && stakingPoolDB.swIniciado && stakingPoolDB.swFunded && !stakingPoolDB.swClosed && !stakingPoolDB.swTerminated) {
-				stakingPoolsDB.push(stakingPoolDB)
+		if(stakingPoolDB.swShowOnHome){
+
+			const stakingPoolDB_Parsed = stakingPoolDBParser(stakingPoolsDB_[i]);
+			const stakingPoolDB_Updated = await serverSide_updateStakingPool (stakingPoolDB_Parsed)
+
+			if(pkh){
+				const address = stakingPoolDB_Updated.scriptAddress
+				const eUTxOByPkh : EUTxO [] = await getEUTxOsFromDBByAddressAndPkh(address, pkh);
+				if (eUTxOByPkh.length > 0 ) {
+					stakingPoolsDB.push(stakingPoolDB_Updated)
+				}
+			}else{
+				if (stakingPoolDB_Updated.swPreparado && stakingPoolDB_Updated.swIniciado && stakingPoolDB_Updated.swFunded && !stakingPoolDB_Updated.swClosed && !stakingPoolDB_Updated.swTerminated) {
+					stakingPoolsDB.push(stakingPoolDB_Updated)
+				}
 			}
 		}
 	}
-
-	// , undefined, undefined, function(error: any){
-	// 	if(error) {
-	// 		throw error
-	// 	}
-	// });
-
-	//const stakingPoolsDB = [{name : "RATS"},{name : "RATS"}]
-
-	// console.log ("getAllStakingPoolsForHomeFromDB - stakingPoolsDB: " + stakingPoolsDB[0].beginAt.toISOString() )
 
 	return stakingPoolsDB
 	
 }
 
-
 export async function getStakingPoolFromDBByName (name_ : string) : Promise <StakingPoolDBInterface []> {
+
+	//console.log ("getStakingPoolFromDBByName - name: " + name_ )
 
 	const StakingPoolDBModel = getStakingPoolDBModel()
 
-	const stakingPoolDB = await StakingPoolDBModel.find({name : name_})
-	// 	, undefined, undefined, function(error: any){
-	// 	if(error) {
-	// 		throw error
-	// 	}
-	// });
+	const stakingPoolsDB = await StakingPoolDBModel.find({name : name_})
 
-	//const stakingPoolsDB = [{name : "RATS"},{name : "RATS"}]
-
-	return stakingPoolDB
+	return stakingPoolsDB
 	
 }
 
@@ -351,7 +285,7 @@ export async function getStakingPools(forHome: boolean = true, pkh? : string | u
 
 	console.log("getStakingPools - Init - forHome: " + forHome + " - pkh: " + pkh);
 
-	var stakingPoolsDB: any;
+	var stakingPoolsDB : StakingPoolDBInterface [] = []
 
 	if (forHome) {
 		stakingPoolsDB = await getAllStakingPoolsForHomeFromDB(pkh);

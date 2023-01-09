@@ -195,6 +195,9 @@ export function explainError(errorIn: any): string {
             if (res === "" && error.includes("OutsideValidityIntervalUTxO")) {
                 res += sep + "Invalid transaction date, please try again later!"; sep = ", ";
             }
+            if (res === "" && error.includes("invalidBefore")) {
+                res += sep + "Invalid transaction date, please try again later!"; sep = ", ";
+            }
 
             if (res === "") {
                 res = error;

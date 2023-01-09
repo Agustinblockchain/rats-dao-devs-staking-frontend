@@ -2,7 +2,7 @@ import { Address, Assets, Lucid, UTxO } from 'lucid-cardano';
 import { EUTxO, FundDatum, PoolDatum, Redeemer_Burn_TxID, Redeemer_Mint_TxID, Redeemer_User_Harvest, Redeemer_User_Withdraw, UserDatum } from '../types';
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
 import { createTx, fixTx } from '../utils/cardano-helpersTx';
-import { getHexFrom_Redeemer_TxID, getHexFrom_Validator_Datum, getHexFrom_Validator_Redeemer } from "./helpersDatums";
+import { getHexFrom_Redeemer_TxID, getHexFrom_Validator_Datum, getHexFrom_Validator_Redeemer } from "./helpersDatumsAndRedeemers";
 
 //--------------------------------------
 

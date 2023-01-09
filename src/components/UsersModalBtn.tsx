@@ -7,7 +7,8 @@ import { EUTxO } from "../types";
 import { maxTokensWithDifferentNames } from "../types/constantes";
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
 import { useStoreState } from '../utils/walletProvider';
-import ActionModalBtn from "./ActionModalBtn";
+import ActionWithInputModalBtn from './ActionWithInputModalBtn';
+import ActionWithMessageModalBtn from './ActionWithMessageModalBtn';
 import LoadingSpinner from "./LoadingSpinner";
 //--------------------------------------
 
@@ -17,13 +18,14 @@ type ActionState = "loading" | "success" | "error" | "idle"
 
 export default function UsersModalBtn(
 
-	{ actionName, enabled, show, actionIdx, masterSendBackDepositAction, poolInfo, statePoolData, messageFromParent, hashFromParent, isWorkingFromParent, callback }:
+	{ actionName, enabled, show, actionIdx, masterSendBackDepositAction, poolInfo, statePoolData, messageFromParent, hashFromParent, isWorkingFromParent, callback, swPaddintTop }:
 		{
 			actionName: string, enabled: boolean, show: boolean, actionIdx: string,
 			masterSendBackDepositAction: (poolInfo?: StakingPoolDBInterface | undefined, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets | undefined) => Promise<any>,
 			poolInfo: StakingPoolDBInterface, 
 			statePoolData: ReturnType<typeof useStatePoolData>,
-			messageFromParent?: string | "", hashFromParent?: string | "", isWorkingFromParent?: string | "", callback?: (isWorking: string) => Promise<any>
+			messageFromParent?: string | "", hashFromParent?: string | "", isWorkingFromParent?: string | "", callback?: (isWorking: string) => Promise<any>,
+			swPaddintTop?: Boolean 
 		}) {
 
 	//string '0' shows 0 in UI, Number 0 shows loading skeleton for dynamic values
@@ -39,72 +41,33 @@ export default function UsersModalBtn(
 	});
 
 	const [isWorking, setIsWorking] = useState("")
-
 	const [actionMessage, setActionMessage] = useState("")
 	const [actionHash, setActionHash] = useState("")
 
 	const [eUTxOs_UserDatum_Selected, setEUTxOs_UserDatum_Selected] = useState<EUTxO[]>([])
 
-	const [walletHarvestAmount, setWalletHarvestAmount] = useState<string | 0>(ui_notConnected)
-	const [maxHarvestAmount, setMaxHarvestAmount] = useState<string | 0>(ui_notConnected)
-
 	const { isPoolDataLoaded, 
 		swPreparado, swIniciado, swFunded,
 		swClosed, closedAt, swTerminated, terminatedAt,
-		eUTxOs_With_Datum, countEUTxOs_With_Datum,
 		eUTxO_With_PoolDatum,
-		eUTxOs_With_FundDatum, countEUTxOs_With_FundDatum,
-		eUTxOs_With_UserDatum, countEUTxOs_With_UserDatum,
-		eUTxO_With_ScriptDatum,
-		eUTxO_With_Script_TxID_Master_Fund_Datum,
-		eUTxO_With_Script_TxID_Master_FundAndMerge_Datum,
-		eUTxO_With_Script_TxID_Master_ClosePool_Datum,
-		eUTxO_With_Script_TxID_Master_TerminatePool_Datum,
-		eUTxO_With_Script_TxID_Master_DeleteFund_Datum,
-		eUTxO_With_Script_TxID_Master_SendBackFund_Datum,
-		eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum,
-		eUTxO_With_Script_TxID_Master_AddScripts_Datum,
-		eUTxO_With_Script_TxID_Master_DeleteScripts_Datum,
-		eUTxO_With_Script_TxID_User_Deposit_Datum,
-		eUTxO_With_Script_TxID_User_Harvest_Datum,
-		eUTxO_With_Script_TxID_User_Withdraw_Datum,
-		totalFundsAvailable,
+		eUTxOs_With_UserDatum, 
 		totalStaked, totalRewardsPaid, totalRewardsToPay, totalUsersMinAda,
-		isPoolDataLoading, loadPoolData } = statePoolData
+		isPoolDataLoading, refreshPoolData } = statePoolData
 
 	useEffect(() => {
-		// console.log("FundsModalBtn - " + poolInfo.name + " - useEffect - walletStore.connected: " + walletStore.connected + " - isWalletDataLoaded: " + isWalletDataLoaded)
+		// console.log("UsersModalBtn - " + poolInfo.name + " - useEffect - walletStore.connected: " + walletStore.connected + " - isWalletDataLoaded: " + isWalletDataLoaded)
 
-		if (walletStore.connected && !isWalletDataLoaded) {
-			setWalletHarvestAmount(ui_loading)
-			setMaxHarvestAmount(ui_loading)
-		} else if (walletStore.connected && isWalletDataLoaded) {
-			//------------------
-			const walletHarvestAmount = getTotalOfUnit(poolInfo.harvest_Lucid)
-			//------------------
-			const harvest_CS = poolInfo.harvest_Lucid.slice(0, 56)
-			const harvest_TN = poolInfo.harvest_Lucid.slice(56)
-			const harvest_AC_isAda = (harvest_CS === 'lovelace')
-			const harvest_AC_isWithoutTokenName = !harvest_AC_isAda && harvest_TN == ""
-			//------------------
-			setWalletHarvestAmount(walletHarvestAmount.toString())
-			//------------------
-			if (walletHarvestAmount > maxTokensWithDifferentNames && harvest_AC_isWithoutTokenName) {
-				setMaxHarvestAmount(maxTokensWithDifferentNames.toString())
-			} else {
-				setMaxHarvestAmount(walletHarvestAmount.toString())
-			}
-		} else {
-			setWalletHarvestAmount(ui_notConnected)
-			setMaxHarvestAmount(ui_notConnected)
-		}
 		setEUTxOs_UserDatum_Selected([])
 
 	}, [walletStore, isWalletDataLoaded])
 
 	useEffect(() => {
+		setEUTxOs_UserDatum_Selected([])
+	}, [isPoolDataLoaded])
+
+	useEffect(() => {
 		// if (isWorking === actionNameWithIdx){
-		// 	console.log ("FundModalBtn - useEffect1 - " +(isWorking === actionNameWithIdx ? "YO":"OTRO")+ " - messageFromParent: " + messageFromParent + " - message: " + message)
+		// 	console.log ("UsersModalBtn - useEffect1 - " +(isWorking === actionNameWithIdx ? "YO":"OTRO")+ " - messageFromParent: " + messageFromParent + " - message: " + message)
 		// }
 		if (messageFromParent && messageFromParent !== "" && isWorkingFromParent === actionNameWithIdx) {
 			setActionMessage(messageFromParent)
@@ -115,7 +78,7 @@ export default function UsersModalBtn(
 
 	useEffect(() => {
 		// if (isWorking === actionNameWithIdx){
-		// 	console.log ("FundModalBtn - useEffect2 - " +(isWorking === actionNameWithIdx ? "YO":"OTRO")+ " - hashFromParent: " + hashFromParent + " - hash: " + hash)
+		// 	console.log ("UsersModalBtn - useEffect2 - " +(isWorking === actionNameWithIdx ? "YO":"OTRO")+ " - hashFromParent: " + hashFromParent + " - hash: " + hash)
 		// }
 		if (hashFromParent && hashFromParent !== "" && isWorkingFromParent === actionNameWithIdx) {
 			setActionHash(hashFromParent)
@@ -134,8 +97,8 @@ export default function UsersModalBtn(
 	}, [isWorkingFromParent])
 
 	const handleCallback = async (isWorking: string) => {
-		console.log("FundsModalBtn - " + poolInfo.name + " - handleCallback isWorking: ", isWorking)
-		// alert ("FundsModalBtn - callbak in:" + isWorking)
+		console.log("UsersModalBtn - " + poolInfo.name + " - handleCallback isWorking: ", isWorking)
+		// alert ("UsersModalBtn - callbak in:" + isWorking)
 
 		setIsWorking(isWorking)
 
@@ -148,21 +111,18 @@ export default function UsersModalBtn(
 
 	return (
 		<div className="modal__action_separator">
-			<br></br>
+			
 			{show?
 				<>
+					{swPaddintTop === true || swPaddintTop === undefined? <div><br></br></div> : null}
 					{enabled && (isWorkingFromParent === actionNameWithIdx || isWorkingFromParent === "") ?
-						<label htmlFor={`${actionNameWithIdx}-modal-toggle`} className="btn">
+						<label htmlFor={`${actionNameWithIdx}-modal-toggle`} className="btn btnStakingPool">
 							{actionName}
 							<>
 								{
 									(isWorkingFromParent === actionNameWithIdx) ?
 										<>
-											{/* <UseAnimations
-											strokeColor="currentColor"   //"currentColor"
-											size={50}
-											animation={ loadingAnimation } //status === "error" ? alertTriangleAnimation : (status === "loading" ? loadingAnimation : checkmarkAnimation)
-										/> */}
+											
 											<LoadingSpinner size={25} border={5} />
 										</>
 										:
@@ -171,9 +131,14 @@ export default function UsersModalBtn(
 							</>
 						</label>
 						:
-						<button disabled className="btn"><span className="wallet__button_disabled">{actionName}</span></button>
+						<button disabled className="btn btnStakingPool"><span className="wallet__button_disabled">{actionName}</span></button>
 					}
-					<input
+					
+				</>
+				:
+				<></>
+			}
+			<input
 						className="modal__toggle"
 						type="checkbox"
 						id={`${actionNameWithIdx}-modal-toggle`}
@@ -182,10 +147,6 @@ export default function UsersModalBtn(
 							}
 						}}
 					/>
-				</>
-				:
-				<></>
-			}
 			<div id={`${actionNameWithIdx}-modal`} className="modal">
 				<label htmlFor={`${actionNameWithIdx}-modal-toggle`} className="modal__shade"></label>
 				<div className="modal__content">
@@ -217,20 +178,19 @@ export default function UsersModalBtn(
 												eUTxO =>
 													<tr key={eUTxO.uTxO.txHash + "#" + eUTxO.uTxO.outputIndex}>
 														<td>
-															<input type="checkbox" key={eUTxO.uTxO.txHash + "#" + eUTxO.uTxO.outputIndex}
+															<input type="checkbox" key={eUTxO.uTxO.txHash + "#" + eUTxO.uTxO.outputIndex} checked={eUTxOs_UserDatum_Selected.some(eUTxO_UserDatum => eUTxO_UserDatum.uTxO.txHash === eUTxO.uTxO.txHash && eUTxO_UserDatum.uTxO.outputIndex === eUTxO.uTxO.outputIndex)}
 																onChange={(e) => {
-																	//console.log(e.target.checked)
 																	if (e.target.checked) {
 																		setEUTxOs_UserDatum_Selected(eUTxOs_UserDatum_Selected.concat(eUTxO))
 																	} else {
-																		setEUTxOs_UserDatum_Selected(eUTxOs_UserDatum_Selected.filter(eUTxO_UserDatum => eUTxO_UserDatum.uTxO.txHash !== eUTxO.uTxO.txHash || eUTxO_UserDatum.uTxO.outputIndex !== eUTxO.uTxO.outputIndex))
+																		setEUTxOs_UserDatum_Selected(eUTxOs_UserDatum_Selected.filter(eUTxO_UserDatum => ! ( eUTxO_UserDatum.uTxO.txHash == eUTxO.uTxO.txHash && eUTxO_UserDatum.uTxO.outputIndex == eUTxO.uTxO.outputIndex)))
 																	}
 																}}
 															/>
 														</td>
-														<td>{eUTxO.uTxO.txHash + "#" + eUTxO.uTxO.outputIndex}</td>
+														<td style={{fontSize:8}}>{eUTxO.uTxO.txHash + "#" + eUTxO.uTxO.outputIndex}</td>
 														<td>{eUTxO.datum.udCreatedAt.toString()}</td>
-														<td>{eUTxO.datum.udUser.toString()}</td>
+														<td style={{fontSize:8}}>{eUTxO.datum.udUser.toString()}</td>
 														<td>{Number(eUTxO.datum.udInvest).toLocaleString("en-US") + " " + poolInfo.staking_UI}</td>
 														<td>{Number(eUTxO.datum.udCashedOut).toLocaleString("en-US") + " " + poolInfo.harvest_UI}</td>
 														<td>{(typeof eUTxO_With_PoolDatum == "object" ? Number(getRewardsToPay_In_EUTxO_With_UserDatum (poolInfo, eUTxO_With_PoolDatum, eUTxO)).toLocaleString("en-US"):0)+ " " + poolInfo.harvest_UI}</td>
@@ -256,16 +216,16 @@ export default function UsersModalBtn(
 
 						{/* {toJson(eUTxOs_With_UserDatum)} */}
 						<div className="modal__content_btns">
-							<ActionModalBtn action={masterSendBackDepositAction} swHash={true} eUTxOs_Selected={eUTxOs_UserDatum_Selected} poolInfo={poolInfo} 
+							<ActionWithInputModalBtn action={masterSendBackDepositAction} swHash={true} eUTxOs_Selected={eUTxOs_UserDatum_Selected} poolInfo={poolInfo} 
 								enabled={walletStore.connected && isPoolDataLoaded && swPreparado === true && swTerminated === true && eUTxOs_UserDatum_Selected.length == 1 } 
 								show={true}
 								actionName="Send Back Deposit" actionIdx={poolInfo.name + "-UserModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
 							<div className="modal__action_separator">
 								<br></br>
-								<button className="btn"
+								<button className="btn btnStakingPool"
 									onClick={(e) => {
 										e.preventDefault()
-										loadPoolData ()
+										refreshPoolData ()
 									}
 									}
 									disabled={isPoolDataLoading}
@@ -283,7 +243,7 @@ export default function UsersModalBtn(
 							</div>
 							<div className="modal__action_separator">
 								<br></br>
-								<button className="btn"
+								<button className="btn btnStakingPool"
 									onClick={(e) => {
 										e.preventDefault()
 										const checkbox: any = document.getElementById(`${actionNameWithIdx}-modal-toggle`)

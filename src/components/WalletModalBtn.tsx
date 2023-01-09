@@ -1,5 +1,5 @@
 //--------------------------------------
-import { signIn, signOut } from "next-auth/react"
+import { signIn, signOut, useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
 import Skeleton from "react-loading-skeleton"
 import { initializeLucid, initializeLucidWithWalletFromSeed } from "../utils/initializeLucid"
@@ -10,18 +10,9 @@ import { useStoreActions, useStoreState } from '../utils/walletProvider'
 
 export default function WalletModalBtn() {
 
-	// var _isMounted = false;
-
-	// const [_isMounted, set_isMounted] = useState(false)
-
-	// const [isWorking, setIsWorking] = useState(false)
-
-	// const walletMasterSeed1 = "dad cupboard hotel cause mansion feature oppose prevent install venue finish galaxy tone green volcano neglect coil toast future exchange prize social next tape"
-	// const walletMasterSeed2 = "laptop brief dune view concert rule raise roast vessel harbor discover own urge mail aisle patrol budget awesome mimic throw loop access transfer cousin"
-	// const walletMasterPrivateKey1 = "ed25519_sk1tqszz34acpy9d757ae6qplh9lnrdk3dzf06z7cx8w730jfjxfrh05gsdntczq"
-
-	const walletMasterSeed1 = ""
-	const walletMasterSeed2 = ""
+	const walletMasterSeed1 = process.env.NEXT_PUBLIC_walletMasterSeed1
+	const walletMasterSeed2 = process.env.NEXT_PUBLIC_walletMasterSeed2
+	const walletMasterPrivateKey1 = process.env.NEXT_PUBLIC_walletMasterPrivateKey1
 
 	const [walletMessage, setWalletMessage] = useState("")
 
@@ -29,10 +20,6 @@ export default function WalletModalBtn() {
 	const [savedWalletName, setSavedWalletName] = useLocalStorage("walletName", "")
 	const [savedSwEnviarPorBlockfrost, setSavedSwEnviarPorBlockfrost] = useLocalStorage("SwEnviarPorBlockfrost", false)
 	const [savedIsWalletFromSeed, setSavedIsWalletFromSeed] = useLocalStorage("IsWalletFromSeed", false)
-
-	// const [swSavedWalletConnected, setSavedWalletConnected] = useState(false)
-	// const [savedWalletName, setSavedWalletName] = useState("")
-	// const [savedSwEnviarPorBlockfrost, setSavedSwEnviarPorBlockfrost] = useState(false)
 
 	const [pollWalletsCount, setPollWalletsCount] = useState(0)
 	const [availableWallets, setAvailableWallets] = useState<{ nami: boolean, yoroi: boolean, eternl: boolean, flint: boolean, typhon: boolean, nufi: boolean }>({ yoroi: false, nami: false, eternl: false, flint: false, typhon: false, nufi: false })
@@ -51,8 +38,6 @@ export default function WalletModalBtn() {
 	};
 
 	//--------------------------------------
-	//Wallet Store
-
 	const walletStore = useStoreState(state => state.wallet)
 	const uTxOsAtWallet = useStoreState(state => state.uTxOsAtWallet)
 	const isWalletDataLoaded = useStoreState(state => state.isWalletDataLoaded)
@@ -60,13 +45,12 @@ export default function WalletModalBtn() {
 	const { setWalletStore, loadWalletData } = useStoreActions(actions => {
 		return { setWalletStore: actions.setWallet, loadWalletData: actions.loadWalletData };
 	});
+
 	//--------------------------------------
 
 	const walletConnect = async (walletName: string, closeModal = true) => {
 
 		console.log("WalletModalBtn - walletConnect: " + walletName)
-
-		// setIsWorking(true)
 
 		setWalletMessage("Connecting with " + walletName + "...")
 
@@ -74,54 +58,33 @@ export default function WalletModalBtn() {
 
 			const walletApi = await window.cardano[walletName].enable()
 
-			//console.log("WalletModalBtn - walletConnected1" )
-
 			const lucid = await initializeLucid(walletApi)
-
-			//console.log("WalletModalBtn - walletConnected2" )
 
 			const adddressWallet = await lucid!.wallet.address()
 
 			//const pkh = C.Address.from_bech32(adddressWallet).as_base()?.payment_cred().to_keyhash()?.to_hex();
 			const pkh = lucid!.utils.getAddressDetails(adddressWallet)?.paymentCredential?.hash;
 
-			console.log("WalletModalBtn - walletConnect: addr: " + adddressWallet)
+			//console.log("WalletModalBtn - walletConnect: addr: " + adddressWallet)
 			console.log("WalletModalBtn - walletConnect: pkh: " + pkh)
-			// console.log("WalletModalBtn - walletConnect: swEnviarPorBlockfrost: " + savedSwEnviarPorBlockfrost)
 
 			const protocolParameters = await lucid!.provider.getProtocolParameters();
 
-			const walletStore = { connected: true, name: walletName, walletApi: walletApi, pkh: pkh, lucid: lucid, swEnviarPorBlockfrost: savedSwEnviarPorBlockfrost, protocolParameters: protocolParameters }
+			const walletStore_ = { connected: true, name: walletName, walletApi: walletApi, pkh: pkh, lucid: lucid, swEnviarPorBlockfrost: savedSwEnviarPorBlockfrost, protocolParameters: protocolParameters }
 
-			//console.log("WalletModalBtn - setWalletStore")
+			await signIn('credentials', { pkh: pkh , redirect: false })
 
-			setWalletStore(walletStore)
+			setWalletStore(walletStore_)
 
 			setSavedWalletConnected(true)
 			setSavedWalletName(walletName)
 			setSavedIsWalletFromSeed(false)
 
-			await signIn('credentials', { pkh: pkh , redirect: false })
-
-			//console.log("WalletModalBtn - setSavedWalletName")
-
-			// console.log("WalletModalBtn : " + document.querySelector("#wallet-modal-toggle"))
-			// console.log("WalletModalBtn : " + document.querySelector("wallet-modal-toggle"))
-
-			// if (_isMounted) {
-			// 	if (closeModal) {
-			// 		(document.querySelector("#wallet-modal-toggle") as any).checked = false
-			// 	}
-			// }
-			//if (_isMounted) 
-
 			setWalletMessage("Loading Wallet info...")
 
-			await loadWalletData(walletStore)
+			await loadWalletData(walletStore_)
 
 			setWalletMessage("Connected with " + walletName + "!")
-
-			//console.log("WalletModalBtn - setWalletMessage")
 
 		} catch (error) {
 
@@ -131,14 +94,11 @@ export default function WalletModalBtn() {
 
 		}
 
-		// setIsWorking(false)
 	}
 
 	const walletFromSeedConnect = async (walletName: string, closeModal = true) => {
 
 		console.log("WalletModalBtn - walletMasterConnect")
-
-		// setIsWorking(true)
 
 		setWalletMessage("Connecting with " + walletName + "...")
 
@@ -147,10 +107,11 @@ export default function WalletModalBtn() {
 			var walletSeed: string = ""
 
 			if (walletName === "Master1") {
-				walletSeed = walletMasterSeed1
+				walletSeed = walletMasterSeed1? walletMasterSeed1 : ""
 			} else if (walletName === "Master2") {
-				walletSeed = walletMasterSeed2
+				walletSeed = walletMasterSeed2? walletMasterSeed2 : ""
 			}
+
 			//const newBech32PrivateKey = C.PrivateKey.generate_ed25519().to_bech32()
 			//const walletPrivateKey ="ed25519_sk10lc2huyqqx53qkcj8u9x794cesmtrpn95330aurcvkex8wmysljsz062s8" // walletMasterPrivateKey1
 			//alert ("walletPrivateKey: " + walletPrivateKey)
@@ -158,29 +119,19 @@ export default function WalletModalBtn() {
 
 			const lucid = await initializeLucidWithWalletFromSeed(walletSeed)
 
-			//console.log("WalletModalBtn - walletConnected2" )
-
 			const adddressWallet = await lucid!.wallet.address()
 
 			//const pkh = C.Address.from_bech32(adddressWallet).as_base()?.payment_cred().to_keyhash()?.to_hex();
 			const pkh = lucid!.utils.getAddressDetails(adddressWallet)?.paymentCredential?.hash;
 
-			console.log("WalletModalBtn - walletConnect: addr: " + adddressWallet)
+			//console.log("WalletModalBtn - walletConnect: addr: " + adddressWallet)
 			console.log("WalletModalBtn - walletConnect: pkh: " + pkh)
-			// console.log("WalletModalBtn - walletConnect: swEnviarPorBlockfrost: " + savedSwEnviarPorBlockfrost)
-
-			// const pkh2 = addrToPubKeyHash (adddressWallet)
-			// console.log("WalletModalBtn - walletConnect: pkh2: " + pkh2)
-
-			// const add = pubKeyHashToAddress (pkh2!, 0)
-			// console.log("WalletModalBtn - walletConnect: add: " + add)
-
 
 			const protocolParameters = await lucid!.provider.getProtocolParameters();
 
 			const walletStore = { connected: true, name: walletName, walletApi: undefined, pkh: pkh, lucid: lucid, swEnviarPorBlockfrost: savedSwEnviarPorBlockfrost, protocolParameters: protocolParameters }
 
-			//console.log("WalletModalBtn - setWalletStore")
+			await signIn('credentials', { pkh: pkh , redirect: false })
 
 			setWalletStore(walletStore)
 
@@ -188,27 +139,11 @@ export default function WalletModalBtn() {
 			setSavedWalletName(walletName)
 			setSavedIsWalletFromSeed(true)
 
-			await signIn('credentials', { pkh: pkh , redirect: false })
-
-			//console.log("WalletModalBtn - setSavedWalletName")
-
-			// console.log("WalletModalBtn : " + document.querySelector("#wallet-modal-toggle"))
-			// console.log("WalletModalBtn : " + document.querySelector("wallet-modal-toggle"))
-
-			// if (_isMounted) {
-			// 	if (closeModal) {
-			// 		(document.querySelector("#wallet-modal-toggle") as any).checked = false
-			// 	}
-			// }
-			//if (_isMounted) 
-
 			setWalletMessage("Loading Wallet info...")
 
 			await loadWalletData(walletStore)
 
 			setWalletMessage("Connected with " + walletName + "!")
-
-			//console.log("WalletModalBtn - setWalletMessage")
 
 		} catch (error) {
 
@@ -218,15 +153,11 @@ export default function WalletModalBtn() {
 
 		}
 
-		// setIsWorking(false)
 	}
-
 
 	const walletDisconnect = async (closeModal = true) => {
 
 		console.log("WalletModalBtn - walletDisconnect")
-
-		// setIsWorking(true)
 
 		setWalletMessage("Disconnecting Wallet ...")
 
@@ -245,9 +176,6 @@ export default function WalletModalBtn() {
 
 			setWalletMessage("Wallet Disconnected!")
 
-			//console.log("WalletModalBtn - setWalletMessage")
-
-
 		} catch (error) {
 
 			console.error("WalletModalBtn - walletDisconnect Error2: " + error)
@@ -255,8 +183,6 @@ export default function WalletModalBtn() {
 			setWalletMessage("Error Disconnecting Wallet: " + error)
 
 		}
-
-		// setIsWorking(false)
 
 	}
 
@@ -352,13 +278,7 @@ export default function WalletModalBtn() {
 
 	useEffect(() => {
 
-		//set_isMounted( true);
-		//- IsWorking: "+ isWorking +" 
-		// console.log ("WalletModalBtn - useEffect2 - savedSwEnviarPorBlockfrost: " + savedSwEnviarPorBlockfrost + " - swSavedWalletConnected: " + swSavedWalletConnected + " - savedWalletName: " + savedWalletName + " - walletStore.connected: " + walletStore.connected)
-
 		poolWalletsAndConnect()
-
-		//return () => { set_isMounted (false) };
 
 	}, [])
 
@@ -427,9 +347,6 @@ export default function WalletModalBtn() {
 							:
 								<>
 
-
-
-
 									{
 										Object.keys(availableWallets).map(wallet => {
 											const enabled = (availableWallets as { [key: string]: boolean })[wallet];
@@ -489,38 +406,45 @@ export default function WalletModalBtn() {
 											
 										})
 									}
-									{/* <button
-										key={"Wallet Master 1"}
-										className="btn wallet__button"
-										onClick={async (e) => {
-											try {
-												e.preventDefault()
-												walletFromSeedConnect("Master1", false)
-											} catch (error) {
-												console.error("WalletModalBtn - Error connecting with wallet from seed" + error)
-											}
-										}}
-									>
-										<span>
-											Wallet Master 1
-										</span>
-									</button>
-									<button
-										key={"Wallet Master 2"}
-										className="btn wallet__button"
-										onClick={async (e) => {
-											try {
-												e.preventDefault()
-												walletFromSeedConnect("Master2", false)
-											} catch (error) {
-												console.error("WalletModalBtn - Error connecting with wallet from seed" + error)
-											}
-										}}
-									>
-										<span>
-											Wallet Master 2
-										</span>
-									</button> */}
+
+									{process.env.NODE_ENV==="development"?
+										<>
+											<button
+												key={"Wallet Master 1"}
+												className="btn wallet__button"
+												onClick={async (e) => {
+													try {
+														e.preventDefault()
+														walletFromSeedConnect("Master1", false)
+													} catch (error) {
+														console.error("WalletModalBtn - Error connecting with wallet from seed" + error)
+													}
+												}}
+											>
+												<span>
+													Wallet Master 1
+												</span>
+											</button>
+											<button
+												key={"Wallet Master 2"}
+												className="btn wallet__button"
+												onClick={async (e) => {
+													try {
+														e.preventDefault()
+														walletFromSeedConnect("Master2", false)
+													} catch (error) {
+														console.error("WalletModalBtn - Error connecting with wallet from seed" + error)
+													}
+												}}
+											>
+												<span>
+													Wallet Master 2
+												</span>
+											</button>
+										</>
+										:
+										<></>
+									}
 								</>
 							}
 						</div>

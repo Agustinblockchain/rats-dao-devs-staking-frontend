@@ -1,11 +1,9 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import type { NextApiRequest, NextApiResponse } from 'next'
 
-import { connect } from '../../utils/dbConnect'
-
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { connect } from '../../utils/dbConnect';
 import { toJson } from '../../utils/utils';
-
-import { getDatumDBModel, getDatumFromDBByDatumHash } from  '../../types/datumDBModel'
+import { getDatumFromDBByDatumHash } from '../../types/datumDBModel';
+import { getSession } from 'next-auth/react';
 
 type Data = {
     msg: string
@@ -14,6 +12,16 @@ type Data = {
 
 export default async function handler( req: NextApiRequest, res: NextApiResponse<Data | string>) {
 
+    //--------------------------------
+    const session = await getSession({ req })
+    if (!session) {
+        console.error("/api/getDatum - Must Connect to your Wallet"); 
+        res.status(400).json({ msg: "Must Connect to your Wallet" , datum : undefined})
+        return 
+    }
+    const sesionPkh = session?.user.pkh
+    //--------------------------------
+    
     const datumHash = req.body.datumHash
 
     await connect();

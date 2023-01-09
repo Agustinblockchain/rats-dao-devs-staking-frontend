@@ -109,7 +109,7 @@ export function toJson(data: any) {
         return jsonreplace
 
     } else {
-        return ""
+        return "{}"
     }
 }
 
@@ -186,4 +186,26 @@ export function searchAndGetKeyInObject(obj: any, key: string) {
 }
 
 //----------------------------------------------------------------------
+
+export function htmlEscape(str: string) {
+    return str
+        .replace(/&/g, '&amp')
+        .replace(/'/g, '&apos')
+        .replace(/"/g, '&quot')
+        .replace(/>/g, '&gt')   
+        .replace(/</g, '&lt');    
+}
+
+// The opposite function:
+export function htmlUnescape(str: string) {
+    return str
+        .replace(/&amp/g, '&')
+        .replace(/&apos/g, "'")
+        .replace(/&quot/g, '"')
+        .replace(/&gt/g, '>')   
+        .replace(/&lt/g, '<');    
+}
+
+//----------------------------------------------------------------------
+
 

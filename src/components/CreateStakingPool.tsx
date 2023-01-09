@@ -8,12 +8,13 @@ import { format } from 'date-fns';
 import { Assets, UTxO } from 'lucid-cardano';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { splitUTxOs } from "../stakePool/endPoints - splitUTxOs";
-import { apiCreateStakingPoolDB, getEstadoDeployAPI } from "../stakePool/helpersStakePool";
+import { apiCreateStakingPoolDB, getEstadoDeployAPI } from "../stakePool/apis";
 import { maxMasters } from '../types/constantes';
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
 import { pushSucessNotification } from "../utils/pushNotification";
 import { useStoreState } from '../utils/walletProvider';
-import ActionModalBtn from './ActionModalBtn';
+import ActionWithInputModalBtn from './ActionWithInputModalBtn';
+import ActionWithMessageModalBtn from './ActionWithMessageModalBtn';
 import LoadingSpinner from "./LoadingSpinner";
 import { EUTxO } from '../types';
 import { newTransaction } from '../utils/cardano-helpersTx';
@@ -185,11 +186,11 @@ export default function CreateStakingPool( ) {
 				interest: interest
 			}
 
-			const [message, stakingPool] = await apiCreateStakingPoolDB(data)
+			const stakingPool = await apiCreateStakingPoolDB(data)
 
 			setActionMessage("Smart Contracts created!")
 
-            pushSucessNotification("Creating Smart Contracts ", message, false);
+            pushSucessNotification("Creating Smart Contracts ", "Smart Contracts created!", false);
 
             setTimeout(setStakingPoolCreated, 3000, stakingPool);
 
@@ -208,7 +209,7 @@ export default function CreateStakingPool( ) {
 	//--------------------------------------
 
 	const splitUTxOsAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
-		await newTransaction ("CreateStakingPool - Split Wallet UTxOs", walletStore, poolInfo, splitUTxOs, false, setActionMessage, setActionHash, setIsWorking, getUTxOsFromWallet, eUTxOs_Selected, assets) 
+		return await newTransaction ("CreateStakingPool - Split Wallet UTxOs", walletStore, poolInfo, splitUTxOs, false, setActionMessage, setActionHash, setIsWorking, getDataFromWallet, eUTxOs_Selected, assets) 
 	}
 
 	//--------------------------------------
@@ -219,12 +220,12 @@ export default function CreateStakingPool( ) {
 			{stakingPoolCreated ?
 				<div >
 					{/* <StakingPoolAdmin key={stakingPoolCreated.name} stakingPoolInfo={stakingPoolCreated} /> 
-			<ActionModalBtn action={createNewPoolAction} actionIdx="1" enabled={true} actionName="Create New StakingPool Files" /> */}
+					<ActionWithInputModalBtn action={createNewPoolAction} actionIdx="1" enabled={true} actionName="Create New StakingPool Files" /> */}
 					<br></br>
 
-					{/* <ActionModalBtn action={IniciarPoolAction} poolInfo={stakingPoolCreated}  actionIdx="1" enabled={true} actionName="Iniciar Pool" />	 */}
+					{/* <ActionWithInputModalBtn action={IniciarPoolAction} poolInfo={stakingPoolCreated}  actionIdx="1" enabled={true} actionName="Iniciar Pool" />	 */}
 
-					<button className="btn"
+					<button className="btn btnStakingPool"
 						onClick={(e) => {
 							e.preventDefault()
 							IniciarPoolAction(stakingPoolCreated)
@@ -241,9 +242,9 @@ export default function CreateStakingPool( ) {
 					</div>
 					<br></br>
 
-					{/* <ActionModalBtn action={createNewPoolAction} actionIdx="1" enabled={true} actionName="Create New StakingPool Files" /> */}
+					{/* <ActionWithInputModalBtn action={createNewPoolAction} actionIdx="1" enabled={true} actionName="Create New StakingPool Files" /> */}
 
-					<button className="btn"
+					<button className="btn btnStakingPool"
 						onClick={(e) => {
 							e.preventDefault()
 							createNewPoolAction()
@@ -391,20 +392,23 @@ export default function CreateStakingPool( ) {
 
 										</form>
 
-										<ActionModalBtn action={createPoolFilesAction} swHash={false} 
+										<ActionWithMessageModalBtn action={createPoolFilesAction} 
+											description={'<li className="info">After creating the Pool you should prepare it immediately.</li>\
+											<li className="info">You should not make other transactions because the contract was created depending on a specific UTxO that should not be consumed before (UTxO to mint the PoolID NFT)</li>\
+											<li className="info">After finishing creating the Pool you will be redirected <a href="/admin" style={{ textDecoration: \'underline\' }}>here</a> to prepare it and have the first Funds added.</li>'}
+											swHash={false} 
 											enabled={walletStore.connected && uTxOsAtWalllet.length > 0} 
 											show={true}
 											actionIdx="1" actionName="Create Staking Pool" messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
-										<br></br>
-										<li className="info">After creating the Pool you should prepare it immediately.</li>
-										<li className="info">You should not make other transactions because the contract was created depending on a specific UTxO that should not be consumed before (UTxO to mint the PoolID NFT)</li>
-										<li className="info">After finishing creating the Pool you will be redirected <a href="/admin" style={{ textDecoration: 'underline' }}>here</a> to prepare it and have the first Funds added.</li>
-										<br></br>
-										<ActionModalBtn action={splitUTxOsAction} swHash={true} 
-											enabled={walletStore.connected} 
+										
+										<ActionWithMessageModalBtn action={splitUTxOsAction} 
+											description={'<li className="info">It is generally a good practice to split your wallet\'s UTXOs (unspent transaction outputs) into smaller amounts.</li> \
+											<li className="info">Having smaller UTXOs with only ADA amounts can make it easier to use them as collateral for smart contracts.</li>'}
+											swHash={true}
+											enabled={walletStore.connected}
 											show={true}
 											actionName="Split Wallet UTxOs" actionIdx="1" messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
-
+							
 									</div>
 								</div>
 							</div>

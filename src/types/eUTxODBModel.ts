@@ -25,11 +25,6 @@ export async function getAllEUTxOsFromDB () : Promise<EUTxO[]> {
 	const EUTxODBModel = getEUTxODBModel()
 
 	const eUTxOsDB = await EUTxODBModel.find({})
-	// 	, undefined, undefined, function(error: any){
-	// 	if(error) {
-	// 		throw error
-	// 	}
-	// });
 
 	return eUTxOsDB
 	
@@ -41,12 +36,6 @@ export async function getEUTxOsFromDBByAddress (address : string) : Promise<EUTx
 
 	const eUTxODB : EUTxODBInterface []  = await EUTxODBModel.find({"eUTxO.uTxO.address": address})
 	
-	// , undefined, undefined, function(error: any){
-	// 	if(error) {
-	// 		throw error
-	// 	}
-	// });
-
 	return eUTxODB.map((eUTxODB) => eUTxODB.eUTxO)
 	
 }
@@ -57,17 +46,7 @@ export async function getEUTxOsFromDBByAddressAndPkh (address : string, pkh : st
 
 	const eUTxODB : EUTxODBInterface []  = await EUTxODBModel.find({"eUTxO.uTxO.address": address,  "eUTxO.datum.udUser": pkh})
 	
-	///"eUTxO.datum.plutusDataIndex": UserDatum.plutusDataIndex,
-
-	
-	// , undefined, undefined, function(error: any){
-	// 	if(error) {
-	// 		throw error
-	// 	}
-	// });
-
 	return eUTxODB.map((eUTxODB) => eUTxODB.eUTxO)
-	
 }
 
 export async function getEUTxOFromDBByTxHashAndIndex (txHash : string, outputIndex: number): Promise<EUTxO []>  {
@@ -78,12 +57,6 @@ export async function getEUTxOFromDBByTxHashAndIndex (txHash : string, outputInd
 
 	const eUTxODB = await EUTxODBModel.find({ "eUTxO.uTxO.txHash": txHash, "eUTxO.uTxO.outputIndex": outputIndex})
 	
-	// , undefined, undefined, function(error: any){
-	// 	if(error) {
-	// 		throw error
-	// 	}
-	// });
-
 	return eUTxODB.map((eUTxODB) => eUTxODB.eUTxO)
 }
 
@@ -92,13 +65,10 @@ export async function deleteEUTxOsFromDBByAddress (address : string) : Promise<n
 
 	const EUTxODBModel = getEUTxODBModel()
 	
-	const del = await EUTxODBModel.deleteMany({"eUTxO.uTxO.address": address}
-		// , undefined, function(error: any){
-		// if(error) {
-		// 	throw error
-		// }
-		// }
+	const del = await EUTxODBModel.deleteMany(
+		{"eUTxO.uTxO.address": address}
 	);
+
 	return del.deletedCount
 }
 
@@ -120,11 +90,6 @@ export async function deleteEUTxOsFromDBPreparingOrConsumingByAddress (address :
 				{"eUTxO.isConsuming.plutusDataIndex":0, "eUTxO.isConsuming.val":  {"$lte":nowMinusTxConsumingTime}}
 			] 
 		}
-		// , undefined, function(error: any){
-		// if(error) {
-		// 	throw error
-		// }
-		// }
 	);
 	// console.log ("deleteEUTxOsFromDBPreparingOrConsumingByAddress - del: " + del.deletedCount)
 	return del.deletedCount
@@ -138,13 +103,6 @@ export async function deleteEUTxOsFromDBByTxHashAndIndex (txHash : string, outpu
 	
 	return del.deletedCount
 
-	// console.log ("deleteEUTxOsFromDBByTxHashAndIndex - del: " + del.deletedCount)
-		// , undefined, function(error: any){
-		// if(error) {
-		// 	throw error
-		// }
-		// }
-	
 }
 
 

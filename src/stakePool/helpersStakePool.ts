@@ -4,10 +4,13 @@ import { maxRewards, poolDatum_ClaimedFund, txID_User_Withdraw_TN } from "../typ
 import { StakingPoolDBInterface } from "../types/stakePoolDBModel";
 import { addAssetsList, sumTokensAmt_From_AC_Lucid } from "../utils/cardano-helpers";
 import { strToHex, toJson } from "../utils/utils";
+import { eUTxODBParser } from "./helpersEUTxOs";
 
 //---------------------------------------------------------------
 
-export function stakingPoolDBParser(stakingPoolDB: any) {
+export function stakingPoolDBParser(stakingPoolDB: StakingPoolDBInterface) {
+
+    //console.log ("stakingPoolDBParser - init - stakingPoolDB: " + stakingPoolDB.name);
 
     const stakingPoolDB_: StakingPoolDBInterface = {
         name: stakingPoolDB.name,
@@ -30,27 +33,25 @@ export function stakingPoolDBParser(stakingPoolDB: any) {
 
         masters: stakingPoolDB.masters,
 
-        uTxO_With_PoolDatum: stakingPoolDB.uTxO_With_PoolDatum === "" ? undefined : JSON.parse(stakingPoolDB.uTxO_With_PoolDatum),
+        eUTxO_With_ScriptDatum: eUTxODBParser(stakingPoolDB.eUTxO_With_ScriptDatum),
 
-        eUTxO_With_ScriptDatum: stakingPoolDB.eUTxO_With_ScriptDatum === "" ? undefined : JSON.parse(stakingPoolDB.eUTxO_With_ScriptDatum),
+        eUTxO_With_Script_TxID_Master_Fund_Datum: eUTxODBParser(stakingPoolDB.eUTxO_With_Script_TxID_Master_Fund_Datum),
+        eUTxO_With_Script_TxID_Master_FundAndMerge_Datum: eUTxODBParser(stakingPoolDB.eUTxO_With_Script_TxID_Master_FundAndMerge_Datum),
+        eUTxO_With_Script_TxID_Master_SplitFund_Datum: eUTxODBParser(stakingPoolDB.eUTxO_With_Script_TxID_Master_SplitFund_Datum),
+        eUTxO_With_Script_TxID_Master_ClosePool_Datum: eUTxODBParser(stakingPoolDB.eUTxO_With_Script_TxID_Master_ClosePool_Datum),
+        eUTxO_With_Script_TxID_Master_TerminatePool_Datum: eUTxODBParser(stakingPoolDB.eUTxO_With_Script_TxID_Master_TerminatePool_Datum),
+        eUTxO_With_Script_TxID_Master_DeleteFund_Datum: eUTxODBParser(stakingPoolDB.eUTxO_With_Script_TxID_Master_DeleteFund_Datum),
+        eUTxO_With_Script_TxID_Master_SendBackFund_Datum: eUTxODBParser(stakingPoolDB.eUTxO_With_Script_TxID_Master_SendBackFund_Datum),
+        eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum: eUTxODBParser(stakingPoolDB.eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum),
+        eUTxO_With_Script_TxID_Master_AddScripts_Datum: eUTxODBParser(stakingPoolDB.eUTxO_With_Script_TxID_Master_AddScripts_Datum),
+        eUTxO_With_Script_TxID_Master_DeleteScripts_Datum: eUTxODBParser(stakingPoolDB.eUTxO_With_Script_TxID_Master_DeleteScripts_Datum),
 
-        eUTxO_With_Script_TxID_Master_Fund_Datum: stakingPoolDB.eUTxO_With_Script_TxID_Master_Fund_Datum === "" ? undefined : JSON.parse(stakingPoolDB.eUTxO_With_Script_TxID_Master_Fund_Datum),
-        eUTxO_With_Script_TxID_Master_FundAndMerge_Datum: stakingPoolDB.eUTxO_With_Script_TxID_Master_FundAndMerge_Datum === "" ? undefined : JSON.parse(stakingPoolDB.eUTxO_With_Script_TxID_Master_FundAndMerge_Datum),
-        eUTxO_With_Script_TxID_Master_SplitFund_Datum: stakingPoolDB.eUTxO_With_Script_TxID_Master_SplitFund_Datum === "" ? undefined : JSON.parse(stakingPoolDB.eUTxO_With_Script_TxID_Master_SplitFund_Datum),
-        eUTxO_With_Script_TxID_Master_ClosePool_Datum: stakingPoolDB.eUTxO_With_Script_TxID_Master_ClosePool_Datum === "" ? undefined : JSON.parse(stakingPoolDB.eUTxO_With_Script_TxID_Master_ClosePool_Datum),
-        eUTxO_With_Script_TxID_Master_TerminatePool_Datum: stakingPoolDB.eUTxO_With_Script_TxID_Master_TerminatePool_Datum === "" ? undefined : JSON.parse(stakingPoolDB.eUTxO_With_Script_TxID_Master_TerminatePool_Datum),
-        eUTxO_With_Script_TxID_Master_DeleteFund_Datum: stakingPoolDB.eUTxO_With_Script_TxID_Master_DeleteFund_Datum === "" ? undefined : JSON.parse(stakingPoolDB.eUTxO_With_Script_TxID_Master_DeleteFund_Datum),
-        eUTxO_With_Script_TxID_Master_SendBackFund_Datum: stakingPoolDB.eUTxO_With_Script_TxID_Master_SendBackFund_Datum === "" ? undefined : JSON.parse(stakingPoolDB.eUTxO_With_Script_TxID_Master_SendBackFund_Datum),
-        eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum: stakingPoolDB.eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum === "" ? undefined : JSON.parse(stakingPoolDB.eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum),
-        eUTxO_With_Script_TxID_Master_AddScripts_Datum: stakingPoolDB.eUTxO_With_Script_TxID_Master_AddScripts_Datum === "" ? undefined : JSON.parse(stakingPoolDB.eUTxO_With_Script_TxID_Master_AddScripts_Datum),
-        eUTxO_With_Script_TxID_Master_DeleteScripts_Datum: stakingPoolDB.eUTxO_With_Script_TxID_Master_DeleteScripts_Datum === "" ? undefined : JSON.parse(stakingPoolDB.eUTxO_With_Script_TxID_Master_DeleteScripts_Datum),
-
-        eUTxO_With_Script_TxID_User_Deposit_Datum: stakingPoolDB.eUTxO_With_Script_TxID_User_Deposit_Datum === "" ? undefined : JSON.parse(stakingPoolDB.eUTxO_With_Script_TxID_User_Deposit_Datum),
-        eUTxO_With_Script_TxID_User_Harvest_Datum: stakingPoolDB.eUTxO_With_Script_TxID_User_Harvest_Datum === "" ? undefined : JSON.parse(stakingPoolDB.eUTxO_With_Script_TxID_User_Harvest_Datum),
-        eUTxO_With_Script_TxID_User_Withdraw_Datum: stakingPoolDB.eUTxO_With_Script_TxID_User_Withdraw_Datum === "" ? undefined : JSON.parse(stakingPoolDB.eUTxO_With_Script_TxID_User_Withdraw_Datum),
+        eUTxO_With_Script_TxID_User_Deposit_Datum: eUTxODBParser(stakingPoolDB.eUTxO_With_Script_TxID_User_Deposit_Datum),
+        eUTxO_With_Script_TxID_User_Harvest_Datum: eUTxODBParser(stakingPoolDB.eUTxO_With_Script_TxID_User_Harvest_Datum),
+        eUTxO_With_Script_TxID_User_Withdraw_Datum: eUTxODBParser(stakingPoolDB.eUTxO_With_Script_TxID_User_Withdraw_Datum),
 
         scriptAddress: stakingPoolDB.scriptAddress,
-        script: JSON.parse(stakingPoolDB.script),
+        script: (stakingPoolDB.script),
 
         staking_UI: stakingPoolDB.staking_UI,
         harvest_UI: stakingPoolDB.harvest_UI,
@@ -58,53 +59,55 @@ export function stakingPoolDBParser(stakingPoolDB: any) {
         staking_Lucid: stakingPoolDB.staking_Lucid,
         harvest_Lucid: stakingPoolDB.harvest_Lucid,
 
-        pParams: JSON.parse(stakingPoolDB.pParams),
+        pParams: (stakingPoolDB.pParams),
 
-        poolID_TxOutRef: JSON.parse(stakingPoolDB.poolID_TxOutRef),
+        poolID_TxOutRef: (stakingPoolDB.poolID_TxOutRef),
         poolID_CS: stakingPoolDB.poolID_CS,
-        poolID_Script: JSON.parse(stakingPoolDB.poolID_Script),
+        poolID_Script: (stakingPoolDB.poolID_Script),
 
         txID_Master_Fund_CS: stakingPoolDB.txID_Master_Fund_CS,
-        txID_Master_Fund_Script: JSON.parse(stakingPoolDB.txID_Master_Fund_Script),
+        txID_Master_Fund_Script: (stakingPoolDB.txID_Master_Fund_Script),
 
         txID_Master_FundAndMerge_CS: stakingPoolDB.txID_Master_FundAndMerge_CS,
-        txID_Master_FundAndMerge_Script: JSON.parse(stakingPoolDB.txID_Master_FundAndMerge_Script),
+        txID_Master_FundAndMerge_Script: (stakingPoolDB.txID_Master_FundAndMerge_Script),
 
         txID_Master_SplitFund_CS: stakingPoolDB.txID_Master_SplitFund_CS,
-        txID_Master_SplitFund_Script: JSON.parse(stakingPoolDB.txID_Master_SplitFund_Script),
+        txID_Master_SplitFund_Script: (stakingPoolDB.txID_Master_SplitFund_Script),
 
         txID_Master_TerminatePool_CS: stakingPoolDB.txID_Master_TerminatePool_CS,
-        txID_Master_TerminatePool_Script: JSON.parse(stakingPoolDB.txID_Master_TerminatePool_Script),
+        txID_Master_TerminatePool_Script: (stakingPoolDB.txID_Master_TerminatePool_Script),
 
         txID_Master_ClosePool_CS: stakingPoolDB.txID_Master_ClosePool_CS,
-        txID_Master_ClosePool_Script: JSON.parse(stakingPoolDB.txID_Master_ClosePool_Script),
+        txID_Master_ClosePool_Script: (stakingPoolDB.txID_Master_ClosePool_Script),
 
         txID_Master_DeleteFund_CS: stakingPoolDB.txID_Master_DeleteFund_CS,
-        txID_Master_DeleteFund_Script: JSON.parse(stakingPoolDB.txID_Master_DeleteFund_Script),
+        txID_Master_DeleteFund_Script: (stakingPoolDB.txID_Master_DeleteFund_Script),
 
         txID_Master_SendBackFund_CS: stakingPoolDB.txID_Master_SendBackFund_CS,
-        txID_Master_SendBackFund_Script: JSON.parse(stakingPoolDB.txID_Master_SendBackFund_Script),
+        txID_Master_SendBackFund_Script: (stakingPoolDB.txID_Master_SendBackFund_Script),
 
         txID_Master_SendBackDeposit_CS: stakingPoolDB.txID_Master_SendBackDeposit_CS,
-        txID_Master_SendBackDeposit_Script: JSON.parse(stakingPoolDB.txID_Master_SendBackDeposit_Script),
+        txID_Master_SendBackDeposit_Script: (stakingPoolDB.txID_Master_SendBackDeposit_Script),
 
         txID_Master_AddScripts_CS: stakingPoolDB.txID_Master_AddScripts_CS,
-        txID_Master_AddScripts_Script: JSON.parse(stakingPoolDB.txID_Master_AddScripts_Script),
+        txID_Master_AddScripts_Script: (stakingPoolDB.txID_Master_AddScripts_Script),
 
         txID_Master_DeleteScripts_CS: stakingPoolDB.txID_Master_DeleteScripts_CS,
-        txID_Master_DeleteScripts_Script: JSON.parse(stakingPoolDB.txID_Master_DeleteScripts_Script),
+        txID_Master_DeleteScripts_Script: (stakingPoolDB.txID_Master_DeleteScripts_Script),
 
         txID_User_Deposit_CS: stakingPoolDB.txID_User_Deposit_CS,
-        txID_User_Deposit_Script: JSON.parse(stakingPoolDB.txID_User_Deposit_Script),
+        txID_User_Deposit_Script: (stakingPoolDB.txID_User_Deposit_Script),
 
         txID_User_Harvest_CS: stakingPoolDB.txID_User_Harvest_CS,
-        txID_User_Harvest_Script: JSON.parse(stakingPoolDB.txID_User_Harvest_Script),
+        txID_User_Harvest_Script: (stakingPoolDB.txID_User_Harvest_Script),
 
         txID_User_Withdraw_CS: stakingPoolDB.txID_User_Withdraw_CS,
-        txID_User_Withdraw_Script: JSON.parse(stakingPoolDB.txID_User_Withdraw_Script)
+        txID_User_Withdraw_Script: (stakingPoolDB.txID_User_Withdraw_Script)
     };
 
-    stakingPoolDB_.pParams.ppInterestRates = stakingPoolDB_.pParams.ppInterestRates.map((item: any) => { return new InterestRate(item.iMinDays, item.iPercentage); });
+    stakingPoolDB_.pParams.ppInterestRates = stakingPoolDB_.pParams.ppInterestRates.map((item: any) => { return new InterestRate(item.iMinDays.plutusDataIndex === 1? new Maybe<number>() : new Maybe<number> (item.iMinDays.val), item.iPercentage); });
+
+    //console.log ("stakingPoolDBParser - end - stakingPoolDB: " + stakingPoolDB.name);
 
     return stakingPoolDB_;
 
@@ -112,180 +115,8 @@ export function stakingPoolDBParser(stakingPoolDB: any) {
 
 //----------------------------------------------------------------------
 
-export async function getEstadoDeployAPI(nombrePool: string) {
-
-    let data = {
-        nombrePool: nombrePool
-    };
-
-    const urlApi = "/api/getEstadoDeploy";
-
-    const requestOptions = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: toJson(data)
-    };
-
-    const response = await fetch(urlApi, requestOptions);
-    const json = await response.json();
-    const message = json.msg;
-
-    switch (response.status) {
-        case 500:
-            console.error("getEstadoDeploy - api/getEstadoDeploy - Error 500")
-            throw "Error 500";
-        case 400:
-            console.error("getEstadoDeploy - api/getEstadoDeploy - Error: " + message);
-            throw message;
-        default:
-            console.error("getEstadoDeploy - api/getEstadoDeploy: Error Unknown")
-            throw "Error Unknown";
-        case 200:
-            console.log("getEstadoDeploy - api/getEstadoDeploy: " + message);
-            return message;
-    }
-}
-
-//----------------------------------------------------------------------
-
-export async function apiCreateStakingPoolDB(data: any) {
-
-    const urlApi = "/api/createStakingPool"
-
-    const requestOptions = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: toJson(data)
-    };
-
-    const response = await fetch(urlApi, requestOptions)
-    const json = await response.json()
-    const message = json.msg
-    const stakingPool = json.stakingPool
-
-    switch (response.status) {
-        case 500:
-            console.error("apiCreateStakingPoolDB - api/createStakingPool: Error 500")
-            throw "Error 500";
-        case 400:
-            console.error("apiCreateStakingPoolDB - api/createStakingPool - Error: " + message)
-            throw message;
-        default:
-            console.error("apiCreateStakingPoolDB - api/createStakingPool: Error Unknown")
-            throw "Error Unknown";
-        case 200:
-            console.log("apiCreateStakingPoolDB - api/createStakingPool: " + message)
-            return [message, stakingPool] as const;
-    }
-}
-
-
-export async function apiUpdateStakingPoolShowOnHomeDB(nombrePool: string, swShowOnHome: boolean = true) {
-
-    let data = {
-        nombrePool: nombrePool,
-        swShowOnHome: swShowOnHome,
-    }
-
-    const urlApi = "/api/updateStakingPoolShowOnHome";
-
-    const requestOptions = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: toJson(data)
-    };
-
-    const response = await fetch(urlApi, requestOptions);
-    const json = await response.json();
-    const message = json.msg;
-
-    switch (response.status) {
-        case 500:
-            console.error("apiUpdateStakingPoolShowOnHomeDB - /api/updateStakingPoolShowOnHome - Error 500");
-            throw "Error 500";
-        case 400:
-            console.error("apiUpdateStakingPoolShowOnHomeDB - /api/updateStakingPoolShowOnHome - Error: " + message);
-            throw message;
-        default:
-            console.error("apiUpdateStakingPoolShowOnHomeDB - api/updateStakingPoolShowOnHome: Error Unknown")
-            throw "Error Unknown";
-        case 200:
-            //console.log("apiUpdateStakingPoolShowOnHomeDB - /api/updateStakingPoolShowOnHome: " + message)
-            return message;
-    }
-
-}
-
-export async function apiUpdateStakingPoolDB(data: any) {
-
-    const urlApi = "/api/updateStakingPool";
-
-    const requestOptions = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: toJson(data)
-    };
-
-    const response = await fetch(urlApi, requestOptions);
-    const json = await response.json();
-    const message = json.msg;
-
-    switch (response.status) {
-        case 500:
-            console.error("apiUpdateStakingPoolDB - /api/updateStakingPool - Error 500");
-            throw "Error 500";
-        case 400:
-            console.error("apiUpdateStakingPoolDB - /api/updateStakingPool - Error: " + message);
-            throw message;
-        default:
-            console.error("apiUpdateStakingPoolDB - api/updateStakingPool: Error Unknown")
-            throw "Error Unknown";
-        case 200:
-            //console.log("apiUpdateStakingPoolDB - /api/updateStakingPool: " + message)
-            return message;
-    }
-
-}
-
-
-export async function apiDeleteStakingPoolDB(nombrePool: string) {
-
-    let data = {
-        nombrePool: nombrePool
-    };
-
-    const urlApi = "/api/deleteStakingPool";
-
-    const requestOptions = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: toJson(data)
-    };
-
-    const response = await fetch(urlApi, requestOptions);
-    const json = await response.json();
-    const message = json.msg;
-
-    switch (response.status) {
-        case 500:
-            console.error("apiDeleteStakingPool - /api/deleteStakingPool - Error 500");
-            throw "Error 500";
-        case 400:
-            console.error("apiDeleteStakingPool - /api/deleteStakingPool - Error: " + message);
-            throw message;
-        default:
-            console.error("apiDeleteStakingPool - api/deleteStakingPool: Error Unknown")
-            throw "Error Unknown";
-        case 200:
-            //console.log("apiDeleteStakingPool - /api/deleteStakingPool: " + message)
-            return message;
-    }
-}
-
-//----------------------------------------------------------------------
-
 export function getRewardsPerInvest(poolInfo: StakingPoolDBInterface, closedAt: POSIXTime | undefined, interestRates: InterestRate[], lastClaim: Maybe<POSIXTime>, now: POSIXTime, depositTime: POSIXTime, invest: BIGINT, rewardsNotClaimed: BIGINT): BIGINT {
-    // console.log ("getRewardsPerInvest - Init")  
+    //console.log ("getRewardsPerInvest - Init - Rates: " + toJson(interestRates) + " - lenght: " + (interestRates.length))  
     var upperTime;
     if (closedAt !== undefined) {
         // console.log ("getRewardsPerInvest - deadlineOrCloseTime - usando closedAt: " + closedAt)
@@ -320,11 +151,15 @@ export function getRewardsPerInvest(poolInfo: StakingPoolDBInterface, closedAt: 
     }
 
     function getInterestRate(interestRates: InterestRate[]): number {
+        //console.log ("getInterestRate - Init - Rates: " + toJson(interestRates) + " - lenght: " + (interestRates.length))  
+    
         if (interestRates.length == 0) {
             throw "It shouldn't happen that you don't find a suitable rate...";
         }
         const [x, ...xs] = interestRates;
+        // if (x.iMinDays.plutusDataIndex === 1 || isDiffLessThanMinDays(Number(diffForInterestRate), x.iMinDays.val)) {
         if (x.iMinDays.val === undefined || isDiffLessThanMinDays(Number(diffForInterestRate), x.iMinDays.val)) {
+              
             return x.iPercentage;
         }
         return getInterestRate(xs);
@@ -346,6 +181,8 @@ export function getRewardsPerInvest(poolInfo: StakingPoolDBInterface, closedAt: 
     }
 
 }
+
+//---------------------------------------------------------------
 
 export function sortFundDatum(poolInfo: StakingPoolDBInterface, eUTxOs_With_FundDatum: EUTxO[]) {
     return eUTxOs_With_FundDatum.sort((a, b) => {
@@ -412,12 +249,14 @@ export function sortFundDatum(poolInfo: StakingPoolDBInterface, eUTxOs_With_Fund
         // return 0;
     });
 }
+
 //---------------------------------------------------------------
 
 export function calculate_Sort_FundDatum(poolInfo: StakingPoolDBInterface, eUTxO_With_FundDatum: EUTxO) {
     const fundsA = getAvailaibleFunds_In_EUTxO_With_FundDatum(eUTxO_With_FundDatum);
     return fundsA;
 }
+
 //---------------------------------------------------------------
 
 export function selectFundDatum_WithEnoughValueToClaim(eUTxOs_With_FundDatum: EUTxO[], claimLeft: BIGINT) {
@@ -438,7 +277,6 @@ export function selectFundDatum_WithEnoughValueToClaim(eUTxOs_With_FundDatum: EU
 }
 
 //---------------------------------------------------------------
-
 
 export function getTotalFundAmountsRemains_ForMasters(eUTxO_With_PoolDatum: EUTxO, eUTxOs_With_FundDatum: EUTxO[]) {
 
@@ -528,6 +366,7 @@ export function getStakedAmount_In_EUTxO_With_UserDatum(eUTxO_With_UserDatum: EU
 
     return userDatum.udInvest;
 }
+
 //---------------------------------------------------------------
 
 export function getTotalAvailaibleFunds(eUTxOs_With_FundDatum: EUTxO[]) {
@@ -542,6 +381,7 @@ export function getTotalAvailaibleFunds(eUTxOs_With_FundDatum: EUTxO[]) {
     return total;
 
 }
+
 //---------------------------------------------------------------
 
 export function getAvailaibleFunds_In_EUTxO_With_FundDatum(eUTxO_With_FundDatum: EUTxO): BIGINT {
@@ -563,6 +403,8 @@ export function getTotalRewardsToPay_In_EUTxOs_With_UserDatum(poolInfo: StakingP
 //---------------------------------------------------------------
 
 export function getRewardsToPay_In_EUTxO_With_UserDatum(poolInfo: StakingPoolDBInterface, eUTxO_With_PoolDatum: EUTxO, eUTxO_With_UserDatum: EUTxO) {
+
+    //console.log("getRewardsToPay_In_EUTxO_With_UserDatum - INIT - rates: " + toJson(poolInfo.pParams.ppInterestRates));
 
     const poolDatum: PoolDatum = eUTxO_With_PoolDatum.datum as PoolDatum;
     const userDatum: UserDatum = eUTxO_With_UserDatum.datum as UserDatum;
@@ -599,7 +441,6 @@ export function getTotalUsersMinAda_In_EUTxOs_With_UserDatum(poolInfo: StakingPo
     return total;
 }
 
-
 //---------------------------------------------------------------
 
 export function getTotalUserRegistered(poolInfo: StakingPoolDBInterface, eUTxO_With_PoolDatum: EUTxO, eUTxOs_With_FundDatum: EUTxO[], eUTxOs_With_UserDatum: EUTxO[]) {
@@ -619,11 +460,13 @@ export function getTotalUserRegistered(poolInfo: StakingPoolDBInterface, eUTxO_W
 
     return total;
 }
+
 //----------------------------------------------------------
 
 export function getTotalUserActive(eUTxOs_With_UserDatum: EUTxO[]) {
     return eUTxOs_With_UserDatum.length;
 }
+
 //----------------------------------------------------------
 
 export function getTotalCashedOut(eUTxO_With_PoolDatum: EUTxO, eUTxOs_With_FundDatum: EUTxO[]) {
@@ -639,6 +482,7 @@ export function getTotalCashedOut(eUTxO_With_PoolDatum: EUTxO, eUTxOs_With_FundD
     }
     return total;
 }
+
 //----------------------------------------------------------
 
 export function getIfUserRegistered(pkh: PaymentKeyHash, eUTxOs_With_UserDatum: EUTxO[]) {
@@ -651,6 +495,7 @@ export function getIfUserRegistered(pkh: PaymentKeyHash, eUTxOs_With_UserDatum: 
     });
     return sw;
 }
+
 //----------------------------------------------------------
 
 export function getUserStaked(pkh: PaymentKeyHash, eUTxOs_With_UserDatum: EUTxO[]) {
@@ -662,6 +507,7 @@ export function getUserStaked(pkh: PaymentKeyHash, eUTxOs_With_UserDatum: EUTxO[
     });
     return total;
 }
+
 //----------------------------------------------------------
 
 export function getUserRewardsPaid(pkh: PaymentKeyHash, eUTxOs_With_UserDatum: EUTxO[]) {
@@ -673,9 +519,12 @@ export function getUserRewardsPaid(pkh: PaymentKeyHash, eUTxOs_With_UserDatum: E
     });
     return total;
 }
+
 //----------------------------------------------------------
 
 export function getUserRewardsToPay(poolInfo: StakingPoolDBInterface, pkh: PaymentKeyHash, eUTxO_With_PoolDatum: EUTxO, eUTxOs_With_UserDatum: EUTxO[]) {
+
+    //console.log("getUserRewardsToPay - INIT - rates: " + toJson(poolInfo.pParams.ppInterestRates));
 
     const poolDatum: PoolDatum = eUTxO_With_PoolDatum.datum as PoolDatum;
     const closedAt = poolDatum.pdClosedAt.val;
@@ -694,4 +543,5 @@ export function getUserRewardsToPay(poolInfo: StakingPoolDBInterface, pkh: Payme
     });
     return total;
 }
+
 //----------------------------------------------------------

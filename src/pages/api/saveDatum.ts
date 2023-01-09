@@ -1,4 +1,4 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
+
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 import { connect } from '../../utils/dbConnect'
@@ -6,6 +6,7 @@ import { connect } from '../../utils/dbConnect'
 import { toJson } from '../../utils/utils';
 
 import { getDatumDBModel, getDatumFromDBByDatumHash } from  '../../types/datumDBModel'
+import { getSession } from 'next-auth/react';
 
 type Data = {
 	msg: string
@@ -13,6 +14,16 @@ type Data = {
 
 export default async function handler( req: NextApiRequest, res: NextApiResponse<Data | string>) {
 
+	//--------------------------------
+    const session = await getSession({ req })
+	if (!session) {
+		console.error("/api/saveDatum - Must Connect to your Wallet"); 
+        res.status(400).json({ msg: "Must Connect to your Wallet" })
+		return 
+    }
+    const sesionPkh = session?.user.pkh
+    //--------------------------------
+	
 	const datumHash = req.body.datumHash
 	const datum = req.body.datum
 
@@ -28,8 +39,6 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
             // console.log("/api/saveDatum - Datum already Exist");
             res.status(201).json({ msg: "Datum already Exist"})
             return
-        // } else {
-        //     console.log("/api/saveEUTxO - EUTxO not Exist: " + eUTxO.uTxO.txHash + " - " + eUTxO.uTxO.outputIndex);
         }
 
 		var datumDBModel = getDatumDBModel()
@@ -40,18 +49,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 		});
 		
 		await newDatumDB.save()
-		// 	function(error: any){
-		// 	if(error) {
-		// 		console.error("/api/saveDatum - Can't save datum in Database - Error: " + error); 
-		// 		res.status(400).json({ msg: "Can't save datum in Database - Error: " + error})
-		// 		return 
-		// 	}else{
-		// 		console.log ("/api/saveDatum - Datum saved in Database!" )
-		// 		res.status(200).json({ msg: "Datum saved in Database!"})
-		// 		return
-		// 	}
-		// });
-		// console.log ("/api/saveDatum - Datum saved in Database!" )
+
 		res.status(200).json({ msg: "Datum saved in Database!"})
 		return
 	} catch (error) {

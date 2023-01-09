@@ -207,9 +207,10 @@ body.preload .mobile {
 
   &__action_cards {
     flex: 3;
-    display: flex;
+    // display: flex;
     flex-wrap: wrap;
     height: auto;
+    width: 100%;
   }
 
   &__action_card {
@@ -232,17 +233,20 @@ body.preload .mobile {
   }
 
 
+
   &__stat {
     flex: 1;
     display: flex;
     flex-direction: column;
+    align-items: center;
   }
-  
+
   &__column {
     flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
+    width: 90%;
   }
 					
 
@@ -1236,6 +1240,11 @@ $gap: 25px;
   height: math.div($base-sizing, 2);
 }
 
+.btnStakingPool{
+  width: 150px;
+  text-align: center;
+}
+
 .btn {
   display: inline-block;
   text-decoration: none;
@@ -1249,6 +1258,7 @@ $gap: 25px;
   border-width: 1px;
   border-style: solid;
   border-color: darken($orange, 25%);
+ 
 
   &__ghost {
     /*display: inline-block;*/

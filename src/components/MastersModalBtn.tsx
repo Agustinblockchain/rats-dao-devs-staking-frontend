@@ -7,7 +7,8 @@ import { EUTxO, Master, Master_Funder } from "../types";
 import { maxTokensWithDifferentNames, poolDatum_ClaimedFund } from "../types/constantes";
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
 import { useStoreState } from '../utils/walletProvider';
-import ActionModalBtn from "./ActionModalBtn";
+import ActionWithInputModalBtn from './ActionWithInputModalBtn';
+import ActionWithMessageModalBtn from './ActionWithMessageModalBtn';
 import LoadingSpinner from "./LoadingSpinner";
 //--------------------------------------
 
@@ -17,14 +18,15 @@ type ActionState = "loading" | "success" | "error" | "idle"
 
 export default function MasterModalBtn(
 
-	{ actionName, enabled, show, actionIdx, masterSendBackFundAction, masterGetBackFundAction, poolInfo, statePoolData, messageFromParent, hashFromParent, isWorkingFromParent, callback }:
+	{ actionName, enabled, show, actionIdx, masterSendBackFundAction, masterGetBackFundAction, poolInfo, statePoolData, messageFromParent, hashFromParent, isWorkingFromParent, callback, swPaddintTop}:
 		{
 			actionName: string, enabled: boolean, show: boolean, actionIdx: string,
 			masterGetBackFundAction: (poolInfo?: StakingPoolDBInterface | undefined, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets | undefined) => Promise<any>,
 			masterSendBackFundAction: (poolInfo?: StakingPoolDBInterface | undefined, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets | undefined, master_Selected?: Master | undefined) => Promise<any>,
 			poolInfo: StakingPoolDBInterface, 
 			statePoolData: ReturnType<typeof useStatePoolData>,
-			messageFromParent?: string | "", hashFromParent?: string | "", isWorkingFromParent?: string | "", callback?: (isWorking: string) => Promise<any>
+			messageFromParent?: string | "", hashFromParent?: string | "", isWorkingFromParent?: string | "", callback?: (isWorking: string) => Promise<any>,
+			swPaddintTop?: Boolean 
 		}) {
 
 	//string '0' shows 0 in UI, Number 0 shows loading skeleton for dynamic values
@@ -46,9 +48,6 @@ export default function MasterModalBtn(
 
 	const [masterFunders_Selected, setMasterFunders_Selected] = useState<Master_Funder[]>([])
 
-	const [walletHarvestAmount, setWalletHarvestAmount] = useState<string | 0>(ui_notConnected)
-	const [maxHarvestAmount, setMaxHarvestAmount] = useState<string | 0>(ui_notConnected)
-
 	const { isPoolDataLoaded, 
 
         swPreparado, swIniciado, swFunded,
@@ -56,59 +55,25 @@ export default function MasterModalBtn(
 
 		eUTxOs_With_Datum, countEUTxOs_With_Datum,
 		eUTxO_With_PoolDatum,
-		eUTxOs_With_FundDatum, countEUTxOs_With_FundDatum,
-		eUTxOs_With_UserDatum, countEUTxOs_With_UserDatum,
-		eUTxO_With_ScriptDatum,
-		eUTxO_With_Script_TxID_Master_Fund_Datum,
-		eUTxO_With_Script_TxID_Master_FundAndMerge_Datum,
-		eUTxO_With_Script_TxID_Master_ClosePool_Datum,
-		eUTxO_With_Script_TxID_Master_TerminatePool_Datum,
-		eUTxO_With_Script_TxID_Master_DeleteFund_Datum,
-		eUTxO_With_Script_TxID_Master_SendBackFund_Datum,
-		eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum,
-		eUTxO_With_Script_TxID_Master_AddScripts_Datum,
-		eUTxO_With_Script_TxID_Master_DeleteScripts_Datum,
-		eUTxO_With_Script_TxID_User_Deposit_Datum,
-		eUTxO_With_Script_TxID_User_Harvest_Datum,
-		eUTxO_With_Script_TxID_User_Withdraw_Datum,
+		eUTxOs_With_FundDatum, 
         masterFunders,
 		totalFundsAvailable, totalFundAmount, totalFundAmountsRemains_ForMaster,
 		totalStaked, totalRewardsPaid, totalRewardsToPay, totalMastersMinAda,
-		isPoolDataLoading, loadPoolData } = statePoolData
+		isPoolDataLoading, refreshPoolData } = statePoolData
 
 	useEffect(() => {
-		// console.log("FundsModalBtn - " + poolInfo.name + " - useEffect - walletStore.connected: " + walletStore.connected + " - isWalletDataLoaded: " + isWalletDataLoaded)
-
-		if (walletStore.connected && !isWalletDataLoaded) {
-			setWalletHarvestAmount(ui_loading)
-			setMaxHarvestAmount(ui_loading)
-		} else if (walletStore.connected && isWalletDataLoaded) {
-			//------------------
-			const walletHarvestAmount = getTotalOfUnit(poolInfo.harvest_Lucid)
-			//------------------
-			const harvest_CS = poolInfo.harvest_Lucid.slice(0, 56)
-			const harvest_TN = poolInfo.harvest_Lucid.slice(56)
-			const harvest_AC_isAda = (harvest_CS === 'lovelace')
-			const harvest_AC_isWithoutTokenName = !harvest_AC_isAda && harvest_TN == ""
-			//------------------
-			setWalletHarvestAmount(walletHarvestAmount.toString())
-			//------------------
-			if (walletHarvestAmount > maxTokensWithDifferentNames && harvest_AC_isWithoutTokenName) {
-				setMaxHarvestAmount(maxTokensWithDifferentNames.toString())
-			} else {
-				setMaxHarvestAmount(walletHarvestAmount.toString())
-			}
-		} else {
-			setWalletHarvestAmount(ui_notConnected)
-			setMaxHarvestAmount(ui_notConnected)
-		}
+		// console.log("MastersModalBtn - " + poolInfo.name + " - useEffect - walletStore.connected: " + walletStore.connected + " - isWalletDataLoaded: " + isWalletDataLoaded)
 		setMasterFunders_Selected([])
 
 	}, [walletStore, isWalletDataLoaded])
 
 	useEffect(() => {
+		setMasterFunders_Selected([])
+	}, [isPoolDataLoaded])
+
+	useEffect(() => {
 		// if (isWorking === actionNameWithIdx){
-		// 	console.log ("FundModalBtn - useEffect1 - " +(isWorking === actionNameWithIdx ? "YO":"OTRO")+ " - messageFromParent: " + messageFromParent + " - message: " + message)
+		// 	console.log ("MastersModalBtn - useEffect1 - " +(isWorking === actionNameWithIdx ? "YO":"OTRO")+ " - messageFromParent: " + messageFromParent + " - message: " + message)
 		// }
 		if (messageFromParent && messageFromParent !== "" && isWorkingFromParent === actionNameWithIdx) {
 			setActionMessage(messageFromParent)
@@ -119,7 +84,7 @@ export default function MasterModalBtn(
 
 	useEffect(() => {
 		// if (isWorking === actionNameWithIdx){
-		// 	console.log ("FundModalBtn - useEffect2 - " +(isWorking === actionNameWithIdx ? "YO":"OTRO")+ " - hashFromParent: " + hashFromParent + " - hash: " + hash)
+		// 	console.log ("MastersModalBtn - useEffect2 - " +(isWorking === actionNameWithIdx ? "YO":"OTRO")+ " - hashFromParent: " + hashFromParent + " - hash: " + hash)
 		// }
 		if (hashFromParent && hashFromParent !== "" && isWorkingFromParent === actionNameWithIdx) {
 			setActionHash(hashFromParent)
@@ -138,13 +103,10 @@ export default function MasterModalBtn(
 	}, [isWorkingFromParent])
 
 	const handleCallback = async (isWorking: string) => {
-		console.log("FundsModalBtn - " + poolInfo.name + " - handleCallback isWorking: ", isWorking)
-		// alert ("FundsModalBtn - callbak in:" + isWorking)
-
+		console.log("MastersModalBtn - " + poolInfo.name + " - handleCallback isWorking: ", isWorking)
+		// alert ("MastersModalBtn - callbak in:" + isWorking)
 		setIsWorking(isWorking)
-
 		callback ? await callback(actionNameWithIdx) : null
-
 		return isWorking
 		// setActionHash("")
 		// setIsWorkingStakingPool(isWorking)
@@ -152,21 +114,17 @@ export default function MasterModalBtn(
 
 	return (
 		<div className="modal__action_separator">
-			<br></br>
+			
 			{show?
 				<>
+					{swPaddintTop === true || swPaddintTop === undefined? <div><br></br></div> : null}
 					{enabled && (isWorkingFromParent === actionNameWithIdx || isWorkingFromParent === "") ?
-						<label htmlFor={`${actionNameWithIdx}-modal-toggle`} className="btn">
+						<label htmlFor={`${actionNameWithIdx}-modal-toggle`} className="btn btnStakingPool">
 							{actionName}
 							<>
 								{
 									(isWorkingFromParent === actionNameWithIdx) ?
 										<>
-											{/* <UseAnimations
-											strokeColor="currentColor"   //"currentColor"
-											size={50}
-											animation={ loadingAnimation } //status === "error" ? alertTriangleAnimation : (status === "loading" ? loadingAnimation : checkmarkAnimation)
-										/> */}
 											<LoadingSpinner size={25} border={5} />
 										</>
 										:
@@ -175,9 +133,14 @@ export default function MasterModalBtn(
 							</>
 						</label>
 						:
-						<button disabled className="btn"><span className="wallet__button_disabled">{actionName}</span></button>
+						<button disabled className="btn btnStakingPool"><span className="wallet__button_disabled">{actionName}</span></button>
 					}
-					<input
+					
+					</>
+				:
+				<></>
+			}
+			<input
 						className="modal__toggle"
 						type="checkbox"
 						id={`${actionNameWithIdx}-modal-toggle`}
@@ -186,10 +149,6 @@ export default function MasterModalBtn(
 							}
 						}}
 					/>
-					</>
-				:
-				<></>
-			}
 			<div id={`${actionNameWithIdx}-modal`} className="modal">
 				<label htmlFor={`${actionNameWithIdx}-modal-toggle`} className="modal__shade"></label>
 				<div className="modal__content">
@@ -219,7 +178,7 @@ export default function MasterModalBtn(
 												(masterFunder, index) =>
 													<tr key={index}>
 														<td>
-															<input type="checkbox" key={index}
+															<input type="checkbox" key={index} checked={masterFunders_Selected.includes(masterFunder)} 
 																onChange={(e) => {
 																	//console.log(e.target.checked)
 																	if (e.target.checked) {
@@ -258,23 +217,28 @@ export default function MasterModalBtn(
                         {masterFunders_Selected.length>0?masterFunders_Selected[0].mfMaster:undefined}
                         {swZeroFunds} */}
 
-						
-
 						<div className="modal__content_btns">
-							<ActionModalBtn action={masterGetBackFundAction} swHash={true} poolInfo={poolInfo} 
+							
+							<ActionWithInputModalBtn action={masterGetBackFundAction} 
+								swHash={true} 
+								poolInfo={poolInfo} 
 								enabled={walletStore.connected && isPoolDataLoaded && swPreparado === true && swTerminated === true && swZeroFunds === true} 
 								show={true }
-								actionName="Get Back Fund" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
-							<ActionModalBtn action={masterSendBackFundAction} swHash={true} master_Selected={masterFunders_Selected.length>0?masterFunders_Selected[0].mfMaster:undefined }  poolInfo={poolInfo} 
+								actionName="Get Back Fund" actionIdx={poolInfo.name + "-MasterModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
+							
+							<ActionWithInputModalBtn action={masterSendBackFundAction} 
+								swHash={true} master_Selected={masterFunders_Selected.length>0?masterFunders_Selected[0].mfMaster:undefined }  
+								poolInfo={poolInfo} 
 								enabled={walletStore.connected && isPoolDataLoaded &&  masterFunders_Selected.length == 1 && swPreparado === true && swTerminated === true && swZeroFunds === true} 
 								show={true}
 								actionName="Send Back Fund" actionIdx={poolInfo.name + "-MasterModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
+							
 							<div className="modal__action_separator">
 								<br></br>
-								<button className="btn"
+								<button className="btn btnStakingPool"
 									onClick={(e) => {
 										e.preventDefault()
-										loadPoolData ()
+										refreshPoolData ()
 									}
 									}
 									disabled={isPoolDataLoading}
@@ -290,9 +254,10 @@ export default function MasterModalBtn(
 									}
 								</button>
 							</div>
+							
 							<div className="modal__action_separator">
 								<br></br>
-								<button className="btn"
+								<button className="btn btnStakingPool"
 									onClick={(e) => {
                                             e.preventDefault()
                                             const checkbox: any = document.getElementById(`${actionNameWithIdx}-modal-toggle`)

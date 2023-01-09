@@ -7,7 +7,7 @@ import { explainError } from "../stakePool/explainError";
 import { EUTxO, Master, Maybe, POSIXTime } from "../types";
 import { maxTxExMem, maxTxExSteps, maxTxSize, TIME_OUT_TRY_TX, txConsumingTime, txPreparingTime, validTimeRangeInSlots } from "../types/constantes";
 import { StakingPoolDBInterface } from "../types/stakePoolDBModel";
-import { apiDeleteEUTxODB, apiUpdateEUTxODBIsConsuming, apiUpdateEUTxODBIsPreparing } from "./cardano-helpers";
+import { apiDeleteEUTxODB, apiUpdateEUTxODBIsConsuming, apiUpdateEUTxODBIsPreparing } from "../stakePool/apis";
 import { showPtrInHex, toJson } from "./utils";
 import { Wallet } from "./walletProvider";
 
@@ -15,7 +15,7 @@ import { Wallet } from "./walletProvider";
 
 export async function newTransaction (title : string, walletStore: Wallet, poolInfo: StakingPoolDBInterface | undefined, endPoint: (wallet: Wallet, poolInfo: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets, master_Selected?: Master) => Promise <[string, EUTxO []]>, isWorkingInABuffer: boolean, setActionMessage: (value: SetStateAction<string>) => void, setActionHash: (value: SetStateAction<string>) => void, setIsWorking: (value: SetStateAction<string>) => void, callback: () => Promise<any>, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets, master_Selected?: Master) {
     
-    console.log(title + " - " + toJson(poolInfo?.name))
+    //console.log(title + " - " + toJson(poolInfo?.name) + " - newTransaction - INIT")
 
     const lucid = walletStore.lucid
 
@@ -37,6 +37,8 @@ export async function newTransaction (title : string, walletStore: Wallet, poolI
         setActionHash(txHash)
 
         await waitForTxConfirmation (lucid!, txHash, eUTxO_for_consuming, callback, isWorkingInABuffer) 
+
+        //console.log(title + " - " + toJson(poolInfo?.name) + " - newTransaction - txHash: " + txHash + " - txHash2: " + txHash.toString())
 
         if (isWorkingInABuffer === undefined || !isWorkingInABuffer){
             callback();
@@ -233,25 +235,25 @@ function createCostModels_NEW_VERISON(costModels: any) {
 
 export async function makeTx_And_UpdateEUTxOsIsPreparing(functionName: string, wallet: Wallet, protocolParameters: any, tx_Binded: (...args: any) => Promise<TxComplete>, eUTxO_for_consuming: EUTxO[]): Promise<[string,EUTxO[]]> {
     var timeOut : any = undefined;
-    async function updateIsPreparing (time: Maybe<POSIXTime>) {
-        console.log ("updateIsPreparing: " + (time.val? "SET":"UNSET") + " - " + eUTxO_for_consuming.length);
+    async function updateIsPreparing (setIsPrearing: boolean) {
+        console.log ("updateIsPreparing: " + (setIsPrearing? "SET":"UNSET") + " - " + eUTxO_for_consuming.length);
         if (timeOut) clearTimeout(timeOut)
         for (let i = 0; i < eUTxO_for_consuming.length; i++) {
-            eUTxO_for_consuming[i].isPreparing = time;
-            await apiUpdateEUTxODBIsPreparing(eUTxO_for_consuming[i]);
+            const eUTxO_Updated = await apiUpdateEUTxODBIsPreparing(eUTxO_for_consuming[i], setIsPrearing);
+            eUTxO_for_consuming[i] = eUTxO_Updated;
         }
     }
     try {
         //------------------
         const now = new Date();
-        await updateIsPreparing(new Maybe<POSIXTime>(BigInt(now.getTime())));
+        await updateIsPreparing(true);
         //------------------
-        timeOut = setTimeout(updateIsPreparing, txPreparingTime, new Maybe<POSIXTime>());
+        timeOut = setTimeout(updateIsPreparing, txPreparingTime, false);
         //------------------
         var txHash = await makeTx(functionName, wallet, protocolParameters, tx_Binded);
         return [txHash, eUTxO_for_consuming];
     } catch (error) {
-        updateIsPreparing(new Maybe<POSIXTime>())
+        updateIsPreparing(false)
         console.error(functionName + " - Error: " + error);
         throw error;
     }
@@ -405,12 +407,12 @@ export const saveTxSignedToFile = async (txSigned: TxSigned) => {
 
 export async function waitForTxConfirmation (lucid: Lucid, txhash: string, eUTxO_for_consuming: EUTxO[], callback: () => Promise<any>, isWorkingInABuffer?: boolean) {
     var timeOut : any = undefined;
-    async function updateIsConsuming(time: Maybe<POSIXTime>) {
-        console.log("waitForTxConfirmation - updateIsConsuming: " + (time.val? "SET":"UNSET") + " - " + eUTxO_for_consuming.length);
+    async function updateIsConsuming(setIsConsuming: boolean) {
+        console.log("waitForTxConfirmation - updateIsConsuming: " + (setIsConsuming? "SET":"UNSET") + " - " + eUTxO_for_consuming.length);
         if (timeOut) clearTimeout(timeOut);
         for (let i = 0; i < eUTxO_for_consuming.length; i++) {
-            eUTxO_for_consuming[i].isConsuming = time;
-            await apiUpdateEUTxODBIsConsuming(eUTxO_for_consuming[i]);
+            const eUTxO_Updated = await apiUpdateEUTxODBIsConsuming(eUTxO_for_consuming[i], setIsConsuming);
+            eUTxO_for_consuming[i] = eUTxO_Updated;
         }
     }
     async function deleteIsConsuming() {
@@ -422,21 +424,20 @@ export async function waitForTxConfirmation (lucid: Lucid, txhash: string, eUTxO
     }
     try {
         //------------------
-        const now = new Date();
-        await updateIsConsuming(new Maybe<POSIXTime>(BigInt(now.getTime())));
+        await updateIsConsuming(true);
         //await deleteIsConsuming();
         //------------------
-        timeOut = setTimeout(updateIsConsuming, txConsumingTime, new Maybe<POSIXTime>());
+        timeOut = setTimeout(updateIsConsuming, txConsumingTime, false);
         //------------------
         if (await lucid.awaitTx(txhash)) {
             console.log("waitForTxConfirmation - Tx confirmed");
             await deleteIsConsuming();
         } else {
             console.log("waitForTxConfirmation - Tx not confirmed");
-            await updateIsConsuming(new Maybe<POSIXTime>());
+            await updateIsConsuming(false);
         }
     } catch (error) {
-        updateIsConsuming(new Maybe<POSIXTime>())
+        updateIsConsuming(false)
         console.error("waitForTxConfirmation - Error: " + error);
         throw error;
     } 

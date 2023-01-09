@@ -9,7 +9,7 @@ import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
 import { createTx, fixTx } from '../utils/cardano-helpersTx';
 import { objToPlutusData } from "../utils/cardano-utils";
 import { showPtrInHex } from '../utils/utils';
-import { getHexFrom_Redeemer_TxID, getHexFrom_Validator_Datum, getHexFrom_Validator_Redeemer } from "./helpersDatums";
+import { getHexFrom_Redeemer_TxID, getHexFrom_Validator_Datum, getHexFrom_Validator_Redeemer } from "./helpersDatumsAndRedeemers";
 //--------------------------------------
 
 export async function masterPreparePoolTx(

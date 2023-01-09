@@ -14,22 +14,23 @@ import {
 } from "../types/constantes";
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
 import {
-    addAssets, addAssetsList, apiGetEUTxOsDBByAddress, calculateMinAda, calculateMinAdaOfAssets, createValue_Adding_Tokens_Of_AC_Lucid, find_EUTxO_In_EUTxOs, find_TxOutRef_In_UTxOs, subsAssets, sumTokensAmt_From_AC_Lucid
+    addAssets, addAssetsList, calculateMinAda, calculateMinAdaOfAssets, createValue_Adding_Tokens_Of_AC_Lucid, find_EUTxO_In_EUTxOs, find_TxOutRef_In_UTxOs, subsAssets, sumTokensAmt_From_AC_Lucid
 } from '../utils/cardano-helpers';
 import { makeTx_And_UpdateEUTxOsIsPreparing } from '../utils/cardano-helpersTx';
 import { pubKeyHashToAddress } from "../utils/cardano-utils";
 import { strToHex, toJson } from '../utils/utils';
 import { Wallet } from '../utils/walletProvider';
+import { apiGetEUTxOsDBByStakingPool } from './apis';
 import {
     masterClosePoolTx, masterDeleteFundsTx, masterFundAndMergeTx, masterNewFundTx, masterPreparePoolTx, masterSendBackDepositTx, masterSendBackFundTx, masterSplitFundTx, masterTerminatePoolTx
 } from './endPointsTx - master';
-import { mkUpdated_FundDatum_With_NewFundAmountAndMerging, mkUpdated_FundDatum_With_SplitFund, mkUpdated_PoolDatum_With_ClosedAt, mkUpdated_PoolDatum_With_DeletingFunds, mkUpdated_PoolDatum_With_NewFund, mkUpdated_PoolDatum_With_NewFundAmountAndMerging, mkUpdated_PoolDatum_With_SendBackFund, mkUpdated_PoolDatum_With_SplitFundAmount, mkUpdated_PoolDatum_With_Terminated } from './helpersDatums';
+import { mkUpdated_FundDatum_With_NewFundAmountAndMerging, mkUpdated_FundDatum_With_SplitFund, mkUpdated_PoolDatum_With_ClosedAt, mkUpdated_PoolDatum_With_DeletingFunds, mkUpdated_PoolDatum_With_NewFund, mkUpdated_PoolDatum_With_NewFundAmountAndMerging, mkUpdated_PoolDatum_With_SendBackFund, mkUpdated_PoolDatum_With_SplitFundAmount, mkUpdated_PoolDatum_With_Terminated } from './helpersDatumsAndRedeemers';
 import {
     getEUTxOs_With_FundDatum_InEUxTOList, getEUTxOs_With_UserDatum_InEUxTOList,
     getEUTxO_With_PoolDatum_InEUxTOList
-} from './helpersScripts';
+} from './helpersEUTxOs';
 import {
-    getAvailaibleFunds_In_EUTxO_With_FundDatum, getFundAmountsRemains_ForMaster
+        getAvailaibleFunds_In_EUTxO_With_FundDatum, getFundAmountsRemains_ForMaster
 } from "./helpersStakePool";
 
 //--------------------------------------
@@ -162,7 +163,7 @@ export async function masterNewFund(wallet: Wallet, poolInfo: StakingPoolDBInter
     // //------------------
     // const eUTxOs_With_Datum = await getExtendedUTxOsWith_Datum(lucid!, uTxOsAtScript)
     //------------------
-    const eUTxOs_With_Datum = await apiGetEUTxOsDBByAddress(scriptAddress)
+    const eUTxOs_With_Datum = await apiGetEUTxOsDBByStakingPool(poolInfo.name!)
     //------------------
     const poolID_AC_Lucid = poolInfo.pParams.ppPoolID_CS + strToHex(poolID_TN);
     //------------------
@@ -285,7 +286,7 @@ export async function masterFundAndMerge(wallet: Wallet, poolInfo: StakingPoolDB
     // //------------------
     // const eUTxOs_With_Datum = await getExtendedUTxOsWith_Datum(lucid!, uTxOsAtScript)
     //------------------
-    const eUTxOs_With_Datum = await apiGetEUTxOsDBByAddress(scriptAddress)
+    const eUTxOs_With_Datum = await apiGetEUTxOsDBByStakingPool(poolInfo.name!)
     //------------------
     const poolID_AC_Lucid = poolInfo.pParams.ppPoolID_CS + strToHex(poolID_TN);
     //------------------
@@ -446,7 +447,7 @@ export async function masterMergeFunds(wallet: Wallet, poolInfo: StakingPoolDBIn
     // //------------------
     // const eUTxOs_With_Datum = await getExtendedUTxOsWith_Datum(lucid!, uTxOsAtScript)
     //------------------
-    const eUTxOs_With_Datum = await apiGetEUTxOsDBByAddress(scriptAddress)
+    const eUTxOs_With_Datum = await apiGetEUTxOsDBByStakingPool(poolInfo.name!)
     //------------------
     const poolID_AC_Lucid = poolInfo.pParams.ppPoolID_CS + strToHex(poolID_TN);
     //------------------
@@ -610,7 +611,7 @@ export async function masterSplitFund(wallet: Wallet, poolInfo: StakingPoolDBInt
     // //------------------
     // const eUTxOs_With_Datum = await getExtendedUTxOsWith_Datum(lucid!, uTxOsAtScript)
     //------------------
-    const eUTxOs_With_Datum = await apiGetEUTxOsDBByAddress(scriptAddress)
+    const eUTxOs_With_Datum = await apiGetEUTxOsDBByStakingPool(poolInfo.name!)
     //------------------
     const poolID_AC_Lucid = poolInfo.pParams.ppPoolID_CS + strToHex(poolID_TN);
     //------------------
@@ -787,7 +788,7 @@ export async function masterClosePool(wallet: Wallet, poolInfo: StakingPoolDBInt
     // //------------------
     // const eUTxOs_With_Datum = await getExtendedUTxOsWith_Datum(lucid!, uTxOsAtScript)
     //------------------
-    const eUTxOs_With_Datum = await apiGetEUTxOsDBByAddress(scriptAddress)
+    const eUTxOs_With_Datum = await apiGetEUTxOsDBByStakingPool(poolInfo.name!)
     //------------------
     const poolID_AC_Lucid = poolInfo.pParams.ppPoolID_CS + strToHex(poolID_TN);
     //------------------
@@ -881,7 +882,7 @@ export async function masterTerminatePool(wallet: Wallet, poolInfo: StakingPoolD
     // //------------------
     // const eUTxOs_With_Datum = await getExtendedUTxOsWith_Datum(lucid!, uTxOsAtScript)
     //------------------
-    const eUTxOs_With_Datum = await apiGetEUTxOsDBByAddress(scriptAddress)
+    const eUTxOs_With_Datum = await apiGetEUTxOsDBByStakingPool(poolInfo.name!)
     //------------------
     const poolID_AC_Lucid = poolInfo.pParams.ppPoolID_CS + strToHex(poolID_TN);
     //------------------
@@ -974,7 +975,7 @@ export async function masterDeleteFunds(wallet: Wallet, poolInfo: StakingPoolDBI
     // //------------------
     // const eUTxOs_With_Datum = await getExtendedUTxOsWith_Datum(lucid!, uTxOsAtScript)
     //------------------
-    const eUTxOs_With_Datum = await apiGetEUTxOsDBByAddress(scriptAddress)
+    const eUTxOs_With_Datum = await apiGetEUTxOsDBByStakingPool(poolInfo.name!)
     //------------------
     const poolID_AC_Lucid = poolInfo.pParams.ppPoolID_CS + strToHex(poolID_TN);
     //------------------
@@ -1144,7 +1145,7 @@ export async function masterGetBackFund(wallet: Wallet, poolInfo: StakingPoolDBI
     // //------------------
     // const eUTxOs_With_Datum = await getExtendedUTxOsWith_Datum(lucid!, uTxOsAtScript)
     //------------------
-    const eUTxOs_With_Datum = await apiGetEUTxOsDBByAddress(scriptAddress)
+    const eUTxOs_With_Datum = await apiGetEUTxOsDBByStakingPool(poolInfo.name!)
     //------------------
     const poolID_AC_Lucid = poolInfo.pParams.ppPoolID_CS + strToHex(poolID_TN);
     //------------------
@@ -1276,7 +1277,7 @@ export async function masterSendBackFund(wallet: Wallet, poolInfo: StakingPoolDB
     // //------------------
     // const eUTxOs_With_Datum = await getExtendedUTxOsWith_Datum(lucid!, uTxOsAtScript)
     //------------------
-    const eUTxOs_With_Datum = await apiGetEUTxOsDBByAddress(scriptAddress)
+    const eUTxOs_With_Datum = await apiGetEUTxOsDBByStakingPool(poolInfo.name!)
     //------------------
     const poolID_AC_Lucid = poolInfo.pParams.ppPoolID_CS + strToHex(poolID_TN);
     //------------------
@@ -1430,7 +1431,7 @@ export async function masterSendBackDeposit(wallet: Wallet, poolInfo: StakingPoo
     // //------------------
     // const eUTxOs_With_Datum = await getExtendedUTxOsWith_Datum(lucid!, uTxOsAtScript)
     //------------------
-    const eUTxOs_With_Datum = await apiGetEUTxOsDBByAddress(scriptAddress)
+    const eUTxOs_With_Datum = await apiGetEUTxOsDBByStakingPool(poolInfo.name!)
     //------------------
     const eUTxO_With_ScriptDatum = poolInfo.eUTxO_With_ScriptDatum
     if (!eUTxO_With_ScriptDatum) {

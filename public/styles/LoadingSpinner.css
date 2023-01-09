@@ -16,7 +16,7 @@
   }
 
   .spinner-container {
-    /* display: grid; */
+    display: grid;
     justify-content: center;
     align-items: center;
     /* height: 350px; */

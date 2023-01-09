@@ -3,13 +3,13 @@ import { Blockfrost, Lucid, WalletApi } from 'lucid-cardano';
 import { toJson } from './utils';
 //--------------------------------------
 
-export const initializeLucid = async (walletApi: WalletApi | undefined) => {
+export const initializeLucid = async (walletApi?: WalletApi | undefined) => {
     // console.log ("initializeLucid - init")
     try {
         const lucid = await Lucid.new(
             // new Blockfrost(process.env.NEXT_PUBLIC_BLOCKFROST_URL!, process.env.NEXT_PUBLIC_BLOCKFROST_KEY!),
-            new Blockfrost("/api/blockfrost", "xxxx"),
-            process.env.NEXT_PUBLIC_USE_MAINNET === 'true' ? 'Mainnet':'Preview'
+            new Blockfrost(process.env.NEXT_PUBLIC_REACT_SERVER_URL + "/api/blockfrost", "xxxx"),
+                process.env.NEXT_PUBLIC_USE_MAINNET === 'true' ? 'Mainnet':'Preview'
         )
         
         if(walletApi !== undefined) {
@@ -30,8 +30,8 @@ export const initializeLucidWithWalletFromPrivateKey = async (walletPrivateKey: 
     try {
         const lucid = await Lucid.new(
             // new Blockfrost(process.env.NEXT_PUBLIC_BLOCKFROST_URL!, process.env.NEXT_PUBLIC_BLOCKFROST_KEY!),
-            new Blockfrost("/api/blockfrost", "xxxx"),
-            process.env.NEXT_PUBLIC_USE_MAINNET === 'true' ? 'Mainnet':'Preview'
+            new Blockfrost(process.env.NEXT_PUBLIC_REACT_SERVER_URL + "/api/blockfrost", "xxxx"),
+                process.env.NEXT_PUBLIC_USE_MAINNET === 'true' ? 'Mainnet':'Preview'
         )
         
         await lucid.selectWalletFromPrivateKey(walletPrivateKey)
@@ -49,8 +49,8 @@ export const initializeLucidWithWalletFromSeed = async (walletSeed: string) => {
     try {
         const lucid = await Lucid.new(
             // new Blockfrost(process.env.NEXT_PUBLIC_BLOCKFROST_URL!, process.env.NEXT_PUBLIC_BLOCKFROST_KEY!),
-            new Blockfrost("/api/blockfrost", "xxxx"),
-            process.env.NEXT_PUBLIC_USE_MAINNET === 'true' ? 'Mainnet':'Preview'
+            new Blockfrost(process.env.NEXT_PUBLIC_REACT_SERVER_URL + "/api/blockfrost", "xxxx"),
+                process.env.NEXT_PUBLIC_USE_MAINNET === 'true' ? 'Mainnet':'Preview'
         )
         
         await lucid.selectWalletFromSeed(walletSeed)
@@ -62,8 +62,5 @@ export const initializeLucidWithWalletFromSeed = async (walletSeed: string) => {
         console.error("initializeLucidWithWalletFromSeed - Error: " + error)
     }
 }
-
-
-
 
 //--------------------------------------

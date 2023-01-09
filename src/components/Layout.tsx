@@ -2,8 +2,6 @@
 import Footer from './Footer';
 import Navbar from './Navbar';
 
-import { useStoreState } from '../utils/walletProvider';
-
 //--------------------------------------
 
 export default function Layout({
@@ -13,10 +11,6 @@ export default function Layout({
 	home?: boolean
 }) {
 	//const Navbar = dynamic(() => import('./Navbar'), { ssr: false })
-	
-	const walletStore = useStoreState(state => state.wallet)
-  	const uTxOsAtWallet = useStoreState(state => state.uTxOsAtWallet)
-  
 	
 	return (
 		// <Html className="primary_content">

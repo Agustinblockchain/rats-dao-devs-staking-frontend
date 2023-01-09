@@ -5,7 +5,7 @@ import {
 } from '../types';
 import { poolID_TN, scriptID_Master_ClosePool_TN, scriptID_Master_DeleteFund_TN, scriptID_Master_DeleteScripts_TN, scriptID_Master_FundAndMerge_TN, scriptID_Master_Fund_TN, scriptID_Master_SendBackDeposit_TN, scriptID_Master_SendBackFund_TN, scriptID_Master_SplitFund_TN, scriptID_Master_TerminatePool_TN, scriptID_User_Deposit_TN, scriptID_User_Harvest_TN, scriptID_User_Withdraw_TN, txID_Master_AddScripts_TN, txID_Master_DeleteScripts_TN } from "../types/constantes";
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
-import { addAssets, addAssetsList, apiGetEUTxOsDBByAddress, getAssetsFromCS, subsAssets } from '../utils/cardano-helpers';
+import { addAssets, addAssetsList, getAssetsFromCS, subsAssets } from '../utils/cardano-helpers';
 import { makeTx_And_UpdateEUTxOsIsPreparing } from '../utils/cardano-helpersTx';
 import { pubKeyHashToAddress } from "../utils/cardano-utils";
 import { strToHex, toJson } from '../utils/utils';
@@ -13,7 +13,8 @@ import { Wallet } from '../utils/walletProvider';
 import {
     masterAddScriptsMasterClosePoolTx, masterAddScriptsMasterDeleteFundTx, masterAddScriptsMasterDeleteScriptsTx, masterAddScriptsMasterFundAndMergeTx, masterAddScriptsMasterFundTx, masterAddScriptsMasterSendBackDepositTx, masterAddScriptsMasterSendBackFundTx, masterAddScriptsMasterSplitFundTx, masterAddScriptsMasterTerminatePoolTx, masterAddScriptsUserDepositTx, masterAddScriptsUserHarvestTx, masterAddScriptsUserWithdrawTx, masterDeleteScriptsTx
 } from "./endPointsTx - master - scripts";
-import { getEUTxO_With_PoolDatum_InEUxTOList, getEUTxO_With_ScriptDatum_InEUxTOList } from './helpersScripts';
+import { getEUTxO_With_PoolDatum_InEUxTOList, getEUTxO_With_ScriptDatum_InEUxTOList } from './helpersEUTxOs';
+import { apiGetEUTxOsDBByStakingPool } from './apis';
 
 //--------------------------------------
 
@@ -714,7 +715,7 @@ export async function masterDeleteScriptsMaster (wallet: Wallet, poolInfo: Staki
     // //------------------
     // const eUTxOs_With_Datum = await getExtendedUTxOsWith_Datum(lucid!, uTxOsAtScript)
     //------------------
-    const eUTxOs_With_Datum = await apiGetEUTxOsDBByAddress(scriptAddress);
+    const eUTxOs_With_Datum = await apiGetEUTxOsDBByStakingPool(poolInfo.name!);
     //------------------
     const txID_Master_DeleteScripts_CS = poolInfo.txID_Master_DeleteScripts_CS;
     const txID_Master_DeleteScripts_TN_Hex = strToHex(txID_Master_DeleteScripts_TN);
@@ -901,7 +902,7 @@ export async function masterDeleteScriptsUser(wallet: Wallet, poolInfo: StakingP
     // //------------------
     // const eUTxOs_With_Datum = await getExtendedUTxOsWith_Datum(lucid!, uTxOsAtScript)
     //------------------
-    const eUTxOs_With_Datum = await apiGetEUTxOsDBByAddress(scriptAddress);
+    const eUTxOs_With_Datum = await apiGetEUTxOsDBByStakingPool(poolInfo.name!);
     //------------------
     const txID_Master_DeleteScripts_CS = poolInfo.txID_Master_DeleteScripts_CS;
     const txID_Master_DeleteScripts_TN_Hex = strToHex(txID_Master_DeleteScripts_TN);

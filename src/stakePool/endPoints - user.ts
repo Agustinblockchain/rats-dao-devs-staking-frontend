@@ -7,16 +7,17 @@ import {
     fundID_TN, maxDiffTokensForUserDatum, poolID_TN, tokenNameLenght, txID_User_Deposit_For_User_TN, txID_User_Harvest_TN, txID_User_Withdraw_TN, userID_TN
 } from "../types/constantes";
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
-import { addAssets, addAssetsList, apiGetEUTxOsDBByAddress, calculateMinAda, calculateMinAdaOfAssets, createValue_Adding_Tokens_Of_AC_Lucid, subsAssets } from '../utils/cardano-helpers';
+import { addAssets, addAssetsList, calculateMinAda, calculateMinAdaOfAssets, createValue_Adding_Tokens_Of_AC_Lucid, subsAssets } from '../utils/cardano-helpers';
 import { makeTx_And_UpdateEUTxOsIsPreparing } from '../utils/cardano-helpersTx';
 import { pubKeyHashToAddress } from "../utils/cardano-utils";
 import { strToHex, toJson } from '../utils/utils';
 import { Wallet } from '../utils/walletProvider';
+import { apiGetEUTxOsDBByStakingPool } from './apis';
 import { userDepositTx, userHarvestPoolTx, userWithdrawTx } from "./endPointsTx - user";
-import { mkUpdated_FundDatum_With_NewClaimRewards } from './helpersDatums';
+import { mkUpdated_FundDatum_With_NewClaimRewards } from './helpersDatumsAndRedeemers';
 import {
     getEUTxOs_With_FundDatum_InEUxTOList, getEUTxO_With_PoolDatum_InEUxTOList
-} from './helpersScripts';
+} from './helpersEUTxOs';
 import {
     getAvailaibleFunds_In_EUTxO_With_FundDatum, getRewardsPerInvest, getTotalAvailaibleFunds,
     selectFundDatum_WithEnoughValueToClaim, sortFundDatum
@@ -74,7 +75,7 @@ export async function userDeposit(wallet: Wallet, poolInfo: StakingPoolDBInterfa
     // //------------------
     // const eUTxOs_With_Datum = await getExtendedUTxOsWith_Datum(lucid!, uTxOsAtScript)
     //------------------
-    const eUTxOs_With_Datum = await apiGetEUTxOsDBByAddress(scriptAddress);
+    const eUTxOs_With_Datum = await apiGetEUTxOsDBByStakingPool(poolInfo.name!);
     //------------------
     const eUTxO_With_ScriptDatum = poolInfo.eUTxO_With_ScriptDatum;
     if (!eUTxO_With_ScriptDatum) {
@@ -96,8 +97,11 @@ export async function userDeposit(wallet: Wallet, poolInfo: StakingPoolDBInterfa
     }
     console.log(functionName + " - UTxO with PoolDatum: " + eUTxO_With_PoolDatum.uTxO.txHash + "#" + eUTxO_With_PoolDatum.uTxO.outputIndex);
     //------------------
-    const depositAmount = assets![poolInfo!.staking_Lucid];
-    const value_Deposit = createValue_Adding_Tokens_Of_AC_Lucid(uTxOsAtWallet, poolInfo!.staking_Lucid, depositAmount);
+    // const depositAmount = assets![poolInfo!.staking_Lucid];
+    // const value_Deposit = createValue_Adding_Tokens_Of_AC_Lucid(uTxOsAtWallet, poolInfo!.staking_Lucid, depositAmount);
+    const depositAmount = Object.entries(assets!).reduce ((acc, cur) => acc + BigInt(cur[1]), 0n)
+    const value_Deposit = assets!
+    console.log(functionName + " - Deposit Amount: " + depositAmount);
     console.log(functionName + " - Value Deposit: " + toJson(value_Deposit));
     //------------------
     const value_For_Mint_UserID: Assets = { [userID_AC.currencySymbol + userID_AC.tokenName]: 1n };
@@ -181,7 +185,7 @@ export async function userHarvest(wallet: Wallet, poolInfo: StakingPoolDBInterfa
     // //------------------
     // const eUTxOs_With_Datum = await getExtendedUTxOsWith_Datum(lucid!, uTxOsAtScript)
     //------------------
-    const eUTxOs_With_Datum = await apiGetEUTxOsDBByAddress(scriptAddress);
+    const eUTxOs_With_Datum = await apiGetEUTxOsDBByStakingPool(poolInfo.name!);
     //------------------
     const poolID_AC_Lucid = poolInfo.pParams.ppPoolID_CS + strToHex(poolID_TN);
     //------------------
@@ -427,7 +431,7 @@ export async function userWithdraw(wallet: Wallet, poolInfo: StakingPoolDBInterf
     // //------------------
     // const eUTxOs_With_Datum = await getExtendedUTxOsWith_Datum(lucid!, uTxOsAtScript)
     //------------------
-    const eUTxOs_With_Datum = await apiGetEUTxOsDBByAddress(scriptAddress);
+    const eUTxOs_With_Datum = await apiGetEUTxOsDBByStakingPool(poolInfo.name!);
     //------------------
     const eUTxO_With_ScriptDatum = poolInfo.eUTxO_With_ScriptDatum;
     if (!eUTxO_With_ScriptDatum) {
@@ -513,7 +517,7 @@ export async function userWithdraw(wallet: Wallet, poolInfo: StakingPoolDBInterf
         value_For_PoolDatum = subsAssets(value_For_PoolDatum, value_For_SendBackDeposit_To_User);
         console.log(functionName + " - value For PoolDatum: " + toJson(value_For_PoolDatum));
         //------------------
-        var tx_Binded = userWithdrawTx.bind(
+        var tx_Binded = userWithdrawTx.bind(functionName,
             lucid!, protocolParameters, poolInfo, userAddr,
             eUTxO_With_ScriptDatum,
             eUTxO_With_Script_TxID_User_Withdraw_Datum,

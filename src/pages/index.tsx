@@ -15,6 +15,7 @@ import { useStoreState } from '../utils/walletProvider';
 import { StakingPoolDBInterface, getStakingPools } from '../types/stakePoolDBModel'
 import { createContext, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
+import { stakingPoolDBParser } from '../stakePool/helpersStakePool'
 // import StakingPoolAdmin from '../components/StakingPoolAdmin';
 
 //--------------------------------------
@@ -29,19 +30,24 @@ const Home : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = 
 	const [isRefreshing, setIsRefreshing] = useState(true);
 
 	const walletStore = useStoreState(state => state.wallet)
+	
+	const [stakingPoolsParsed, setStakingPoolsParsed] = useState<StakingPoolDBInterface [] > ([]);
 
 	const refreshData = () => {
-
-		console.log ("ROUTER HOME: walletStore.connected " + walletStore.connected + " router.asPath: " + router.asPath);
-
+		console.log ("Admin - refreshData - router.replace - walletStore.connected " + walletStore.connected + " - router.asPath: " + router.asPath);
 		router.replace(router.basePath );
-
 		setIsRefreshing(true);
 	};
 
 	//------------------
 	useEffect(() => {
 		setIsRefreshing(false);
+		if (stakingPools){
+			for (let i = 0; i < stakingPools.length; i++) {
+				stakingPools[i] = stakingPoolDBParser(stakingPools[i]);
+			}
+			setStakingPoolsParsed (stakingPools)
+		}
 	}, [stakingPools]);
 	
 
@@ -50,8 +56,8 @@ const Home : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = 
 	return (
 		<Layout>
 
-			{stakingPools.length > 0 ? 
-				stakingPools.map(
+			{stakingPoolsParsed.length > 0 ? 
+				stakingPoolsParsed.map(
 					sp => <StakingPool key={sp.name} stakingPoolInfo={sp}  />
 				)
 			:
@@ -75,7 +81,6 @@ export async function getServerSideProps() {
 		console.log ("Home getServerSideProps - stakingPool - length: " + rawDataStakingPools.length)
 		const stringifiedDataStakingPools = toJson(rawDataStakingPools);
 		const dataStakingPools : StakingPoolDBInterface [] = JSON.parse(stringifiedDataStakingPools);
-		//console.log ("Home getServerSideProps - stakingPool length: " + dataStakingPools.length)
 		return {
 			props: {
 				stakingPools: dataStakingPools
@@ -86,7 +91,9 @@ export async function getServerSideProps() {
 		console.error (error)
 		const dataStakingPools : StakingPoolDBInterface [] = [];
 		return {
-			props: { stakingPools: dataStakingPools }
+			props: { 
+				stakingPools: dataStakingPools 
+			}
 		};
 	}
 }

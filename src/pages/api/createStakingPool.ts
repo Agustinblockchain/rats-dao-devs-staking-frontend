@@ -1,22 +1,17 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import type { NextApiRequest, NextApiResponse } from 'next'
 
-import { connect } from '../../utils/dbConnect'
-
-const fs = require('fs/promises');
-
-import { exec, ExecException }  from 'child_process';
-import { sha256HexStr, strToHex, toJson } from '../../utils/utils';
-
-import { getScriptFromFile, getSymbolFromFile, getTextFromFile } from '../../utils/utilsServerSide';
-import { getPABPoolParamsFromFile, getEstadoDeployFromFile } from "../../stakePool/utilsServerSide";
-import { getStakingPoolDBModel, getStakingPoolFromDBByName, StakingPoolDBInterface } from  '../../types/stakePoolDBModel'
-import { el } from 'date-fns/locale';
-import { MintingPolicy,  SpendingValidator } from 'lucid-cardano';
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { connect } from '../../utils/dbConnect';
+import { exec } from 'child_process';
+import { toJson } from '../../utils/utils';
+import { MintingPolicy, SpendingValidator } from 'lucid-cardano';
+import { getSession } from 'next-auth/react';
+import { getEstadoDeployFromFile, getPABPoolParamsFromFile } from "../../stakePool/helpersServerSide";
 import { CurrencySymbol, PoolParams } from '../../types';
 import { maxMasters } from '../../types/constantes';
-import { getEstadoDeployAPI } from "../../stakePool/helpersStakePool";
-import { getSession } from 'next-auth/react';
+import { getStakingPoolDBModel, getStakingPoolFromDBByName, StakingPoolDBInterface } from '../../types/stakePoolDBModel';
+import { getScriptFromFile, getTextFromFile } from '../../utils/utilsServerSide';
+
+const fs = require('fs/promises');
 
 type Data = {
 	msg: string
@@ -30,6 +25,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 	if (!session) {
 		console.error("/api/createStakingPool - Must Connect to your Wallet"); 
         res.status(400).json({ msg: "Must Connect to your Wallet", stakingPool: undefined })
+		return 
     }
     const sesionPkh = session?.user.pkh
     //--------------------------------
@@ -68,7 +64,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 	
 	if (stakingPoolWithSameName.length> 0 ){
 		console.error("/api/createStakingPool - Can't create Pool with existing name"); 
-		res.status(400).json({ msg: "Can't create Pool with existing name", stakingPool: stakingPoolWithSameName[0]})
+		res.status(400).json({ msg: "Can't create Pool with existing name", stakingPool: undefined})
 		return 
 	}
 
@@ -76,13 +72,13 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 
 	if (masters.length == 0 ){
 		console.error("/api/createStakingPool - Can't create Pool with no masters"); 
-		res.status(400).json({ msg: "Can't create Pool with no masters", stakingPool: stakingPoolWithSameName[0]})
+		res.status(400).json({ msg: "Can't create Pool with no masters", stakingPool: undefined})
 		return 
 	}
 
 	if (mastersSplited.length> maxMasters ){
 		console.error("/api/createStakingPool - Can't create Pool with so many masters"); 
-		res.status(400).json({ msg: "Can't create Pool with so many masters", stakingPool: stakingPoolWithSameName[0]})
+		res.status(400).json({ msg: "Can't create Pool with so many masters", stakingPool: undefined})
 		return 
 	}
 	
@@ -97,7 +93,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 					var errorStr = toJson(stderr)
 					errorStr = errorStr.indexOf("CallStack") > -1 ? errorStr.slice(7,errorStr.indexOf("CallStack")-2) : errorStr  
 					console.error("/api/createStakingPool - exec - Error: " + errorStr );
-					res.status(400).json({ msg: "There were an error creating Smart Contracts: " + errorStr, stakingPool: stakingPoolWithSameName[0]})
+					res.status(400).json({ msg: "There were an error creating Smart Contracts: " + errorStr, stakingPool: undefined})
 					return
 				}else {
 					const timeoutGetEstadoDeploy = setInterval(async function () { 
@@ -348,24 +344,22 @@ async function crearStakingPool(nombrePool: any, staking_UI: any, harvest_UI: an
 
 		masters: pabPoolParams.masters,
 
-		uTxO_With_PoolDatum: "",
+		eUTxO_With_ScriptDatum: undefined,
 
-		eUTxO_With_ScriptDatum: "",
+		eUTxO_With_Script_TxID_Master_Fund_Datum: undefined,
+		eUTxO_With_Script_TxID_Master_FundAndMerge_Datum: undefined,
+		eUTxO_With_Script_TxID_Master_SplitFund_Datum: undefined,
+		eUTxO_With_Script_TxID_Master_ClosePool_Datum: undefined,
+		eUTxO_With_Script_TxID_Master_TerminatePool_Datum: undefined,
+		eUTxO_With_Script_TxID_Master_DeleteFund_Datum: undefined,
+		eUTxO_With_Script_TxID_Master_SendBackFund_Datum: undefined,
+		eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum: undefined,
+		eUTxO_With_Script_TxID_Master_AddScripts_Datum: undefined,
+		eUTxO_With_Script_TxID_Master_DeleteScripts_Datum: undefined,
 
-		eUTxO_With_Script_TxID_Master_Fund_Datum: "",
-		eUTxO_With_Script_TxID_Master_FundAndMerge_Datum: "",
-		eUTxO_With_Script_TxID_Master_SplitFund_Datum: "",
-		eUTxO_With_Script_TxID_Master_ClosePool_Datum: "",
-		eUTxO_With_Script_TxID_Master_TerminatePool_Datum: "",
-		eUTxO_With_Script_TxID_Master_DeleteFund_Datum: "",
-		eUTxO_With_Script_TxID_Master_SendBackFund_Datum: "",
-		eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum: "",
-		eUTxO_With_Script_TxID_Master_AddScripts_Datum: "",
-		eUTxO_With_Script_TxID_Master_DeleteScripts_Datum: "",
-
-		eUTxO_With_Script_TxID_User_Deposit_Datum: "",
-		eUTxO_With_Script_TxID_User_Harvest_Datum: "",
-		eUTxO_With_Script_TxID_User_Withdraw_Datum: "",
+		eUTxO_With_Script_TxID_User_Deposit_Datum: undefined,
+		eUTxO_With_Script_TxID_User_Harvest_Datum: undefined,
+		eUTxO_With_Script_TxID_User_Withdraw_Datum: undefined,
 
 		staking_Lucid: pabPoolParams.staking_Lucid,
 		harvest_Lucid: pabPoolParams.harvest_Lucid,
@@ -373,68 +367,59 @@ async function crearStakingPool(nombrePool: any, staking_UI: any, harvest_UI: an
 		staking_UI: staking_UI,
 		harvest_UI: harvest_UI,
 
-		pParams: toJson(poolParams),
+		pParams: (poolParams),
 
 		scriptAddress: stakePlusV2Addr,
-		script: toJson(stakePlusV2Script),
+		script: (stakePlusV2Script),
 
-		poolID_TxOutRef: toJson(pabPoolParams.poolID_TxOutRef),
+		poolID_TxOutRef: (pabPoolParams.poolID_TxOutRef),
 		poolID_CS: poolID_CS,
-		poolID_Script: toJson(poolID_Script),
+		poolID_Script: (poolID_Script),
 
 		txID_Master_Fund_CS: txID_Master_Fund_CS,
-		txID_Master_Fund_Script: toJson(txID_Master_Fund_Script),
+		txID_Master_Fund_Script: (txID_Master_Fund_Script),
 
 		txID_Master_FundAndMerge_CS: txID_Master_FundAndMerge_CS,
-		txID_Master_FundAndMerge_Script: toJson(txID_Master_FundAndMerge_Script),
+		txID_Master_FundAndMerge_Script: (txID_Master_FundAndMerge_Script),
 
 		txID_Master_SplitFund_CS: txID_Master_SplitFund_CS,
-		txID_Master_SplitFund_Script: toJson(txID_Master_SplitFund_Script),
+		txID_Master_SplitFund_Script: (txID_Master_SplitFund_Script),
 
 		txID_Master_ClosePool_CS: txID_Master_ClosePool_CS,
-		txID_Master_ClosePool_Script: toJson(txID_Master_ClosePool_Script),
+		txID_Master_ClosePool_Script: (txID_Master_ClosePool_Script),
 
 		txID_Master_TerminatePool_CS: txID_Master_TerminatePool_CS,
-		txID_Master_TerminatePool_Script: toJson(txID_Master_TerminatePool_Script),
+		txID_Master_TerminatePool_Script: (txID_Master_TerminatePool_Script),
 
 		txID_Master_DeleteFund_CS: txID_Master_DeleteFund_CS,
-		txID_Master_DeleteFund_Script: toJson(txID_Master_DeleteFund_Script),
+		txID_Master_DeleteFund_Script: (txID_Master_DeleteFund_Script),
 
 		txID_Master_SendBackFund_CS: txID_Master_SendBackFund_CS,
-		txID_Master_SendBackFund_Script: toJson(txID_Master_SendBackFund_Script),
+		txID_Master_SendBackFund_Script: (txID_Master_SendBackFund_Script),
 
 		txID_Master_SendBackDeposit_CS: txID_Master_SendBackDeposit_CS,
-		txID_Master_SendBackDeposit_Script: toJson(txID_Master_SendBackDeposit_Script),
+		txID_Master_SendBackDeposit_Script: (txID_Master_SendBackDeposit_Script),
 
 		txID_Master_AddScripts_CS: txID_Master_AddScripts_CS,
-		txID_Master_AddScripts_Script: toJson(txID_Master_AddScripts_Script),
+		txID_Master_AddScripts_Script: (txID_Master_AddScripts_Script),
 
 		txID_Master_DeleteScripts_CS: txID_Master_DeleteScripts_CS,
-		txID_Master_DeleteScripts_Script: toJson(txID_Master_DeleteScripts_Script),
+		txID_Master_DeleteScripts_Script: (txID_Master_DeleteScripts_Script),
 
 		txID_User_Deposit_CS: txID_User_Deposit_CS,
-		txID_User_Deposit_Script: toJson(txID_User_Deposit_Script),
+		txID_User_Deposit_Script: (txID_User_Deposit_Script),
 
 		txID_User_Harvest_CS: txID_User_Harvest_CS,
-		txID_User_Harvest_Script: toJson(txID_User_Harvest_Script),
+		txID_User_Harvest_Script: (txID_User_Harvest_Script),
 
 		txID_User_Withdraw_CS: txID_User_Withdraw_CS,
-		txID_User_Withdraw_Script: toJson(txID_User_Withdraw_Script),
+		txID_User_Withdraw_Script: (txID_User_Withdraw_Script),
 
 	});
 
 	try{
 		await newStakingPoolDB.save()
-		// 	function (error: any) {
-		// 	if (error) {
-		// 		console.error("/api/createStakingPool - Can't save StakingPool in Database - Error: " + error);
-		// 		res.status(400).json({ msg: "Can't save StakingPool in Database - Error: " + error, stakingPool: undefined });
-		// 		return;
-		// 	}else{
-				
-		// 	}
-		// });
-		
+
 		console.log("/api/createStakingPool - StakingPool saved in Database!");
 		res.status(200).json({ msg: "Smart Contracts created!", stakingPool: newStakingPoolDB });
 		return

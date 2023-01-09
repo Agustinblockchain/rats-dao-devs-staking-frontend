@@ -3,7 +3,7 @@ import { BIGINT, EUTxO } from '../types';
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
 import { makeTx_And_UpdateEUTxOsIsPreparing } from '../utils/cardano-helpersTx';
 import { Wallet } from '../utils/walletProvider';
-import { splitUTxOsTx } from "./endPointsTx - splitUTxOsTx";
+import { splitUTxOsTx } from "./endPointsTx - splitUTxOs";
 
 //--------------------------------------
 
@@ -22,7 +22,7 @@ export async function splitUTxOs(wallet: Wallet, poolInfo: StakingPoolDBInterfac
     const splitAmount: BIGINT = 10000000n;
     const value_For_SplitUTxO: Assets = { ["lovelace"]: splitAmount };
     //------------------
-   var tx_Binded = splitUTxOsTx.bind(lucid!, protocolParameters, masterAddr, value_For_SplitUTxO);
+   var tx_Binded = splitUTxOsTx.bind(functionName, lucid!,protocolParameters, masterAddr, value_For_SplitUTxO);
     //------------------
     var eUTxO_for_consuming: EUTxO[] = [];
     //------------------

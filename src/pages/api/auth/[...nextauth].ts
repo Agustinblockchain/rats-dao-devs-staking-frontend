@@ -40,7 +40,7 @@ export default NextAuth({
 
 					const user : User = { id: credentials?.pkh!, pkh: credentials?.pkh!, swAdmin: swAdmin, swCreate: swCreate }
 
-					// console.log("/api/auth/[...nextauth].ts - authorize - user: " + toJson(user))
+					console.log("/api/auth/[...nextauth].ts - authorize - user: " + toJson(user))
 
 					return user
 				}else{

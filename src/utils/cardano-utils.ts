@@ -6,7 +6,6 @@ import { bytesUint8ArraToHex } from "./utils";
 //---------------------------------------------------------------
 //USING CARDANO MULTIPLATAFORM, NO LUCID:
 
-
 export const addrToPubKeyHash = (bech32Addr: string) => {
     const baseAddress = BaseAddress.from_address(
         Address.from_bech32(bech32Addr)
@@ -21,6 +20,9 @@ export const addrToPubKeyHash = (bech32Addr: string) => {
     }
 
 };
+
+//----------------------------------------------------------------------
+
 // network: mainnet = 1    Tesnet = 0
 
 export function Ed25519KeyHashToAddress(keyHash: Ed25519KeyHash, network: number) {
@@ -40,6 +42,9 @@ export function Ed25519KeyHashToAddress(keyHash: Ed25519KeyHash, network: number
     return bech32;
 
 }
+
+//----------------------------------------------------------------------
+
 // network: mainnet = 1    Tesnet = 0
 
 export function Bip32PublicKeyToAddress(bip32: Bip32PublicKey, network: number) {
@@ -66,6 +71,9 @@ export function Bip32PublicKeyToAddress(bip32: Bip32PublicKey, network: number) 
     return bech32;
 
 }
+
+//----------------------------------------------------------------------
+
 // network: mainnet = 1    Tesnet = 0
 
 export function Bip32PrivateKeyToAddress(bip32: Bip32PrivateKey, network: number) {
@@ -93,6 +101,9 @@ export function Bip32PrivateKeyToAddress(bip32: Bip32PrivateKey, network: number
     return bech32;
 
 }
+
+//----------------------------------------------------------------------
+
 // network: mainnet = 1    Tesnet = 0
 
 export function pubKeyHashToAddress(pkh: PaymentKeyHash, network: number) {
@@ -107,8 +118,8 @@ export function pubKeyHashToAddress(pkh: PaymentKeyHash, network: number) {
 
 }
 
-
 //----------------------------------------------------------------------
+
 function itemToData(item: any) {
 
     if (typeof item === 'bigint' || typeof item === 'number' || typeof item === 'string' && !isNaN(parseInt(item)) && item.slice(-1) === 'n') {
@@ -154,6 +165,9 @@ function itemToData(item: any) {
         return (subObjToData(item));
     }
 }
+
+//----------------------------------------------------------------------
+
 //for creating a PlutusData structure from any Object
 function subObjToData(data: any) {
 
@@ -192,6 +206,9 @@ function subObjToData(data: any) {
     }
 
 }
+
+//----------------------------------------------------------------------
+
 //for creating a PlutusData structure from any Object
 //it used firts the lucidData format, and then Data.to, for serialize and then PlutusData.from_bytes(fromHex()) to get the final PlutusData
 
@@ -208,4 +225,5 @@ export function objToPlutusData(data: any) {
     return plutusData;
 
 }
+
 //----------------------------------------------------------------------

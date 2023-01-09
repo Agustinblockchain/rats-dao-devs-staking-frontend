@@ -105,59 +105,6 @@ export const storeWallet = createStore<AppStoreModel> (({
 
 		return BigInt(total.toString()) as BIGINT
 	}),
-
-	// walletCreateValue_Adding_Tokens_Of_AC_Lucid: computed(state => (unit: string, amount: BIGINT) => {
-	
-	// 	// console.log("storeWallet - createValue_Adding_Tokens_Of_AC_Lucid - unit: " + unit + " - amount: " + amount)
-
-	// 	const CS = unit.slice(0,56)
-	// 	const TN = unit.slice(56)
-
-	// 	const isAda = (unit === 'lovelace')
-	// 	const isWithoutTokenName = !isAda && TN == ""
-
-	// 	var assets : Assets = {}
-
-	// 	// console.log("storeWallet - createValue_Adding_Tokens_Of_AC_Lucid - isAda: " + isAda + " - isWithoutTokenName: " + isWithoutTokenName)
-
-	// 	if (isWithoutTokenName){
-	// 		state.uTxOsAtWallet.forEach(u => { 
-
-	// 			let total: BIGINT = 0n;
-
-	// 			for (const [key, value] of Object.entries(u.assets)) {
-
-	// 				const CS_ = key.slice(0,56)
-					
-	// 				if (CS == CS_) {
-	// 					//console.log("storeWallet - createValue_Adding_Tokens_Of_AC_Lucid - CS: " + CS + " - CS_: " + CS_ + " - value: " + value)
-
-	// 					if (total + value < amount) {
-	// 						total += value
-	// 						assets[key] = value
-	// 					}else if (total + value == amount) {
-	// 						total += value
-	// 						assets[key] = value
-	// 						break
-	// 					}else{
-	// 						const rest = amount - total
-	// 						assets[key] = rest
-	// 						break
-	// 					}
-	// 				}
-	// 			}
-			
-	// 		})
-	// 	}else{
-	// 		assets[unit] = amount
-	// 	}
-
-	// 	// console.log("storeWallet - createValue_Adding_Tokens_Of_AC_Lucid - assets: " + toJson( assets))
-
-	// 	return assets
-	// })
-	
- 
 	
 }))
 
