@@ -104,6 +104,8 @@ export const maxTxExSteps = 10000000000
 
 export const maxTxSize = 16384
 
+export const maxTxFundDatumInputs = 2
+
 //------------------------------------------
 
 export const poolDatum_NotTerminated = 0

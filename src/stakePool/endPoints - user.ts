@@ -4,7 +4,7 @@ import {
     Redeemer_Burn_TxID, Redeemer_Mint_TxID, Redeemer_User_Deposit, Redeemer_User_Harvest, Redeemer_User_Withdraw, UserDatum
 } from '../types';
 import {
-    fundID_TN, maxDiffTokensForUserDatum, poolID_TN, tokenNameLenght, txID_User_Deposit_For_User_TN, txID_User_Harvest_TN, txID_User_Withdraw_TN, userID_TN
+    fundID_TN, maxDiffTokensForUserDatum, maxTxFundDatumInputs, poolID_TN, tokenNameLenght, txID_User_Deposit_For_User_TN, txID_User_Harvest_TN, txID_User_Withdraw_TN, userID_TN
 } from "../types/constantes";
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
 import { addAssets, addAssetsList, calculateMinAda, calculateMinAdaOfAssets, createValue_Adding_Tokens_Of_AC_Lucid, subsAssets } from '../utils/cardano-helpers';
@@ -294,6 +294,10 @@ export async function userHarvest(wallet: Wallet, poolInfo: StakingPoolDBInterfa
     const eUTxOs_With_FundDatum_And_Ordered = sortFundDatum(poolInfo, eUTxOs_With_FundDatum);
     const eUTxOs_With_FundDatum_WithEnoughValueToClaim: EUTxO[] = selectFundDatum_WithEnoughValueToClaim(eUTxOs_With_FundDatum_And_Ordered, harvest_Amount);
     console.log(functionName + " - EUTxOs With FundDatum With Enough Value To Claim - length: " + eUTxOs_With_FundDatum_WithEnoughValueToClaim.length);
+    //------------------
+    if (eUTxOs_With_FundDatum_WithEnoughValueToClaim.length > maxTxFundDatumInputs) {
+        throw "Trying to use too many inputs with funds to cover your claim. Ask Manager to create UTxOs with more funds or reduce the amount you want to claim";
+    }
     //------------------
     let datum_and_values_for_FundDatum: { datum: FundDatum; value: Assets; }[] = [];
     var claimLeft = harvest_Amount;
