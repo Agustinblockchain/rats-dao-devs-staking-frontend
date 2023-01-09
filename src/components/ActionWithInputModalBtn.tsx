@@ -409,7 +409,7 @@ export default function ActionWithInputModalBtn(
 														if (input_AC_isWithoutTokenName && BigInt(userMaxTokens) == BigInt(maxTokensWithDifferentNames)){
 															setMessage("You have exceeded the maximum amount per transaction for this token which is: " + maxTokensWithDifferentNames )
 														}else{
-															setMessage("You do not have enough tokens to perform this action. Try reconnecting your wallet." )
+															setMessage("You have exceeded the maximum avalaible tokens which is: " + userMaxTokens )
 														}
 													} else {
 
