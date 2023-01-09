@@ -28,8 +28,11 @@ const Create : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> 
 	
 	useEffect(() => {
 		// console.log("Create - useEffect - walletStore.connected: " + walletStore.connected)
-		if (pkh != walletStore.pkh) {
+		if (walletStore.connected ) {
 			refreshData(walletStore.pkh)
+		}else{
+			refreshData(undefined)
+
 		}
 	}, [walletStore.connected])
 

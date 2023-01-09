@@ -39,8 +39,11 @@ const Admin : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> =
 	
 	useEffect(() => {
 		// console.log("Admin - useEffect - walletStore.connected: " + walletStore.connected + " - walletStore.pkh: " + walletStore.pkh + " - pkh: " + pkh)
-		if (walletStore.connected && pkh != walletStore.pkh) {
+		if (walletStore.connected ) {
 			refreshData(walletStore.pkh)
+		}else{
+			refreshData(undefined)
+
 		}
 	}, [walletStore.connected])
 

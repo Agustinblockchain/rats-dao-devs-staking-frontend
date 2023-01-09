@@ -44,8 +44,11 @@ const Withdraw : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>
 	
 	useEffect(() => {
 		// console.log("Withdraw - useEffect - walletStore.connected: " + walletStore.connected)
-		if (walletStore.connected && pkh != walletStore.pkh) {
+		if (walletStore.connected ) {
 			refreshData(walletStore.pkh)
+		}else{
+			refreshData(undefined)
+
 		}
 	}, [walletStore.connected])
 
