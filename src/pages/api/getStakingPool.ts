@@ -20,13 +20,13 @@ type Data = {
 export default async function handler( req: NextApiRequest, res: NextApiResponse<Data | string>) {
 
     //--------------------------------
-    const session = await getSession({ req })
-	if (!session) {
-		console.error("/api/getStakingPool - Must Connect to your Wallet"); 
-        res.status(400).json({ msg: "Must Connect to your Wallet" , stakingPool: undefined})
-        return 
-    }
-    const sesionPkh = session?.user.pkh
+    // const session = await getSession({ req })
+	// if (!session) {
+	// 	console.error("/api/getStakingPool - Must Connect to your Wallet"); 
+    //     res.status(400).json({ msg: "Must Connect to your Wallet" , stakingPool: undefined})
+    //     return 
+    // }
+    // const sesionPkh = session?.user.pkh
     //--------------------------------
     
     const nombrePool = req.body.nombrePool
