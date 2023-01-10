@@ -32,42 +32,32 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 	const ui_notConnected = '...'
 
 	const walletStore = useStoreState(state => state.wallet)
-
 	const { uTxOsAtWallet, isWalletDataLoaded, getTotalOfUnit } = useStoreState(state => {
 		return { uTxOsAtWallet: state.uTxOsAtWallet, isWalletDataLoaded: state.isWalletDataLoaded, getTotalOfUnit: state.walletGetTotalOfUnit };
 	});
-
 	const { loadWalletData } = useStoreActions(actions => {
 		return { loadWalletData: actions.loadWalletData };
 	});
 
 	const [isWorking, setIsWorking] = useState("")
-
 	const isCancelling = useRef(false);
 	const isWorkingInABuffer = useRef(false);
-
 	const setIsWorkingInABuffer = (value: boolean) => {
 		isWorkingInABuffer.current = value
 	}
-
 	const setIsCanceling = (value: boolean) => {
 		isCancelling.current = value
 	}
 
 	const [actionMessage, setActionMessage] = useState("")
 	const [actionHash, setActionHash] = useState("")
-
 	const [walletStakingAmount, setWalletStakingAmount] = useState<string | 0>(ui_notConnected)
 	const [walletHarvestAmount, setWalletHarvestAmount] = useState<string | 0>(ui_notConnected)
-
 	const [maxStakingAmount, setMaxStakingAmount] = useState<string | 0>(ui_notConnected)
 	const [maxHarvestAmount, setMaxHarvestAmount] = useState<string | 0>(ui_notConnected)
-
 	const [walletStakingAssets, setWalletStakingAssets] = useState<Assets>({})
-
 	
 	const statePoolData = useStatePoolData(stakingPoolInfo)
-
 	const { 
 		poolInfo,
 
@@ -108,16 +98,12 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 
 	useEffect(() => {
 		// console.log("StakingPool - " + poolInfo.name + " - useEffect - walletStore.connected: " + walletStore.connected + " - isWalletDataLoaded: " + isWalletDataLoaded)
-
 		if (walletStore.connected && !isWalletDataLoaded) {
 			setWalletStakingAmount(ui_loading)
 			setWalletHarvestAmount(ui_loading)
-
 			setMaxStakingAmount(ui_loading)
 			setMaxHarvestAmount(ui_loading)
-
 			setWalletStakingAssets({})
-
 		} else if (walletStore.connected && isWalletDataLoaded) {
 			//------------------
 			const walletStakingAmount = getTotalOfUnit(poolInfo.staking_Lucid)
@@ -148,26 +134,19 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 				}
 			}
 			setWalletStakingAssets(assetsOfAC)
-
 		} else {
-			// console.log("StakingPool - " + poolInfo.name + " - useEffect3 - walletStore.connected: " + walletStore.connected + " - isWalletDataLoaded: " + isWalletDataLoaded)
-
 			setWalletStakingAmount(ui_notConnected)
 			setWalletHarvestAmount(ui_notConnected)
-
 			setMaxStakingAmount(ui_notConnected)
 			setMaxHarvestAmount(ui_notConnected)
-
 			setWalletStakingAssets({})
-
 		}
 	}, [walletStore, isWalletDataLoaded])
 
 	//--------------------------------------
 
-	const handleCallback = async (isWorking: string) => {
-		console.log("StakingPool - " + poolInfo.name + " - handleCallback isWorking: ", isWorking)
-		// alert ("StakingPool - callbak in:" + isWorking)
+	const handleSetIsWorking = async (isWorking: string) => {
+		console.log("StakingPool - " + poolInfo.name + " - handleSetIsWorking isWorking: ", isWorking)
 		setIsWorking(isWorking)
 		return isWorking
 	}
@@ -192,15 +171,15 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 	//--------------------------------------
 
 	const userDepositAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
-		return await newTransaction ("StakingPool - Deposit Pool", walletStore, poolInfo, userDeposit, isWorkingInABuffer.current, setActionMessage, setActionHash, setIsWorking, updateDetailsStakingPoolAndWallet, eUTxOs_Selected, assets) 
+		return await newTransaction ("StakingPool - Deposit Pool", walletStore, poolInfo, userDeposit, isWorkingInABuffer.current, setActionMessage, setActionHash, setIsWorking, eUTxOs_Selected, assets) 
 	}
 
 	const userHarvestAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[], assets?: Assets) => {
-		return await newTransaction ("StakingPool - Harvest Pool", walletStore, poolInfo, userHarvest, isWorkingInABuffer.current, setActionMessage, setActionHash, setIsWorking, updateDetailsStakingPoolAndWallet, eUTxOs_Selected, assets) 
+		return await newTransaction ("StakingPool - Harvest Pool", walletStore, poolInfo, userHarvest, isWorkingInABuffer.current, setActionMessage, setActionHash, setIsWorking, eUTxOs_Selected, assets) 
 	}
 
 	const userWithdrawAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[], assets?: Assets) => {
-		return await newTransaction ("StakingPool - Withdraw Pool", walletStore, poolInfo, userWithdraw, isWorkingInABuffer.current, setActionMessage, setActionHash, setIsWorking, updateDetailsStakingPoolAndWallet, eUTxOs_Selected, assets) 
+		return await newTransaction ("StakingPool - Withdraw Pool", walletStore, poolInfo, userWithdraw, isWorkingInABuffer.current, setActionMessage, setActionHash, setIsWorking, eUTxOs_Selected, assets) 
 	}
 
 	//--------------------------------------
@@ -211,21 +190,19 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 
 		setActionMessage("Creating Transfer, please wait...")
 		setIsWorkingInABuffer(true)
-		var swErrors = false
 
 		for (let i = 1; i <= 50 && !isCancelling.current; i++) {
-			try {
-				setActionMessage("Deposit " + i + " of "+ 50 + ", please wait..."+ (isCancelling.current ? " (Canceling when this Tx finishes)" : ""))
-				const txHash = await userDepositAction(poolInfo, eUTxOs_Selected, assets);
-				pushSucessNotification("Deposit " + i + " of "+ 50, txHash, true);
-				setActionHash("")
-			} catch (error: any) {
-				const error_explained = explainError(error)
-				pushWarningNotification("Deposit " + i + " of "+ 50, error_explained);
-				swErrors = true
-				await updateDetailsStakingPoolAndWallet()
-				// await new Promise(r => setTimeout(r, 2000));
-			}
+			// try {
+			setActionMessage("Deposit " + i + " of "+ 50 + ", please wait..."+ (isCancelling.current ? " (Canceling when this Tx finishes)" : ""))
+			const txHash = await userDepositAction(poolInfo, eUTxOs_Selected, assets);
+			pushSucessNotification("Deposit " + i + " of "+ 50, txHash, true);
+			setActionHash("")
+			await updateDetailsStakingPoolAndWallet()
+			// } catch (error: any) {
+			// 	const error_explained = explainError(error)
+			// 	pushWarningNotification("Deposit " + i + " of "+ 50, error_explained);
+			// 	await updateDetailsStakingPoolAndWallet()
+			// }
 		}
 		setIsWorkingInABuffer(false)
 		setIsWorking("")
@@ -233,11 +210,11 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 			setIsCanceling(false)
 			return "You have cancel the operation"
 		}else{
-			if (swErrors) {
-				throw "Error executing some of the transactions"
-			} else {
+			// if (swErrors) {
+			// 	throw "Error executing some of the transactions"
+			// } else {
 				return "Deposit Batch executed"
-			}
+			// }
 		}
 
 	}
@@ -245,7 +222,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 	//--------------------------------------
 	
 	const splitUTxOsAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
-		return await newTransaction ("StakingPool - Split Wallet UTxOs", walletStore, poolInfo, splitUTxOs, isWorkingInABuffer.current, setActionMessage, setActionHash, setIsWorking, updateDetailsStakingPoolAndWallet, eUTxOs_Selected, assets) 
+		return await newTransaction ("StakingPool - Split Wallet UTxOs", walletStore, poolInfo, splitUTxOs, isWorkingInABuffer.current, setActionMessage, setActionHash, setIsWorking, eUTxOs_Selected, assets) 
 	}
 	
 	//--------------------------------------
@@ -437,14 +414,18 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 													</h4>
 													<h3 className="pool__stat-value">{(userStakedData.userRewardsToPay === 0 ? userStakedData.userRewardsToPay : Number(userStakedData.userRewardsToPay).toLocaleString("en-US") + " " + poolInfo.harvest_UI) || <Skeleton baseColor='#e2a7a7' />}</h3>
 													<div className="pool__stat-actions">
-														<ActionWithInputModalBtn action={userHarvestAction} 
+														<ActionWithInputModalBtn 
+															action={userHarvestAction} 
+															postAction={updateDetailsStakingPoolAndWallet}
 															swHash={true} 
 															eUTxOs_Selected={[userStakedData.eUTxO_With_UserDatum!]} 
 															poolInfo={poolInfo} 
 															showInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={userStakedData.userRewardsToPay} 
 															enabled={walletStore.connected && isPoolDataLoaded && swUserRegistered && swTerminated === false} 
 															show={true} 
-															actionName="Harvest" actionIdx={poolInfo.name + "-" + userStakedData.eUTxO_With_UserDatum!.uTxO.txHash + "-" + userStakedData.eUTxO_With_UserDatum!.uTxO.outputIndex} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
+															actionName="Harvest" actionIdx={poolInfo.name + "-" + userStakedData.eUTxO_With_UserDatum!.uTxO.txHash + "-" + userStakedData.eUTxO_With_UserDatum!.uTxO.outputIndex} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
+															setIsWorking={handleSetIsWorking} 
+														/>
 													</div>
 												</div>
 												<div className="pool__flex_gap"></div>
@@ -452,7 +433,10 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 													<h4 className="pool__stat-title">Staked</h4>
 													<h3 className="pool__stat-value">{(userStakedData.userStaked === 0 ? userStakedData.userStaked : Number(userStakedData.userStaked).toLocaleString("en-US") + " " + poolInfo.staking_UI) || <Skeleton baseColor='#e2a7a7' />}</h3>
 													<div className="pool__stat-actions">
-														<ActionWithMessageModalBtn action={userWithdrawAction} swHash={true} 
+														<ActionWithMessageModalBtn 
+															action={userWithdrawAction} 
+															postAction={updateDetailsStakingPoolAndWallet}
+															swHash={true} 
 															description={'<li className="info">Do you want to get back your deposit?</li> \
 															<li className="info">Please, make sure you have taken care of any outstanding rewards before withdrawing your deposit.</li>\
 															<li className="info">You can\'t claim them after withdrawing.</li>'}
@@ -461,7 +445,8 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 															show={true} 
 															actionName="Withdraw" 
 															actionIdx={poolInfo.name + "-" + userStakedData.eUTxO_With_UserDatum!.uTxO.txHash + "-" + userStakedData.eUTxO_With_UserDatum!.uTxO.outputIndex} 
-															messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} 
+															messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
+															setIsWorking={handleSetIsWorking} 
 														/>
 													</div>
 												</div>
@@ -481,52 +466,67 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 								staking_AC_isWithoutTokenName?
 									<>
 										<ActionWithSelectInputModalBtn 
-											action={userDepositAction} swHash={true} 
+											action={userDepositAction} 
+											postAction={updateDetailsStakingPoolAndWallet}
+											swHash={true} 
 											poolInfo={poolInfo} 
 											walletAssets={walletStakingAssets}
 											inputUnitForLucid={poolInfo.staking_Lucid} inputUnitForShowing={poolInfo.staking_UI} inputMax={maxStakingAmount} 
 											enabled={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded && swFunded === true && swClosed === false} 
 											show={poolInfo.swFunded === true && poolInfo.swClosed === false} 
-											actionName="Deposit" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} swPaddintTop={false} />
+											actionName="Deposit" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
+											setIsWorking={handleSetIsWorking} 
+											swPaddintTop={false} 
+										/>
 									</>
 								:
 									<>	
 										<ActionWithInputModalBtn 
-											action={userDepositAction} swHash={true} 
+											action={userDepositAction} 
+											postAction={updateDetailsStakingPoolAndWallet}
+											swHash={true} 
 											poolInfo={poolInfo} 
 											showInput={true} inputUnitForLucid={poolInfo.staking_Lucid} inputUnitForShowing={poolInfo.staking_UI} inputMax={maxStakingAmount} 
 											enabled={walletStore.connected && isPoolDataLoaded && swFunded === true && swClosed === false} 
 											show={poolInfo.swFunded === true && poolInfo.swClosed === false} 
-											actionName="Deposit" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} swPaddintTop={false} />
+											actionName="Deposit" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
+											setIsWorking={handleSetIsWorking} 
+											swPaddintTop={false} 
+										/>
 									</>
 							}
 							
 							{process.env.NODE_ENV==="development"?
-								<ActionWithInputModalBtn action={userDepositBatchAction} swHash={false} 
+								<ActionWithInputModalBtn 
+									action={userDepositBatchAction} 
+									postAction={updateDetailsStakingPoolAndWallet}
+									swHash={false} 
 									poolInfo={poolInfo} showInput={true} inputUnitForLucid={poolInfo.staking_Lucid} inputUnitForShowing={poolInfo.staking_UI} inputMax={maxStakingAmount} 
 									enabled={walletStore.connected && isPoolDataLoaded && swFunded === true && swClosed === false} 
 									show={poolInfo.swFunded === true && poolInfo.swClosed === false} 
 									actionName="Deposit Batch" 
 									actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-									callback={handleCallback} 
+									setIsWorking={handleSetIsWorking} 
 									cancel={handleCancel}
-									/>
+								/>
 							:
 								<></>
 							}
 						</div>
 						<div className="pool__stat">
 						
-							<ActionWithMessageModalBtn action={splitUTxOsAction} 
-									description={'<li className="info">It is generally a good practice to split your wallet\'s UTXOs (unspent transaction outputs) into smaller amounts.</li> \
-									<li className="info">Having smaller UTXOs with only ADA amounts can make it easier to use them as collateral for smart contracts.</li>'}
-									swHash={true}
-									enabled={walletStore.connected && isPoolDataLoaded}
-									show={true }
-									actionName="Split Wallet UTxOs" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} 
-									swPaddintTop={false}
-									/>
-						
+							<ActionWithMessageModalBtn 
+								action={splitUTxOsAction} 
+								postAction={updateDetailsStakingPoolAndWallet}
+								description={'<li className="info">It is generally a good practice to split your wallet\'s UTXOs (unspent transaction outputs) into smaller amounts.</li> \
+								<li className="info">Having smaller UTXOs with only ADA amounts can make it easier to use them as collateral for smart contracts.</li>'}
+								swHash={true}
+								enabled={walletStore.connected && isPoolDataLoaded}
+								show={true }
+								actionName="Split Wallet UTxOs" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
+								setIsWorking={handleSetIsWorking} 
+								swPaddintTop={false}
+							/>
 						</div>
 					</div>
 				</div>

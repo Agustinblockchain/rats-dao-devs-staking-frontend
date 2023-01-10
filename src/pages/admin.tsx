@@ -11,7 +11,7 @@ import { useRouter } from 'next/router'
 import { stakingPoolDBParser } from '../stakePool/helpersStakePool'
 import { getSession, useSession } from 'next-auth/react'
 //--------------------------------------
-const Admin : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> =  ({stakingPools, pkh} : InferGetServerSidePropsType<typeof getServerSideProps>) =>  {
+const Admin : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> =  ({stakingPools, pkh, swCreate} : InferGetServerSidePropsType<typeof getServerSideProps>) =>  {
 	
 	const router = useRouter();
 
@@ -29,14 +29,8 @@ const Admin : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> =
 
 	useEffect(() => {
 		setIsRefreshing(false);
-		if (stakingPools){
-			for (let i = 0; i < stakingPools.length; i++) {
-				stakingPools[i] = stakingPoolDBParser(stakingPools[i]);
-			}
-			setStakingPoolsParsed (stakingPools)
-		}
-	}, [stakingPools]);
-	
+	}, []);
+
 	useEffect(() => {
 		// console.log("Admin - useEffect - walletStore.connected: " + walletStore.connected + " - walletStore.pkh: " + walletStore.pkh + " - pkh: " + pkh)
 		if (walletStore.connected ) {
@@ -47,10 +41,19 @@ const Admin : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> =
 		}
 	}, [walletStore.connected])
 
+	useEffect(() => {
+		if (stakingPools){
+			for (let i = 0; i < stakingPools.length; i++) {
+				stakingPools[i] = stakingPoolDBParser(stakingPools[i]);
+			}
+			setStakingPoolsParsed (stakingPools)
+		}
+	}, [stakingPools]);
+
 	const StakingPoolAdmin = dynamic(() => import('../components/StakingPoolAdmin'), { ssr: false, loading: () => <p>Loading...</p> })
 
 	return (
-		<Layout>
+		<Layout swCreate={swCreate}>
 			{ !walletStore.connected?
 					<div>Connect you wallet to see Staking Pools to Admin</div>
 				:
@@ -75,26 +78,23 @@ export async function getServerSideProps(context : any) {
 
 		await connect();
 
+		const session = await getSession(context)
+
 		var rawDataStakingPools : StakingPoolDBInterface []
 		if (context.query?.pkh != undefined) {
 			// console.log ("Admin getServerSideProps - init - context.query?.pkh:", context.query?.pkh);
 			if(context.query?.pkh != ""){
-
-				const session = await getSession(context)
 				if (session) {
 					console.log ("Admin getServerSideProps - init - session:", toJson (session));
-
 					if (session.user.pkh === context.query?.pkh) {
 						rawDataStakingPools  = await getStakingPools(false, context.query?.pkh, session?.user.swAdmin)
 					}else{
 						rawDataStakingPools = []
 					}
-
 				}else{
 					//console.log ("Admin getServerSideProps - init - session: undefined");
 					rawDataStakingPools = []
 				}
-
 			}else{
 				// console.log ("Admin getServerSideProps - init - context.query?.pkh:", context.query?.pkh);
 				rawDataStakingPools = []
@@ -111,6 +111,7 @@ export async function getServerSideProps(context : any) {
 		return {
 			props: {
 				stakingPools: dataStakingPools,
+				swCreate: session && session.user ? session.user.swCreate : false ,
 				pkh: context.query?.pkh !== undefined ? context.query?.pkh : ""
 			}
 		};
@@ -120,6 +121,7 @@ export async function getServerSideProps(context : any) {
 		const dataStakingPools : StakingPoolDBInterface [] = [];
 		return {
 			props: { 
+				swCreate: false,
 				stakingPools: dataStakingPools,
 				pkh: context.query?.pkh !== undefined ? context.query?.pkh : ""
 			}

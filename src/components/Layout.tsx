@@ -6,9 +6,11 @@ import Navbar from './Navbar';
 
 export default function Layout({
 	children,
+	swCreate
 }: {
 	children: React.ReactNode
 	home?: boolean
+	swCreate?: boolean
 }) {
 	//const Navbar = dynamic(() => import('./Navbar'), { ssr: false })
 	
@@ -17,7 +19,7 @@ export default function Layout({
 		<div className="primary_content"> 
 			
 			<div className="content">
-				<Navbar/>
+				<Navbar swCreate={swCreate}/>
 
 				<div className="section">
 					

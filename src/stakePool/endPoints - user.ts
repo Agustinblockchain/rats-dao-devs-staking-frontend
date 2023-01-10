@@ -149,10 +149,10 @@ export async function userDeposit(wallet: Wallet, poolInfo: StakingPoolDBInterfa
         redeemer_For_Mint_TxID_User_Deposit, value_For_Mint_TxID_User_Deposit, value_For_Mint_UserID
     );
     //------------------
-    var eUTxO_for_consuming: EUTxO[] = [];
+    var eUTxOs_for_consuming: EUTxO[] = [];
     //------------------
-    const [txHash, eUTxO_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxO_for_consuming);
-    return [txHash, eUTxO_for_consuming_];
+    const [txHash, eUTxOs_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxOs_for_consuming);
+    return [txHash, eUTxOs_for_consuming_];
 }
 
 //--------------------------------------
@@ -363,14 +363,14 @@ export async function userHarvest(wallet: Wallet, poolInfo: StakingPoolDBInterfa
         redeemer_For_Mint_TxID_User_Harvest, value_For_Mint_TxID_User_Harvest
     );
     //------------------
-    var eUTxO_for_consuming: EUTxO[] = [];
+    var eUTxOs_for_consuming: EUTxO[] = [];
     for (let i = 0; i < eUTxOs_With_FundDatum_WithEnoughValueToClaim.length; i++) {
-        eUTxO_for_consuming.push(eUTxOs_With_FundDatum_WithEnoughValueToClaim[i]);
+        eUTxOs_for_consuming.push(eUTxOs_With_FundDatum_WithEnoughValueToClaim[i]);
     }
-    eUTxO_for_consuming.push(eUTxO_With_UserDatum);
+    eUTxOs_for_consuming.push(eUTxO_With_UserDatum);
     //------------------
-    const [txHash, eUTxO_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxO_for_consuming);
-    return [txHash, eUTxO_for_consuming_];
+    const [txHash, eUTxOs_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxOs_for_consuming);
+    return [txHash, eUTxOs_for_consuming_];
 }
 
 //--------------------------------------
@@ -536,12 +536,12 @@ export async function userWithdraw(wallet: Wallet, poolInfo: StakingPoolDBInterf
             redeemer_Burn_UserID, value_For_Burn_UserID, value_For_Burn_TxID_User_Deposit
         );
         //------------------
-        var eUTxO_for_consuming: EUTxO[] = [];
-        eUTxO_for_consuming.push(eUTxO_With_PoolDatum)   
-        eUTxO_for_consuming.push(eUTxO_With_UserDatum);
+        var eUTxOs_for_consuming: EUTxO[] = [];
+        eUTxOs_for_consuming.push(eUTxO_With_PoolDatum)   
+        eUTxOs_for_consuming.push(eUTxO_With_UserDatum);
         //------------------
-        const [txHash, eUTxO_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxO_for_consuming);
-        return [txHash, eUTxO_for_consuming_];
+        const [txHash, eUTxOs_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxOs_for_consuming);
+        return [txHash, eUTxOs_for_consuming_];
         //------------------
     } else {
         //------------------
@@ -580,12 +580,12 @@ export async function userWithdraw(wallet: Wallet, poolInfo: StakingPoolDBInterf
             redeemer_Burn_UserID, value_For_Burn_UserID, value_For_Burn_TxID_User_Deposit
         );
         //------------------
-        var eUTxO_for_consuming: EUTxO[] = [];
-        eUTxO_for_consuming.push(eUTxO_With_FundDatum);
-        eUTxO_for_consuming.push(eUTxO_With_UserDatum);
+        var eUTxOs_for_consuming: EUTxO[] = [];
+        eUTxOs_for_consuming.push(eUTxO_With_FundDatum);
+        eUTxOs_for_consuming.push(eUTxO_With_UserDatum);
         //------------------
-        const [txHash, eUTxO_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxO_for_consuming);
-        return [txHash, eUTxO_for_consuming_];
+        const [txHash, eUTxOs_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxOs_for_consuming);
+        return [txHash, eUTxOs_for_consuming_];
         //------------------
     }
 }

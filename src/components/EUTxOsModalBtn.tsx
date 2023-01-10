@@ -14,14 +14,15 @@ type ActionState = "loading" | "success" | "error" | "idle"
 
 //--------------------------------------
 
-export default function UsersModalBtn(
+export default function EUTxOsModalBtn(
 
-	{ actionName, enabled, show, actionIdx, poolInfo, statePoolData, messageFromParent, hashFromParent, isWorkingFromParent, callback, swPaddintTop }:
+	{ actionName, enabled, show, actionIdx, poolInfo, statePoolData, messageFromParent, hashFromParent, isWorkingFromParent, setIsWorkingParent, swPaddintTop }:
 		{
 			actionName: string, enabled: boolean, show: boolean, actionIdx: string,
 			poolInfo: StakingPoolDBInterface, 
 			statePoolData: ReturnType<typeof useStatePoolData>,
-			messageFromParent?: string | "", hashFromParent?: string | "", isWorkingFromParent?: string | "", callback?: (isWorking: string) => Promise<any>,
+			messageFromParent?: string | "", hashFromParent?: string | "", isWorkingFromParent?: string | "", 
+			setIsWorkingParent?: (isWorking: string) => Promise<any>,
 			swPaddintTop?: Boolean 
 		}) {
 
@@ -61,9 +62,8 @@ export default function UsersModalBtn(
 
 	useEffect(() => {
 		// console.log("EUTxOsModalBtn - " + poolInfo.name + " - useEffect - walletStore.connected: " + walletStore.connected + " - isWalletDataLoaded: " + isWalletDataLoaded)
-		if (isPoolDataLoaded === true) {
+		if (isPoolDataLoaded) {
 			setEUTxOs_With_Datum_DB(eUTxOs_With_Datum)
-			// loadEUTxOs ()
 		}
 	}, [isPoolDataLoaded])
 
@@ -92,16 +92,6 @@ export default function UsersModalBtn(
 		}
 
 	}, [isWorkingFromParent])
-
-	const handleCallback = async (isWorking: string) => {
-		console.log("EUTxOsModalBtn - " + poolInfo.name + " - handleCallback isWorking: ", isWorking)
-
-		setIsWorking(isWorking)
-
-		callback ? await callback(actionNameWithIdx) : null
-
-		return isWorking
-	}
 
 	return (
 		<div className="modal__action_separator">
@@ -147,55 +137,50 @@ export default function UsersModalBtn(
 					<div className="modal__content_item" >
 						<h3>List of UTxOs in DB</h3>
 						{
-							// (!isPoolDataLoaded) ?
-							// 	<>
-							// 		<LoadingSpinner size={25} border={5} />
-							// 	</>
-							// 	:
-								<div className="tableContainerFunds" style={{ maxHeight: 300 }}>
-									<table>
-										<thead>
-											<tr>
-												<th></th>
-												<th>Tx Hash # Index</th>
-												<th>Datum</th>
-												<th>IsPreparing</th>
-												<th>Deleting?</th>
-												<th>IsConsuming</th>
-												<th>Deleting?</th>
-											</tr>
-										</thead>
-										<tbody>
-											{eUTxOs_With_Datum_DB.map(
-												eUTxO =>
-													<tr key={eUTxO.uTxO.txHash + "#" + eUTxO.uTxO.outputIndex}>
-														<td>
-															<input type="checkbox" key={eUTxO.uTxO.txHash + "#" + eUTxO.uTxO.outputIndex} 
-																onChange={(e) => {
-																	
-																}}
-															/>
-														</td>
-														<td>{eUTxO.uTxO.txHash + "#" + eUTxO.uTxO.outputIndex}</td>
-														<td>{getDatumType(eUTxO.datum)}</td>
-														<td>{eUTxO.isPreparing.val !== undefined? "yes" : "no"}</td>
-														<td>{eUTxO.isPreparing.val !== undefined && eUTxO.isPreparing.val < (now - txPreparingTime)? "yes" : "no"}</td>
-														<td>{eUTxO.isConsuming.val !== undefined? "yes" : "no"}</td>
-														<td>{eUTxO.isConsuming.val !== undefined && eUTxO.isConsuming.val < (now - txConsumingTime)? "yes" : "no"}</td>
-													</tr>
-											)}
-											<tr >
-												<td>{eUTxOs_With_Datum_DB.length}</td>
-												<td></td>
-												<td></td>
-												<td></td>
-												<td></td>
-												<td></td>
-												<td></td>
-											</tr>
-										</tbody>
-									</table>
-								</div>
+							<div className="tableContainerFunds" style={{ maxHeight: 300 }}>
+								<table>
+									<thead>
+										<tr>
+											<th></th>
+											<th>Tx Hash # Index</th>
+											<th>Datum</th>
+											<th>IsPreparing</th>
+											<th>Deleting?</th>
+											<th>IsConsuming</th>
+											<th>Deleting?</th>
+										</tr>
+									</thead>
+									<tbody>
+										{eUTxOs_With_Datum_DB.map(
+											eUTxO =>
+												<tr key={eUTxO.uTxO.txHash + "#" + eUTxO.uTxO.outputIndex}>
+													<td>
+														<input type="checkbox" key={eUTxO.uTxO.txHash + "#" + eUTxO.uTxO.outputIndex} 
+															onChange={(e) => {
+																
+															}}
+														/>
+													</td>
+													<td>{eUTxO.uTxO.txHash + "#" + eUTxO.uTxO.outputIndex}</td>
+													<td>{getDatumType(eUTxO.datum)}</td>
+													<td>{eUTxO.isPreparing.val !== undefined? "yes" : "no"}</td>
+													<td>{eUTxO.isPreparing.val !== undefined && eUTxO.isPreparing.val < (now - txPreparingTime)? "yes" : "no"}</td>
+													<td>{eUTxO.isConsuming.val !== undefined? "yes" : "no"}</td>
+													<td>{eUTxO.isConsuming.val !== undefined && eUTxO.isConsuming.val < (now - txConsumingTime)? "yes" : "no"}</td>
+												</tr>
+										)}
+										<tr >
+											<td>{eUTxOs_With_Datum_DB.length}</td>
+											<td></td>
+											<td></td>
+											<td></td>
+											<td></td>
+											<td></td>
+											<td></td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
 						}
 
 						<div className="modal__content_btns">

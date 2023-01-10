@@ -13,7 +13,7 @@ import { Wallet } from "./walletProvider";
 
 //---------------------------------------------------------------
 
-export async function newTransaction (title : string, walletStore: Wallet, poolInfo: StakingPoolDBInterface | undefined, endPoint: (wallet: Wallet, poolInfo: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets, master_Selected?: Master) => Promise <[string, EUTxO []]>, isWorkingInABuffer: boolean, setActionMessage: (value: SetStateAction<string>) => void, setActionHash: (value: SetStateAction<string>) => void, setIsWorking: (value: SetStateAction<string>) => void, callback: () => Promise<any>, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets, master_Selected?: Master) {
+export async function newTransaction (title : string, walletStore: Wallet, poolInfo: StakingPoolDBInterface | undefined, endPoint: (wallet: Wallet, poolInfo: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets, master_Selected?: Master) => Promise <[string, EUTxO []]>, isWorkingInABuffer: boolean, setActionMessage: (value: SetStateAction<string>) => void, setActionHash: (value: SetStateAction<string>) => void, setIsWorking: (value: SetStateAction<string>) => void, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets, master_Selected?: Master) {
     
     //console.log(title + " - " + toJson(poolInfo?.name) + " - newTransaction - INIT")
 
@@ -23,12 +23,12 @@ export async function newTransaction (title : string, walletStore: Wallet, poolI
         setActionMessage("Creating Transfer, please wait...")
     }
 
-    var eUTxO_for_consuming : EUTxO [] = []
+    var eUTxOs_for_consuming : EUTxO [] = []
 
     try {
 
-        const [txHash, eUTxO_for_consuming_] =  await endPoint(walletStore!, poolInfo!, eUTxOs_Selected, assets, master_Selected);
-        eUTxO_for_consuming = eUTxO_for_consuming_
+        const [txHash, eUTxOs_for_consuming_] =  await endPoint(walletStore!, poolInfo!, eUTxOs_Selected, assets, master_Selected);
+        eUTxOs_for_consuming = eUTxOs_for_consuming_
 
         if (!isWorkingInABuffer) {
             setActionMessage("Waiting for confirmation, please wait...")
@@ -36,37 +36,18 @@ export async function newTransaction (title : string, walletStore: Wallet, poolI
 
         setActionHash(txHash)
 
-        await waitForTxConfirmation (lucid!, txHash, eUTxO_for_consuming, callback, isWorkingInABuffer) 
+        await waitForTxConfirmation (lucid!, txHash, eUTxOs_for_consuming) 
 
-        //console.log(title + " - " + toJson(poolInfo?.name) + " - newTransaction - txHash: " + txHash + " - txHash2: " + txHash.toString())
-
-        if (isWorkingInABuffer === undefined || !isWorkingInABuffer){
-            callback();
-        }else{
-            await callback();
-        }
-            
         if (!isWorkingInABuffer) setIsWorking("")
 
         return txHash.toString();
 
     } catch (error: any) {
 
-        // if (errorIsBecauseEUTxOsAreNotUpdated(error)) {
-        //     for (let i = 0; i < eUTxO_for_consuming.length; i++) {
-        //         await apiDeleteEUTxODB(eUTxO_for_consuming[i]);
-        //     }
-        //     if (isWorkingInABuffer === undefined || !isWorkingInABuffer)
-        //         callback();
-        //     else
-        //         await callback();
-        // }
-
         if (!isWorkingInABuffer) setIsWorking("")
 
         throw error
     }
-
 }
 
 //---------------------------------------------------------------
@@ -233,14 +214,14 @@ function createCostModels_NEW_VERISON(costModels: any) {
 
 //---------------------------------------------------------------
 
-export async function makeTx_And_UpdateEUTxOsIsPreparing(functionName: string, wallet: Wallet, protocolParameters: any, tx_Binded: (...args: any) => Promise<TxComplete>, eUTxO_for_consuming: EUTxO[]): Promise<[string,EUTxO[]]> {
+export async function makeTx_And_UpdateEUTxOsIsPreparing(functionName: string, wallet: Wallet, protocolParameters: any, tx_Binded: (...args: any) => Promise<TxComplete>, eUTxOs_for_consuming: EUTxO[]): Promise<[string,EUTxO[]]> {
     var timeOut : any = undefined;
     async function updateIsPreparing (setIsPrearing: boolean) {
-        console.log ("updateIsPreparing: " + (setIsPrearing? "SET":"UNSET") + " - " + eUTxO_for_consuming.length);
+        console.log ("updateIsPreparing: " + (setIsPrearing? "SET":"UNSET") + " - " + eUTxOs_for_consuming.length);
         if (timeOut) clearTimeout(timeOut)
-        for (let i = 0; i < eUTxO_for_consuming.length; i++) {
-            const eUTxO_Updated = await apiUpdateEUTxODBIsPreparing(eUTxO_for_consuming[i], setIsPrearing);
-            eUTxO_for_consuming[i] = eUTxO_Updated;
+        for (let i = 0; i < eUTxOs_for_consuming.length; i++) {
+            const eUTxO_Updated = await apiUpdateEUTxODBIsPreparing(eUTxOs_for_consuming[i], setIsPrearing);
+            eUTxOs_for_consuming[i] = eUTxO_Updated;
         }
     }
     try {
@@ -251,7 +232,7 @@ export async function makeTx_And_UpdateEUTxOsIsPreparing(functionName: string, w
         timeOut = setTimeout(updateIsPreparing, txPreparingTime, false);
         //------------------
         var txHash = await makeTx(functionName, wallet, protocolParameters, tx_Binded);
-        return [txHash, eUTxO_for_consuming];
+        return [txHash, eUTxOs_for_consuming];
     } catch (error) {
         updateIsPreparing(false)
         console.error(functionName + " - Error: " + error);
@@ -405,27 +386,26 @@ export const saveTxSignedToFile = async (txSigned: TxSigned) => {
 
 //---------------------------------------------------------------
 
-export async function waitForTxConfirmation (lucid: Lucid, txhash: string, eUTxO_for_consuming: EUTxO[], callback: () => Promise<any>, isWorkingInABuffer?: boolean) {
+export async function waitForTxConfirmation (lucid: Lucid, txhash: string, eUTxOs_for_consuming: EUTxO[]) {
     var timeOut : any = undefined;
     async function updateIsConsuming(setIsConsuming: boolean) {
-        console.log("waitForTxConfirmation - updateIsConsuming: " + (setIsConsuming? "SET":"UNSET") + " - " + eUTxO_for_consuming.length);
+        console.log("waitForTxConfirmation - updateIsConsuming: " + (setIsConsuming? "SET":"UNSET") + " - " + eUTxOs_for_consuming.length);
         if (timeOut) clearTimeout(timeOut);
-        for (let i = 0; i < eUTxO_for_consuming.length; i++) {
-            const eUTxO_Updated = await apiUpdateEUTxODBIsConsuming(eUTxO_for_consuming[i], setIsConsuming);
-            eUTxO_for_consuming[i] = eUTxO_Updated;
+        for (let i = 0; i < eUTxOs_for_consuming.length; i++) {
+            const eUTxO_Updated = await apiUpdateEUTxODBIsConsuming(eUTxOs_for_consuming[i], setIsConsuming);
+            eUTxOs_for_consuming[i] = eUTxO_Updated;
         }
     }
     async function deleteIsConsuming() {
-        console.log("waitForTxConfirmation - deleteIsConsuming: " + eUTxO_for_consuming.length);
+        console.log("waitForTxConfirmation - deleteIsConsuming: " + eUTxOs_for_consuming.length);
         if (timeOut) clearTimeout(timeOut);
-        for (let i = 0; i < eUTxO_for_consuming.length; i++) {
-            await apiDeleteEUTxODB(eUTxO_for_consuming[i]);
+        for (let i = 0; i < eUTxOs_for_consuming.length; i++) {
+            await apiDeleteEUTxODB(eUTxOs_for_consuming[i]);
         }
     }
     try {
         //------------------
         await updateIsConsuming(true);
-        //await deleteIsConsuming();
         //------------------
         timeOut = setTimeout(updateIsConsuming, txConsumingTime, false);
         //------------------

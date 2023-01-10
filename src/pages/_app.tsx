@@ -12,7 +12,6 @@ import React from 'react'
 const StoreProviderOverride = StoreProvider as any;
 
 function MyApp({ Component, pageProps } : AppProps<{ session?: Session; }>) {
-
 	return(
 		<SessionProvider session={pageProps.session} refetchInterval={0}>
 			<StoreProviderOverride store={storeWallet} >

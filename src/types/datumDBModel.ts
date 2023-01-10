@@ -25,11 +25,6 @@ export async function getAllDatumsFromDB () : Promise <DatumDBInterface []> {
 	const DatumDBModel = getDatumDBModel()
 
 	const datumsDB = await DatumDBModel.find({})
-	// 	, undefined, undefined, function(error: any){
-	// 	if(error) {
-	// 		throw error
-	// 	}
-	// });
 
 	return datumsDB
 	
@@ -49,3 +44,15 @@ export async function getDatumFromDBByDatumHash (datumHash_ : string) : Promise 
 	return datumDB
 	
 }
+
+export async function deleteAllDatumsFromDB () : Promise<number> {
+
+	const DatumDBModel = getDatumDBModel()
+	
+	const del = await DatumDBModel.deleteMany(
+		{}
+	);
+
+	return del.deletedCount
+}
+

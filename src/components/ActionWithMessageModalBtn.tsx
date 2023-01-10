@@ -17,11 +17,19 @@ type ActionStatus = "loading" | "success" | "error" | "idle"
 
 export default function ActionWithMessageModalBtn(
 
-	{ actionName, enabled, show, actionIdx, description, action, poolInfo, eUTxOs_Selected, master_Selected, swHash, messageFromParent, hashFromParent, isWorking, callback, cancel, swPaddintTop }:
+	{ actionName, enabled, show, actionIdx, description, 
+		action, 
+		postAction,
+		setIsWorking, 
+		cancel, 
+		poolInfo, eUTxOs_Selected, master_Selected, swHash, messageFromParent, hashFromParent, isWorking, swPaddintTop }:
 		{
 			actionName: string, enabled: boolean, show: boolean, actionIdx: string,
 			description?: string,
 			action: (poolInfo?: StakingPoolDBInterface | undefined, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets | undefined, master_Selected?: Master | undefined) => Promise<any>,
+			postAction?: () => Promise<any>,
+			setIsWorking?: (isWorking: string) => Promise<any>,
+			cancel?: () => Promise<any>,
 			poolInfo?: StakingPoolDBInterface | undefined,
 			eUTxOs_Selected?: EUTxO[] | undefined,
 			master_Selected?: Master | undefined,
@@ -29,8 +37,6 @@ export default function ActionWithMessageModalBtn(
 			messageFromParent?: string | "",
 			hashFromParent?: string | "",
 			isWorking?: string | "",
-			callback?: (isWorking: string) => Promise<any>,
-			cancel?: () => Promise<any>,
 			swPaddintTop?: Boolean ,
 		} 
 ) {
@@ -85,7 +91,7 @@ export default function ActionWithMessageModalBtn(
 			console.log("ActionModalBtn - doAction: " + actionNameWithIdx + " - message: " + message + " - messageFromParent: " + messageFromParent)
 
 			//alert ("callback:" + isWorking)
-			callback ? await callback(actionNameWithIdx) : null
+			setIsWorking ? await setIsWorking(actionNameWithIdx) : null
 			// setIsWorking(actionNameWithIdx)
 
 			setStatus("loading")
@@ -116,6 +122,10 @@ export default function ActionWithMessageModalBtn(
 				setHash("")
 			}
 
+			if (postAction)	{
+				await postAction()
+			}
+
 		} catch (error: any) {
 			const error_explained = explainError(error)
 			console.error("ActionModalBtn - doAction - " + actionName + " - Error: " + error_explained)
@@ -125,6 +135,10 @@ export default function ActionWithMessageModalBtn(
 			setTitle(`${actionName} Error`)
 			setMessage(error_explained)
 			setHash("")
+
+			if (postAction)	{
+				await postAction()
+			}
 
 		}
 	}
@@ -260,7 +274,7 @@ export default function ActionWithMessageModalBtn(
 								</div>
 
 								<br></br>
-								<div>
+								<div style={{textAlign:"center", minWidth:320}}>
 									{cancel && status === "loading"?
 										<button className="btn btnStakingPool"
 												onClick={(e) => {
@@ -302,7 +316,7 @@ export default function ActionWithMessageModalBtn(
 								{message !== "" ? <div style={{ marginTop: 10 }}>{message}</div> : <></>}
 								<br></br>
 
-								<div>
+								<div style={{textAlign:"center", minWidth:320}}>
 									<button
 										className="btn btnStakingPool"
 										disabled={!enabled}

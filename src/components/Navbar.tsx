@@ -1,11 +1,7 @@
-import { useStoreState } from '../utils/walletProvider';
 import WalletModalBtn from './WalletModalBtn';
 //--------------------------------------
-export default function Navbar() {
-	//const WalletModalBtn = dynamic(() => import('./WalletModalBtn'), { ssr: false })
-	const walletStore = useStoreState(state => state.wallet)
-	const uTxOsAtWallet = useStoreState(state => state.uTxOsAtWallet)
-  
+export default function Navbar({swCreate}: {swCreate ?: boolean}) {
+
 	return (
 		<div className="header">
 			<div className="navbar-section navbar-start">
@@ -14,6 +10,12 @@ export default function Navbar() {
 					<li><a href="/withdraw">My Deposits</a></li>
 					<li><a href="/admin">Admin</a></li>
 					<li><a href="/create">Create</a></li>
+					{swCreate === true?
+						<li><a href="/settings">Settings</a></li>
+						:
+						<>	
+						</>
+					}
 					<li><a href="/faq">FAQ</a></li>
 				</ul>
 			</div>

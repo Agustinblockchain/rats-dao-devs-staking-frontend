@@ -165,14 +165,14 @@ export default function WalletModalBtn() {
 
 			const walletStore = { connected: false, name: '', walletApi: undefined, pkh: "", lucid: undefined, swEnviarPorBlockfrost: false, protocolParameters: undefined }
 
+			await signOut({ redirect: false })
+
 			setWalletStore(walletStore)
 
 			setSavedWalletConnected(false)
 			setSavedWalletName("")
 			setSavedSwEnviarPorBlockfrost(false)
 			setSavedIsWalletFromSeed(false)
-
-			await signOut({ redirect: false })
 
 			setWalletMessage("Wallet Disconnected!")
 
@@ -277,15 +277,11 @@ export default function WalletModalBtn() {
 	}, [savedSwEnviarPorBlockfrost])
 
 	useEffect(() => {
-
 		poolWalletsAndConnect()
-
 	}, [])
 
 	return (
 		<div>
-
-
 			<label htmlFor="wallet-modal-toggle" className="wallet__modal_button btn">
 
 				<svg width="25" viewBox="0 0 23 18" fill="none" className={walletStore.connected ? "wallet__indicator" : ""} xmlns="http://www.w3.org/2000/svg">

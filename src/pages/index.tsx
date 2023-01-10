@@ -2,26 +2,18 @@
 import type { InferGetStaticPropsType, InferGetServerSidePropsType, NextPage } from 'next'
 import Layout from '../components/Layout'
 import dynamic from 'next/dynamic'
-//--------------------------------------
-// import safeJsonStringify from 'safe-json-stringify';
-//--------------------------------------
-
 import { toJson } from '../utils/utils'
 import { connect } from '../utils/dbConnect'
-
-import path from 'path'
 import { useStoreState } from '../utils/walletProvider';
-
 import { StakingPoolDBInterface, getStakingPools } from '../types/stakePoolDBModel'
 import { createContext, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { stakingPoolDBParser } from '../stakePool/helpersStakePool'
-// import StakingPoolAdmin from '../components/StakingPoolAdmin';
+import { getSession } from 'next-auth/react'
 
 //--------------------------------------
 
-
-const Home : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> =  ({stakingPools} : InferGetServerSidePropsType<typeof getServerSideProps>) =>  {
+const Home : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> =  ({stakingPools, swCreate} : InferGetServerSidePropsType<typeof getServerSideProps>) =>  {
 	
 	//console.log("Home")   
 
@@ -33,13 +25,26 @@ const Home : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = 
 	
 	const [stakingPoolsParsed, setStakingPoolsParsed] = useState<StakingPoolDBInterface [] > ([]);
 
-	const refreshData = () => {
-		console.log ("Admin - refreshData - router.replace - walletStore.connected " + walletStore.connected + " - router.asPath: " + router.asPath);
-		router.replace(router.basePath );
+	const refreshData = (pkh : string | undefined) => {
+		console.log ("Home - refreshData - router.replace - pkh: "+ pkh + " - walletStore.connected " + walletStore.connected + " - router.asPath: " + router.asPath);
+		router.replace(router.basePath + "?pkh=" + pkh);
 		setIsRefreshing(true);
 	};
 
-	//------------------
+	useEffect(() => {
+		setIsRefreshing(false);
+	}, []);
+	
+	useEffect(() => {
+		// console.log("Home - useEffect - walletStore.connected: " + walletStore.connected)
+		if (walletStore.connected ) {
+			refreshData(walletStore.pkh)
+		}else{
+			refreshData(undefined)
+
+		}
+	}, [walletStore.connected])
+
 	useEffect(() => {
 		setIsRefreshing(false);
 		if (stakingPools){
@@ -50,11 +55,10 @@ const Home : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = 
 		}
 	}, [stakingPools]);
 	
-
 	const StakingPool = dynamic(() => import('../components/StakingPool'), { ssr: false, loading: () => <p>Loading...</p> })
 
 	return (
-		<Layout>
+		<Layout swCreate={swCreate}>
 
 			{stakingPoolsParsed.length > 0 ? 
 				stakingPoolsParsed.map(
@@ -68,12 +72,19 @@ const Home : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = 
 	)
 }
 
-export async function getServerSideProps() { 
+export async function getServerSideProps(context : any) { 
 	try {
 		
 		console.log ("Home getServerSideProps - init");
 
 		await connect();
+
+		const session = await getSession(context)
+		if (session) {
+			console.log ("Home getServerSideProps - init - session:", toJson (session));
+		}else{
+			//console.log ("Create getServerSideProps - init - session: undefined");
+		}
 
 		var rawDataStakingPools : StakingPoolDBInterface []
 		rawDataStakingPools = await getStakingPools(true)
@@ -83,6 +94,7 @@ export async function getServerSideProps() {
 		const dataStakingPools : StakingPoolDBInterface [] = JSON.parse(stringifiedDataStakingPools);
 		return {
 			props: {
+				swCreate: session && session.user ? session.user.swCreate : false ,
 				stakingPools: dataStakingPools
 			}
 		};
@@ -92,6 +104,7 @@ export async function getServerSideProps() {
 		const dataStakingPools : StakingPoolDBInterface [] = [];
 		return {
 			props: { 
+				swCreate: false,
 				stakingPools: dataStakingPools 
 			}
 		};

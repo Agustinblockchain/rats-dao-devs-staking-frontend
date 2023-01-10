@@ -24,8 +24,8 @@ export async function splitUTxOs(wallet: Wallet, poolInfo: StakingPoolDBInterfac
     //------------------
    var tx_Binded = splitUTxOsTx.bind(functionName, lucid!,protocolParameters, masterAddr, value_For_SplitUTxO);
     //------------------
-    var eUTxO_for_consuming: EUTxO[] = [];
+    var eUTxOs_for_consuming: EUTxO[] = [];
     //------------------
-    const [txHash, eUTxO_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxO_for_consuming);
-    return [txHash, eUTxO_for_consuming_];
+    const [txHash, eUTxOs_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxOs_for_consuming);
+    return [txHash, eUTxOs_for_consuming_];
 }

@@ -17,10 +17,20 @@ type ActionStatus = "loading" | "success" | "error" | "idle"
 
 export default function ActionWithInputModalBtn(
 
-	{ actionName, enabled, show, actionIdx, action, poolInfo, eUTxOs_Selected, master_Selected, showInput, inputUnitForLucid, inputUnitForShowing, inputMax, swHash, messageFromParent, hashFromParent, isWorking, callback, cancel, swPaddintTop }:
+	{ 
+		actionName, enabled, show, actionIdx, 
+		action, 
+		postAction,
+		setIsWorking, 
+		cancel,
+		poolInfo, eUTxOs_Selected, master_Selected, showInput, inputUnitForLucid, inputUnitForShowing, inputMax, swHash, messageFromParent, hashFromParent, isWorking, 
+		swPaddintTop }:
 		{
 			actionName: string, enabled: boolean, show: boolean, actionIdx: string,
 			action: (poolInfo?: StakingPoolDBInterface | undefined, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets | undefined, master_Selected?: Master | undefined) => Promise<any>,
+			postAction?: () => Promise<any>,
+			setIsWorking?: (isWorking: string) => Promise<any>,
+			cancel?: () => Promise<any>,
 			poolInfo?: StakingPoolDBInterface | undefined,
 			eUTxOs_Selected?: EUTxO[] | undefined,
 			master_Selected?: Master | undefined,
@@ -32,8 +42,6 @@ export default function ActionWithInputModalBtn(
 			messageFromParent?: string | "",
 			hashFromParent?: string | "",
 			isWorking?: string | "",
-			callback?: (isWorking: string) => Promise<any>,
-			cancel?: () => Promise<any>,
 			swPaddintTop?: Boolean 
 		} 
 ) {
@@ -95,7 +103,7 @@ export default function ActionWithInputModalBtn(
 			console.log("ActionModalBtn - doAction: " + actionNameWithIdx + " - message: " + message + " - messageFromParent: " + messageFromParent)
 
 			//alert ("callback:" + isWorking)
-			callback ? await callback(actionNameWithIdx) : null
+			setIsWorking ? await setIsWorking(actionNameWithIdx) : null
 			// setIsWorking(actionNameWithIdx)
 
 			setStatus("loading")
@@ -129,6 +137,10 @@ export default function ActionWithInputModalBtn(
 			setTokenAmount("0")
 			setTokenAmountFormatedValue("0")
 
+			if (postAction)	{
+				await postAction()
+			}
+
 		} catch (error: any) {
 			const error_explained = explainError(error)
 			console.error("ActionModalBtn - doAction - " + actionName + " - Error: " + error_explained)
@@ -142,6 +154,10 @@ export default function ActionWithInputModalBtn(
 			// no inicio los valores si hay error
 			setTokenAmount("0")
 			setTokenAmountFormatedValue("0")
+
+			if (postAction)	{
+				await postAction()
+			}
 		}
 	}
 
@@ -305,7 +321,7 @@ export default function ActionWithInputModalBtn(
 								</div>
 
 								<br></br>
-								<div>
+								<div style={{textAlign:"center", minWidth:320}}>
 									{cancel && status === "loading"?
 										<button className="btn btnStakingPool"
 												onClick={(e) => {
@@ -390,7 +406,7 @@ export default function ActionWithInputModalBtn(
 										/>
 										<br></br>
 
-										<div>
+										<div style={{textAlign:"center", minWidth:320}}>
 											<button
 												className="btn btnStakingPool"
 												disabled={!enabled}

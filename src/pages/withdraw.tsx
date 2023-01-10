@@ -1,11 +1,6 @@
-//--------------------------------------
 import type { InferGetStaticPropsType, InferGetServerSidePropsType, NextPage } from 'next'
 import Layout from '../components/Layout'
 import dynamic from 'next/dynamic'
-//--------------------------------------
-// import safeJsonStringify from 'safe-json-stringify';
-//--------------------------------------
-
 import { toJson } from '../utils/utils'
 import { connect } from '../utils/dbConnect'
 import { useStoreState } from '../utils/walletProvider';
@@ -16,7 +11,7 @@ import { getSession } from 'next-auth/react'
 import { stakingPoolDBParser } from '../stakePool/helpersStakePool'
 //--------------------------------------
 
-const Withdraw : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> =  ({stakingPools, pkh} : InferGetServerSidePropsType<typeof getServerSideProps>) =>  {
+const Withdraw : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> =  ({stakingPools, pkh, swCreate} : InferGetServerSidePropsType<typeof getServerSideProps>) =>  {
 	
 	const router = useRouter();
 
@@ -34,14 +29,8 @@ const Withdraw : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>
 
 	useEffect(() => {
 		setIsRefreshing(false);
-		if (stakingPools){
-			for (let i = 0; i < stakingPools.length; i++) {
-				stakingPools[i] = stakingPoolDBParser(stakingPools[i]);
-			}
-			setStakingPoolsParsed (stakingPools)
-		}
-	}, [stakingPools]);
-	
+	}, []);
+
 	useEffect(() => {
 		// console.log("Withdraw - useEffect - walletStore.connected: " + walletStore.connected)
 		if (walletStore.connected ) {
@@ -52,10 +41,19 @@ const Withdraw : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>
 		}
 	}, [walletStore.connected])
 
+	useEffect(() => {
+		if (stakingPools){
+			for (let i = 0; i < stakingPools.length; i++) {
+				stakingPools[i] = stakingPoolDBParser(stakingPools[i]);
+			}
+			setStakingPoolsParsed (stakingPools)
+		}
+	}, [stakingPools]);
+	
 	const StakingPool = dynamic(() => import('../components/StakingPool'), { ssr: false, loading: () => <p>Loading...</p> })
 
 	return (
-		<Layout>
+		<Layout swCreate={swCreate}>
 			{ !walletStore.connected?
 					<div>Connect you wallet to see your Deposits</div>
 				:
@@ -78,13 +76,14 @@ export async function getServerSideProps(context : any) {
 
 		await connect();
 
+		const session = await getSession(context)
+
 		var rawDataStakingPools : StakingPoolDBInterface []
 		if (context.query?.pkh != undefined) {
 			// console.log ("Withdraw1 getServerSideProps - init - context.query?.pkh:", context.query?.pkh);
 			if(context.query?.pkh != ""){
 				// console.log ("Withdraw2 getServerSideProps - init - context.query?.pkh:", context.query?.pkh);
-
-				const session = await getSession(context)
+				
 				if (session) {
 					console.log ("Withdraw getServerSideProps - init - session:", toJson (session));
 
@@ -114,6 +113,7 @@ export async function getServerSideProps(context : any) {
 		return {
 			props: {
 				stakingPools: dataStakingPools,
+				swCreate: session && session.user ? session.user.swCreate : false ,
 				pkh: context.query?.pkh !== undefined ? context.query?.pkh : ""
 			}
 		};
@@ -124,6 +124,7 @@ export async function getServerSideProps(context : any) {
 		return {
 			props: { 
 				stakingPools: dataStakingPools, 
+				swCreate: false,
 				pkh: context.query?.pkh !== undefined ? context.query?.pkh : ""
 			}
 		};

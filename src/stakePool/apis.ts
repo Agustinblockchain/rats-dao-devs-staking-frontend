@@ -112,6 +112,74 @@ export async function apiSaveDatumDB(datumHash: string, datum: string) {
     }
 }
 
+//------------------------------------------------------
+
+export async function apiGetDatumsCountDB() {
+    let data = undefined
+    const urlApi = process.env.NEXT_PUBLIC_REACT_SERVER_URL + "/api/getAllDatumsCount";
+    const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: toJson(data)
+    };
+    const response = await fetch(urlApi, requestOptions);
+    const json = await response.json();
+    const message = json.msg;
+
+    switch (response.status) {
+        case 500:
+            console.error("apiGetDatumsCountDB - /api/getAllDatumsCount - Error 500");
+            throw "Error 500";
+        case 400:
+            console.error("apiGetDatumsCountDB - /api/getAllDatumsCount - Error: " + message);
+            throw message;
+        default:
+            console.error("apiGetDatumsCountDB - /api/getAllDatumsCount: Error Unknown");
+            throw "Error Unknown";
+        case 201:
+            // console.log ("apiGetDatumsCountDB - /api/getAllDatumsCount: " + message)
+            return;
+        case 200:
+            //console.log ("apiGetDatumsCountDB - /api/getAllDatumsCount: " + message)
+            const count = json.count;
+            return count;
+    }
+}
+
+//------------------------------------------------------
+
+
+export async function apiDeleteAllDatumDB() {
+    let data = undefined
+    const urlApi = process.env.NEXT_PUBLIC_REACT_SERVER_URL + "/api/deleteAllDatums";
+    const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: toJson(data)
+    };
+    const response = await fetch(urlApi, requestOptions);
+    const json = await response.json();
+    const message = json.msg;
+
+    switch (response.status) {
+        case 500:
+            console.error("apiDeleteAllDatumDB - /api/deleteAllDatums - Error 500");
+            throw "Error 500";
+        case 400:
+            console.error("apiDeleteAllDatumDB - /api/deleteAllDatums - Error: " + message);
+            throw message;
+        default:
+            console.error("apiDeleteAllDatumDB - /api/deleteAllDatums: Error Unknown");
+            throw "Error Unknown";
+        case 201:
+            // console.log ("apiDeleteAllDatumDB - /api/deleteAllDatums: " + message)
+            return;
+        case 200:
+            //console.log ("apiDeleteAllDatumDB - /api/deleteAllDatums: " + message)
+            return;
+    }
+}
+
 //----------------------------------------------------------------------
 
 export async function apiCreateStakingPoolDB(data: any) {

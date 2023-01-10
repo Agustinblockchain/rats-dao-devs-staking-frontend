@@ -64,49 +64,36 @@ export default function CreateStakingPool( ) {
 
 	const getUTxOsFromWallet = async () => {
 		console.log("CreateStakingPool - getUTxOsFromWallet")
-
 		if (walletStore.connected) {
 			const lucid = walletStore.lucid
-
 			const uTxOs = await lucid!.wallet?.getUtxos();
-
 			setUTxOsAtWalllet(uTxOs)
-
 			console.log("CreateStakingPool - uTxOs.length: " + uTxOs.length)
-
 			return uTxOs
 		}
-
 		return []
 	}
 
 	const getPoolID_TxOutRef = async () => {
 		console.log("CreateStakingPool - getPoolID_TxOutRef")
-
 		if (walletStore.connected) {
 			const lucid = walletStore.lucid
-
 			setIsUTxOsFromWalletLoading(true)
-
 			const uTxOs = await getUTxOsFromWallet()
-
 			setIsUTxOsFromWalletLoading(false)
-
 			console.log("CreateStakingPool - uTxOsAtWalllet.length: " + uTxOs.length)
-
-			if (uTxOs.length > 0)
+			if (uTxOs.length > 0){
 				setPoolID_TxOutRef(uTxOs[0].txHash + "#" + uTxOs[0].outputIndex)
+			}
 		}
 	}
 
 	const getDataFromWallet = async () => {
 		console.log("CreateStakingPool - getDataFromWallet")
-
 		if (walletStore.connected) {
-
-			if (masters === "")
+			if (masters === ""){
 				setMasters(walletStore.pkh)
-
+			}
 			if (poolID_TxOutRef === "") {
 				await getPoolID_TxOutRef()
 			} else {
@@ -117,17 +104,14 @@ export default function CreateStakingPool( ) {
 
 	useEffect(() => {
 		// console.log("CreateStakingPool - useEffect - walletStore.connected: " + walletStore.connected)
-
-		if (walletStore.connected)
+		if (walletStore.connected){
 			getDataFromWallet()
-
+		}
 	}, [walletStore])
 
-	const handleCallback = async (isWorking: string) => {
+	const handleSetIsWorking = async (isWorking: string) => {
 		console.log("CreateStakingPool - handleCallback isWorking: ", isWorking)
 		setIsWorking(isWorking)
-		// setActionHash("")
-		// setIsWorkingStakingPool(isWorking)
 		return isWorking
 	}
 	
@@ -209,7 +193,7 @@ export default function CreateStakingPool( ) {
 	//--------------------------------------
 
 	const splitUTxOsAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
-		return await newTransaction ("CreateStakingPool - Split Wallet UTxOs", walletStore, poolInfo, splitUTxOs, false, setActionMessage, setActionHash, setIsWorking, getDataFromWallet, eUTxOs_Selected, assets) 
+		return await newTransaction ("CreateStakingPool - Split Wallet UTxOs", walletStore, poolInfo, splitUTxOs, false, setActionMessage, setActionHash, setIsWorking, eUTxOs_Selected, assets) 
 	}
 
 	//--------------------------------------
@@ -219,17 +203,13 @@ export default function CreateStakingPool( ) {
 
 			{stakingPoolCreated ?
 				<div >
-					{/* <StakingPoolAdmin key={stakingPoolCreated.name} stakingPoolInfo={stakingPoolCreated} /> 
-					<ActionWithInputModalBtn action={createNewPoolAction} actionIdx="1" enabled={true} actionName="Create New StakingPool Files" /> */}
+					
 					<br></br>
-
-					{/* <ActionWithInputModalBtn action={IniciarPoolAction} poolInfo={stakingPoolCreated}  actionIdx="1" enabled={true} actionName="Iniciar Pool" />	 */}
-
 					<button className="btn btnStakingPool"
 						onClick={(e) => {
-							e.preventDefault()
-							IniciarPoolAction(stakingPoolCreated)
-						}
+								e.preventDefault()
+								IniciarPoolAction(stakingPoolCreated)
+							}
 						}
 					>Prepare Pool
 					</button>
@@ -241,8 +221,6 @@ export default function CreateStakingPool( ) {
 
 					</div>
 					<br></br>
-
-					{/* <ActionWithInputModalBtn action={createNewPoolAction} actionIdx="1" enabled={true} actionName="Create New StakingPool Files" /> */}
 
 					<button className="btn btnStakingPool"
 						onClick={(e) => {
@@ -392,23 +370,28 @@ export default function CreateStakingPool( ) {
 
 										</form>
 
-										<ActionWithMessageModalBtn action={createPoolFilesAction} 
+										<ActionWithMessageModalBtn 
+											action={createPoolFilesAction} 
+											postAction={undefined}
 											description={'<li className="info">After creating the Pool you should prepare it immediately.</li>\
 											<li className="info">You should not make other transactions because the contract was created depending on a specific UTxO that should not be consumed before (UTxO to mint the PoolID NFT)</li>\
 											<li className="info">After finishing creating the Pool you will be redirected <a href="/admin" style={{ textDecoration: \'underline\' }}>here</a> to prepare it and have the first Funds added.</li>'}
 											swHash={false} 
 											enabled={walletStore.connected && uTxOsAtWalllet.length > 0} 
 											show={true}
-											actionIdx="1" actionName="Create Staking Pool" messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
+											actionIdx="1" actionName="Create Staking Pool" messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
+											setIsWorking={handleSetIsWorking} />
 										
-										<ActionWithMessageModalBtn action={splitUTxOsAction} 
+										<ActionWithMessageModalBtn 
+											action={splitUTxOsAction} 
+											postAction={getDataFromWallet}
 											description={'<li className="info">It is generally a good practice to split your wallet\'s UTXOs (unspent transaction outputs) into smaller amounts.</li> \
 											<li className="info">Having smaller UTXOs with only ADA amounts can make it easier to use them as collateral for smart contracts.</li>'}
 											swHash={true}
 											enabled={walletStore.connected}
 											show={true}
-											actionName="Split Wallet UTxOs" actionIdx="1" messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
-							
+											actionName="Split Wallet UTxOs" actionIdx="1" messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
+											setIsWorking={handleSetIsWorking} />
 									</div>
 								</div>
 							</div>

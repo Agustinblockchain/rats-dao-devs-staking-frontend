@@ -21,7 +21,8 @@ export default function FundsModalBtn(
 
 	{ actionName, enabled, show, actionIdx,
 		masterNewFundAction, masterNewFundsBatchAction, masterFundAndMergeAction, masterMergeFundsAction, masterSplitFundAction, masterDeleteFundsAction, masterDeleteFundsBatchAction,
-		poolInfo, statePoolData, messageFromParent, hashFromParent, isWorkingFromParent, callback , cancel, swPaddintTop}:
+		postAction,
+		poolInfo, statePoolData, messageFromParent, hashFromParent, isWorkingFromParent, setIsWorkingParent: setIsWorkingParent , cancel, swPaddintTop}:
 		{
 			actionName: string, enabled: boolean, show: boolean, actionIdx: string,
 			masterNewFundAction: (poolInfo?: StakingPoolDBInterface | undefined, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets | undefined) => Promise<any>,
@@ -31,11 +32,12 @@ export default function FundsModalBtn(
 			masterSplitFundAction: (poolInfo?: StakingPoolDBInterface | undefined, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets | undefined) => Promise<any>,
 			masterDeleteFundsAction: (poolInfo?: StakingPoolDBInterface | undefined, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets | undefined) => Promise<any>,
 			masterDeleteFundsBatchAction: (poolInfo?: StakingPoolDBInterface | undefined, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets | undefined) => Promise<any>,
+			postAction?: () => Promise<any>,
+			setIsWorkingParent?: (isWorking: string) => Promise<any>
+			cancel?: () => Promise<any>,
 			poolInfo: StakingPoolDBInterface, 
 			statePoolData: ReturnType<typeof useStatePoolData>,
 			messageFromParent?: string | "", hashFromParent?: string | "", isWorkingFromParent?: string | "", 
-			callback?: (isWorking: string) => Promise<any>
-			cancel?: () => Promise<any>,
 			swPaddintTop?: Boolean 
 		}) {
 
@@ -97,18 +99,22 @@ export default function FundsModalBtn(
 			setWalletHarvestAmount(ui_notConnected)
 			setMaxHarvestAmount(ui_notConnected)
 		}
-		setEUTxOs_FundDatum_Selected([])
 
 	}, [walletStore, isWalletDataLoaded])
 
 	useEffect(() => {
-		setEUTxOs_FundDatum_Selected([])
+		if (isPoolDataLoaded){
+			var eUTxOs_FundDatum_Selected_ : EUTxO [] = [] 
+			eUTxOs_FundDatum_Selected.forEach(eUTxO => {
+				if (eUTxOs_With_FundDatum.some(eUTxO_FundDatum => eUTxO_FundDatum.uTxO.txHash === eUTxO.uTxO.txHash && eUTxO_FundDatum.uTxO.outputIndex === eUTxO.uTxO.outputIndex)){
+					eUTxOs_FundDatum_Selected_.push(eUTxO)
+				}
+			})
+			setEUTxOs_FundDatum_Selected(eUTxOs_FundDatum_Selected_)
+		}
 	}, [isPoolDataLoaded])
 
 	useEffect(() => {
-		// if (isWorking === actionNameWithIdx){
-		// 	console.log ("FundsModalBtn - useEffect1 - " +(isWorking === actionNameWithIdx ? "YO":"OTRO")+ " - messageFromParent: " + messageFromParent + " - message: " + message)
-		// }
 		if (messageFromParent && messageFromParent !== "" && isWorkingFromParent === actionNameWithIdx) {
 			setActionMessage(messageFromParent)
 		} else {
@@ -117,9 +123,6 @@ export default function FundsModalBtn(
 	}, [messageFromParent])
 
 	useEffect(() => {
-		// if (isWorking === actionNameWithIdx){
-		// 	console.log ("FundsModalBtn - useEffect2 - " +(isWorking === actionNameWithIdx ? "YO":"OTRO")+ " - hashFromParent: " + hashFromParent + " - hash: " + hash)
-		// }
 		if (hashFromParent && hashFromParent !== "" && isWorkingFromParent === actionNameWithIdx) {
 			setActionHash(hashFromParent)
 		} else {
@@ -129,22 +132,18 @@ export default function FundsModalBtn(
 	}, [hashFromParent])
 
 	useEffect(() => {
-
 		if (isWorkingFromParent === "") {
 			setIsWorking("")
 		}
-
 	}, [isWorkingFromParent])
 
-	const handleCallback = async (isWorking: string) => {
+	const handleSetIsWorking = async (isWorking: string) => {
 		console.log("FundsModalBtn - " + poolInfo.name + " - handleCallback isWorking: ", isWorking)
-		// alert ("FundsModalBtn - callbak in:" + isWorking)
 		setIsWorking(isWorking)
-		callback ? await callback(actionNameWithIdx) : null
+		setIsWorkingParent ? await setIsWorkingParent(actionNameWithIdx) : null
 		return isWorking
-		// setActionHash("")
-		// setIsWorkingStakingPool(isWorking)
 	}
+
 	const handleCancel = async () => {
 		console.log("FundsModalBtn - " + poolInfo.name + " - handleCancel")
 		cancel ? await cancel() : null
@@ -243,56 +242,83 @@ export default function FundsModalBtn(
 						</div>
 							
 						<div className="modal__content_btns">
-							<ActionWithInputModalBtn action={masterNewFundAction} swHash={true} poolInfo={poolInfo} 
+							<ActionWithInputModalBtn 
+								action={masterNewFundAction} 
+								postAction={postAction} 
+								swHash={true} poolInfo={poolInfo} 
 								showInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={maxHarvestAmount} 
 								enabled={walletStore.connected && isPoolDataLoaded && swPreparado === true} 
 								show={isPoolDataLoaded === true && swPreparado === true && swTerminated === false}
-								actionName="New Fund" actionIdx={poolInfo.name + "-FundsModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
+								actionName="New Fund" actionIdx={poolInfo.name + "-FundsModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
+								setIsWorking={handleSetIsWorking} 
+							/>
 							
 							<ActionWithInputModalBtn 
-									action={masterNewFundsBatchAction} swHash={false} poolInfo={poolInfo} 
-									showInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={maxHarvestAmount} 
-									enabled={walletStore.connected && isPoolDataLoaded && swPreparado === true} 
-									show={isPoolDataLoaded === true && swPreparado === true && swTerminated === false}
-									actionName="New Funds Batch" actionIdx={poolInfo.name + "-FundsModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-									callback={handleCallback} 
-									cancel={handleCancel}
-									/>
+								action={masterNewFundsBatchAction}  
+								postAction={postAction} 
+								swHash={false} poolInfo={poolInfo} 
+								showInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={maxHarvestAmount} 
+								enabled={walletStore.connected && isPoolDataLoaded && swPreparado === true} 
+								show={isPoolDataLoaded === true && swPreparado === true && swTerminated === false}
+								actionName="New Funds Batch" actionIdx={poolInfo.name + "-FundsModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
+								setIsWorking={handleSetIsWorking} 
+								cancel={handleCancel}
+							/>
 							
-							<ActionWithInputModalBtn action={masterFundAndMergeAction} swHash={true} eUTxOs_Selected={eUTxOs_FundDatum_Selected} poolInfo={poolInfo} 
+							<ActionWithInputModalBtn 
+								action={masterFundAndMergeAction}  
+								postAction={postAction} 
+								swHash={true} eUTxOs_Selected={eUTxOs_FundDatum_Selected} poolInfo={poolInfo} 
 								showInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={maxHarvestAmount} 
 								enabled={walletStore.connected && isPoolDataLoaded && swFunded === true && swTerminated === false && eUTxOs_FundDatum_Selected.length > 0} 
 								show={isPoolDataLoaded === true && swPreparado === true && swFunded === true && swTerminated === false}
-								actionName="Fund And Merge" actionIdx={poolInfo.name + "-FundsModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
+								actionName="Fund And Merge" actionIdx={poolInfo.name + "-FundsModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
+								setIsWorking={handleSetIsWorking} 
+							/>
 							
-							<ActionWithInputModalBtn action={masterMergeFundsAction} swHash={true} eUTxOs_Selected={eUTxOs_FundDatum_Selected} poolInfo={poolInfo} 
+							<ActionWithInputModalBtn 
+								action={masterMergeFundsAction}  
+								postAction={postAction} 
+								swHash={true} eUTxOs_Selected={eUTxOs_FundDatum_Selected} poolInfo={poolInfo} 
 								enabled={walletStore.connected && isPoolDataLoaded && swFunded === true && eUTxOs_FundDatum_Selected.length > 1} 
 								show={isPoolDataLoaded === true && swPreparado === true && swFunded === true}
-								actionName="Merge Funds" actionIdx={poolInfo.name + "-FundsModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
+								actionName="Merge Funds" actionIdx={poolInfo.name + "-FundsModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
+								setIsWorking={handleSetIsWorking} 
+							/>
 							
-							<ActionWithInputModalBtn action={masterSplitFundAction} swHash={true} eUTxOs_Selected={eUTxOs_FundDatum_Selected} poolInfo={poolInfo} 
+							<ActionWithInputModalBtn 
+								action={masterSplitFundAction}  
+								postAction={postAction} 
+								swHash={true} eUTxOs_Selected={eUTxOs_FundDatum_Selected} poolInfo={poolInfo} 
 								showInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={maxHarvestAmount} 
 								enabled={walletStore.connected && isPoolDataLoaded && swFunded === true && eUTxOs_FundDatum_Selected.length == 1} 
 								show={isPoolDataLoaded === true && swPreparado === true && swFunded === true && swTerminated === false}
-								actionName="Split Fund" actionIdx={poolInfo.name + "-FundsModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
+								actionName="Split Fund" actionIdx={poolInfo.name + "-FundsModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
+								setIsWorking={handleSetIsWorking} 
+							/>
 						
-							<ActionWithInputModalBtn action={masterDeleteFundsAction} swHash={true} eUTxOs_Selected={eUTxOs_FundDatum_Selected} poolInfo={poolInfo} 
+							<ActionWithInputModalBtn 
+								action={masterDeleteFundsAction} 
+								postAction={postAction} 
+								swHash={true} eUTxOs_Selected={eUTxOs_FundDatum_Selected} poolInfo={poolInfo} 
 								enabled={walletStore.connected && isPoolDataLoaded && swFunded === true && eUTxOs_FundDatum_Selected.length > 0 && swTerminated === true} 
 								show={isPoolDataLoaded === true && swPreparado === true && swFunded === true && swTerminated === true}
-								actionName="Delete Funds" actionIdx={poolInfo.name + "-FundsModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} callback={handleCallback} />
+								actionName="Delete Funds" actionIdx={poolInfo.name + "-FundsModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
+								setIsWorking={handleSetIsWorking} 
+							/>
 							
 							<ActionWithInputModalBtn 
-								action={masterDeleteFundsBatchAction} swHash={false} poolInfo={poolInfo} 
+								action={masterDeleteFundsBatchAction}  
+								postAction={postAction} 
+								swHash={false} poolInfo={poolInfo} 
 								enabled={walletStore.connected && isPoolDataLoaded && swFunded === true && swTerminated === true} actionName="Delete Funds Batch" actionIdx={poolInfo.name + "-FundsModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
 								show={isPoolDataLoaded === true && swPreparado === true && swFunded === true && swTerminated === true}
-								callback={handleCallback} 
+								setIsWorking={handleSetIsWorking} 
 								cancel={handleCancel}
-								/>							
+							/>							
 						</div>
 
 						<div className="modal__content_btns">
-							
-							
 							
 							<div className="modal__action_separator">
 								<br></br>

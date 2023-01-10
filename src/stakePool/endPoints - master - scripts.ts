@@ -64,10 +64,10 @@ export async function masterAddScriptsMasterFund(wallet: Wallet, poolInfo: Staki
         script_TxID_Master_Fund_Datum
     );
     //------------------
-    var eUTxO_for_consuming: EUTxO[] = [];
+    var eUTxOs_for_consuming: EUTxO[] = [];
     //------------------
-    const [txHash, eUTxO_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxO_for_consuming);
-    return [txHash, eUTxO_for_consuming_];
+    const [txHash, eUTxOs_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxOs_for_consuming);
+    return [txHash, eUTxOs_for_consuming_];
 }
 //--------------------------------------
 
@@ -117,10 +117,10 @@ export async function masterAddScriptsMasterFundAndMerge(wallet: Wallet, poolInf
         script_TxID_Master_FundAndMerge_Datum
     );
     //------------------
-    var eUTxO_for_consuming: EUTxO[] = [];
+    var eUTxOs_for_consuming: EUTxO[] = [];
     //------------------
-    const [txHash, eUTxO_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxO_for_consuming);
-    return [txHash, eUTxO_for_consuming_];
+    const [txHash, eUTxOs_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxOs_for_consuming);
+    return [txHash, eUTxOs_for_consuming_];
 }
 //--------------------------------------
 
@@ -170,10 +170,10 @@ export async function masterAddScriptsMasterSplitFund(wallet: Wallet, poolInfo: 
         script_TxID_Master_SplitFund_Datum
     );
     //------------------
-    var eUTxO_for_consuming: EUTxO[] = [];
+    var eUTxOs_for_consuming: EUTxO[] = [];
     //------------------
-    const [txHash, eUTxO_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxO_for_consuming);
-    return [txHash, eUTxO_for_consuming_];
+    const [txHash, eUTxOs_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxOs_for_consuming);
+    return [txHash, eUTxOs_for_consuming_];
 }
 //--------------------------------------
 
@@ -223,10 +223,10 @@ export async function masterAddScriptsMasterClosePool(wallet: Wallet, poolInfo: 
         script_TxID_Master_ClosePool_Datum
     );
     //------------------
-    var eUTxO_for_consuming: EUTxO[] = [];
+    var eUTxOs_for_consuming: EUTxO[] = [];
     //------------------
-    const [txHash, eUTxO_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxO_for_consuming);
-    return [txHash, eUTxO_for_consuming_];
+    const [txHash, eUTxOs_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxOs_for_consuming);
+    return [txHash, eUTxOs_for_consuming_];
 }
 
 //--------------------------------------
@@ -277,10 +277,10 @@ export async function masterAddScriptsMasterTerminatePool(wallet: Wallet, poolIn
         script_TxID_Master_TerminatePool_Datum
     );
     //------------------
-    var eUTxO_for_consuming: EUTxO[] = [];
+    var eUTxOs_for_consuming: EUTxO[] = [];
     //------------------
-    const [txHash, eUTxO_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxO_for_consuming);
-    return [txHash, eUTxO_for_consuming_];
+    const [txHash, eUTxOs_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxOs_for_consuming);
+    return [txHash, eUTxOs_for_consuming_];
 }
 
 //--------------------------------------
@@ -331,10 +331,10 @@ export async function masterAddScriptsMasterDeleteFund(wallet: Wallet, poolInfo:
         script_TxID_Master_DeleteFund_Datum
     );
     //------------------
-    var eUTxO_for_consuming: EUTxO[] = [];
+    var eUTxOs_for_consuming: EUTxO[] = [];
     //------------------
-    const [txHash, eUTxO_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxO_for_consuming);
-    return [txHash, eUTxO_for_consuming_];
+    const [txHash, eUTxOs_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxOs_for_consuming);
+    return [txHash, eUTxOs_for_consuming_];
 }
 
 //--------------------------------------
@@ -385,10 +385,10 @@ export async function masterAddScriptsMasterDeleteScripts(wallet: Wallet, poolIn
         script_TxID_Master_DeleteScripts_Datum
     );
     //------------------
-    var eUTxO_for_consuming: EUTxO[] = [];
+    var eUTxOs_for_consuming: EUTxO[] = [];
     //------------------
-    const [txHash, eUTxO_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxO_for_consuming);
-    return [txHash, eUTxO_for_consuming_];
+    const [txHash, eUTxOs_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxOs_for_consuming);
+    return [txHash, eUTxOs_for_consuming_];
 }
 
 //--------------------------------------
@@ -439,10 +439,10 @@ export async function masterAddScriptsMasterSendBackFund(wallet: Wallet, poolInf
         script_TxID_Master_SendBackFund_Datum
     );
     //------------------
-    var eUTxO_for_consuming: EUTxO[] = [];
+    var eUTxOs_for_consuming: EUTxO[] = [];
     //------------------
-    const [txHash, eUTxO_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxO_for_consuming);
-    return [txHash, eUTxO_for_consuming_];
+    const [txHash, eUTxOs_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxOs_for_consuming);
+    return [txHash, eUTxOs_for_consuming_];
 }
 
 //--------------------------------------
@@ -493,10 +493,10 @@ export async function masterAddScriptsMasterSendBackDeposit(wallet: Wallet, pool
         script_TxID_Master_SendBackDeposit_Datum
     );
     //------------------
-    var eUTxO_for_consuming: EUTxO[] = [];
+    var eUTxOs_for_consuming: EUTxO[] = [];
     //------------------
-    const [txHash, eUTxO_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxO_for_consuming);
-    return [txHash, eUTxO_for_consuming_];
+    const [txHash, eUTxOs_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxOs_for_consuming);
+    return [txHash, eUTxOs_for_consuming_];
 }
 
 //--------------------------------------
@@ -554,10 +554,10 @@ export async function masterAddScriptsUserDeposit(wallet: Wallet, poolInfo: Stak
         script_TxID_User_Deposit_Datum
     );
     //------------------
-    var eUTxO_for_consuming: EUTxO[] = [];
+    var eUTxOs_for_consuming: EUTxO[] = [];
     //------------------
-    const [txHash, eUTxO_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxO_for_consuming);
-    return [txHash, eUTxO_for_consuming_];
+    const [txHash, eUTxOs_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxOs_for_consuming);
+    return [txHash, eUTxOs_for_consuming_];
 }
 
 //--------------------------------------
@@ -608,10 +608,10 @@ export async function masterAddScriptsUserHarvest(wallet: Wallet, poolInfo: Stak
         script_TxID_User_Harvest_Datum
     );
     //------------------
-    var eUTxO_for_consuming: EUTxO[] = [];
+    var eUTxOs_for_consuming: EUTxO[] = [];
     //------------------
-    const [txHash, eUTxO_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxO_for_consuming);
-    return [txHash, eUTxO_for_consuming_];
+    const [txHash, eUTxOs_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxOs_for_consuming);
+    return [txHash, eUTxOs_for_consuming_];
 }
 
 //--------------------------------------
@@ -662,10 +662,10 @@ export async function masterAddScriptsUserWithdraw(wallet: Wallet, poolInfo: Sta
         script_TxID_User_Withdraw_Datum
     );
     //------------------
-    var eUTxO_for_consuming: EUTxO[] = [];
+    var eUTxOs_for_consuming: EUTxO[] = [];
     //------------------
-    const [txHash, eUTxO_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxO_for_consuming);
-    return [txHash, eUTxO_for_consuming_];
+    const [txHash, eUTxOs_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxOs_for_consuming);
+    return [txHash, eUTxOs_for_consuming_];
 }
 
 //--------------------------------------
@@ -845,14 +845,14 @@ export async function masterDeleteScriptsMaster (wallet: Wallet, poolInfo: Staki
         redeemer_For_Burn_ScriptIDs, value_For_Burn_ScriptIDs
     );
     //------------------
-    var eUTxO_for_consuming: EUTxO[] = [];
-    eUTxO_for_consuming.push(eUTxO_With_PoolDatum);
+    var eUTxOs_for_consuming: EUTxO[] = [];
+    eUTxOs_for_consuming.push(eUTxO_With_PoolDatum);
     for (let i = 0; i < eUTxOsWithScripts.length; i++) {
-        eUTxO_for_consuming.push(eUTxOsWithScripts[i]);
+        eUTxOs_for_consuming.push(eUTxOsWithScripts[i]);
     }
     //------------------
-    const [txHash, eUTxO_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxO_for_consuming);
-    return [txHash, eUTxO_for_consuming_];
+    const [txHash, eUTxOs_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxOs_for_consuming);
+    return [txHash, eUTxOs_for_consuming_];
 }
 
 //--------------------------------------
@@ -1012,12 +1012,12 @@ export async function masterDeleteScriptsUser(wallet: Wallet, poolInfo: StakingP
         redeemer_For_Burn_ScriptIDs, value_For_Burn_ScriptIDs
     );
     //------------------
-    var eUTxO_for_consuming: EUTxO[] = [];
-    eUTxO_for_consuming.push(eUTxO_With_PoolDatum);
+    var eUTxOs_for_consuming: EUTxO[] = [];
+    eUTxOs_for_consuming.push(eUTxO_With_PoolDatum);
     for (let i = 0; i < eUTxOsWithScripts.length; i++) {
-        eUTxO_for_consuming.push(eUTxOsWithScripts[i]);
+        eUTxOs_for_consuming.push(eUTxOsWithScripts[i]);
     }
     //------------------
-    const [txHash, eUTxO_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxO_for_consuming);
-    return [txHash, eUTxO_for_consuming_];
+    const [txHash, eUTxOs_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxOs_for_consuming);
+    return [txHash, eUTxOs_for_consuming_];
 }

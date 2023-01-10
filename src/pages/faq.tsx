@@ -1,5 +1,13 @@
-import type { NextPage } from 'next'
+import type { InferGetStaticPropsType, InferGetServerSidePropsType, NextPage } from 'next'
 import Layout from '../components/Layout'
+import dynamic from 'next/dynamic'
+import { toJson } from '../utils/utils'
+import { connect } from '../utils/dbConnect'
+import { useStoreState } from '../utils/walletProvider';
+import { StakingPoolDBInterface, getStakingPools } from '../types/stakePoolDBModel'
+import { createContext, useEffect, useState } from 'react'
+import { useRouter } from 'next/router'
+import { getSession } from 'next-auth/react'
 
 const getFaqText = (n : number) => {
 	switch(n) {
@@ -35,10 +43,38 @@ const getFaqTitle = (n : number) => {
 	}
 }
 
+const Faq : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = ({swCreate, pkh} : InferGetServerSidePropsType<typeof getServerSideProps>) =>  {
+	const router = useRouter();
 
-const Faq: NextPage = () => {
+	const [isRefreshing, setIsRefreshing] = useState(true);
+
+	const walletStore = useStoreState(state => state.wallet)
+
+	const [stakingPoolsParsed, setStakingPoolsParsed] = useState<StakingPoolDBInterface [] > ([]);
+
+	const refreshData = (pkh : string | undefined) => {
+		console.log ("FAQ - refreshData - router.replace - pkh: "+ pkh + " - walletStore.connected " + walletStore.connected + " - router.asPath: " + router.asPath);
+		router.replace(router.basePath + "?pkh=" + pkh);
+		setIsRefreshing(true);
+	};
+
+	useEffect(() => {
+		setIsRefreshing(false);
+	}, []);
+	
+	useEffect(() => {
+		// console.log("FAQ - useEffect - walletStore.connected: " + walletStore.connected)
+		if (walletStore.connected ) {
+			refreshData(walletStore.pkh)
+		}else{
+			refreshData(undefined)
+
+		}
+	}, [walletStore.connected])
+	
+	
 	return (
-		<Layout>
+		<Layout swCreate={swCreate}>
 
 			<div className="section__text">
 				<div className="faq">
@@ -55,6 +91,34 @@ const Faq: NextPage = () => {
 
 		</Layout>
 	)
+}
+
+export async function getServerSideProps(context : any) { 
+	try {
+		console.log ("FAQ getServerSideProps -------------------------------");
+		console.log ("FAQ getServerSideProps - init - context.query?.pkh:", context.query?.pkh);
+
+		const session = await getSession(context)
+		if (session) {
+			console.log ("FAQ getServerSideProps - init - session:", toJson (session));
+		}else{
+			//console.log ("FAQ getServerSideProps - init - session: undefined");
+		}
+		return {
+			props: {
+				swCreate: session && session.user ? session.user.swCreate : false ,
+				pkh: context.query?.pkh !== undefined ? context.query?.pkh : ""
+			}
+		};
+	} catch (error) {
+		console.error (error)
+		return {
+			props: { 
+				swCreate: false,
+				pkh: context.query?.pkh !== undefined ? context.query?.pkh : ""
+			 }
+		};
+	}
 }
 
 export default Faq

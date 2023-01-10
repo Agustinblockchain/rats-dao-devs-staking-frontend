@@ -18,12 +18,20 @@ type ActionStatus = "loading" | "success" | "error" | "idle"
 
 export default function ActionWithSelectInputModalBtn(
 
-	{ actionName, enabled, show, actionIdx, action, poolInfo, eUTxOs_Selected, master_Selected, 
+	{ actionName, enabled, show, actionIdx, 
+		action, 
+		postAction,
+		setIsWorking, 
+		cancel, 
+		poolInfo, eUTxOs_Selected, master_Selected, 
 		walletAssets,
-		inputUnitForLucid, inputUnitForShowing, inputMax, swHash, messageFromParent, hashFromParent, isWorking, callback, cancel, swPaddintTop }:
+		inputUnitForLucid, inputUnitForShowing, inputMax, swHash, messageFromParent, hashFromParent, isWorking, swPaddintTop }:
 		{
 			actionName: string, enabled: boolean, show: boolean, actionIdx: string,
 			action: (poolInfo?: StakingPoolDBInterface | undefined, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets | undefined, master_Selected?: Master | undefined) => Promise<any>,
+			postAction?: () => Promise<any>,
+			setIsWorking?: (isWorking: string) => Promise<any>,
+			cancel?: () => Promise<any>,
 			poolInfo?: StakingPoolDBInterface | undefined,
 			eUTxOs_Selected?: EUTxO[] | undefined,
 			master_Selected?: Master | undefined,
@@ -35,8 +43,6 @@ export default function ActionWithSelectInputModalBtn(
 			messageFromParent?: string | "",
 			hashFromParent?: string | "",
 			isWorking?: string | "",
-			callback?: (isWorking: string) => Promise<any>,
-			cancel?: () => Promise<any>,
 			swPaddintTop?: Boolean 
 		} 
 ) {
@@ -128,7 +134,7 @@ export default function ActionWithSelectInputModalBtn(
 			console.log("ActionModalBtn - doAction: " + actionNameWithIdx + " - message: " + message + " - messageFromParent: " + messageFromParent)
 
 			//alert ("callback:" + isWorking)
-			callback ? await callback(actionNameWithIdx) : null
+			setIsWorking ? await setIsWorking(actionNameWithIdx) : null
 			// setIsWorking(actionNameWithIdx)
 
 			setStatus("loading")
@@ -168,6 +174,10 @@ export default function ActionWithSelectInputModalBtn(
 			setWalletAssetsSelect(walletAssetsSelect_)
 			setTokenAmount(0)
 
+			if (postAction)	{
+				await postAction()
+			}
+
 		} catch (error: any) {
 			const error_explained = explainError(error)
 			console.error("ActionModalBtn - doAction - " + actionName + " - Error: " + error_explained)
@@ -187,6 +197,10 @@ export default function ActionWithSelectInputModalBtn(
 			}
 			setWalletAssetsSelect(walletAssetsSelect_)
 			setTokenAmount(0)
+
+			if (postAction)	{
+				await postAction()
+			}
 		}
 	}
 
@@ -345,7 +359,7 @@ export default function ActionWithSelectInputModalBtn(
 								</div>
 
 								<br></br>
-								<div>
+								<div style={{textAlign:"center", minWidth:320}}>
 									{cancel && status === "loading"?
 										<button className="btn btnStakingPool"
 												onClick={(e) => {
@@ -422,7 +436,7 @@ export default function ActionWithSelectInputModalBtn(
 								</div>
 								
 								<br></br>
-								<div>
+								<div style={{textAlign:"center", minWidth:320}}>
 									<button
 										className="btn btnStakingPool"
 										disabled={!enabled}
