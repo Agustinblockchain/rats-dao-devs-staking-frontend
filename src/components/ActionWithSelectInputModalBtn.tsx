@@ -398,7 +398,7 @@ export default function ActionWithSelectInputModalBtn(
 											<>
 												{walletAssetsList.map((asset, idx) => 
 													<div key={idx} >
-														<b>{asset.tokenName}</b> (There are {asset.value.toLocaleString()} in your wallet)
+														<b>{asset.tokenName}</b> (There are {formatAmount(Number(asset.value), inputDecimals, undefined)} in your wallet)
 														<br></br>
 														<NumericFormat key={"NumericFormat" + idx} style={{ width: 300, fontSize: 12 }} type="text" value={ walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.amountFormatedValue}
 															onValueChange={(values) => {
@@ -426,7 +426,7 @@ export default function ActionWithSelectInputModalBtn(
 									}
 
 									<div style={{textAlign: "center", width: "100%", paddingTop: 10}}>
-										<b>Total:</b> {tokenAmount.toLocaleString()} {inputUnitForShowing} (Max: <b>{userMaxTokens.toLocaleString()}</b>)
+										<b>Total:</b> {formatAmount(tokenAmount, inputDecimals, inputUnitForShowing)} (Max: <b>{formatAmount(Number(userMaxTokens), inputDecimals, undefined)}</b>)
 									</div>
 								</>
 								:
