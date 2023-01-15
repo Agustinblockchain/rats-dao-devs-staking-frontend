@@ -18,30 +18,52 @@ type ActionStatus = "loading" | "success" | "error" | "idle"
 export default function ActionWithInputModalBtn(
 
 	{ 
-		actionName, enabled, show, actionIdx, 
+		actionName, 
+		actionIdx, 
+		description,
 		action, 
-		postAction,
+		postActionSuccess,
+		postActionError,
 		setIsWorking, 
 		cancel,
-		poolInfo, eUTxOs_Selected, master_Selected, showInput, inputUnitForLucid, inputUnitForShowing, inputMax, swHash, messageFromParent, hashFromParent, isWorking, 
+		poolInfo, 
+		swEnabledBtnOpenModal, 
+		swEnabledBtnAction, 
+		swShow, 
+		eUTxOs_Selected, 
+		master_Selected, 
+		swShowInput, 
+		inputUnitForLucid, 
+		inputUnitForShowing, 
+		inputMax, 
+		swHash, 
+		messageFromParent, 
+		hashFromParent, 
+		isWorking, 
 		swPaddintTop }:
 		{
-			actionName: string, enabled: boolean, show: boolean, actionIdx: string,
-			action: (poolInfo?: StakingPoolDBInterface | undefined, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets | undefined, master_Selected?: Master | undefined) => Promise<any>,
-			postAction?: () => Promise<any>,
+			actionName: string, 
+			actionIdx: string,
+			description?: string,
+			action: (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[], assets?: Assets, master_Selected?: Master) => Promise<any>,
+			postActionSuccess?: () => Promise<any>,
+			postActionError?: () => Promise<any>,
 			setIsWorking?: (isWorking: string) => Promise<any>,
 			cancel?: () => Promise<any>,
 			poolInfo?: StakingPoolDBInterface | undefined,
-			eUTxOs_Selected?: EUTxO[] | undefined,
-			master_Selected?: Master | undefined,
-			showInput?: boolean | false,
-			inputUnitForLucid?: string | "lovelace",
-			inputUnitForShowing?: string | "ADA (lovelace)",
-			inputMax?: 0 | string,
+			swEnabledBtnOpenModal: boolean, 
+			swEnabledBtnAction: boolean, 
+			swShow: boolean, 
+			eUTxOs_Selected?: EUTxO[],
+			master_Selected?: Master,
+			swShowInput?: boolean,
+			inputUnitForLucid?: string,
+			inputUnitForShowing?: string,
+			inputMax?: string | 0,
 			swHash?: Boolean,
-			messageFromParent?: string | "",
-			hashFromParent?: string | "",
-			isWorking?: string | "",
+			messageFromParent?: string,
+			hashFromParent?: string,
+			isWorking?: string,
 			swPaddintTop?: Boolean 
 		} 
 ) {
@@ -59,15 +81,12 @@ export default function ActionWithInputModalBtn(
 	const [userMaxTokens, setUserMaxTokens] = useState<string>("0");
 
 	useEffect(() => {
-		if (showInput && inputMax) {
+		if (swShowInput && inputMax) {
 			setUserMaxTokens(inputMax!.toString())
 		}
 	}, [inputMax])
 
 	useEffect(() => {
-		// if (isWorking === actionNameWithIdx){
-		// 	console.log ("ActionModalBtn - useEffect1 - " +(isWorking === actionNameWithIdx ? "YO":"OTRO")+ " - messageFromParent: " + messageFromParent + " - message: " + message)
-		// }
 		if (messageFromParent && messageFromParent !== "" && isWorking === actionNameWithIdx) {
 			setMessage(messageFromParent)
 		} else {
@@ -76,9 +95,6 @@ export default function ActionWithInputModalBtn(
 	}, [messageFromParent])
 
 	useEffect(() => {
-		// if (isWorking === actionNameWithIdx){
-		// 	console.log ("ActionModalBtn - useEffect2 - " +(isWorking === actionNameWithIdx ? "YO":"OTRO")+ " - hashFromParent: " + hashFromParent + " - hash: " + hash)
-		// }
 		if (hashFromParent && hashFromParent !== "" && hashFromParent !== undefined && isWorking === actionNameWithIdx) {
 			setHash(hashFromParent)
 		} else {
@@ -89,41 +105,27 @@ export default function ActionWithInputModalBtn(
 
 	const doAction = async (
 				action: (
-					poolInfo?: StakingPoolDBInterface | undefined, 
-					eUTxOs_Selected?: EUTxO[] | undefined, 
-					assets?: Assets | undefined, 
-					master_Selected?: Master | undefined
+					poolInfo?: StakingPoolDBInterface, 
+					eUTxOs_Selected?: EUTxO[], 
+					assets?: Assets, 
+					master_Selected?: Master
 				) => Promise<any>, 
-				poolInfo?: StakingPoolDBInterface | undefined, 
-				eUTxOs_Selected?: EUTxO[] | undefined, 
-				assets?: Assets | undefined,
-				master_Selected?: Master | undefined
+				poolInfo?: StakingPoolDBInterface, 
+				eUTxOs_Selected?: EUTxO[], 
+				assets?: Assets,
+				master_Selected?: Master
 			) => {
 		try {
 			console.log("ActionModalBtn - doAction: " + actionNameWithIdx + " - message: " + message + " - messageFromParent: " + messageFromParent)
-
-			//alert ("callback:" + isWorking)
 			setIsWorking ? await setIsWorking(actionNameWithIdx) : null
-			// setIsWorking(actionNameWithIdx)
-
 			setStatus("loading")
-
 			setTitle(actionName)
-			// setTitle("Procesando "+ actionName + " ...")
 			setMessage(messageFromParent !== undefined ? messageFromParent : "")
 			setHash("")
-
 			var res
-
-			//alert ("action:" + isWorking)
 			res = await action(poolInfo, eUTxOs_Selected, assets, master_Selected)
-
-			//alert ("post action:" + isWorking)
-
 			pushSucessNotification(actionName, res, swHash);
-
 			setStatus('success')
-
 			if (swHash) {
 				setTitle(`${actionName} Ok!`)
 				setMessage("")
@@ -133,30 +135,23 @@ export default function ActionWithInputModalBtn(
 				setMessage(res)
 				setHash("")
 			}
-
 			setTokenAmount("0")
 			setTokenAmountFormatedValue("0")
-
-			if (postAction)	{
-				await postAction()
+			if (postActionSuccess)	{
+				await postActionSuccess()
 			}
-
 		} catch (error: any) {
 			const error_explained = explainError(error)
 			console.error("ActionModalBtn - doAction - " + actionName + " - Error: " + error_explained)
-
 			pushWarningNotification(actionName, error_explained);
 			setStatus('error')
 			setTitle(`${actionName} Error`)
 			setMessage(error_explained)
 			setHash("")
-
-			// no inicio los valores si hay error
 			setTokenAmount("0")
 			setTokenAmountFormatedValue("0")
-
-			if (postAction)	{
-				await postAction()
+			if (postActionError)	{
+				await postActionError()
 			}
 		}
 	}
@@ -173,16 +168,10 @@ export default function ActionWithInputModalBtn(
 			isWorking: {isWorking}
 			</>  */}
 
-
-			<>{showInput ?
-				""// <>{(userMaxTokens ===0? userMaxTokens : "Max " + inputUnit + " to use in Wallet: " + userMaxTokens ) || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</>
-				: null}</>
-
-			
-			{show ?
+			{swShow ?
 				<>
 					{swPaddintTop === true || swPaddintTop === undefined? <div><br></br></div> : null}
-					{enabled && (isWorking === actionNameWithIdx || isWorking === "") ?
+					{(swEnabledBtnOpenModal && isWorking === "") || (isWorking === actionNameWithIdx) ?
 						<label htmlFor={`${actionNameWithIdx}-modal-toggle`} className="btn btnStakingPool">
 							{actionName}
 							<>
@@ -202,8 +191,6 @@ export default function ActionWithInputModalBtn(
 								{actionName}
 								{(status === 'loading') ?
 									<>
-										
-
 										<LoadingSpinner size={25} border={5} />
 									</>
 									:
@@ -222,43 +209,32 @@ export default function ActionWithInputModalBtn(
 				type="checkbox"
 				id={`${actionNameWithIdx}-modal-toggle`}
 				onChange={(e) => {
-					//console.log ("modal change: " + e.target.checked)
 					if (e.target.checked) {
-						//si es checked es porque esta abierto el modal
-						if (showInput) {
+						if (status === 'success' || status === 'error') {
+							setStatus('idle')
+							setTitle(actionName)
+							setMessage("")
+							setHash("")
+						}
+						if (swShowInput) {
 							//el modal se abre y muestra inputs
-
 							//no quiero cambiar el status a menos que este en success o error, que ya paso el proceso anterior.
 							//en ese caso lo pongo en idle de nuevo
 							//si estaba loading, no hago nada, porque el proceso sigue corriendo
-
-							if (status === 'success' || status === 'error') {
-								setStatus('idle')
-
-								setTitle(actionName)
-								setMessage("")
-								setHash("")
-							}
-
 						} else {
 							//el modal se abre y ejecuta la accion directamente solo si esta en idle, success, o error, o sea, que no este en loading
-
 							if (status === "idle" || status === "success" || status === "error") {
-								if (poolInfo) {
-									// if (eUTxOs_Selected !== undefined) {
-									doAction(action, poolInfo, eUTxOs_Selected, undefined, master_Selected)
-									// } else {
-									// 	doAction(action, poolInfo)
-									// }
-								} else {
-									doAction(action)
-								}
+								// if (poolInfo) {
+								// 	// if (eUTxOs_Selected !== undefined) {
+								// 	doAction(action, poolInfo, eUTxOs_Selected, undefined, master_Selected)
+								// 	// } else {
+								// 	// 	doAction(action, poolInfo)
+								// 	// }
+								// } else {
+								// 	doAction(action)
+								// }
 							}
 						}
-					} else {
-						//si no es checked es porque esta cerrado el modal
-						//setTitle("cuando ?")
-						//setStatus("idle")
 					}
 				}}
 			/>
@@ -266,25 +242,23 @@ export default function ActionWithInputModalBtn(
 				<label htmlFor={`${actionNameWithIdx}-modal-toggle`} className="modal__shade"></label>
 				<div className="modal__content">
 					<div className="modal__content_item">
+
 						{/* <>
-							Title: {title} <br></br>
-							status: {status} <br></br>
-							Parent msg: {messageFromParent} <br></br>
-							msg: {message} <br></br>
-							Parent hash: {hashFromParent} <br></br>
-							hash: {hash} <br></br>
-							isWorking: {isWorking} <br></br>
-							swHash: {swHash? "1" : "0"} <br></br>
-							</> */}
+						Title: {title} <br></br>
+						status: {status} <br></br>
+						Parent msg: {messageFromParent} <br></br>
+						msg: {message} <br></br>
+						Parent hash: {hashFromParent} <br></br>
+						hash: {hash} <br></br>
+						isWorking: {isWorking} <br></br>
+						swHash: {swHash? "1" : "0"} <br></br>
+						</> */}
 
 						{status !== "idle" ?
 							//no esta idle, esta procesando o termino de procesar ok o con error
 							<>
-
 								<h3>{title}</h3>
-
 								{message !== "" ? <div style={{ marginTop: 10 }}>{message}</div> : <></>}
-
 								{(swHash && hash !== "" && hash !== undefined) ?
 									<>
 										<div>
@@ -305,30 +279,24 @@ export default function ActionWithInputModalBtn(
 									:
 									<></>
 								}
-
 								<div>
-
 									{status === "loading" ?
 										<>
 											<br></br>
 											<LoadingSpinner size={25} border={5} />
-
 										</>
 										:
 										<></>
 									}
-
 								</div>
+							
 
-								<br></br>
-								<div style={{textAlign:"center", minWidth:320}}>
+								<div style={{textAlign:"center", minWidth:320, paddingTop: 25}}>
 									{cancel && status === "loading"?
 										<button className="btn btnStakingPool"
 												onClick={(e) => {
 													e.preventDefault()
-
 													cancel()
-
 												}
 											}
 										>
@@ -337,115 +305,97 @@ export default function ActionWithInputModalBtn(
 									:
 										<></>
 									}	
+
 									<button className="btn btnStakingPool"
 											onClick={(e) => {
 												e.preventDefault()
-
 												const checkbox: any = document.getElementById(`${actionNameWithIdx}-modal-toggle`)
-
 												checkbox!.checked = false
-
 											}
 										}
 									>
 										Close
 									</button>
 								</div>
-									
 							</>
 							:
 							//esta idle, no esta procesando nada
 							<>
-								{showInput ?
-
+								{swShowInput ?
 									//el modal muestra input
 									<>
 										<h3>{title}</h3>
-
+										{description !== "" ?<div style={{ paddingTop: 10 }}><div dangerouslySetInnerHTML={{ __html: description! }} /></div> : <></>}
+										{message !== "" ?<div style={{ paddingTop: 10 }}><b>{message}</b></div> : <></>}
 										<h4 style={{ paddingTop: 10 }}>How many {inputUnitForShowing}?</h4>
-
-										{message !== "" ? <div style={{ marginTop: 10 }}>{message}</div> : <></>}
 										<br></br>
 										<NumericFormat style={{ width: 300, fontSize: 12 }} type="text" value={tokenAmountFormatedValue}
-
-											// onChange={e => setTokenAmount(Number(e.target.value).toString()) } 
-
-											// isAllowed={(values) => {
-											// 	const {floatValue} = values;
-											// 	return floatValue! >= 1 &&  floatValue! <= Number(userMaxTokens);
-											//   }}
-
 											onValueChange={(values) => {
-												const { formattedValue, value } = values;
-												// formattedValue = $2,223
-												// floatValue = 2223
-												setTokenAmount(value)
+													const { formattedValue, value } = values;
+													// formattedValue = $2,223
+													// floatValue = 2223
+													setTokenAmount(value)
+												}
 											}
-											}
-
 											thousandsGroupStyle="thousand" thousandSeparator="," decimalSeparator="." decimalScale={0}
 										/>
 
-										{/* <input  style={{ width: 300, fontSize: 12 }}
+										{/* 
+										//antigua barra:
+										<input  style={{ width: 300, fontSize: 12 }}
 										type="number"
 										placeholder="Amount"
 										max={userMaxTokens?.toString()}
 										value={tokenAmount}
 										onChange={e => setTokenAmount(Number(e.target.value).toString())}
-									/> */}
+										/> */}
 										<br></br>
-										<input style={{ width: 300, fontSize: 12 }} type="range" min={0} max={userMaxTokens?.toString()} value={tokenAmount}
 
+										<input style={{ width: 300, fontSize: 12 }} type="range" min={0} max={userMaxTokens?.toString()} value={tokenAmount}
 											onChange={e => {
 												setTokenAmount(Number(e.target.value).toString())
 												setTokenAmountFormatedValue(Number(e.target.value).toString())
-
 											}}
-
-
 										/>
-										<br></br>
 
-										<div style={{textAlign:"center", minWidth:320}}>
+										<div style={{textAlign:"center", minWidth:320, paddingTop: 25}}>
 											<button
 												className="btn btnStakingPool"
-												disabled={!enabled}
+												disabled={!swEnabledBtnAction}
 												onClick={(e) => {
-													e.preventDefault()
-
-													if (tokenAmount === "" || BigInt(tokenAmount) <= 0n) {
-
-														setMessage("Please enter a valid amount greater than zero")
-
-													} else if (BigInt(tokenAmount) > BigInt(userMaxTokens)) {
-														const input_CS = inputUnitForLucid!.slice(0, 56)
-														const input_TN = inputUnitForLucid!.slice(56)
-														const input_AC_isAda = (input_CS === 'lovelace')
-														const input_AC_isWithoutTokenName = !input_AC_isAda && input_TN == ""	
-														if (input_AC_isWithoutTokenName && BigInt(userMaxTokens) == BigInt(maxTokensWithDifferentNames)){
-															setMessage("You have exceeded the maximum amount per transaction for this token which is: " + maxTokensWithDifferentNames )
-														}else{
-															setMessage("You have exceeded the maximum avalaible tokens which is: " + userMaxTokens )
-														}
-													} else {
-
-
-														setMessage("")
-
-														let assets: Assets = { [inputUnitForLucid!]: BigInt(tokenAmount) }
-
-														if (eUTxOs_Selected !== undefined) {
-															doAction(action, poolInfo, eUTxOs_Selected, assets)
+														e.preventDefault()
+														if (tokenAmount === "" || BigInt(tokenAmount) <= 0n) {
+															setMessage("Please enter a valid amount greater than zero")
+														} else if (BigInt(tokenAmount) > BigInt(userMaxTokens)) {
+															const input_CS = inputUnitForLucid!.slice(0, 56)
+															const input_TN = inputUnitForLucid!.slice(56)
+															const input_AC_isAda = (input_CS === 'lovelace')
+															const input_AC_isWithoutTokenName = !input_AC_isAda && input_TN == ""	
+															if (input_AC_isWithoutTokenName && BigInt(userMaxTokens) == BigInt(maxTokensWithDifferentNames)){
+																setMessage("You have exceeded the maximum amount per transaction for this token which is: " + maxTokensWithDifferentNames )
+															}else{
+																setMessage("You have exceeded the maximum avalaible tokens which is: " + userMaxTokens )
+															}
 														} else {
-															doAction(action, poolInfo, undefined, assets)
+															setMessage("")
+															let assets: Assets = { [inputUnitForLucid!]: BigInt(tokenAmount) }
+															doAction(action, poolInfo, eUTxOs_Selected, assets, master_Selected)
 														}
 													}
 												}
-												}
 											>
-												{actionName}
+												{!swEnabledBtnAction?
+													<>
+														<span className="wallet__button_disabled">
+														Accept
+														</span>
+													</>
+													:
+													<>
+														Accept
+													</>
+												}
 											</button>
-												
 											<button className="btn btnStakingPool"
 													onClick={(e) => {
 														e.preventDefault()
@@ -460,20 +410,49 @@ export default function ActionWithInputModalBtn(
 										</div>
 									</>
 									:
-									//Si esta en idle pero no hay input... cosa que no deberia pasar, si no hay input es por que esta procesando de una y debeeria estar en waiting
-									//por las dudas pongo el close button
+									//Si esta en idle pero no hay input... 
 									<>
-										<button className="btn btnStakingPool"
-											onClick={(e) => {
-													e.preventDefault()
-													const checkbox: any = document.getElementById(`${actionNameWithIdx}-modal-toggle`)
-													checkbox!.checked = false
-
+										<h3>{title}</h3>
+										{description !== "" ?<div style={{ paddingTop: 10 }}><div dangerouslySetInnerHTML={{ __html: description! }} /></div> : <></>}
+										{message !== "" ?<div style={{ paddingTop: 10 }}><b>{message}</b></div> : <></>}
+										
+										<div style={{textAlign:"center", minWidth:320, paddingTop: 25}}>
+											<button
+												className="btn btnStakingPool"
+												disabled={!swEnabledBtnAction}
+												onClick={(e) => {
+														e.preventDefault()
+														setMessage("")
+														let assets: Assets = { [inputUnitForLucid!]: BigInt(tokenAmount) }
+														doAction(action, poolInfo, eUTxOs_Selected, assets, master_Selected)
+													}
 												}
-											}
-										>
-											Close X
-										</button>
+											>
+												{!swEnabledBtnAction?
+													<>
+														<span className="wallet__button_disabled">
+														Accept
+														</span>
+													</>
+													:
+													<>
+														Accept
+													</>
+												}
+											</button>
+												
+											<button className="btn btnStakingPool"
+												onClick={(e) => {
+														e.preventDefault()
+														setMessage("")
+														const checkbox: any = document.getElementById(`${actionNameWithIdx}-modal-toggle`)
+														checkbox!.checked = false
+													}
+												}
+											>
+												Cancel
+											</button>
+										</div>
 									</>
 
 								}

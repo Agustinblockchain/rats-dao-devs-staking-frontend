@@ -14,7 +14,7 @@ export async function masterAddScriptsMasterFundTx(
     script_TxID_Master_Fund_Datum: ScriptDatum
 ) {
     //------------------
-    const functionName = "Master Add Scripts Tx - Master Fund";
+    const functionName = "EndPoint Tx Master - Add Script - Master Fund";
     //------------------
     const scriptAddress: Address = poolInfo.scriptAddress;
     //------------------
@@ -59,7 +59,7 @@ export async function masterAddScriptsMasterFundAndMergeTx(
     script_TxID_Master_FundAndMerge_Datum: ScriptDatum
 ) {
     //------------------
-    const functionName = "Master Add Scripts Tx - Master Fund And Merge";
+    const functionName = "EndPoint Tx Master - Add Script - Master Fund And Merge";
     //------------------
     const scriptAddress: Address = poolInfo.scriptAddress;
     //------------------
@@ -105,7 +105,7 @@ export async function masterAddScriptsMasterSplitFundTx(
 
 ) {
     //------------------
-    const functionName = "Master Add Scripts Tx - Master Split Fund";
+    const functionName = "EndPoint Tx Master - Add Script - Master Split Fund";
     //------------------
     const scriptAddress: Address = poolInfo.scriptAddress;
     //------------------
@@ -150,7 +150,7 @@ export async function masterAddScriptsMasterClosePoolTx(
     script_TxID_Master_ClosePool_Datum: ScriptDatum
 ) {
     //------------------
-    const functionName = "Master Add Scripts Tx - Master Close Pool";
+    const functionName = "EndPoint Tx Master - Add Script - Master Close Pool";
     //------------------
     const scriptAddress: Address = poolInfo.scriptAddress;
     //------------------
@@ -195,7 +195,7 @@ export async function masterAddScriptsMasterTerminatePoolTx(
     script_TxID_Master_TerminatePool_Datum: ScriptDatum
 ) {
     //------------------
-    const functionName = "Master Add Scripts Tx - Master Terminate Pool";
+    const functionName = "EndPoint Tx Master - Add Script - Master Terminate Pool";
     //------------------
     const scriptAddress: Address = poolInfo.scriptAddress;
     //------------------
@@ -240,7 +240,7 @@ export async function masterAddScriptsMasterDeleteFundTx(
     script_TxID_Master_DeleteFund_Datum: ScriptDatum
 ) {
     //------------------
-    const functionName = "Master Add Scripts Tx - Master Delete Fund";
+    const functionName = "EndPoint Tx Master - Add Script - Master Delete Fund";
     //------------------
     const scriptAddress: Address = poolInfo.scriptAddress;
     //------------------
@@ -285,7 +285,7 @@ export async function masterAddScriptsMasterDeleteScriptsTx(
     script_TxID_Master_DeleteScriptsDatum: ScriptDatum
 ) {
     //------------------
-    const functionName = "Master Add Scripts Tx - Master Delete Scripts";
+    const functionName = "EndPoint Tx Master - Add Script - Master Delete Scripts";
     //------------------
     const scriptAddress: Address = poolInfo.scriptAddress;
     //------------------
@@ -330,7 +330,7 @@ export async function masterAddScriptsMasterSendBackFundTx(
     script_TxID_Master_SendBackFund_Datum: ScriptDatum
 ) {
     //------------------
-    const functionName = "Master Add Scripts Tx - Master Send Back Fund";
+    const functionName = "EndPoint Tx Master - Add Script - Master Send Back Fund";
     //------------------
     const scriptAddress: Address = poolInfo.scriptAddress;
     //------------------
@@ -375,7 +375,7 @@ export async function masterAddScriptsMasterSendBackDepositTx(
     script_TxID_Master_SendBackDeposit_Datum: ScriptDatum
 ) {
     //------------------
-    const functionName = "Master Add Scripts Tx - Master Send Back Deposit";
+    const functionName = "EndPoint Tx Master - Add Script - Master Send Back Deposit";
     //------------------
     const scriptAddress: Address = poolInfo.scriptAddress;
     //------------------
@@ -420,7 +420,7 @@ export async function masterAddScriptsUserDepositTx(
     script_TxID_User_Deposit_Datum: ScriptDatum
 ) {
     //------------------
-    const functionName = "Master Add Scripts Tx - User DepositTx";
+    const functionName = "EndPoint Tx Master - Add Script - User Deposit";
     //------------------
     const scriptAddress: Address = poolInfo.scriptAddress;
     //------------------
@@ -465,7 +465,7 @@ export async function masterAddScriptsUserHarvestTx(
     script_TxID_User_Harvest_Datum: ScriptDatum
 ) {
     //------------------
-    const functionName = "Master Add Scripts Tx - User Harvest";
+    const functionName = "EndPoint Tx Master - Add Script - User Harvest";
     //------------------
     const scriptAddress: Address = poolInfo.scriptAddress;
     //------------------
@@ -510,7 +510,7 @@ export async function masterAddScriptsUserWithdrawTx(
     script_TxID_User_Withdraw_Datum: ScriptDatum
 ) {
     //------------------
-    const functionName = "Master Add Scripts Tx - User Withdraw";
+    const functionName = "EndPoint Tx Master - Add Script - User Withdraw";
     //------------------
     const scriptAddress: Address = poolInfo.scriptAddress;
     //------------------
@@ -561,7 +561,7 @@ export async function masterDeleteScriptsTx(
     redeemer_For_Burn_ScriptIDs: Redeemer_Burn_TxID, value_For_Burn_ScriptIDs: Assets
 ) {
     //------------------
-    const functionName = "Master Delete Scripts Tx";
+    const functionName = "EndPoint Tx Master - Delete Scripts";
     //------------------
     console.log(functionName + " - init");
     //------------------

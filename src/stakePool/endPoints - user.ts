@@ -27,7 +27,7 @@ import {
 
 export async function userDeposit(wallet: Wallet, poolInfo: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) : Promise <[string, EUTxO []]>  {
     //------------------
-    const functionName = "Deposit";
+    const functionName = "EndPoint User - Deposit";
     //------------------
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
@@ -66,14 +66,6 @@ export async function userDeposit(wallet: Wallet, poolInfo: StakingPoolDBInterfa
     const txID_user_Deposit_For_User_TN_Hex = strToHex(txID_User_Deposit_For_User_TN);
     const txID_User_Deposit_AC: AssetClass = { currencySymbol: txID_User_Deposit_CS, tokenName: txID_user_Deposit_For_User_TN_Hex };
     console.log(functionName + " - txID_User_Deposit_AC: " + toJson(txID_User_Deposit_AC));
-    //------------------
-    // const uTxOsAtScript = await lucid!.utxosAt(scriptAddress)
-    // console.log(functionName + " - uTxOs At Script - length: " + uTxOsAtScript.length)
-    // if (uTxOsAtScript.length == 0) {
-    //     throw "UTxO list at Script is empty";
-    // }
-    // //------------------
-    // const eUTxOs_With_Datum = await getExtendedUTxOsWith_Datum(lucid!, uTxOsAtScript)
     //------------------
     const eUTxOs_With_Datum = await apiGetEUTxOsDBByStakingPool(poolInfo.name!);
     //------------------
@@ -159,7 +151,7 @@ export async function userDeposit(wallet: Wallet, poolInfo: StakingPoolDBInterfa
 
 export async function userHarvest(wallet: Wallet, poolInfo: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) : Promise <[string, EUTxO []]>{
     //------------------
-    const functionName = "Harvest ";
+    const functionName = "EndPoint User - Harvest";
     //------------------
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
@@ -176,14 +168,6 @@ export async function userHarvest(wallet: Wallet, poolInfo: StakingPoolDBInterfa
     if (uTxOsAtWallet.length == 0) {
         throw "There are no UTxOs available in your wallet";
     }
-    //------------------
-    // const uTxOsAtScript = await lucid!.utxosAt(scriptAddress)
-    // console.log(functionName + " - uTxOs At Script - length: " + uTxOsAtScript.length)
-    // if (uTxOsAtScript.length == 0) {
-    //     throw "UTxO list at Script is empty";
-    // }
-    // //------------------
-    // const eUTxOs_With_Datum = await getExtendedUTxOsWith_Datum(lucid!, uTxOsAtScript)
     //------------------
     const eUTxOs_With_Datum = await apiGetEUTxOsDBByStakingPool(poolInfo.name!);
     //------------------
@@ -377,7 +361,7 @@ export async function userHarvest(wallet: Wallet, poolInfo: StakingPoolDBInterfa
 
 export async function userWithdraw(wallet: Wallet, poolInfo: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) : Promise <[string, EUTxO []]> {
     //------------------
-    const functionName = "User Withdraw";
+    const functionName = "EndPoint User - Withdraw";
     //------------------
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
@@ -426,14 +410,6 @@ export async function userWithdraw(wallet: Wallet, poolInfo: StakingPoolDBInterf
     if (uTxOsAtWallet.length == 0) {
         throw "There are no UTxOs available in your wallet";
     }
-    //------------------
-    // const uTxOsAtScript = await lucid!.utxosAt(scriptAddress)
-    // console.log(functionName + " - uTxOs At Script - length: " + uTxOsAtScript.length)
-    // if (uTxOsAtScript.length == 0) {
-    //     throw "UTxO list at Script is empty";
-    // }
-    // //------------------
-    // const eUTxOs_With_Datum = await getExtendedUTxOsWith_Datum(lucid!, uTxOsAtScript)
     //------------------
     const eUTxOs_With_Datum = await apiGetEUTxOsDBByStakingPool(poolInfo.name!);
     //------------------

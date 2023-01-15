@@ -16,12 +16,27 @@ type ActionState = "loading" | "success" | "error" | "idle"
 
 export default function EUTxOsModalBtn(
 
-	{ actionName, enabled, show, actionIdx, poolInfo, statePoolData, messageFromParent, hashFromParent, isWorkingFromParent, setIsWorkingParent, swPaddintTop }:
+	{ 	actionName, 
+		actionIdx, 
+		poolInfo_, 
+		statePoolData, 
+		swEnabledBtnOpenModal, 
+		swShow, 
+		messageFromParent, 
+		hashFromParent, 
+		isWorkingFromParent, 
+		setIsWorkingParent, 
+		swPaddintTop }:
 		{
-			actionName: string, enabled: boolean, show: boolean, actionIdx: string,
-			poolInfo: StakingPoolDBInterface, 
+			actionName: string, 
+			actionIdx: string,
+			poolInfo_: StakingPoolDBInterface, 
 			statePoolData: ReturnType<typeof useStatePoolData>,
-			messageFromParent?: string | "", hashFromParent?: string | "", isWorkingFromParent?: string | "", 
+			swEnabledBtnOpenModal: boolean, 
+			swShow: boolean, 
+			messageFromParent?: string, 
+			hashFromParent?: string, 
+			isWorkingFromParent?: string, 
 			setIsWorkingParent?: (isWorking: string) => Promise<any>,
 			swPaddintTop?: Boolean 
 		}) {
@@ -38,7 +53,7 @@ export default function EUTxOsModalBtn(
 
 	const now = new Date().getTime()
 
-	const { isPoolDataLoaded, isPoolDataLoading, refreshEUTxOs, eUTxOs_With_Datum } = statePoolData
+	const { poolInfo, isPoolDataLoaded, isPoolDataLoading, refreshEUTxOs, eUTxOs_With_Datum } = statePoolData
 
 	const [eUTxOs_With_Datum_DB, setEUTxOs_With_Datum_DB] = useState<EUTxO[]>([])
 
@@ -96,10 +111,11 @@ export default function EUTxOsModalBtn(
 	return (
 		<div className="modal__action_separator">
 			
-			{show?
+			{swShow?
 				<>
 					{swPaddintTop === true || swPaddintTop === undefined? <div><br></br></div> : null}
-					{enabled && (isWorkingFromParent === actionNameWithIdx || isWorkingFromParent === "") ?
+					{/* {swEnabledBtnOpenModal && (isWorkingFromParent === actionNameWithIdx || isWorkingFromParent === "") ? */}
+					{(swEnabledBtnOpenModal && isWorkingFromParent === "") || (isWorkingFromParent === actionNameWithIdx) ?
 						<label htmlFor={`${actionNameWithIdx}-modal-toggle`} className="btn btnStakingPool">
 							{actionName}
 							<>

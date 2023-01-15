@@ -320,6 +320,8 @@ async function crearStakingPool(nombrePool: any, staking_UI: any, harvest_UI: an
 
 		imageSrc: "https://ratsdao.io/img/ratsdao.png",
 
+		swDeleted: false,
+
 		swShowOnSite: true,
 
 		swShowOnHome: true,
@@ -336,7 +338,9 @@ async function crearStakingPool(nombrePool: any, staking_UI: any, harvest_UI: an
 		swTerminated: false,
 
 		swZeroFunds: true,
-		swPoolReadyForDelete: true,
+
+		swPoolReadyForDeleteMainScripts: true,
+		swPoolReadyForDeletePoolInDB: true,
 
 		beginAt: new Date(pabPoolParams.beginAt),
 		deadline: new Date(pabPoolParams.deadline),

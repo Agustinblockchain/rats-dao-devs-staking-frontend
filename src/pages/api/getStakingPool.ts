@@ -52,7 +52,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
             const stakingPool_Parsed = stakingPoolDBParser(stakingPool);
             const stakingPoolDB_Updated = await serverSide_updateStakingPool (stakingPool_Parsed)
 
-            console.log("/api/getStakingPool - StakingPool found: " + stakingPoolDB_Updated.name);
+            //console.log("/api/getStakingPool - StakingPool found: " + stakingPoolDB_Updated.name);
             res.status(200).json({ msg: "StakingPool found", stakingPool : stakingPoolDB_Updated})
             return
         }

@@ -7,7 +7,7 @@ import { apiDeleteAllDatumDB, apiGetDatumsCountDB } from '../stakePool/apis';
 import { EUTxO } from '../types';
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
 import { toJson } from '../utils/utils';
-import ActionWithMessageModalBtn from './ActionWithMessageModalBtn';
+import ActionWithInputModalBtn from './ActionWithInputModalBtn';
 //--------------------------------------
 
 export default function SettingsForm() {
@@ -95,15 +95,18 @@ export default function SettingsForm() {
 							There are: {datumsCount} datums in Database
 						</div>
 
-						<ActionWithMessageModalBtn 
+						<ActionWithInputModalBtn 
 							action={masterShowPoolAction} 
-							postAction={undefined}
-							description={'<li className="info">Delete All Datums in Database</li>'}
+							postActionSuccess={undefined}
+							postActionError={undefined}
+							setIsWorking={handleSetIsWorking} 
+							actionName="Delete Datums" actionIdx="1" messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
+							description={'<p className="info">Delete All Datums in Database</p>'}
+							swEnabledBtnOpenModal={true} 
+							swEnabledBtnAction={true} 
+							swShow={true}
 							swHash={false} 
-							enabled={true} 
-							show={true}
-							actionIdx="1" actionName="Delete Datums" messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-							setIsWorking={handleSetIsWorking} />
+						/>
 				</div>
 			</div>
 		</div>

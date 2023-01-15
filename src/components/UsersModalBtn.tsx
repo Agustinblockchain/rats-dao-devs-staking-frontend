@@ -1,6 +1,7 @@
 //--------------------------------------
 import { Assets } from "lucid-cardano";
 import { useEffect, useState } from "react";
+import Skeleton from "react-loading-skeleton";
 import { getRewardsToPay_In_EUTxO_With_UserDatum } from "../stakePool/helpersStakePool";
 import useStatePoolData from '../stakePool/useStatePoolData';
 import { EUTxO } from "../types";
@@ -8,7 +9,6 @@ import { maxTokensWithDifferentNames } from "../types/constantes";
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
 import { useStoreState } from '../utils/walletProvider';
 import ActionWithInputModalBtn from './ActionWithInputModalBtn';
-import ActionWithMessageModalBtn from './ActionWithMessageModalBtn';
 import LoadingSpinner from "./LoadingSpinner";
 //--------------------------------------
 
@@ -18,27 +18,40 @@ type ActionState = "loading" | "success" | "error" | "idle"
 
 export default function UsersModalBtn(
 
-	{ actionName, enabled, show, actionIdx, 
+	{ 	actionName, 
+		actionIdx, 
 		masterSendBackDepositAction, 
-		postAction,
-		poolInfo, statePoolData, messageFromParent, hashFromParent, isWorkingFromParent, setIsWorkingParent, swPaddintTop }:
+		postActionSuccess,
+		postActionError,
+		poolInfo_, 
+		statePoolData, 
+		swEnabledBtnOpenModal, 
+		swShow, 
+		messageFromParent, 
+		hashFromParent, 
+		isWorkingFromParent, 
+		setIsWorkingParent, 
+		swPaddintTop }:
 		{
-			actionName: string, enabled: boolean, show: boolean, actionIdx: string,
-			masterSendBackDepositAction: (poolInfo?: StakingPoolDBInterface | undefined, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets | undefined) => Promise<any>,
-			postAction?: () => Promise<any>,
+			actionName: string, 
+			actionIdx: string,
+			masterSendBackDepositAction: (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[], assets?: Assets) => Promise<any>,
+			postActionSuccess?: () => Promise<any>,
+			postActionError?: () => Promise<any>,
 			setIsWorkingParent?: (isWorking: string) => Promise<any>,
-			poolInfo: StakingPoolDBInterface, 
+			poolInfo_: StakingPoolDBInterface, 
 			statePoolData: ReturnType<typeof useStatePoolData>,
-			messageFromParent?: string | "", hashFromParent?: string | "", isWorkingFromParent?: string | "", 
+			swEnabledBtnOpenModal: boolean, 
+			swShow: boolean, 
+			messageFromParent?: string, 
+			hashFromParent?: string, 
+			isWorkingFromParent?: string, 
 			swPaddintTop?: Boolean 
 		}) {
 
 	const actionNameWithIdx = actionName + "-" + actionIdx
 
 	const walletStore = useStoreState(state => state.wallet)
-	const { isWalletDataLoaded, getTotalOfUnit } = useStoreState(state => {
-		return { isWalletDataLoaded: state.isWalletDataLoaded, getTotalOfUnit: state.walletGetTotalOfUnit };
-	});
 
 	const [isWorking, setIsWorking] = useState("")
 	const [actionMessage, setActionMessage] = useState("")
@@ -46,13 +59,17 @@ export default function UsersModalBtn(
 
 	const [eUTxOs_UserDatum_Selected, setEUTxOs_UserDatum_Selected] = useState<EUTxO[]>([])
 
-	const { isPoolDataLoaded, 
-		swPreparado, swIniciado, swFunded,
-		swClosed, closedAt, swTerminated, terminatedAt,
+	const { 
+		poolInfo,
+		isPoolDataLoaded, 
 		eUTxO_With_PoolDatum,
 		eUTxOs_With_UserDatum, 
-		totalStaked, totalRewardsPaid, totalRewardsToPay, totalUsersMinAda,
-		isPoolDataLoading, refreshPoolData } = statePoolData
+		totalStakedUI,
+		totalRewardsPaidUI,
+		totalRewardsToPayUI,
+		totalUsersMinAdaUI,
+		isPoolDataLoading,
+		refreshPoolData } = statePoolData
 
 	useEffect(() => {
 		if (isPoolDataLoaded){
@@ -98,10 +115,11 @@ export default function UsersModalBtn(
 	return (
 		<div className="modal__action_separator">
 			
-			{show?
+			{swShow?
 				<>
 					{swPaddintTop === true || swPaddintTop === undefined? <div><br></br></div> : null}
-					{enabled && (isWorkingFromParent === actionNameWithIdx || isWorkingFromParent === "") ?
+					{(swEnabledBtnOpenModal && isWorkingFromParent === "") || (isWorkingFromParent === actionNameWithIdx) ?
+					// {swEnabledBtnOpenModal && (isWorkingFromParent === actionNameWithIdx || isWorkingFromParent === "") ?
 						<label htmlFor={`${actionNameWithIdx}-modal-toggle`} className="btn btnStakingPool">
 							{actionName}
 							<>
@@ -184,11 +202,11 @@ export default function UsersModalBtn(
 											<td>Total</td>
 											<td></td>
 											<td></td>
-											<td>{Number(totalStaked).toLocaleString("en-US") + " " + poolInfo.staking_UI}</td>
-											<td>{Number(totalRewardsPaid).toLocaleString("en-US") + " " + poolInfo.harvest_UI}</td>
-											<td>{Number(totalRewardsToPay).toLocaleString("en-US") + " " + poolInfo.harvest_UI}</td>
+											<td>{totalStakedUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</td>
+											<td>{totalRewardsPaidUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</td>
+											<td>{totalRewardsToPayUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</td>
 											<td></td>
-											<td>{Number(totalUsersMinAda).toLocaleString("en-US") + " ADA (lovelace)" }</td>
+											<td>{totalUsersMinAdaUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</td>
 										</tr>
 									</tbody>
 								</table>
@@ -198,12 +216,18 @@ export default function UsersModalBtn(
 						<div className="modal__content_btns">
 							<ActionWithInputModalBtn 
 								action={masterSendBackDepositAction} 
-								postAction={postAction}
-								swHash={true} eUTxOs_Selected={eUTxOs_UserDatum_Selected} poolInfo={poolInfo} 
-								enabled={walletStore.connected && isPoolDataLoaded && swPreparado === true && swTerminated === true && eUTxOs_UserDatum_Selected.length == 1 } 
-								show={true}
-								actionName="Send Back Deposit" actionIdx={poolInfo.name + "-UserModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
+								postActionSuccess={postActionSuccess}
+								postActionError={postActionError}
 								setIsWorking={handleSetIsWorking} 
+								actionName="Send Back Deposit" actionIdx={poolInfo.name + "-UserModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
+								description={'<li className="info">Return the Deposit to the chosen User</li>\
+								<li className="info">Please note, the Pool must be terminated before utilizing this feature</li>'}
+								poolInfo={poolInfo} 
+								swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && eUTxOs_UserDatum_Selected.length == 1} 
+								swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && poolInfo.swTerminated && eUTxOs_UserDatum_Selected.length == 1 } 
+								swShow={poolInfo.swPreparado}
+								swHash={true} 
+								eUTxOs_Selected={eUTxOs_UserDatum_Selected} 
 							/>
 							
 							<div className="modal__action_separator">

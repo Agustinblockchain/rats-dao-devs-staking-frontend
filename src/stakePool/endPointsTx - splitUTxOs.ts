@@ -5,7 +5,7 @@ import { toJson } from '../utils/utils';
 //--------------------------------------
 export async function splitUTxOsTx(lucid: Lucid, protocolParameters: any, addressWallet: Address, value_For_SplitUTxO: Assets) {
     //------------------
-    const functionName = "Split Wallet UTxOs Tx";
+    const functionName = "EndPoint Tx - Split Wallet UTxOs";
     //------------------
     console.log(functionName + " - value For SplitUTxO: " + toJson(value_For_SplitUTxO));
     //------------------

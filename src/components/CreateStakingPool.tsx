@@ -14,7 +14,6 @@ import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
 import { pushSucessNotification } from "../utils/pushNotification";
 import { useStoreState } from '../utils/walletProvider';
 import ActionWithInputModalBtn from './ActionWithInputModalBtn';
-import ActionWithMessageModalBtn from './ActionWithMessageModalBtn';
 import LoadingSpinner from "./LoadingSpinner";
 import { EUTxO } from '../types';
 import { newTransaction } from '../utils/cardano-helpersTx';
@@ -25,6 +24,7 @@ export default function CreateStakingPool( ) {
 
 	const walletStore = useStoreState(state => state.wallet)
 
+	const [stakingPoolCreated_, setStakingPoolCreated_] = useState<StakingPoolDBInterface | undefined>(undefined)
 	const [stakingPoolCreated, setStakingPoolCreated] = useState<StakingPoolDBInterface | undefined>(undefined)
 
 	const [swDummyStakingPool, setSwDummyStakingPool] = useState(false)
@@ -171,23 +171,16 @@ export default function CreateStakingPool( ) {
 			}
 
 			const stakingPool = await apiCreateStakingPoolDB(data)
-
 			setActionMessage("Smart Contracts created!")
-
-            pushSucessNotification("Creating Smart Contracts ", "Smart Contracts created!", false);
-
-            setTimeout(setStakingPoolCreated, 3000, stakingPool);
-
             clearInterval(timeoutGetEstadoDeploy)
+            setTimeout(setStakingPoolCreated, 3000, stakingPool);
             setIsWorking("")
-
+			return "Smart Contracts created, redirecting page...";
 		} catch (error) {
 			clearInterval(timeoutGetEstadoDeploy)
 			setIsWorking("")
 			throw error
 		}
-
-
 	}
 
 	//--------------------------------------
@@ -216,9 +209,8 @@ export default function CreateStakingPool( ) {
 					<br></br>
 					<div>
 
-						<li className="info">You must prepare the Pool immediately.</li>
-						<li className="info">You should not do any other txs now, because you risk consuming the uTxO you chose to mint the NFT PoolID.</li>
-
+					<li className="info">Prepare your newly created pool immediately.</li>
+					<li className="info">Avoid making other transactions as the contract is dependent on a specific UTxO to mint the PoolID NFT that should not be consumed before.</li>
 					</div>
 					<br></br>
 
@@ -316,7 +308,12 @@ export default function CreateStakingPool( ) {
 
 											<h4 className="pool__stat-title">Grace Time</h4>
 											<input name='ppGraceTieme' value={graceTime} style={{ width: 600, fontSize: 12 }} onChange={(event) => setppGraceTime(event.target.value)}  ></input>
-											<li className="info">Period for users to collect their rewards after the Deadline or forced close, in milliseconds. For example: 1000*60*60*24*15 = 1296000000 = 15 days</li>
+											<li className="info">Period for users to collect their rewards after the Deadline or forced close, in milliseconds.</li>
+											<li className="info">(To use 15 days, enter: 1000*60*60*24*15 = 1296000000)</li>
+											<li className="info">(To use 1 day, enter: 1000*60*60*24 = 86400000)</li>
+											<li className="info">(To use 1 hour, enter: 1000*60*60 = 3600000)</li>
+											<li className="info">(To use 15 minutes, enter: 1000*60*15 = 900000)</li>
+											
 											<br></br>
 
 											<h4 className="pool__stat-title">Staking Unit: Name to Show in User Interface </h4><input name='staking_UI' value={staking_UI} style={{ width: 600, fontSize: 12 }} onChange={(event) => setStakingUnitForShowing(event.target.value)}  ></input>
@@ -370,28 +367,32 @@ export default function CreateStakingPool( ) {
 
 										</form>
 
-										<ActionWithMessageModalBtn 
+										<ActionWithInputModalBtn 
 											action={createPoolFilesAction} 
-											postAction={undefined}
-											description={'<li className="info">After creating the Pool you should prepare it immediately.</li>\
-											<li className="info">You should not make other transactions because the contract was created depending on a specific UTxO that should not be consumed before (UTxO to mint the PoolID NFT)</li>\
-											<li className="info">After finishing creating the Pool you will be redirected <a href="/admin" style={{ textDecoration: \'underline\' }}>here</a> to prepare it and have the first Funds added.</li>'}
+											postActionSuccess={undefined}
+											postActionError={undefined}
+											setIsWorking={handleSetIsWorking} 
+											actionName="Create Staking Pool" actionIdx="1" messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
+											description={'<li className="info">Prepare your newly created pool immediately.</li>\
+											<li className="info">Avoid making other transactions as the contract is dependent on a specific UTxO to mint the PoolID NFT that should not be consumed before.</li>'}
+											swEnabledBtnOpenModal={walletStore.connected && uTxOsAtWalllet.length > 0} 
+											swEnabledBtnAction={walletStore.connected && uTxOsAtWalllet.length > 0} 
+											swShow={true}
 											swHash={false} 
-											enabled={walletStore.connected && uTxOsAtWalllet.length > 0} 
-											show={true}
-											actionIdx="1" actionName="Create Staking Pool" messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-											setIsWorking={handleSetIsWorking} />
-										
-										<ActionWithMessageModalBtn 
+											/>
+
+										<ActionWithInputModalBtn 
 											action={splitUTxOsAction} 
-											postAction={getDataFromWallet}
-											description={'<li className="info">It is generally a good practice to split your wallet\'s UTXOs (unspent transaction outputs) into smaller amounts.</li> \
-											<li className="info">Having smaller UTXOs with only ADA amounts can make it easier to use them as collateral for smart contracts.</li>'}
-											swHash={true}
-											enabled={walletStore.connected}
-											show={true}
+											postActionSuccess={getDataFromWallet}
+											postActionError={getDataFromWallet}
+											setIsWorking={handleSetIsWorking}
 											actionName="Split Wallet UTxOs" actionIdx="1" messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-											setIsWorking={handleSetIsWorking} />
+											description={'<p className="info">It is recommended to split your wallet\'s UTXOs (unspent transaction outputs) into smaller amounts. This will make it easier to use them as collateral for smart contracts and will provide more flexibility in managing your funds.</p>'}
+											swEnabledBtnOpenModal={walletStore.connected}
+											swEnabledBtnAction={walletStore.connected}
+											swShow={true}
+											swHash={true}
+											/>
 									</div>
 								</div>
 							</div>

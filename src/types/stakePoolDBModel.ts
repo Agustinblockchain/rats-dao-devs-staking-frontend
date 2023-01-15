@@ -12,6 +12,7 @@ export interface StakingPoolDBInterface {
 	name: string,
 	imageSrc: string,
 
+	swDeleted: boolean,
 	swShowOnSite: boolean,
 	swShowOnHome: boolean,
 	swPreparado: boolean,
@@ -21,7 +22,8 @@ export interface StakingPoolDBInterface {
 	closedAt: Date | undefined,
 	swTerminated: boolean,
 	swZeroFunds: boolean,
-	swPoolReadyForDelete: boolean,
+	swPoolReadyForDeleteMainScripts: boolean,
+	swPoolReadyForDeletePoolInDB: boolean,
 
 	beginAt: Date,
 	deadline: Date,
@@ -109,6 +111,8 @@ const stakingPoolDBSchema = new Schema<StakingPoolDBInterface>({
 	name: { type: String, required: true },
 	imageSrc: { type: String, required: true },
 
+	swDeleted: { type: Boolean, required: true },
+	
 	swShowOnSite: { type: Boolean, required: true },
 	swShowOnHome: { type: Boolean, required: true },
 	swPreparado: { type: Boolean, required: true },
@@ -118,7 +122,8 @@ const stakingPoolDBSchema = new Schema<StakingPoolDBInterface>({
 	closedAt: { type: Date, required: false },
 	swTerminated: { type: Boolean, required: true },
 	swZeroFunds: { type: Boolean, required: true },
-	swPoolReadyForDelete : { type: Boolean, required: true },
+	swPoolReadyForDeleteMainScripts : { type: Boolean, required: true },
+	swPoolReadyForDeletePoolInDB : { type: Boolean, required: true },
 
 	beginAt: { type: Date, required: true },
 	deadline: { type: Date, required: true },
@@ -213,6 +218,7 @@ export async function getAllStakingPoolsForAdminFromDB (pkh? : string | undefine
 	
 	const stakingPoolsDB_ : StakingPoolDBInterface [] = await StakingPoolDBModel.find({
 		swShowOnSite : true,
+		swDeleted : false
 	})
 
 	var stakingPoolsDB : StakingPoolDBInterface [] = []
@@ -237,7 +243,8 @@ export async function getAllStakingPoolsForHomeFromDB (pkh? : string | undefined
 	console.log ("getAllStakingPoolsForHomeFromDB - pkh: " + pkh )
 	
 	const stakingPoolsDB_ : StakingPoolDBInterface [] = await StakingPoolDBModel.find({
-		swShowOnSite : true
+		swShowOnSite : true,
+		swDeleted : false
 	})
 
 	var stakingPoolsDB : StakingPoolDBInterface [] = []

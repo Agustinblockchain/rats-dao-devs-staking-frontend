@@ -18,31 +18,45 @@ type ActionStatus = "loading" | "success" | "error" | "idle"
 
 export default function ActionWithSelectInputModalBtn(
 
-	{ actionName, enabled, show, actionIdx, 
+	{ 	actionName, 
+		actionIdx, 
+		description,
 		action, 
-		postAction,
+		postActionSuccess,
+		postActionError,
 		setIsWorking, 
 		cancel, 
-		poolInfo, eUTxOs_Selected, master_Selected, 
+		poolInfo, 
+		swEnabledBtnOpenModal, 
+		swEnabledBtnAction, 
+		swShow, 
+		eUTxOs_Selected, 
+		master_Selected, 
 		walletAssets,
 		inputUnitForLucid, inputUnitForShowing, inputMax, swHash, messageFromParent, hashFromParent, isWorking, swPaddintTop }:
 		{
-			actionName: string, enabled: boolean, show: boolean, actionIdx: string,
-			action: (poolInfo?: StakingPoolDBInterface | undefined, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets | undefined, master_Selected?: Master | undefined) => Promise<any>,
-			postAction?: () => Promise<any>,
+			actionName: string, 
+			actionIdx: string,
+			description?: string,
+			action: (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[], assets?: Assets, master_Selected?: Master) => Promise<any>,
+			postActionSuccess?: () => Promise<any>,
+			postActionError?: () => Promise<any>,
 			setIsWorking?: (isWorking: string) => Promise<any>,
 			cancel?: () => Promise<any>,
-			poolInfo?: StakingPoolDBInterface | undefined,
-			eUTxOs_Selected?: EUTxO[] | undefined,
-			master_Selected?: Master | undefined,
+			poolInfo?: StakingPoolDBInterface,
+			swEnabledBtnOpenModal: boolean, 
+			swEnabledBtnAction: boolean, 
+			swShow: boolean, 
+			eUTxOs_Selected?: EUTxO[],
+			master_Selected?: Master,
 			walletAssets : Assets ,
-			inputUnitForLucid: string | "lovelace",
-			inputUnitForShowing: string | "ADA (lovelace)",
+			inputUnitForLucid: string,
+			inputUnitForShowing: string,
 			inputMax: 0 | string,
 			swHash?: Boolean,
-			messageFromParent?: string | "",
-			hashFromParent?: string | "",
-			isWorking?: string | "",
+			messageFromParent?: string,
+			hashFromParent?: string,
+			isWorking?: string,
 			swPaddintTop?: Boolean 
 		} 
 ) {
@@ -96,9 +110,6 @@ export default function ActionWithSelectInputModalBtn(
 	}, [walletAssetsSelect])
 
 	useEffect(() => {
-		// if (isWorking === actionNameWithIdx){
-		// 	console.log ("ActionModalBtn - useEffect1 - " +(isWorking === actionNameWithIdx ? "YO":"OTRO")+ " - messageFromParent: " + messageFromParent + " - message: " + message)
-		// }
 		if (messageFromParent && messageFromParent !== "" && isWorking === actionNameWithIdx) {
 			setMessage(messageFromParent)
 		} else {
@@ -107,9 +118,6 @@ export default function ActionWithSelectInputModalBtn(
 	}, [messageFromParent])
 
 	useEffect(() => {
-		// if (isWorking === actionNameWithIdx){
-		// 	console.log ("ActionModalBtn - useEffect2 - " +(isWorking === actionNameWithIdx ? "YO":"OTRO")+ " - hashFromParent: " + hashFromParent + " - hash: " + hash)
-		// }
 		if (hashFromParent && hashFromParent !== "" && hashFromParent !== undefined && isWorking === actionNameWithIdx) {
 			setHash(hashFromParent)
 		} else {
@@ -132,29 +140,15 @@ export default function ActionWithSelectInputModalBtn(
 			) => {
 		try {
 			console.log("ActionModalBtn - doAction: " + actionNameWithIdx + " - message: " + message + " - messageFromParent: " + messageFromParent)
-
-			//alert ("callback:" + isWorking)
 			setIsWorking ? await setIsWorking(actionNameWithIdx) : null
-			// setIsWorking(actionNameWithIdx)
-
 			setStatus("loading")
-
 			setTitle(actionName)
-			// setTitle("Procesando "+ actionName + " ...")
 			setMessage(messageFromParent !== undefined ? messageFromParent : "")
 			setHash("")
-
 			var res
-
-			//alert ("action:" + isWorking)
 			res = await action(poolInfo, eUTxOs_Selected, assets, master_Selected)
-
-			//alert ("post action:" + isWorking)
-
 			pushSucessNotification(actionName, res, swHash);
-
 			setStatus('success')
-
 			if (swHash) {
 				setTitle(`${actionName} Ok!`)
 				setMessage("")
@@ -164,7 +158,6 @@ export default function ActionWithSelectInputModalBtn(
 				setMessage(res)
 				setHash("")
 			}
-
 			const walletAssetsSelect_ = []
 			for (const [key, value] of Object.entries(walletAssets)) {
 				const CS_ = key.slice(0, 56)
@@ -173,22 +166,17 @@ export default function ActionWithSelectInputModalBtn(
 			}
 			setWalletAssetsSelect(walletAssetsSelect_)
 			setTokenAmount(0)
-
-			if (postAction)	{
-				await postAction()
+			if (postActionSuccess)	{
+				await postActionSuccess()
 			}
-
 		} catch (error: any) {
 			const error_explained = explainError(error)
 			console.error("ActionModalBtn - doAction - " + actionName + " - Error: " + error_explained)
-
 			pushWarningNotification(actionName, error_explained);
 			setStatus('error')
 			setTitle(`${actionName} Error`)
 			setMessage(error_explained)
 			setHash("")
-
-			// no inicio los valores si hay error
 			const walletAssetsSelect_ = []
 			for (const [key, value] of Object.entries(walletAssets)) {
 				const CS_ = key.slice(0, 56)
@@ -197,9 +185,8 @@ export default function ActionWithSelectInputModalBtn(
 			}
 			setWalletAssetsSelect(walletAssetsSelect_)
 			setTokenAmount(0)
-
-			if (postAction)	{
-				await postAction()
+			if (postActionError)	{
+				await postActionError()
 			}
 		}
 	}
@@ -240,10 +227,10 @@ export default function ActionWithSelectInputModalBtn(
 			isWorking: {isWorking}
 			</>  */}
 			
-			{show ?
+			{swShow ?
 				<>
 					{swPaddintTop === true || swPaddintTop === undefined? <div><br></br></div> : null}
-					{enabled && (isWorking === actionNameWithIdx || isWorking === "") ?
+					{(swEnabledBtnOpenModal && isWorking === "") || (isWorking === actionNameWithIdx) ?
 						<label htmlFor={`${actionNameWithIdx}-modal-toggle`} className="btn btnStakingPool">
 							{actionName}
 							<>
@@ -281,48 +268,37 @@ export default function ActionWithSelectInputModalBtn(
 				type="checkbox"
 				id={`${actionNameWithIdx}-modal-toggle`}
 				onChange={(e) => {
-					//console.log ("modal change: " + e.target.checked)
 					if (e.target.checked) {
-						//si es checked es porque esta abierto el modal
-
 						if (status === 'success' || status === 'error') {
 							setStatus('idle')
-
 							setTitle(actionName)
 							setMessage("")
 							setHash("")
 						}
-						
-					} else {
-						//si no es checked es porque esta cerrado el modal
-						//setTitle("cuando ?")
-						//setStatus("idle")
-					}
+					} 
 				}}
 			/>
 			<div id={`${actionNameWithIdx}-modal`} className="modal">
 				<label htmlFor={`${actionNameWithIdx}-modal-toggle`} className="modal__shade"></label>
 				<div className="modal__content">
 					<div className="modal__content_item">
+
 						{/* <>
-							Title: {title} <br></br>
-							status: {status} <br></br>
-							Parent msg: {messageFromParent} <br></br>
-							msg: {message} <br></br>
-							Parent hash: {hashFromParent} <br></br>
-							hash: {hash} <br></br>
-							isWorking: {isWorking} <br></br>
-							swHash: {swHash? "1" : "0"} <br></br>
-							</> */}
+						Title: {title} <br></br>
+						status: {status} <br></br>
+						Parent msg: {messageFromParent} <br></br>
+						msg: {message} <br></br>
+						Parent hash: {hashFromParent} <br></br>
+						hash: {hash} <br></br>
+						isWorking: {isWorking} <br></br>
+						swHash: {swHash? "1" : "0"} <br></br>
+						</> */}
 
 						{status !== "idle" ?
 							//no esta idle, esta procesando o termino de procesar ok o con error
 							<>
-
 								<h3>{title}</h3>
-
 								{message !== "" ? <div style={{ marginTop: 10 }}>{message}</div> : <></>}
-
 								{(swHash && hash !== "" && hash !== undefined) ?
 									<>
 										<div>
@@ -343,9 +319,7 @@ export default function ActionWithSelectInputModalBtn(
 									:
 									<></>
 								}
-
 								<div>
-
 									{status === "loading" ?
 										<>
 											<br></br>
@@ -355,11 +329,10 @@ export default function ActionWithSelectInputModalBtn(
 										:
 										<></>
 									}
-
 								</div>
+								
 
-								<br></br>
-								<div style={{textAlign:"center", minWidth:320}}>
+								<div style={{textAlign:"center", minWidth:320, paddingTop: 25}}>
 									{cancel && status === "loading"?
 										<button className="btn btnStakingPool"
 												onClick={(e) => {
@@ -378,11 +351,8 @@ export default function ActionWithSelectInputModalBtn(
 									<button className="btn btnStakingPool"
 											onClick={(e) => {
 												e.preventDefault()
-
 												const checkbox: any = document.getElementById(`${actionNameWithIdx}-modal-toggle`)
-
 												checkbox!.checked = false
-
 											}
 										}
 									>
@@ -395,85 +365,83 @@ export default function ActionWithSelectInputModalBtn(
 							//esta idle, no esta procesando nada
 							<>
 								<h3>{title}</h3>
-
-								<h4 style={{ paddingTop: 10 }}>How many {inputUnitForShowing}?</h4>		
-
+								{description !== "" ?<div style={{ paddingTop: 10 }}><div dangerouslySetInnerHTML={{ __html: description! }} /></div> : <></>}
 								{message !== "" ? <div style={{ marginTop: 10 }}>{message}</div> : <></>}
-								<br></br>
-
+								<h4 style={{ paddingTop: 10 }}>How many {inputUnitForShowing}?</h4>		
 								{
-									walletAssetsList.map((asset, idx) => 
-										
-										<div key={idx} >
-											<b>{asset.tokenName}</b> (There are {asset.value.toLocaleString()} in your wallet)
-											<br></br>
-
-											<NumericFormat key={"NumericFormat" + idx} style={{ width: 300, fontSize: 12 }} type="text" value={ walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.amountFormatedValue}
-												onValueChange={(values) => {
-														const { formattedValue, value } = values;
-														handleChangeValue (asset.tokenNameHEX, value)
-													}
-												}
-
-												thousandsGroupStyle="thousand" thousandSeparator="," decimalSeparator="." decimalScale={0}
-											/>
-											<br></br>
-											<input key={"input" + idx} style={{ width: 300, fontSize: 12 }} type="range" min={0} max={walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.max} value={walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.amount}
-												onChange={e => {
-													handleChangeFormatedValue (asset.tokenNameHEX, Number(e.target.value).toString(), Number(e.target.value).toString())
-												}}
-											/>
-											<br></br>
-											
+									(walletAssetsList.length > 0) ?
+										<>
+											{walletAssetsList.map((asset, idx) => 
+												<div key={idx} >
+													<b>{asset.tokenName}</b> (There are {asset.value.toLocaleString()} in your wallet)
+													<br></br>
+													<NumericFormat key={"NumericFormat" + idx} style={{ width: 300, fontSize: 12 }} type="text" value={ walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.amountFormatedValue}
+														onValueChange={(values) => {
+																const { formattedValue, value } = values;
+																handleChangeValue (asset.tokenNameHEX, value)
+															}
+														}
+														thousandsGroupStyle="thousand" thousandSeparator="," decimalSeparator="." decimalScale={0}
+													/>
+													<br></br>
+													<input key={"input" + idx} style={{ width: 300, fontSize: 12 }} type="range" min={0} max={walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.max} value={walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.amount}
+														onChange={e => {
+															handleChangeFormatedValue (asset.tokenNameHEX, Number(e.target.value).toString(), Number(e.target.value).toString())
+														}}
+													/>
+													<br></br>
+												</div>
+											)}
+										</>
+									:
+										(<div style={{ textAlign: "center", paddingTop: 10 }}>	
+											<b>There are no {inputUnitForShowing} in your wallet</b>
 										</div>
-										
 									)
 
 								}
 
-								<div style={{textAlign: "left", width: "100%"}}>
+								<div style={{textAlign: "left", width: "100%", paddingTop: 10}}>
 									<b>Total: {tokenAmount.toLocaleString()} {inputUnitForShowing} (Max: {userMaxTokens.toLocaleString()})</b>
 								</div>
 								
-								<br></br>
-								<div style={{textAlign:"center", minWidth:320}}>
+
+								<div style={{textAlign:"center", minWidth:320, paddingTop: 25}}>
 									<button
 										className="btn btnStakingPool"
-										disabled={!enabled}
+										disabled={!swEnabledBtnAction}
 										onClick={(e) => {
-											e.preventDefault()
-
-											if (BigInt(tokenAmount) <= 0n) {
-
-												setMessage("Please enter a valid amount greater than zero")
-
-											} else if (BigInt(tokenAmount) > BigInt(userMaxTokens)) {
-												
-												if (input_AC_isWithoutTokenName && BigInt(userMaxTokens) == BigInt(maxTokensWithDifferentNames)){
-													setMessage("You have exceeded the maximum amount per transaction for this token which is: " + maxTokensWithDifferentNames + "." )
-												}else{
-													setMessage("You have exceeded the maximum avalaible tokens which is: " + userMaxTokens )
-												}
-											} else {
-
-												setMessage("")
-
-												let assets: Assets = {}
-
-												walletAssetsSelect.forEach((asset) => {
-													assets[input_CS + asset.tokenNameHEX] = BigInt (asset.amount)
-												})
-												
-												if (eUTxOs_Selected !== undefined) {
-													doAction(action, poolInfo, eUTxOs_Selected, assets)
+												e.preventDefault()
+												if (BigInt(tokenAmount) <= 0n) {
+													setMessage("Please enter a valid amount greater than zero")
+												} else if (BigInt(tokenAmount) > BigInt(userMaxTokens)) {
+													if (input_AC_isWithoutTokenName && BigInt(userMaxTokens) == BigInt(maxTokensWithDifferentNames)){
+														setMessage("You have exceeded the maximum amount per transaction for this token which is: " + maxTokensWithDifferentNames + "." )
+													}else{
+														setMessage("You have exceeded the maximum avalaible tokens which is: " + userMaxTokens )
+													}
 												} else {
-													doAction(action, poolInfo, undefined, assets)
+													setMessage("")
+													let assets: Assets = {}
+													walletAssetsSelect.forEach((asset) => {
+														assets[input_CS + asset.tokenNameHEX] = BigInt (asset.amount)
+													})
+													doAction(action, poolInfo, eUTxOs_Selected, assets, master_Selected)
 												}
 											}
 										}
-										}
 									>
-										{actionName}
+										{!swEnabledBtnAction?
+											<>
+												<span className="wallet__button_disabled">
+												Accept
+												</span>
+											</>
+											:
+											<>
+												Accept
+											</>
+										}
 									</button>
 										
 									<button className="btn btnStakingPool"
@@ -488,7 +456,6 @@ export default function ActionWithSelectInputModalBtn(
 										Close
 									</button>
 								</div>
-									
 							</>
 						}
 					</div>

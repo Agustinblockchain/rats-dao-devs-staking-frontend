@@ -1,14 +1,15 @@
 //--------------------------------------
 import { Assets } from "lucid-cardano";
 import { useEffect, useState } from "react";
+import Skeleton from "react-loading-skeleton";
 import { getFundAmountsRemains_ForMaster } from "../stakePool/helpersStakePool";
 import useStatePoolData from '../stakePool/useStatePoolData';
 import { EUTxO, Master, Master_Funder } from "../types";
 import { maxTokensWithDifferentNames, poolDatum_ClaimedFund } from "../types/constantes";
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
+import { toJson } from "../utils/utils";
 import { useStoreState } from '../utils/walletProvider';
 import ActionWithInputModalBtn from './ActionWithInputModalBtn';
-import ActionWithMessageModalBtn from './ActionWithMessageModalBtn';
 import LoadingSpinner from "./LoadingSpinner";
 //--------------------------------------
 
@@ -18,30 +19,42 @@ type ActionState = "loading" | "success" | "error" | "idle"
 
 export default function MasterModalBtn(
 
-	{ actionName, enabled, show, actionIdx, 
+	{ 	actionName, 
+		actionIdx, 
 		masterSendBackFundAction, 
 		masterGetBackFundAction, 
-		postAction,
-		poolInfo, statePoolData, messageFromParent, hashFromParent, isWorkingFromParent, setIsWorkingParent, swPaddintTop}:
+		postActionSuccess,
+		postActionError,
+		poolInfo_, 
+		statePoolData, 
+		swEnabledBtnOpenModal, 
+		swShow, 
+		messageFromParent, 
+		hashFromParent, 
+		isWorkingFromParent, 
+		setIsWorkingParent, 
+		swPaddintTop}:
 		{
-			actionName: string, enabled: boolean, show: boolean, actionIdx: string,
-			masterGetBackFundAction: (poolInfo?: StakingPoolDBInterface | undefined, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets | undefined) => Promise<any>,
-			masterSendBackFundAction: (poolInfo?: StakingPoolDBInterface | undefined, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets | undefined, master_Selected?: Master | undefined) => Promise<any>,
-			postAction?: () => Promise<any>,
+			actionName: string, 
+			actionIdx: string,
+			masterGetBackFundAction: (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[], assets?: Assets) => Promise<any>,
+			masterSendBackFundAction: (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[], assets?: Assets, master_Selected?: Master) => Promise<any>,
+			postActionSuccess?: () => Promise<any>,
+			postActionError?: () => Promise<any>,
 			setIsWorkingParent?: (isWorking: string) => Promise<any>,
-			poolInfo: StakingPoolDBInterface, 
+			poolInfo_: StakingPoolDBInterface, 
 			statePoolData: ReturnType<typeof useStatePoolData>,
-			messageFromParent?: string | "", hashFromParent?: string | "", isWorkingFromParent?: string | "", 
+			swEnabledBtnOpenModal: boolean, 
+			swShow: boolean, 
+			messageFromParent?: string, 
+			hashFromParent?: string, 
+			isWorkingFromParent?: string, 
 			swPaddintTop?: Boolean 
 		}) {
 
 	const actionNameWithIdx = actionName + "-" + actionIdx
 
 	const walletStore = useStoreState(state => state.wallet)
-
-	const { isWalletDataLoaded, getTotalOfUnit } = useStoreState(state => {
-		return { isWalletDataLoaded: state.isWalletDataLoaded, getTotalOfUnit: state.walletGetTotalOfUnit };
-	});
 
 	const [isWorking, setIsWorking] = useState("")
 
@@ -50,16 +63,17 @@ export default function MasterModalBtn(
 
 	const [masterFunders_Selected, setMasterFunders_Selected] = useState<Master_Funder[]>([])
 
-	const { isPoolDataLoaded, 
-        swPreparado, swIniciado, swFunded,
-		swClosed, closedAt, swTerminated, terminatedAt, swZeroFunds, swPoolReadyForDelete,
-		eUTxOs_With_Datum, countEUTxOs_With_Datum,
+	const { 
+		poolInfo,
+		isPoolDataLoaded, 
 		eUTxO_With_PoolDatum,
 		eUTxOs_With_FundDatum, 
         masterFunders,
-		totalFundsAvailable, totalFundAmount, totalFundAmountsRemains_ForMaster,
-		totalStaked, totalRewardsPaid, totalRewardsToPay, totalMastersMinAda,
-		isPoolDataLoading, refreshPoolData } = statePoolData
+		totalFundAmountUI,
+		totalFundAmountsRemains_ForMasterUI,
+		totalMastersMinAdaUI,
+		isPoolDataLoading,
+		refreshPoolData } = statePoolData
 
 	useEffect(() => {
 		if (isPoolDataLoaded){
@@ -105,10 +119,11 @@ export default function MasterModalBtn(
 	return (
 		<div className="modal__action_separator">
 			
-			{show?
+			{swShow?
 				<>
 					{swPaddintTop === true || swPaddintTop === undefined? <div><br></br></div> : null}
-					{enabled && (isWorkingFromParent === actionNameWithIdx || isWorkingFromParent === "") ?
+					{(swEnabledBtnOpenModal && isWorkingFromParent === "") || (isWorkingFromParent === actionNameWithIdx) ?
+					// {swEnabledBtnOpenModal && (isWorkingFromParent === actionNameWithIdx || isWorkingFromParent === "") ?
 						<label htmlFor={`${actionNameWithIdx}-modal-toggle`} className="btn btnStakingPool">
 							{actionName}
 							<>
@@ -145,90 +160,94 @@ export default function MasterModalBtn(
 					<div className="modal__content_item" >
 						<h3>List of Masters</h3>
 						{
-							// (!isPoolDataLoaded) ?
-							// 	<>
-							// 		<LoadingSpinner size={25} border={5} />
-							// 	</>
-							// 	:
-								<div className="tableContainerFunds" style={{ maxHeight: 300 }}>
-									<table>
-										<thead>
-											<tr>
-												<th></th>
-												<th>Index</th>
-												<th>Master Pkh</th>
-												<th>Fund Amount</th>
-												<th>Fund Amount To Get Back</th>
-												<th>Claimed Funds</th>
-												<th>Min ADA</th>
-											</tr>
-										</thead>
-										<tbody>
-											{masterFunders.map(
-												(masterFunder, index) =>
-													<tr key={index}>
-														<td>
-															<input type="checkbox" key={index} checked={masterFunders_Selected.includes(masterFunder)} 
-																onChange={(e) => {
-																	//console.log(e.target.checked)
-																	if (e.target.checked) {
-																		setMasterFunders_Selected(masterFunders_Selected.concat(masterFunder))
-																	} else {
-																		setMasterFunders_Selected(masterFunders_Selected.filter(mf => mf.mfMaster !== masterFunder.mfMaster ))
-																	}
-																}}
-															/>
-														</td>
-														<td>{index + 1}</td>
-														<td>{masterFunder.mfMaster}</td>
-														<td>{Number(masterFunder.mfFundAmount).toLocaleString("en-US") + " " + poolInfo.harvest_UI}</td>
-                                                        <td>{(typeof eUTxO_With_PoolDatum == "object" ? Number(getFundAmountsRemains_ForMaster(eUTxO_With_PoolDatum, eUTxOs_With_FundDatum, masterFunder.mfMaster)[0]).toLocaleString("en-US"):0)+ " " + poolInfo.harvest_UI}</td>
-														<td>{masterFunder.mfClaimedFund==poolDatum_ClaimedFund?"Claimed":"Not Claimed"}</td>
-														<td>{Number(masterFunder.mfMinAda).toLocaleString("en-US") + " ADA (lovelace)" }</td>
+							<div className="tableContainerFunds" style={{ maxHeight: 300 }}>
+								<table>
+									<thead>
+										<tr>
+											<th></th>
+											<th>Index</th>
+											<th>Master Pkh</th>
+											<th>Fund Amount</th>
+											<th>Fund Amount To Get Back</th>
+											<th>Claimed Funds</th>
+											<th>Min ADA</th>
+										</tr>
+									</thead>
+									<tbody>
+										{masterFunders.map(
+											(masterFunder, index) =>
+												<tr key={index}>
+													<td>
+														<input type="checkbox" key={index} checked={masterFunders_Selected.includes(masterFunder)} 
+															onChange={(e) => {
+																//console.log(e.target.checked)
+																if (e.target.checked) {
+																	setMasterFunders_Selected(masterFunders_Selected.concat(masterFunder))
+																} else {
+																	setMasterFunders_Selected(masterFunders_Selected.filter(mf => mf.mfMaster !== masterFunder.mfMaster ))
+																}
+															}}
+														/>
+													</td>
+													<td>{index + 1}</td>
+													<td>{masterFunder.mfMaster}</td>
+													<td>{Number(masterFunder.mfFundAmount).toLocaleString("en-US") + " " + poolInfo.harvest_UI}</td>
+													<td>{(typeof eUTxO_With_PoolDatum == "object" ? Number(getFundAmountsRemains_ForMaster(eUTxO_With_PoolDatum, eUTxOs_With_FundDatum, masterFunder.mfMaster)[0]).toLocaleString("en-US"):0)+ " " + poolInfo.harvest_UI}</td>
+													<td>{masterFunder.mfClaimedFund==poolDatum_ClaimedFund?"Claimed":"Not Claimed"}</td>
+													<td>{Number(masterFunder.mfMinAda).toLocaleString("en-US") + " ADA (lovelace)" }</td>
 
-													</tr>
-											)}
-											<tr >
-												<td>{masterFunders.length}</td>
-												<td>Total</td>
-                                                <td></td>
-                                                <td>{Number(totalFundAmount).toLocaleString("en-US") + " " + poolInfo.harvest_UI}</td>
-                                                <td>{Number(totalFundAmountsRemains_ForMaster).toLocaleString("en-US") + " " + poolInfo.harvest_UI}</td>
-                                                <td></td>
-                                                <td>{Number(totalMastersMinAda).toLocaleString("en-US") + " ADA (lovelace)" }</td>
+												</tr>
+										)}
+										<tr >
+											<td>{masterFunders.length}</td>
+											<td>Total</td>
+											<td></td>
+											<td>{totalFundAmountUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</td>
+											<td>{totalFundAmountsRemains_ForMasterUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</td>
+											<td></td>
+											<td>{totalMastersMinAdaUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</td>
 
-											</tr>
-										</tbody>
-									</table>
-								</div>
+										</tr>
+									</tbody>
+								</table>
+							</div>
 						}
 
 						{/* {toJson(masterFunders_Selected)} 
-                        {masterFunders_Selected.length>0?masterFunders_Selected[0].mfMaster:undefined}
-                        {swZeroFunds} */}
+						AAA <br></br>
+                        {masterFunders_Selected.length>0?masterFunders_Selected[0].mfMaster:undefined} */}
 
 						<div className="modal__content_btns">
 							
 							<ActionWithInputModalBtn 
 								action={masterGetBackFundAction} 
-								postAction={postAction}
-								swHash={true} 
-								poolInfo={poolInfo} 
-								enabled={walletStore.connected && isPoolDataLoaded && swPreparado === true && swTerminated === true && swZeroFunds === true} 
-								show={true }
-								actionName="Get Back Fund" actionIdx={poolInfo.name + "-MasterModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
+								postActionSuccess={postActionSuccess}
+								postActionError={postActionError}
 								setIsWorking={handleSetIsWorking} 
+								actionName="Get Back Fund" actionIdx={poolInfo.name + "-MasterModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
+								description={'<li className="info">Retrieve any leftover funds that are rightfully yours.</li>\
+								<li className="info">Please note, the Pool must be Terminated and all Funds must be deleted before utilizing this feature.</li>'} 
+								poolInfo={poolInfo} 
+								swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded} 
+								swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && poolInfo.swTerminated && poolInfo.swZeroFunds} 
+								swShow={poolInfo.swPreparado}
+								swHash={true} 
 							/>
 							
 							<ActionWithInputModalBtn 
 								action={masterSendBackFundAction} 
-								postAction={postAction}
-								swHash={true} master_Selected={masterFunders_Selected.length>0?masterFunders_Selected[0].mfMaster:undefined }  
-								poolInfo={poolInfo} 
-								enabled={walletStore.connected && isPoolDataLoaded &&  masterFunders_Selected.length == 1 && swPreparado === true && swTerminated === true && swZeroFunds === true} 
-								show={true}
-								actionName="Send Back Fund" actionIdx={poolInfo.name + "-MasterModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
+								postActionSuccess={postActionSuccess}
+								postActionError={postActionError}
 								setIsWorking={handleSetIsWorking} 
+								actionName="Send Back Fund" actionIdx={poolInfo.name + "-MasterModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
+								description={'<li className="info">Send any leftover funds to the Master selected.</li>\
+								<li className="info">Please note, the Pool must be Terminated and all Funds must be deleted before utilizing this feature.</li>'} 
+								poolInfo={poolInfo} 
+								swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && masterFunders_Selected.length == 1} 
+								swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && poolInfo.swTerminated && poolInfo.swZeroFunds && masterFunders_Selected.length == 1} 
+								swShow={poolInfo.swPreparado}
+								swHash={true} 
+								master_Selected={masterFunders_Selected.length>0?masterFunders_Selected[0].mfMaster:undefined }  
 							/>
 							
 							<div className="modal__action_separator">

@@ -37,7 +37,7 @@ import {
 
 export async function masterPreparePool(wallet: Wallet, poolInfo: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) : Promise <[string, EUTxO []]> {
     //------------------
-    const functionName = "Master Prepare Pool"
+    const functionName = "EndPoint Master - Prepare Pool"
     //------------------
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
@@ -137,7 +137,7 @@ export async function masterPreparePool(wallet: Wallet, poolInfo: StakingPoolDBI
 
 export async function masterNewFund(wallet: Wallet, poolInfo: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) : Promise <[string, EUTxO []]> {
     //------------------
-    const functionName = "New Fund"
+    const functionName = "EndPoint Master - New Fund"
     //------------------
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
@@ -154,14 +154,6 @@ export async function masterNewFund(wallet: Wallet, poolInfo: StakingPoolDBInter
     if (uTxOsAtWallet.length == 0) {
         throw "There are no UTxOs available in your wallet";
     }
-    //------------------
-    // const uTxOsAtScript = await lucid!.utxosAt(scriptAddress)
-    // console.log(functionName + " - uTxOs At Script - length: " + uTxOsAtScript.length)
-    // if (uTxOsAtScript.length == 0) {
-    //     throw "UTxO list at Script is empty";
-    // }
-    // //------------------
-    // const eUTxOs_With_Datum = await getExtendedUTxOsWith_Datum(lucid!, uTxOsAtScript)
     //------------------
     const eUTxOs_With_Datum = await apiGetEUTxOsDBByStakingPool(poolInfo.name!)
     //------------------
@@ -260,7 +252,7 @@ export async function masterNewFund(wallet: Wallet, poolInfo: StakingPoolDBInter
 
 export async function masterFundAndMerge(wallet: Wallet, poolInfo: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[], assets?: Assets) : Promise <[string, EUTxO []]> {
     //------------------
-    const functionName = "Fund And Merge"
+    const functionName = "EndPoint Master - Fund And Merge"
     //------------------
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
@@ -277,14 +269,6 @@ export async function masterFundAndMerge(wallet: Wallet, poolInfo: StakingPoolDB
     if (uTxOsAtWallet.length == 0) {
         throw "There are no UTxOs available in your wallet";
     }
-    //------------------
-    // const uTxOsAtScript = await lucid!.utxosAt(scriptAddress)
-    // console.log(functionName + " - uTxOs At Script - length: " + uTxOsAtScript.length)
-    // if (uTxOsAtScript.length == 0) {
-    //     throw "UTxO list at Script is empty";
-    // }
-    // //------------------
-    // const eUTxOs_With_Datum = await getExtendedUTxOsWith_Datum(lucid!, uTxOsAtScript)
     //------------------
     const eUTxOs_With_Datum = await apiGetEUTxOsDBByStakingPool(poolInfo.name!)
     //------------------
@@ -421,7 +405,7 @@ export async function masterFundAndMerge(wallet: Wallet, poolInfo: StakingPoolDB
 
 export async function masterMergeFunds(wallet: Wallet, poolInfo: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[], assets?: Assets) : Promise <[string, EUTxO []]> {
     //------------------
-    const functionName = "Merge Funds"
+    const functionName = "EndPoint Master - Merge Funds"
     //------------------
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
@@ -438,14 +422,6 @@ export async function masterMergeFunds(wallet: Wallet, poolInfo: StakingPoolDBIn
     if (uTxOsAtWallet.length == 0) {
         throw "There are no UTxOs available in your wallet";
     }
-    //------------------
-    // const uTxOsAtScript = await lucid!.utxosAt(scriptAddress)
-    // console.log(functionName + " - uTxOs At Script - length: " + uTxOsAtScript.length)
-    // if (uTxOsAtScript.length == 0) {
-    //     throw "UTxO list at Script is empty";
-    // }
-    // //------------------
-    // const eUTxOs_With_Datum = await getExtendedUTxOsWith_Datum(lucid!, uTxOsAtScript)
     //------------------
     const eUTxOs_With_Datum = await apiGetEUTxOsDBByStakingPool(poolInfo.name!)
     //------------------
@@ -585,7 +561,7 @@ export async function masterMergeFunds(wallet: Wallet, poolInfo: StakingPoolDBIn
 
 export async function masterSplitFund(wallet: Wallet, poolInfo: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[], assets?: Assets) : Promise <[string, EUTxO []]> {
     //------------------
-    const functionName = "Split Fund"
+    const functionName = "EndPoint Master - Split Fund"
     //------------------
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
@@ -602,14 +578,6 @@ export async function masterSplitFund(wallet: Wallet, poolInfo: StakingPoolDBInt
     if (uTxOsAtWallet.length == 0) {
         throw "There are no UTxOs available in your wallet";
     }
-    //------------------
-    // const uTxOsAtScript = await lucid!.utxosAt(scriptAddress)
-    // console.log(functionName + " - uTxOs At Script - length: " + uTxOsAtScript.length)
-    // if (uTxOsAtScript.length == 0) {
-    //     throw "UTxO list at Script is empty";
-    // }
-    // //------------------
-    // const eUTxOs_With_Datum = await getExtendedUTxOsWith_Datum(lucid!, uTxOsAtScript)
     //------------------
     const eUTxOs_With_Datum = await apiGetEUTxOsDBByStakingPool(poolInfo.name!)
     //------------------
@@ -762,7 +730,7 @@ export async function masterSplitFund(wallet: Wallet, poolInfo: StakingPoolDBInt
 
 export async function masterClosePool(wallet: Wallet, poolInfo: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) : Promise <[string, EUTxO []]> {
     //------------------
-    const functionName = "Close Pool"
+    const functionName = "EndPoint Master - Close Pool"
     //------------------
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
@@ -779,14 +747,6 @@ export async function masterClosePool(wallet: Wallet, poolInfo: StakingPoolDBInt
     if (uTxOsAtWallet.length == 0) {
         throw "There are no UTxOs available in your wallet";
     }
-    //------------------
-    // const uTxOsAtScript = await lucid!.utxosAt(scriptAddress)
-    // console.log(functionName + " - uTxOs At Script - length: " + uTxOsAtScript.length)
-    // if (uTxOsAtScript.length == 0) {
-    //     throw "UTxO list at Script is empty";
-    // }
-    // //------------------
-    // const eUTxOs_With_Datum = await getExtendedUTxOsWith_Datum(lucid!, uTxOsAtScript)
     //------------------
     const eUTxOs_With_Datum = await apiGetEUTxOsDBByStakingPool(poolInfo.name!)
     //------------------
@@ -856,7 +816,7 @@ export async function masterClosePool(wallet: Wallet, poolInfo: StakingPoolDBInt
 
 export async function masterTerminatePool(wallet: Wallet, poolInfo: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) : Promise <[string, EUTxO []]> {
     //------------------
-    const functionName = "Terminate Pool"
+    const functionName = "EndPoint Master - Terminate Pool"
     //------------------
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
@@ -873,14 +833,6 @@ export async function masterTerminatePool(wallet: Wallet, poolInfo: StakingPoolD
     if (uTxOsAtWallet.length == 0) {
         throw "There are no UTxOs available in your wallet";
     }
-    //------------------
-    // const uTxOsAtScript = await lucid!.utxosAt(scriptAddress)
-    // console.log(functionName + " - uTxOs At Script - length: " + uTxOsAtScript.length)
-    // if (uTxOsAtScript.length == 0) {
-    //     throw "UTxO list at Script is empty";
-    // }
-    // //------------------
-    // const eUTxOs_With_Datum = await getExtendedUTxOsWith_Datum(lucid!, uTxOsAtScript)
     //------------------
     const eUTxOs_With_Datum = await apiGetEUTxOsDBByStakingPool(poolInfo.name!)
     //------------------
@@ -949,7 +901,7 @@ export async function masterTerminatePool(wallet: Wallet, poolInfo: StakingPoolD
 
 export async function masterDeleteFunds(wallet: Wallet, poolInfo: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) : Promise <[string, EUTxO []]> {
     //------------------
-    const functionName = "Delete Funds"
+    const functionName = "EndPoint Master - Delete Funds"
     //------------------
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
@@ -966,14 +918,6 @@ export async function masterDeleteFunds(wallet: Wallet, poolInfo: StakingPoolDBI
     if (uTxOsAtWallet.length == 0) {
         throw "There are no UTxOs available in your wallet";
     }
-    //------------------
-    // const uTxOsAtScript = await lucid!.utxosAt(scriptAddress)
-    // console.log(functionName + " - uTxOs At Script - length: " + uTxOsAtScript.length)
-    // if (uTxOsAtScript.length == 0) {
-    //     throw "UTxO list at Script is empty";
-    // }
-    // //------------------
-    // const eUTxOs_With_Datum = await getExtendedUTxOsWith_Datum(lucid!, uTxOsAtScript)
     //------------------
     const eUTxOs_With_Datum = await apiGetEUTxOsDBByStakingPool(poolInfo.name!)
     //------------------
@@ -1115,7 +1059,7 @@ export async function masterDeleteFunds(wallet: Wallet, poolInfo: StakingPoolDBI
 
 export async function masterGetBackFund(wallet: Wallet, poolInfo: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) : Promise <[string, EUTxO []]> {
     //------------------
-    const functionName = "Get Back Fund"
+    const functionName = "EndPoint Master - Get Back Fund"
     //------------------
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
@@ -1136,14 +1080,6 @@ export async function masterGetBackFund(wallet: Wallet, poolInfo: StakingPoolDBI
     if (uTxOsAtWallet.length == 0) {
         throw "There are no UTxOs available in your wallet";
     }
-    //------------------
-    // const uTxOsAtScript = await lucid!.utxosAt(scriptAddress)
-    // console.log(functionName + " - uTxOs At Script - length: " + uTxOsAtScript.length)
-    // if (uTxOsAtScript.length == 0) {
-    //     throw "UTxO list at Script is empty";
-    // }
-    // //------------------
-    // const eUTxOs_With_Datum = await getExtendedUTxOsWith_Datum(lucid!, uTxOsAtScript)
     //------------------
     const eUTxOs_With_Datum = await apiGetEUTxOsDBByStakingPool(poolInfo.name!)
     //------------------
@@ -1247,7 +1183,7 @@ export async function masterGetBackFund(wallet: Wallet, poolInfo: StakingPoolDBI
 
 export async function masterSendBackFund(wallet: Wallet, poolInfo: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets, master_Selected?: Master) : Promise <[string, EUTxO []]> {
     //------------------
-    const functionName = "Get Back Fund"
+    const functionName = "EndPoint Master - Get Back Fund"
     //------------------
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
@@ -1268,14 +1204,6 @@ export async function masterSendBackFund(wallet: Wallet, poolInfo: StakingPoolDB
     if (uTxOsAtWallet.length == 0) {
         throw "There are no UTxOs available in your wallet";
     }
-    //------------------
-    // const uTxOsAtScript = await lucid!.utxosAt(scriptAddress)
-    // console.log(functionName + " - uTxOs At Script - length: " + uTxOsAtScript.length)
-    // if (uTxOsAtScript.length == 0) {
-    //     throw "UTxO list at Script is empty";
-    // }
-    // //------------------
-    // const eUTxOs_With_Datum = await getExtendedUTxOsWith_Datum(lucid!, uTxOsAtScript)
     //------------------
     const eUTxOs_With_Datum = await apiGetEUTxOsDBByStakingPool(poolInfo.name!)
     //------------------
@@ -1383,7 +1311,7 @@ export async function masterSendBackFund(wallet: Wallet, poolInfo: StakingPoolDB
 
 export async function masterSendBackDeposit(wallet: Wallet, poolInfo: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) : Promise <[string, EUTxO []]> {
     //------------------
-    const functionName = "sendBackDeposit"
+    const functionName = "EndPoint Master - Send Back Deposit"
     //------------------
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
@@ -1422,14 +1350,6 @@ export async function masterSendBackDeposit(wallet: Wallet, poolInfo: StakingPoo
     if (uTxOsAtWallet.length == 0) {
         throw "There are no UTxOs available in your wallet";
     }
-    //------------------
-    // const uTxOsAtScript = await lucid!.utxosAt(scriptAddress)
-    // console.log(functionName + " - uTxOs At Script - length: " + uTxOsAtScript.length)
-    // if (uTxOsAtScript.length == 0) {
-    //     throw "UTxO list at Script is empty";
-    // }
-    // //------------------
-    // const eUTxOs_With_Datum = await getExtendedUTxOsWith_Datum(lucid!, uTxOsAtScript)
     //------------------
     const eUTxOs_With_Datum = await apiGetEUTxOsDBByStakingPool(poolInfo.name!)
     //------------------

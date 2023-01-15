@@ -14,6 +14,10 @@ export const txConsumingTime = 2 * 60 * 1000 // = 2 minutos
 
 //------------------------------------------
 
+export const ADA_UI = "ADA (lovelace)"
+
+//------------------------------------------
+
 export const poolID_TN = "P"
 
 export const fundID_TN = "F"

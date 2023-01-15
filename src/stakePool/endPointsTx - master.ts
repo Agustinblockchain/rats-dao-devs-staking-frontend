@@ -21,7 +21,7 @@ export async function masterPreparePoolTx(
     script_TxID_Master_AddScripts_Datum: ScriptDatum, value_For_Script_TxID_Master_AddScripts: Assets 
 ) {
     //------------------
-    const functionName = "Master Prepare Pool Tx"
+    const functionName = "EndPoint Tx Master - Prepare Pool"
     //------------------
     console.log(functionName + " - poolID_UTxO: " + poolID_UTxO.txHash + "#" + poolID_UTxO.outputIndex)
     //------------------
@@ -86,7 +86,7 @@ export async function masterNewFundTx(
     redeemer_For_Mint_FundID: Redeemer_Mint_TxID, value_For_Mint_FundID: Assets  
     ) {
     //------------------
-    const functionName = "Master New Fund Tx"
+    const functionName = "EndPoint Tx Master - New Fund"
     //------------------
     const scriptAddress: Address = poolInfo.scriptAddress
     //------------------
@@ -143,7 +143,7 @@ export async function masterFundAndMergeTx(
     redeemer_For_Mint_TxID_Master_FundAndMerge: Redeemer_Mint_TxID, value_For_Mint_TxID_Master_FundAndMerge: Assets
     ){
     //------------------
-    const functionName = "Master Fund And Merge Tx"
+    const functionName = "EndPoint Tx Master - Fund And Merge"
     //------------------
     const scriptAddress: Address = poolInfo.scriptAddress
     //------------------
@@ -209,7 +209,7 @@ export async function masterSplitFundTx(
     redeemer_For_Mint_Fund_ID: Redeemer_Mint_TxID, value_For_Mint_FundID: Assets
     ){
     //------------------
-    const functionName = "Master Split Fund Tx"
+    const functionName = "EndPoint Tx Master - Split Fund"
     //------------------
     const scriptAddress: Address = poolInfo.scriptAddress
     //------------------
@@ -278,7 +278,7 @@ export async function masterClosePoolTx(
     redeemer_For_Mint_TxID_Master_ClosePool: Redeemer_Mint_TxID, value_For_Mint_TxID_Master_ClosePool: Assets
     ){
     //------------------
-    const functionName = "Master Close Pool Tx"
+    const functionName = "EndPoint Tx Master - Close Pool"
     //------------------
     const scriptAddress: Address = poolInfo.scriptAddress
     //------------------
@@ -332,7 +332,7 @@ export async function masterTerminatePoolTx(
     redeemer_For_Mint_TxID_Master_TerminatePool: Redeemer_Mint_TxID, value_For_Mint_TxID_Master_TerminatePool: Assets
     ){
     //------------------
-    const functionName = "Master Terminate Pool Tx"
+    const functionName = "EndPoint Tx Master - Terminate Pool"
     //------------------
     const scriptAddress: Address = poolInfo.scriptAddress
     //------------------
@@ -390,7 +390,7 @@ export async function masterDeleteFundsTx(
     redeemer_For_Burn_FundIDs: Redeemer_Burn_TxID, value_For_Burn_FundIDs: Assets
     ){
     //------------------
-    const functionName = "Master Delete Funds Tx"
+    const functionName = "EndPoint Tx Master - Delete Funds"
     //------------------
     const scriptAddress: Address = poolInfo.scriptAddress
     //------------------
@@ -456,7 +456,7 @@ export async function masterSendBackFundTx(
     redeemer_For_Mint_TxID_Master_SendBackFund: Redeemer_Mint_TxID, value_For_Mint_TxID_Master_SendBackFund: Assets
     ){
     //------------------
-    const functionName = "Master Send Back Fund Tx"
+    const functionName = "EndPoint Tx Master - Send Back Fund"
     //------------------
     const scriptAddress: Address = poolInfo.scriptAddress
     //------------------
@@ -518,7 +518,7 @@ export async function masterSendBackDepositTx(
     redeemer_Burn_UserID: Redeemer_Burn_TxID, value_For_Burn_UserID: Assets
     ){
     //------------------
-    const functionName = "Master Send Back Deposit Tx"
+    const functionName = "EndPoint Tx Master - Send Back Deposit"
     //------------------
     const scriptAddress: Address = poolInfo.scriptAddress
     //------------------

@@ -9,7 +9,7 @@ import { splitUTxOsTx } from "./endPointsTx - splitUTxOs";
 
 export async function splitUTxOs(wallet: Wallet, poolInfo: StakingPoolDBInterface) : Promise <[string, EUTxO []]> {
     //------------------
-    const functionName = "Split Wallet UTxOs";
+    const functionName = "EndPoint - Split Wallet UTxOs";
     //------------------
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;

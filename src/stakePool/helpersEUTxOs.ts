@@ -172,11 +172,8 @@ export async function getEUTxOsWith_Datum(lucid: Lucid, utxos: UTxO[]): Promise<
 
 export async function getMissingEUTxOsInDB(lucid: Lucid, utxos: UTxO[], eUTxOsDB: EUTxO[]): Promise<EUTxO[]> {
     const eUTxOs: EUTxO[] = []
-
-    // console.log ("getMissingEUTxOs - init: " + toJson (utxos))
-    
+    //console.log ("getMissingEUTxOs - init: " + toJson (utxos))
     //console.log ("getMissingEUTxOs - init - length script: " + utxos.length + " - db length: " + eUTxOsDB.length)
-
     for (var i = 0; i < utxos.length; i += 1) {
 
         if (!eUTxOsDB.find(eUTxO => eUTxO.uTxO.txHash === utxos[i].txHash && eUTxO.uTxO.outputIndex === utxos[i].outputIndex)) {
@@ -247,7 +244,7 @@ export async function getMissingEUTxOsInDB(lucid: Lucid, utxos: UTxO[], eUTxOsDB
             }
         }
     }
-    // console.log ("getMissingEUTxOs - result:  " + toJson (eUTxOs))
+    //console.log ("getMissingEUTxOs - result:  " + toJson (eUTxOs))
     //console.log ("getMissingEUTxOs - result length:  " + eUTxOs.length)
     return eUTxOs
 }
@@ -382,7 +379,7 @@ export function getEUTxOs_With_UserDatum_InEUxTOList_OfUser(eUTxOs_With_UserDatu
 
 //---------------------------------------------------------------
 
-export function getEUTxO_With_ScriptDatum_InEUxTOList(txID_Master_AddScripts_AC_Lucid: AC, scriptID_AC_Lucid: AC, eUTxOs: EUTxO[], checkConsumingOrPreparing?: boolean | undefined): EUTxO | undefined {
+export function getEUTxO_With_AnyScriptDatum_InEUxTOList(txID_Master_AddScripts_AC_Lucid: AC, eUTxOs: EUTxO[]): EUTxO [] {
     //-------------------
     var eUTxOs_With_ScriptDatum: EUTxO[] = []
     for (var i = 0; i < eUTxOs.length; i += 1) {
@@ -393,7 +390,22 @@ export function getEUTxO_With_ScriptDatum_InEUxTOList(txID_Master_AddScripts_AC_
     var eUTxOs_With_ScriptDatum_And_Token: EUTxO[] = []
     for (var i = 0; i < eUTxOs_With_ScriptDatum.length; i += 1) {
         if (
-            isNFT_With_AC_Lucid_InValue(eUTxOs_With_ScriptDatum[i].uTxO.assets, txID_Master_AddScripts_AC_Lucid) &&
+            isNFT_With_AC_Lucid_InValue(eUTxOs_With_ScriptDatum[i].uTxO.assets, txID_Master_AddScripts_AC_Lucid)
+        ) {
+            eUTxOs_With_ScriptDatum_And_Token.push(eUTxOs_With_ScriptDatum[i])
+        }
+    }
+    return eUTxOs_With_ScriptDatum_And_Token;
+    //-------------------
+}
+
+//---------------------------------------------------------------
+
+export function getEUTxO_With_ScriptDatum_InEUxTOList(scriptID_AC_Lucid: AC, eUTxOs_With_ScriptDatum: EUTxO[], checkConsumingOrPreparing?: boolean | undefined): EUTxO | undefined {
+    //-------------------
+    var eUTxOs_With_ScriptDatum_And_Token: EUTxO[] = []
+    for (var i = 0; i < eUTxOs_With_ScriptDatum.length; i += 1) {
+        if (
             isNFT_With_AC_Lucid_InValue(eUTxOs_With_ScriptDatum[i].uTxO.assets, scriptID_AC_Lucid)
         ) {
             eUTxOs_With_ScriptDatum_And_Token.push(eUTxOs_With_ScriptDatum[i])
@@ -417,6 +429,43 @@ export function getEUTxO_With_ScriptDatum_InEUxTOList(txID_Master_AddScripts_AC_
         return undefined
     }
 }
+
+
+// export function getEUTxO_With_ScriptDatum_InEUxTOList(txID_Master_AddScripts_AC_Lucid: AC, scriptID_AC_Lucid: AC, eUTxOs: EUTxO[], checkConsumingOrPreparing?: boolean | undefined): EUTxO | undefined {
+//     //-------------------
+//     var eUTxOs_With_ScriptDatum: EUTxO[] = []
+//     for (var i = 0; i < eUTxOs.length; i += 1) {
+//         if (isScriptDatum(eUTxOs[i].datum))
+//             eUTxOs_With_ScriptDatum.push(eUTxOs[i])
+//     }
+//     //-------------------
+//     var eUTxOs_With_ScriptDatum_And_Token: EUTxO[] = []
+//     for (var i = 0; i < eUTxOs_With_ScriptDatum.length; i += 1) {
+//         if (
+//             isNFT_With_AC_Lucid_InValue(eUTxOs_With_ScriptDatum[i].uTxO.assets, txID_Master_AddScripts_AC_Lucid) &&
+//             isNFT_With_AC_Lucid_InValue(eUTxOs_With_ScriptDatum[i].uTxO.assets, scriptID_AC_Lucid)
+//         ) {
+//             eUTxOs_With_ScriptDatum_And_Token.push(eUTxOs_With_ScriptDatum[i])
+//         }
+//     }
+//     //-------------------
+//     if (eUTxOs_With_ScriptDatum_And_Token.length > 0){
+//         for (var i = 0; i < eUTxOs_With_ScriptDatum_And_Token.length; i += 1) {
+//             if (Boolean(eUTxOs_With_ScriptDatum_And_Token[i].uTxO.scriptRef)){
+//                 if (checkConsumingOrPreparing === true){
+//                     if (eUTxOs_With_ScriptDatum_And_Token[i].isPreparing.plutusDataIndex === 1  && eUTxOs_With_ScriptDatum_And_Token[i].isConsuming.plutusDataIndex === 1 ){
+//                         return eUTxOs_With_ScriptDatum_And_Token[i]
+//                     }
+//                 }else{
+//                     return eUTxOs_With_ScriptDatum_And_Token[i]
+//                 }
+//             }
+//         }
+//         return undefined
+//     }else{
+//         return undefined
+//     }
+// }
 
 //---------------------------------------------------------------
 

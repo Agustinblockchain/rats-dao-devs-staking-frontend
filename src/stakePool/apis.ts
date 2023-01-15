@@ -440,7 +440,7 @@ export async function apiUpdateEUTxODBIsConsuming(eUTxO: EUTxO, isConsuming: boo
 //------------------------------------------------------
 
 export async function apiGetEUTxOsDBByStakingPool(nombrePool: string) {
-    console.log ("getEUTxOsDBByStakingPool - Init")
+    // console.log ("getEUTxOsDBByStakingPool - Init")
     let data = {
         nombrePool: nombrePool
     };

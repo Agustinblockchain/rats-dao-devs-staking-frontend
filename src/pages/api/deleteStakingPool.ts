@@ -47,17 +47,22 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
                 return 
             }
 
-            if (!stakingPool.swPoolReadyForDelete ){
+            if (!stakingPool.swPoolReadyForDeletePoolInDB ){
                 console.error("/api/deleteStakingPool - Staking Pool is not ready for delete");
                 res.status(400).json({ msg: "Staking Pool is not ready for delete"})
                 return 
             }
 
             var StakingPoolDBModel = getStakingPoolDBModel()
+            // const filter = {name : nombrePool};
+            // await StakingPoolDBModel.deleteOne(filter)
 
             const filter = {name : nombrePool};
-            
-            await StakingPoolDBModel.deleteOne(filter)
+            const update = { 
+                swDeleted: true
+            };
+
+            await StakingPoolDBModel.findOneAndUpdate(filter, update)
 
             console.log("/api/deleteStakingPool - StakingPool deleted in Database!");
             res.status(200).json({ msg: "StakingPool Deleted!"})

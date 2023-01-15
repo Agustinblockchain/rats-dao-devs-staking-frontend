@@ -133,23 +133,27 @@ export function explainError(errorIn: any): string {
             }
 
             if (res === "" && error.includes("Cannot read properties of undefined")) {
-                res += sep + "You are missing ADAs or Tokens in your wallet to make this transaction. It is possible that some transfer is still in the process of being validated. please try again later!"; sep = ", ";
+                res += sep + "You are missing ADAs or Tokens in your wallet to make this transaction. It is possible that some transfer is still in the process of being validated"; sep = ", ";
             }
 
             if (res === "" && error.includes("Insufficient input in transaction")) {
                 res += sep + "You have no funds in your wallet!"; sep = ", ";
             }
-
-            if (res === "" && error.includes("Error: 400:") && error.includes("consumed")) {
-                res += sep + "A UTxO that is needed does not exist. It may be that another User already consumes it. Please try again later!"; sep = ", ";
-            }
-
+           
             if (res === "" && error.includes("Error: 400:") && error.includes("requiredFee")) {
                 res += sep + "There was an incorrect Fee calculation, please try again later!"; sep = ", ";
             }
 
+            if (res === "" && error.includes("Error: 400:") && error.includes("consumed")) {
+                res += sep + "A UTxO that is needed does not exist. It may be that another User already consumes it, please try again later! Also check if you are connected with the right wallet and network"; sep = ", ";
+            }
+
             if (res === "" && error.includes("missing from UTxO set")) {
-                res += sep + "A UTxO that is needed does not exist. It may be that another User already consumes it. Please try again later!"; sep = ", ";
+                res += sep + "A UTxO that is needed does not exist. It may be that another User already consumes it, please try again later! Also check if you are connected with the right wallet and network"; sep = ", ";
+            }
+
+            if (res === "" && error.includes("BadInputsUTxO")) {
+                res += sep + "A UTxO that is needed does not exist. It may be that another User already consumes it, please try again later! Also check if you are connected with the right wallet and network"; sep = ", ";
             }
 
             if (res === "" && error.includes("Error: 400:") && error.includes("maximumExecutionUnits")) {
@@ -165,8 +169,13 @@ export function explainError(errorIn: any): string {
             }
 
             if (res === "" && error.includes("InputsExhaustedError")) {
-                res += sep + "You are missing ADAs or Tokens in your wallet to make this transaction. It is possible that some transfer is still in the process of being validated. please try again later!"; sep = ", ";
+                res += sep + "You are dont have enought ADAs or Tokens in your wallet to make this transaction. It is possible that some transfer is still in the process of being validated. please try again later!"; sep = ", ";
             }
+
+            if (res === "" && error.includes("Not enough ADA leftover to cover minADA")) {
+                res += sep + "You don't have enough ADA or UTxO available. It is possible that some transfer is still in the process of being validated. Please try Split Wallet UTxOs or try again later!"; sep = ", ";
+            }
+
             if (res === "" && error.includes("user declined tx")) {
                 res += sep + "You have canceled the transfer!"; sep = ", ";
             }
@@ -175,26 +184,26 @@ export function explainError(errorIn: any): string {
                 res += sep + "You have canceled the transfer!"; sep = ", ";
             }
 
-            if (res === "" && error.includes("ExtraneousScriptWitnessesUTXOW")) {
-                res += sep + "Technical problems, please try again later!"; sep = ", ";
+            if (res === "" && error.includes("user declined to sign tx")) {
+                res += sep + "You have canceled the transfer!"; sep = ", ";
             }
 
-            if (res === "" && error.includes("BadInputsUTxO")) {
-                res += sep + "A UTxO that is needed does not exist. It may be that another User already consumes it. Please try again later!"; sep = ", ";
+            if (res === "" && error.includes("ExtraneousScriptWitnessesUTXOW")) {
+                res += sep + "Technical problems, please try again later!"; sep = ", ";
             }
 
             if (res === "" && error.includes("ValueNotConservedUTxO")) {
                 res += sep + "Technical problems, please try again later!"; sep = ", ";
             }
-            if (res === "" && error.includes("Not enough ADA leftover to cover minADA")) {
-                res += sep + "You don't have enough ADA or UTxO available. It is possible that some transfer is still in the process of being validated. Please try Split Wallet UTxOs or try again later!!"; sep = ", ";
-            }
+           
             if (res === "" && error.includes("account changed")) {
                 res += sep + "You have changed the wallet in the dApp Connector, please reconnect with your new wallet!"; sep = ", ";
             }
+
             if (res === "" && error.includes("OutsideValidityIntervalUTxO")) {
                 res += sep + "Invalid transaction date, please try again later!"; sep = ", ";
             }
+
             if (res === "" && error.includes("invalidBefore")) {
                 res += sep + "Invalid transaction date, please try again later!"; sep = ", ";
             }

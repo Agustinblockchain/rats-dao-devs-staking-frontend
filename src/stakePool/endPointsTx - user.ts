@@ -16,7 +16,7 @@ export async function userDepositTx(
     redeemer_For_Mint_TxID_User_Deposit: Redeemer_Mint_TxID, value_For_Mint_TxID_User_Deposit: Assets, value_For_Mint_UserID: Assets
 ) {
     //------------------
-    const functionName = "User Deposit Tx";
+    const functionName = "EndPoint Tx User - Deposit";
     //------------------
     const scriptAddress: Address = poolInfo.scriptAddress;
     //------------------
@@ -72,7 +72,7 @@ export async function userHarvestPoolTx(
     redeemer_For_Mint_TxID_User_Harvest: Redeemer_Mint_TxID, value_For_Mint_TxID_User_Harvest: Assets
 ) {
     //------------------
-    const functionName = "User Harvest Tx";
+    const functionName = "EndPoint Tx User - Harvest";
     //------------------
     const scriptAddress: Address = poolInfo.scriptAddress;
     //------------------
@@ -147,7 +147,7 @@ export async function userWithdrawTx(
     redeemer_Burn_UserID: Redeemer_Burn_TxID, value_For_Burn_UserID: Assets, value_For_Burn_TxID_User_Deposit: Assets
 ) {
     //------------------
-    const functionName = "User Withdraw Tx";
+    const functionName = "EndPoint Tx User - Withdraw";
     //------------------
     const scriptAddress: Address = poolInfo.scriptAddress;
     //------------------
