@@ -14,7 +14,8 @@ export const txConsumingTime = 2 * 60 * 1000 // = 2 minutos
 
 //------------------------------------------
 
-export const ADA_UI = "ADA (lovelace)"
+export const ADA_Decimals = 6
+export const ADA_UI = "ADA"
 
 //------------------------------------------
 

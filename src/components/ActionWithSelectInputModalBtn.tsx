@@ -33,7 +33,15 @@ export default function ActionWithSelectInputModalBtn(
 		eUTxOs_Selected, 
 		master_Selected, 
 		walletAssets,
-		inputUnitForLucid, inputUnitForShowing, inputMax, swHash, messageFromParent, hashFromParent, isWorking, swPaddintTop }:
+		inputUnitForLucid, 
+		inputUnitForShowing, 
+		inputDecimals,
+		inputMax, 
+		swHash, 
+		messageFromParent, 
+		hashFromParent, 
+		isWorking, 
+		swPaddintTop }:
 		{
 			actionName: string, 
 			actionIdx: string,
@@ -52,6 +60,7 @@ export default function ActionWithSelectInputModalBtn(
 			walletAssets : Assets ,
 			inputUnitForLucid: string,
 			inputUnitForShowing: string,
+			inputDecimals: number,
 			inputMax: 0 | string,
 			swHash?: Boolean,
 			messageFromParent?: string,
@@ -194,10 +203,15 @@ export default function ActionWithSelectInputModalBtn(
 	function handleChangeValue (tokenNameHEX: string, v: string) {
 		const walletAssetsSelect_ = walletAssetsSelect.map((a, i) => {
 			if (tokenNameHEX === a.tokenNameHEX) {
-			  a.amount = v
-			  return a
+				if(inputDecimals){
+					const pot = Math.pow(10, inputDecimals)
+					a.amount = (Number(v) * pot).toString()
+				}else{
+					a.amount = v
+				}
+				return a
 			} else {
-			  return a;
+			  	return a;
 			}
 		  });
 		  setWalletAssetsSelect(walletAssetsSelect_);
@@ -205,11 +219,16 @@ export default function ActionWithSelectInputModalBtn(
 	function handleChangeFormatedValue (tokenNameHEX: string, v: string, f: string) {
 		const walletAssetsSelect_ = walletAssetsSelect.map((a, i) => {
 			if (tokenNameHEX === a.tokenNameHEX) {
-			  a.amount = v
-			  a.amountFormatedValue = f
-			  return a
+				a.amount = v
+				if(inputDecimals){
+					const pot = Math.pow(10, inputDecimals)
+					a.amountFormatedValue = (Number(f)/pot).toString()
+				}else{
+					a.amountFormatedValue = f
+				}
+			  	return a
 			} else {
-			  return a;
+			  	return a;
 			}
 		  });
 		  setWalletAssetsSelect(walletAssetsSelect_);
@@ -368,6 +387,7 @@ export default function ActionWithSelectInputModalBtn(
 								{description !== "" ?<div style={{ paddingTop: 10 }}><div dangerouslySetInnerHTML={{ __html: description! }} /></div> : <></>}
 								{message !== "" ? <div style={{ marginTop: 10 }}>{message}</div> : <></>}
 								<h4 style={{ paddingTop: 10 }}>How many {inputUnitForShowing}?</h4>		
+								<br></br>
 								{
 									(walletAssetsList.length > 0) ?
 										<>
@@ -381,7 +401,7 @@ export default function ActionWithSelectInputModalBtn(
 																handleChangeValue (asset.tokenNameHEX, value)
 															}
 														}
-														thousandsGroupStyle="thousand" thousandSeparator="," decimalSeparator="." decimalScale={0}
+														thousandsGroupStyle="thousand" thousandSeparator="," decimalSeparator="." decimalScale={inputDecimals}
 													/>
 													<br></br>
 													<input key={"input" + idx} style={{ width: 300, fontSize: 12 }} type="range" min={0} max={walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.max} value={walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.amount}

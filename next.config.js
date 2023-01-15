@@ -10,6 +10,7 @@ module.exports = {
       topLevelAwait: true,
       layers: true
     }
+    // config.output.webassemblyModuleFilename = 'static/wasm/cfbf5897da319460.wasm'
     return config
   }
 }

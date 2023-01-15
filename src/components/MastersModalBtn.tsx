@@ -5,9 +5,9 @@ import Skeleton from "react-loading-skeleton";
 import { getFundAmountsRemains_ForMaster } from "../stakePool/helpersStakePool";
 import useStatePoolData from '../stakePool/useStatePoolData';
 import { EUTxO, Master, Master_Funder } from "../types";
-import { maxTokensWithDifferentNames, poolDatum_ClaimedFund } from "../types/constantes";
+import { ADA_Decimals, ADA_UI, maxTokensWithDifferentNames, poolDatum_ClaimedFund } from "../types/constantes";
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
-import { toJson } from "../utils/utils";
+import { formatAmount, toJson } from "../utils/utils";
 import { useStoreState } from '../utils/walletProvider';
 import ActionWithInputModalBtn from './ActionWithInputModalBtn';
 import LoadingSpinner from "./LoadingSpinner";
@@ -69,6 +69,8 @@ export default function MasterModalBtn(
 		eUTxO_With_PoolDatum,
 		eUTxOs_With_FundDatum, 
         masterFunders,
+		staking_Decimals,
+        harvest_Decimals,
 		totalFundAmountUI,
 		totalFundAmountsRemains_ForMasterUI,
 		totalMastersMinAdaUI,
@@ -191,10 +193,10 @@ export default function MasterModalBtn(
 													</td>
 													<td>{index + 1}</td>
 													<td>{masterFunder.mfMaster}</td>
-													<td>{Number(masterFunder.mfFundAmount).toLocaleString("en-US") + " " + poolInfo.harvest_UI}</td>
-													<td>{(typeof eUTxO_With_PoolDatum == "object" ? Number(getFundAmountsRemains_ForMaster(eUTxO_With_PoolDatum, eUTxOs_With_FundDatum, masterFunder.mfMaster)[0]).toLocaleString("en-US"):0)+ " " + poolInfo.harvest_UI}</td>
+													<td>{formatAmount(Number(masterFunder.mfFundAmount), harvest_Decimals, poolInfo.harvest_UI)}</td>
+													<td>{formatAmount((typeof eUTxO_With_PoolDatum == "object" ? Number(getFundAmountsRemains_ForMaster(eUTxO_With_PoolDatum, eUTxOs_With_FundDatum, masterFunder.mfMaster)[0]):0), harvest_Decimals, poolInfo.harvest_UI)}</td>
 													<td>{masterFunder.mfClaimedFund==poolDatum_ClaimedFund?"Claimed":"Not Claimed"}</td>
-													<td>{Number(masterFunder.mfMinAda).toLocaleString("en-US") + " ADA (lovelace)" }</td>
+													<td>{formatAmount(Number(masterFunder.mfMinAda), ADA_Decimals, ADA_UI) }</td>
 
 												</tr>
 										)}

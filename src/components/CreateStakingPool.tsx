@@ -9,7 +9,7 @@ import { Assets, UTxO } from 'lucid-cardano';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { splitUTxOs } from "../stakePool/endPoints - splitUTxOs";
 import { apiCreateStakingPoolDB, getEstadoDeployAPI } from "../stakePool/apis";
-import { maxMasters } from '../types/constantes';
+import { ADA_UI, maxMasters } from '../types/constantes';
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
 import { pushSucessNotification } from "../utils/pushNotification";
 import { useStoreState } from '../utils/walletProvider';
@@ -47,8 +47,8 @@ export default function CreateStakingPool( ) {
 	const [staking_TN, setppStakingTN] = useState("")
 	const [harvest_TN, setppHarvestTN] = useState("")
 
-	const [staking_UI, setStakingUnitForShowing] = useState("ADA (lovelace)")
-	const [harvest_UI, setHarvestUnitForShowing] = useState("ADA (lovelace)")
+	const [staking_UI, setStakingUnitForShowing] = useState(ADA_UI)
+	const [harvest_UI, setHarvestUnitForShowing] = useState(ADA_UI)
 
 	const [interest, setppInterest] = useState((365 * 24 * 60).toString()) //uno por minuto
 
@@ -321,11 +321,11 @@ export default function CreateStakingPool( ) {
 
 											<h4 className="pool__stat-title">Staking Unit: Currency Symbol</h4>
 											<input name='staking_CS' value={staking_CS} style={{ width: 600, fontSize: 12 }} onChange={(event) => setppStakingCS(event.target.value)}  ></input>
-											<li className="info">Leave empty to use ADA (lovelace)</li>
+											<li className="info">Leave empty to use { ADA_UI }</li>
 											<li className="info">If you want to use another token you must enter its <b>Policy Id</b>, must by a Hexadecimal string of 56 characteres lenght</li>
 
 											<h4 className="pool__stat-title">Staking Unit: Token Name</h4><input name='staking_TN' value={staking_TN} style={{ width: 600, fontSize: 12 }} onChange={(event) => setppStakingTN(event.target.value)}  ></input>
-											<li className="info">Must leave empty if you choose to use ADA (lovelace) as Currency Symbol</li>
+											<li className="info">Must leave empty if you choose to use { ADA_UI } as Currency Symbol</li>
 											<li className="info">Leave empty to use any Token Name within the chossen Currency Symbol</li>
 											<li className="info">If you want to an specific Token Name you must enter its <b>Token Name</b> in Hexadecimal</li>
 
@@ -335,11 +335,11 @@ export default function CreateStakingPool( ) {
 											<li className="info">Will be used to display a friendly name of the chosen unit.</li>
 
 											<h4 className="pool__stat-title">Harvest Unit: Currency Symbol</h4><input name='harvest_CS' value={harvest_CS} style={{ width: 600, fontSize: 12 }} onChange={(event) => setppHarvestCS(event.target.value)}  ></input>
-											<li className="info">Leave empty to use ADA (lovelace)</li>
+											<li className="info">Leave empty to use { ADA_UI }</li>
 											<li className="info">If you want to use another token you must enter its <b>Policy Id</b>, must by a Hexadecimal string of 56 characteres lenght</li>
 
 											<h4 className="pool__stat-title">Harvest Unit: Token Name</h4><input name='harvest_TN' value={harvest_TN} style={{ width: 600, fontSize: 12 }} onChange={(event) => setppHarvestTN(event.target.value)}  ></input>
-											<li className="info">Must leave empty if you choose to use ADA (lovelace) as Currency Symbol</li>
+											<li className="info">Must leave empty if you choose to use { ADA_UI } as Currency Symbol</li>
 											<li className="info">Can't be empty if you choose to use another Currency Symbol</li>
 											<li className="info">Enter the <b>Token Name</b> in Hexadecimal</li>
 

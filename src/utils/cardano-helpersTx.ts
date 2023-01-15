@@ -105,11 +105,6 @@ export async function fixTx(tx_Building: any, lucid: Lucid, protocolParameters: 
 
     var blockLast: number | undefined = undefined
 
-    // await fetch(process.env.NEXT_PUBLIC_BLOCKFROST_URL! + '/blocks/latest', {
-    //     headers: {
-    //         'project_id': process.env.NEXT_PUBLIC_BLOCKFROST_KEY!
-    //     }
-    // })
     await fetch("/api/blockfrost" + '/blocks/latest', {
         headers: {
             'project_id': "xxxxx"

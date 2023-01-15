@@ -1,4 +1,4 @@
-import { EUTxO } from "../types";
+import { AC, AssetClass, EUTxO } from "../types";
 import { StakingPoolDBInterface } from "../types/stakePoolDBModel";
 import { toJson } from "../utils/utils";
 import { eUTxODBParser } from "./helpersEUTxOs";
@@ -531,6 +531,41 @@ export async function apiDeleteEUTxOsDBByStakingPool(nombrePool: string) {
         case 200:
             // console.log ("apiDeleteEUTxOsDBByStakingPool - /api/deleteEUTxOsByStakingPool: " + message)
             return
+    }
+}
+
+//------------------------------------------------------
+
+export async function apiGetTokenMetadata(token_AC: AssetClass) {
+    // console.log("getTokenMetadataFromMintTransaction: " + toJson(token))
+    const urlApi = process.env.NEXT_PUBLIC_REACT_SERVER_URL + "/api/blockfrost" + '/assets/' + token_AC.currencySymbol + token_AC.tokenName
+    const requestOptions = {
+      method: 'GET',
+      headers: {
+        'project_id': "xxxxx"
+      },
+    }
+    try{
+        const response = await fetch(urlApi, requestOptions)
+        const json = await response.json()
+        //console.log(`apiGetTokenMetadata: ` + toJson(json))
+        switch (response.status) {
+            case 404:
+                console.error("apiGetTokenMetadata - /api/blockfrost - Error: " + toJson(json))
+                return undefined;
+            case 400:
+                console.error("apiGetTokenMetadata - /api/blockfrost - Error: " + toJson(json))
+                return undefined;
+            default:
+                console.error("apiGetTokenMetadata - /api/blockfrost: Error: " + toJson(json))
+                return undefined;
+            case 200:
+                // console.log ("apiGetTokenMetadata - /api/blockfrost: " + message)
+                return json;
+        }
+    }catch(error){
+        console.error(`apiGetTokenMetadata - /api/blockfrost: Error : ${error}`)
+        return undefined
     }
 }
 

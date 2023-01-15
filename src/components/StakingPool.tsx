@@ -16,7 +16,7 @@ import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
 import { addAssets } from '../utils/cardano-helpers';
 import { newTransaction } from '../utils/cardano-helpersTx';
 import { pushSucessNotification, pushWarningNotification } from "../utils/pushNotification";
-import { copyToClipboard, toJson } from '../utils/utils';
+import { copyToClipboard, formatAmount, toJson } from '../utils/utils';
 import { useStoreActions, useStoreState } from '../utils/walletProvider';
 import ActionWithInputModalBtn from './ActionWithInputModalBtn';
 import ActionWithSelectInputModalBtn from './ActionWithSelectInputModalBtn';
@@ -63,6 +63,8 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 		poolInfo,
 
 		swClosedUI,
+
+		beginAtUI,
 		closedAtUI, 
 		graceTimeUI,
 		swTerminatedUI, 
@@ -70,6 +72,9 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 
 		countEUTxOs_With_DatumUI,
 		countEUTxOs_With_UserDatumUI,
+
+		staking_Decimals,
+        harvest_Decimals,
 
 		totalFundsAvailableUI,
 
@@ -80,9 +85,11 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 		isPoolDataLoading, 
 		isPoolDataLoaded,
 
-		userStakedDatas, swUserRegistered,
+		userStakedDatas, 
+		swUserRegistered,
 		
-		refreshPoolData
+		refreshPoolData,
+		refreshEUTxOs
 	
 		} = statePoolData
 
@@ -168,7 +175,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 
 	const updateDetailsStakingPoolAndWallet = async () => {
 		const poolInfo = await updateDetailsStakingPool()
-		await loadWalletData(walletStore)
+		if (walletStore.connected) await loadWalletData(walletStore)
 		return poolInfo	
 	}
 
@@ -253,7 +260,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 							</>
 						:
 							<>
-								<button onClick={() => { if (walletStore.connected) { updateDetailsStakingPoolAndWallet() } }} className='btn__ghost icon' style={walletStore.connected ? { cursor: 'pointer' } : { cursor: 'default' }} >
+								<button onClick={() => { if (true) { updateDetailsStakingPoolAndWallet() } }} className='btn__ghost icon' style={true ? { cursor: 'pointer' } : { cursor: 'default' }} >
 									
 									<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" className="bi bi-arrow-repeat" viewBox="0 0 16 16">
 										<path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z" />
@@ -266,28 +273,34 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 						}
 					</h4>
 
-					<div>Pool Closed:  {swClosedUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
-					<div>Pool Terminated: {swTerminatedUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
-					<br></br>
-
 					{process.env.NODE_ENV==="development"?
-							<>
-								<div>EUTxOs At Contract: {countEUTxOs_With_DatumUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</div>
-								<br></br>
-							</>
+						<>
+							<div>Pool Closed:  {swClosedUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
+							<div>Pool Terminated: {swTerminatedUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
+							<br></br>
+
+							{process.env.NODE_ENV==="development"?
+									<>
+										<div>EUTxOs At Contract: {countEUTxOs_With_DatumUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</div>
+										<br></br>
+									</>
+								:
+									<></>
+							}
+						</>
 						:
-							<></>
-					}
+						<></>
+				}
 					
-					<p><>Begin At: {new Date(parseInt(poolInfo.pParams.ppBegintAt.toString())).toString()} {((!poolInfo.swIniciado) ? <>(It hasn't started yet)</>:<></>)}</></p>
+					<p><>Begin At: {beginAtUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} {((!poolInfo.swIniciado) ? <>(It hasn't started yet)</>:<></>)}</></p>
 					<br></br>
 
 					
 					{poolInfo.closedAt?
-						<p><>Forzed Deadline: {closedAtUI} ((poolInfo.swClosed) ? <>(It's already Closed)</>:<></>)</></p>
+						<p><>Forzed Deadline: {closedAtUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} {((poolInfo.swClosed) ? <>(It's already Closed)</>:<></>)}</></p>
 						:
 						<>
-							<p><>Deadline: {closedAtUI} ((poolInfo.swClosed) ? <>(It's already Closed)</>:<></>)</></p>
+							<p><>Deadline: {closedAtUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} {((poolInfo.swClosed) ? <>(It's already Closed)</>:<></>)}</></p>
 						</>
 					}
 					<br></br>
@@ -307,10 +320,10 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 					<br></br>
 
 					<div>
-						Staking Unit In Wallet: {(walletStakingAmountUI === ui_loading || walletStakingAmountUI === ui_notConnected ? walletStakingAmountUI : Number(walletStakingAmountUI).toLocaleString("en-US") + " " + poolInfo.staking_UI) || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}
+						Staking Unit In Wallet: {(walletStakingAmountUI === ui_loading || walletStakingAmountUI === ui_notConnected ? walletStakingAmountUI : formatAmount(Number(walletStakingAmountUI), staking_Decimals, poolInfo.staking_UI)) || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}
 					</div>
 					<div>
-						Harvest Unit In Wallet: {(walletHarvestAmountUI === ui_loading || walletHarvestAmountUI === ui_notConnected ? walletHarvestAmountUI : Number(walletHarvestAmountUI).toLocaleString("en-US") + " " + poolInfo.harvest_UI) || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}
+						Harvest Unit In Wallet: {(walletHarvestAmountUI === ui_loading || walletHarvestAmountUI === ui_notConnected ? walletHarvestAmountUI : formatAmount(Number(walletHarvestAmountUI), harvest_Decimals, poolInfo.harvest_UI)) || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}
 					</div>
 					<br></br>
 
@@ -373,14 +386,14 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 														:
 														<></>
 													}
-													<div style={{textAlign: 'left', width:"100%"}}>Rewards Harvested: {(userStakedData.userRewardsPaid === 0 ? userStakedData.userRewardsPaid : Number(userStakedData.userRewardsPaid).toLocaleString("en-US") + " " + poolInfo.harvest_UI) || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</div>
+													<div style={{textAlign: 'left', width:"100%"}}>Rewards Harvested: {(userStakedData.userRewardsPaid === 0 ? userStakedData.userRewardsPaid : formatAmount(Number(userStakedData.userRewardsPaid), harvest_Decimals, poolInfo.harvest_UI)) || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</div>
 												</div>
 												<div className="pool__flex_gap"></div>
 												<div className="pool__stat">
 													<h4 className="pool__stat-title">
 													Rewards
 													</h4>
-													<h3 className="pool__stat-value">{(userStakedData.userRewardsToPay === 0 ? userStakedData.userRewardsToPay : Number(userStakedData.userRewardsToPay).toLocaleString("en-US") + " " + poolInfo.harvest_UI) || <Skeleton baseColor='#e2a7a7' />}</h3>
+													<h3 className="pool__stat-value">{(userStakedData.userRewardsToPay === 0 ? userStakedData.userRewardsToPay : formatAmount(Number(userStakedData.userRewardsToPay), harvest_Decimals, poolInfo.harvest_UI)) || <Skeleton baseColor='#e2a7a7' />}</h3>
 													<div className="pool__stat-actions" style={{width: 200}}>
 													</div>
 													
@@ -388,7 +401,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 												<div className="pool__flex_gap"></div>
 												<div className="pool__stat">
 													<h4 className="pool__stat-title">Staked</h4>
-													<h3 className="pool__stat-value">{(userStakedData.userStaked === 0 ? userStakedData.userStaked : Number(userStakedData.userStaked).toLocaleString("en-US") + " " + poolInfo.staking_UI) || <Skeleton baseColor='#e2a7a7' />}</h3>
+													<h3 className="pool__stat-value">{(userStakedData.userStaked === 0 ? userStakedData.userStaked : formatAmount(Number(userStakedData.userStaked), staking_Decimals, poolInfo.staking_UI)) || <Skeleton baseColor='#e2a7a7' />}</h3>
 													<div className="pool__stat-actions" style={{width: 200}}>
 													</div>
 												</div>
@@ -406,7 +419,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 														:
 														<></>
 													}
-													<div style={{textAlign: 'left', width:"100%"}}>Rewards Harvested: {(userStakedData.userRewardsPaid === 0 ? userStakedData.userRewardsPaid : Number(userStakedData.userRewardsPaid).toLocaleString("en-US") + " " + poolInfo.harvest_UI) || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</div>
+													<div style={{textAlign: 'left', width:"100%"}}>Rewards Harvested: {(userStakedData.userRewardsPaid === 0 ? userStakedData.userRewardsPaid : formatAmount(Number(userStakedData.userRewardsPaid), harvest_Decimals, poolInfo.harvest_UI)) || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</div>
 												</div>
 												<div className="pool__flex_gap"></div>
 												<div className="pool__stat">
@@ -419,7 +432,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 															</svg>
 														</button> */}
 													</h4>
-													<h3 className="pool__stat-value">{(userStakedData.userRewardsToPay === 0 ? userStakedData.userRewardsToPay : Number(userStakedData.userRewardsToPay).toLocaleString("en-US") + " " + poolInfo.harvest_UI) || <Skeleton baseColor='#e2a7a7' />}</h3>
+													<h3 className="pool__stat-value">{(userStakedData.userRewardsToPay === 0 ? userStakedData.userRewardsToPay : formatAmount(Number(userStakedData.userRewardsToPay), harvest_Decimals, poolInfo.harvest_UI)) || <Skeleton baseColor='#e2a7a7' />}</h3>
 													<div className="pool__stat-actions">
 														<ActionWithInputModalBtn 
 															action={userHarvestAction} 
@@ -432,7 +445,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 															swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && swUserRegistered} 
 															swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && swUserRegistered && !poolInfo.swTerminated} 
 															swShow={true} 
-															swShowInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={userStakedData.userRewardsToPay} 
+															swShowInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={userStakedData.userRewardsToPay} inputDecimals={harvest_Decimals} 
 															swHash={true} 
 															eUTxOs_Selected={[userStakedData.eUTxO_With_UserDatum!]} 
 														/>
@@ -441,7 +454,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 												<div className="pool__flex_gap"></div>
 												<div className="pool__stat">
 													<h4 className="pool__stat-title">Staked</h4>
-													<h3 className="pool__stat-value">{(userStakedData.userStaked === 0 ? userStakedData.userStaked : Number(userStakedData.userStaked).toLocaleString("en-US") + " " + poolInfo.staking_UI) || <Skeleton baseColor='#e2a7a7' />}</h3>
+													<h3 className="pool__stat-value">{(userStakedData.userStaked === 0 ? userStakedData.userStaked : formatAmount(Number(userStakedData.userStaked), staking_Decimals, poolInfo.staking_UI)) || <Skeleton baseColor='#e2a7a7' />}</h3>
 													<div className="pool__stat-actions">
 														<ActionWithInputModalBtn 
 															action={userWithdrawAction} 
@@ -489,7 +502,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 											swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded && !poolInfo.swClosed} 
 											swShow={poolInfo.swFunded} 
 											swHash={true} 
-											inputUnitForLucid={poolInfo.staking_Lucid} inputUnitForShowing={poolInfo.staking_UI} inputMax={maxStakingAmountUI} 
+											inputUnitForLucid={poolInfo.staking_Lucid} inputUnitForShowing={poolInfo.staking_UI} inputMax={maxStakingAmountUI} inputDecimals={staking_Decimals} 
 											walletAssets={walletStakingAssets}
 											swPaddintTop={false} 
 										/>
@@ -507,7 +520,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 											swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded} 
 											swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded && !poolInfo.swClosed} 
 											swShow={poolInfo.swFunded} 
-											swShowInput={true} inputUnitForLucid={poolInfo.staking_Lucid} inputUnitForShowing={poolInfo.staking_UI} inputMax={maxStakingAmountUI} 
+											swShowInput={true} inputUnitForLucid={poolInfo.staking_Lucid} inputUnitForShowing={poolInfo.staking_UI} inputMax={maxStakingAmountUI} inputDecimals={staking_Decimals}  
 											swHash={true} 
 											swPaddintTop={false} 
 										/>
@@ -524,7 +537,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 									actionName="Deposit Batch" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
 									description={poolInfo.swClosed ? '<p className="info">This pool in already closed. You can\'t deposit anymore.</p>' : '<p className="info">Create multiple transactions for new Deposits in one go, rather than manually entering each transaction individually. However, you will still need to individually sign each transaction.</p>'}
 									poolInfo={poolInfo} 
-									swShowInput={true} inputUnitForLucid={poolInfo.staking_Lucid} inputUnitForShowing={poolInfo.staking_UI} inputMax={maxStakingAmountUI} 
+									swShowInput={true} inputUnitForLucid={poolInfo.staking_Lucid} inputUnitForShowing={poolInfo.staking_UI} inputMax={maxStakingAmountUI} inputDecimals={staking_Decimals} 
 									swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded} 
 									swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && !poolInfo.swClosed} 
 									swShow={poolInfo.swFunded} 

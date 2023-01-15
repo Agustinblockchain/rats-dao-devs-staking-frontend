@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import WalletModalBtn from './WalletModalBtn';
 //--------------------------------------
 export default function Navbar({swCreate}: {swCreate ?: boolean}) {

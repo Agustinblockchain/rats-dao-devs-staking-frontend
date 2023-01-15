@@ -35,6 +35,7 @@ export default function ActionWithInputModalBtn(
 		swShowInput, 
 		inputUnitForLucid, 
 		inputUnitForShowing, 
+		inputDecimals,
 		inputMax, 
 		swHash, 
 		messageFromParent, 
@@ -59,6 +60,7 @@ export default function ActionWithInputModalBtn(
 			swShowInput?: boolean,
 			inputUnitForLucid?: string,
 			inputUnitForShowing?: string,
+			inputDecimals?: number,
 			inputMax?: string | 0,
 			swHash?: Boolean,
 			messageFromParent?: string,
@@ -334,10 +336,16 @@ export default function ActionWithInputModalBtn(
 													const { formattedValue, value } = values;
 													// formattedValue = $2,223
 													// floatValue = 2223
-													setTokenAmount(value)
+													if(inputDecimals){
+														const pot = Math.pow(10, inputDecimals)
+														setTokenAmount((Number(value) * pot).toString())
+													}else{
+														setTokenAmount(value)
+													}
+													
 												}
 											}
-											thousandsGroupStyle="thousand" thousandSeparator="," decimalSeparator="." decimalScale={0}
+											thousandsGroupStyle="thousand" thousandSeparator="," decimalSeparator="." decimalScale={inputDecimals}
 										/>
 
 										{/* 
@@ -349,12 +357,17 @@ export default function ActionWithInputModalBtn(
 										value={tokenAmount}
 										onChange={e => setTokenAmount(Number(e.target.value).toString())}
 										/> */}
-										<br></br>
 
 										<input style={{ width: 300, fontSize: 12 }} type="range" min={0} max={userMaxTokens?.toString()} value={tokenAmount}
 											onChange={e => {
 												setTokenAmount(Number(e.target.value).toString())
-												setTokenAmountFormatedValue(Number(e.target.value).toString())
+
+												if(inputDecimals){
+													const pot = Math.pow(10, inputDecimals)
+													setTokenAmountFormatedValue((Number(e.target.value)/pot).toString())
+												}else{
+													setTokenAmountFormatedValue(Number(e.target.value).toString())
+												}
 											}}
 										/>
 

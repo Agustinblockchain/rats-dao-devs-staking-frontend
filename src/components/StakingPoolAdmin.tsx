@@ -21,7 +21,7 @@ import { maxTokensWithDifferentNames, scriptID_Master_ClosePool_TN, scriptID_Mas
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
 import { newTransaction } from '../utils/cardano-helpersTx';
 import { pushSucessNotification, pushWarningNotification } from "../utils/pushNotification";
-import { copyToClipboard, htmlEscape, searchValueInArray, strToHex, toJson } from '../utils/utils';
+import { copyToClipboard, formatAmount, htmlEscape, searchValueInArray, strToHex, toJson } from '../utils/utils';
 import { useStoreActions, useStoreState } from '../utils/walletProvider';
 import ActionWithInputModalBtn from './ActionWithInputModalBtn';
 import ActionWithSelectInputModalBtn from './ActionWithSelectInputModalBtn';
@@ -81,6 +81,8 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
         swFundedUI,
         swClosedUI,
         swTerminatedUI,
+
+		beginAtUI,
         closedAtUI,
 		graceTimeUI,
         terminatedAtUI,
@@ -102,6 +104,9 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 		countEUTxOs_With_DatumUI,
 		countEUTxOs_With_FundDatumUI,
 		countEUTxOs_With_UserDatumUI,
+
+		staking_Decimals,
+        harvest_Decimals,
 
 		totalFundsAvailableUI,
 		totalStakedUI, 
@@ -188,7 +193,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 
 	const updateDetailsStakingPoolAndWallet = async () => {
 		const poolInfo = await updateDetailsStakingPool()
-		await loadWalletData(walletStore)
+		if (walletStore.connected) await loadWalletData(walletStore)
 		return poolInfo	
 	}
 
@@ -1028,7 +1033,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 								</>
 								:
 								<>
-									<button onClick={() => { if (walletStore.connected) { updateDetailsStakingPoolAndWallet() } }} className='btn__ghost icon' style={walletStore.connected ? { cursor: 'pointer' } : { cursor: 'default' }} >
+									<button onClick={() => { if (true) { updateDetailsStakingPoolAndWallet() } }} className='btn__ghost icon' style={true ? { cursor: 'pointer' } : { cursor: 'default' }} >
 										<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" className="bi bi-arrow-repeat" viewBox="0 0 16 16">
 											<path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z" />
 											<path fillRule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z" />
@@ -1117,14 +1122,14 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 							</>
 						}
 
-						<p><>Begin At: {new Date(parseInt(poolInfo.pParams.ppBegintAt.toString())).toString()} {((!poolInfo.swIniciado) ? <>(It hasn't started yet)</>:<></>)}</></p>
+						<p><>Begin At: {beginAtUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} {((!poolInfo.swIniciado) ? <>(It hasn't started yet)</>:<></>)}</></p>
 						<br></br>
 
 						{poolInfo.closedAt?
-						<p><>Forzed Deadline: {closedAtUI} {((poolInfo.swClosed) ? <>(It's already Closed)</>:<></>)}</></p>
+						<p><>Forzed Deadline: {closedAtUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} {((poolInfo.swClosed) ? <>(It's already Closed)</>:<></>)}</></p>
 						:
 						<>
-							<p><>Deadline: {closedAtUI} {((poolInfo.swClosed) ? <>(It's already Closed)</>:<></>)}</></p>
+							<p><>Deadline: {closedAtUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} {((poolInfo.swClosed) ? <>(It's already Closed)</>:<></>)}</></p>
 						</>
 						}
 						<br></br>
@@ -1145,10 +1150,10 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 						<br></br>
 
 						<div>
-							Staking Unit In Wallet: {(walletStakingAmountUI === ui_loading || walletStakingAmountUI === ui_notConnected ? walletStakingAmountUI : Number(walletStakingAmountUI).toLocaleString("en-US") + " " + poolInfo.staking_UI) || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}
+							Staking Unit In Wallet: {(walletStakingAmountUI === ui_loading || walletStakingAmountUI === ui_notConnected ? walletStakingAmountUI : formatAmount(Number(walletStakingAmountUI), staking_Decimals, poolInfo.staking_UI)) || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}
 						</div>
 						<div>
-							Harvest Unit In Wallet: {(walletHarvestAmountUI === ui_loading || walletHarvestAmountUI === ui_notConnected ? walletHarvestAmountUI : Number(walletHarvestAmountUI).toLocaleString("en-US") + " " + poolInfo.harvest_UI) || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}
+							Harvest Unit In Wallet: {(walletHarvestAmountUI === ui_loading || walletHarvestAmountUI === ui_notConnected ? walletHarvestAmountUI : formatAmount(Number(walletHarvestAmountUI), harvest_Decimals, poolInfo.harvest_UI)) || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}
 						</div>
 						<br></br>
 

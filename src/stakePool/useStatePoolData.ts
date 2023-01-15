@@ -1,11 +1,12 @@
 //--------------------------------------
 import { useEffect, useRef, useState } from "react";
-import { EUTxO, Master_Funder, PoolDatum, UserDatum } from "../types";
-import { ADA_UI, fundID_TN, poolDatum_ClaimedFund, poolID_TN, scriptID_Master_AddScripts_TN, scriptID_Master_ClosePool_TN, scriptID_Master_DeleteFund_TN, scriptID_Master_DeleteScripts_TN, scriptID_Master_FundAndMerge_TN, scriptID_Master_Fund_TN, scriptID_Master_SendBackDeposit_TN, scriptID_Master_SendBackFund_TN, scriptID_Master_SplitFund_TN, scriptID_Master_TerminatePool_TN, scriptID_User_Deposit_TN, scriptID_User_Harvest_TN, scriptID_User_Withdraw_TN, scriptID_Validator_TN, txID_Master_AddScripts_TN, userID_TN } from "../types/constantes";
+import { AssetClass, EUTxO, Master_Funder, PoolDatum, UserDatum } from "../types";
+import { ADA_Decimals, ADA_UI, fundID_TN, poolDatum_ClaimedFund, poolID_TN, scriptID_Master_AddScripts_TN, scriptID_Master_ClosePool_TN, scriptID_Master_DeleteFund_TN, scriptID_Master_DeleteScripts_TN, scriptID_Master_FundAndMerge_TN, scriptID_Master_Fund_TN, scriptID_Master_SendBackDeposit_TN, scriptID_Master_SendBackFund_TN, scriptID_Master_SplitFund_TN, scriptID_Master_TerminatePool_TN, scriptID_User_Deposit_TN, scriptID_User_Harvest_TN, scriptID_User_Withdraw_TN, scriptID_Validator_TN, txID_Master_AddScripts_TN, userID_TN } from "../types/constantes";
 import { StakingPoolDBInterface } from "../types/stakePoolDBModel";
 import { apiSaveEUTxODB, apiGetEUTxOsDBByStakingPool,
-    apiGetStakingPoolDB } from "./apis";
-import { strToHex, toJson } from "../utils/utils";
+    apiGetStakingPoolDB, 
+    apiGetTokenMetadata} from "./apis";
+import { formatAmount, strToHex, toJson } from "../utils/utils";
 import { useStoreState } from "../utils/walletProvider";
 import {
     getEUTxOs_With_FundDatum_InEUxTOList, getEUTxOs_With_UserDatum_InEUxTOList,
@@ -48,8 +49,9 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
     const [swPoolReadyForGiveBackFundsUI, setSwPoolReadyForGiveBackFundsUI] = useState<string | 0 > (ui_loading)
     const [swPoolReadyForDeleteMainScriptsUI, setSwPoolReadyForDeleteMainScriptsUI] = useState<string | 0 > (ui_loading)
     const [swPoolReadyForDeletePoolInDBUI, setSwPoolReadyForDeletePoolInDBUI] = useState<string | 0 > (ui_loading)
-    const [graceTimeUI, setGraceTimeUI] = useState<string | 0 > (ui_loading)
+    const [beginAtUI, setBeginAtUI] = useState<string | 0 > (ui_loading)
     const [closedAtUI, setClosedAtUI] = useState<string | 0 > (ui_loading)
+    const [graceTimeUI, setGraceTimeUI] = useState<string | 0 > (ui_loading)
     const [terminatedAtUI, setTerminatedAtUI] = useState<string | 0 >(ui_loading)
 
     const [swAnyScriptsMaster, setSwAnyScriptsMaster] = useState<boolean>(false)
@@ -63,6 +65,9 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
     const [userStakedDatas, setUserStakedDatas] = useState<UserStakedData[]>([])
     const [swUserRegistered, setSwUserRegistered] = useState<boolean>(false)
 
+    const [staking_Decimals, setStaking_Decimals] = useState<number>(0)
+    const [harvest_Decimals, setHarvest_Decimals] = useState<number>(0)
+    
     const [eUTxOs_With_Datum, setEUTxOs_With_Datum] = useState<EUTxO[]>([])
     const [eUTxO_With_PoolDatum, setEUTxO_With_PoolDatum] = useState<EUTxO | undefined> (undefined)
     const [eUTxOs_With_FundDatum, setEUTxOs_With_FundDatum] = useState<EUTxO[]>([])
@@ -90,31 +95,23 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
     });
 
     useEffect(() => {
+        refreshEUTxOs()
         // console.log("useStatePoolData - " + poolInfo.name + " - useEffect - isPoolDataLoading: " + isPoolDataLoading + " - isPoolDataLoaded: " + isPoolDataLoaded + " - isWalletDataLoaded: " + isWalletDataLoaded)
-        if (!walletStore.connected) {
-            setLoading(ui_notConnected)
-        }
+        // if (!walletStore.connected) {
+        //     setLoading(ui_notConnected)
+        // } else {
+        //     // console.log("useStatePoolData - " + poolInfo.name + " - useEffectB - isPoolDataLoading: " + isPoolDataLoading + " - isPoolDataLoaded: " + isPoolDataLoaded + " - isWalletDataLoaded: " + isWalletDataLoaded)
+        //     refreshEUTxOs()
+        // }
     }, [walletStore.connected])
 
-    useEffect(() => {
-       //console.log("useStatePoolData - " + poolInfo.name + " - useEffectA - isPoolDataLoading: " + isPoolDataLoading + " - isPoolDataLoaded: " + isPoolDataLoaded + " - isWalletDataLoaded: " + isWalletDataLoaded)
-        if (!isPoolDataLoaded && !isPoolDataLoading ) {
-            console.log("useStatePoolData - " + poolInfo.name + " - useEffectB - isPoolDataLoading: " + isPoolDataLoading + " - isPoolDataLoaded: " + isPoolDataLoaded + " - isWalletDataLoaded: " + isWalletDataLoaded)
-            refreshEUTxOs()
-        }
-    }, [])
-    
-    // const isPoolInfoSet = useRef(false);
-	// const setIsPoolInfoSet = (value: boolean) => {
-	// 	isPoolInfoSet.current = value
-	// }
-
     // useEffect(() => {
-    //     if (poolInfo && !isPoolInfoSet.current ) {
-    //         console.log("useStatePoolData - " + poolInfo.name + " - useEffectC - callbackSetPoolInfo - isPoolInfoSet.current: " + isPoolInfoSet.current)
-    //         setIsPoolInfoSet(true);
+    //    //console.log("useStatePoolData - " + poolInfo.name + " - useEffectA - isPoolDataLoading: " + isPoolDataLoading + " - isPoolDataLoaded: " + isPoolDataLoaded + " - isWalletDataLoaded: " + isWalletDataLoaded)
+    //     if (!isPoolDataLoaded && !isPoolDataLoading ) {
+    //         console.log("useStatePoolData - " + poolInfo.name + " - useEffectB - isPoolDataLoading: " + isPoolDataLoading + " - isPoolDataLoaded: " + isPoolDataLoaded + " - isWalletDataLoaded: " + isWalletDataLoaded)
+    //         refreshEUTxOs()
     //     }
-    // }, [poolInfo])
+    // }, [])
 
     const setLoading = (ui: string | 0) => {
         // console.log("useStatePoolData - " + poolInfo.name + " - setLoading: " + ui)
@@ -130,6 +127,8 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
         setSwPoolReadyForGiveBackFundsUI(ui)
         setSwPoolReadyForDeleteMainScriptsUI(ui)
         setSwPoolReadyForDeletePoolInDBUI(ui)
+        
+        setBeginAtUI(ui)
         setClosedAtUI(ui)
         setGraceTimeUI(ui)
         setTerminatedAtUI(ui)
@@ -155,6 +154,50 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
 
     const getEUTxOs = async (poolInfo_ : StakingPoolDBInterface) => {
         console.log("useStatePoolData - " + poolInfo.name + " - getEUTxOs - Init")
+        //------------------
+        const staking_CS = stakingPoolInfo.staking_Lucid.slice(0, 56)
+        const staking_TN = stakingPoolInfo.staking_Lucid.slice(56)
+        const staking_AC: AssetClass = { currencySymbol: staking_TN, tokenName: staking_CS };
+        const staking_AC_isAda = (staking_CS === 'lovelace')
+        const staking_AC_isWithoutTokenName = !staking_AC_isAda && staking_TN == ""
+        //------------------
+        const harvest_CS = stakingPoolInfo.harvest_Lucid.slice(0, 56)
+        const harvest_TN = stakingPoolInfo.harvest_Lucid.slice(56)
+        const harvest_AC: AssetClass = { currencySymbol: harvest_CS, tokenName: harvest_TN };
+        const harvest_AC_isAda = (harvest_CS === 'lovelace')
+        const harvest_AC_isWithoutTokenName = !harvest_AC_isAda && harvest_TN == ""
+        //------------------
+        var staking_Decimals = 0
+        if (staking_AC_isAda){
+            staking_Decimals = ADA_Decimals
+        }else if (staking_AC_isWithoutTokenName){
+            staking_Decimals = 0
+        }else{
+            const staking_Metadata = await apiGetTokenMetadata(staking_AC)
+            console.log("useStatePoolData - " + poolInfo.name + " - getEUTxOs - staking_metadata: " + toJson(staking_Metadata))
+            if(staking_Metadata && staking_Metadata?.metadata?.decimals) {
+                staking_Decimals = staking_Metadata.metadata.decimals
+            }else{
+                staking_Decimals = 3
+            }
+        }
+        setStaking_Decimals(staking_Decimals)
+        //------------------
+        var harvest_Decimals = 0
+        if (harvest_AC_isAda){
+            harvest_Decimals = ADA_Decimals
+        }else if (harvest_AC_isWithoutTokenName){
+            harvest_Decimals = 0
+        }else{
+            const harvest_Metadata = await apiGetTokenMetadata(harvest_AC)
+            console.log("useStatePoolData - " + poolInfo.name + " - getEUTxOs - harvest_metadata: " + toJson(harvest_Metadata))
+            if(harvest_Metadata && harvest_Metadata?.metadata?.decimals) {
+                harvest_Decimals = harvest_Metadata.metadata.decimals
+            }else{
+                harvest_Decimals = 3
+            }
+        }
+        setHarvest_Decimals(harvest_Decimals)
         //------------------
         const poolID_AC_Lucid = poolInfo_.pParams.ppPoolID_CS + strToHex(poolID_TN);
         //------------------
@@ -195,21 +238,21 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
                 setUserStakedDatas([])
                 setCountEUTxOs_With_FundDatumUI('0')
                 setCountEUTxOs_With_UserDatumUI('0')
-                setTotalFundAmountUI(Number(0).toLocaleString("en-US") + " " + poolInfo.harvest_UI)
-                setTotalAvailaibleFundsUI(Number(0).toLocaleString("en-US") + " " + poolInfo.harvest_UI)
-                setTotalStakedUI(Number(0).toLocaleString("en-US") + " " + poolInfo.staking_UI)
-                setTotalRewardsPaidUI(Number(0).toLocaleString("en-US") + " " + poolInfo.harvest_UI)
-                setTotalRewardsToPayUI(Number(0).toLocaleString("en-US") + " " + poolInfo.harvest_UI)
-                setTotalFundAmountsRemains_ForMasterUI(Number(0).toLocaleString("en-US") + " " + poolInfo.harvest_UI)
-                setTotalMastersMinAdaUI(Number(0).toLocaleString("en-US") + " " + ADA_UI)
-                setTotalUsersMinAdaUI(Number(0).toLocaleString("en-US") + " " + ADA_UI)
+                setTotalFundAmountUI(formatAmount(0, harvest_Decimals, poolInfo.harvest_UI))
+                setTotalAvailaibleFundsUI(formatAmount(0, harvest_Decimals, poolInfo.harvest_UI))
+                setTotalStakedUI(formatAmount(0, staking_Decimals, poolInfo.staking_UI))
+                setTotalRewardsPaidUI(formatAmount(0, harvest_Decimals, poolInfo.harvest_UI))
+                setTotalRewardsToPayUI(formatAmount(0, harvest_Decimals, poolInfo.harvest_UI))
+                setTotalFundAmountsRemains_ForMasterUI(formatAmount(0, harvest_Decimals, poolInfo.harvest_UI))
+                setTotalMastersMinAdaUI(formatAmount(0, ADA_Decimals, ADA_UI))
+                setTotalUsersMinAdaUI(formatAmount(0, ADA_Decimals, ADA_UI))
                 setUserRegisteredUI('0')
             } else {
                 //console.log("useStatePoolData - " + poolInfo_.name + " - getEUTxOs: UTxO with PoolDatum: " + eUTxO_With_PoolDatum.uTxO.txHash + "#" + eUTxO_With_PoolDatum.uTxO.outputIndex)
                 setEUTxO_With_PoolDatum(eUTxO_With_PoolDatum)
                 setMasterFunders(eUTxO_With_PoolDatum.datum.pdMasterFunders)
-                setTotalFundAmountUI(getTotalFundAmount(eUTxO_With_PoolDatum).toLocaleString("en-US") + " " + poolInfo.harvest_UI)
-                setTotalMastersMinAdaUI(getTotalMastersMinAda_In_EUTxOs_With_UserDatum(poolInfo, eUTxO_With_PoolDatum).toLocaleString("en-US") + " " + ADA_UI)
+                setTotalFundAmountUI(formatAmount(Number(getTotalFundAmount(eUTxO_With_PoolDatum)), harvest_Decimals, poolInfo.harvest_UI))
+                setTotalMastersMinAdaUI(formatAmount(Number(getTotalMastersMinAda_In_EUTxOs_With_UserDatum(poolInfo, eUTxO_With_PoolDatum)), ADA_Decimals, ADA_UI))
             }
         }
         var eUTxOs_With_FundDatum: EUTxO[] = []
@@ -220,15 +263,15 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
                 // console.log("useStatePoolData - " + poolInfo_.name + " - getEUTxOs: Can't find any UTxO with FundDatum. Did you funded already?");
                 setEUTxOs_With_FundDatum([])
                 setCountEUTxOs_With_FundDatumUI('0')
-                setTotalAvailaibleFundsUI(Number(0).toLocaleString("en-US") + " " + poolInfo.harvest_UI)
+                setTotalAvailaibleFundsUI(formatAmount(0, harvest_Decimals, poolInfo.harvest_UI))
             } else {
                 //console.log("useStatePoolData - " + poolInfo_.name + " - getEUTxOs: UTxOs with FundDatum lenght: " + eUTxOs_With_FundDatum.length)
                 const sorted_EUTxOs_With_FundDatum = sortFundDatum(poolInfo, eUTxOs_With_FundDatum)
                 setEUTxOs_With_FundDatum(sorted_EUTxOs_With_FundDatum)
                 setCountEUTxOs_With_FundDatumUI(eUTxOs_With_FundDatum.length.toString())
-                setTotalAvailaibleFundsUI(getTotalAvailaibleFunds(eUTxOs_With_FundDatum).toLocaleString("en-US") + " " + poolInfo.harvest_UI)
+                setTotalAvailaibleFundsUI(formatAmount(Number(getTotalAvailaibleFunds(eUTxOs_With_FundDatum)), harvest_Decimals, poolInfo.harvest_UI))
             }
-            setTotalFundAmountsRemains_ForMasterUI(getTotalFundAmountsRemains_ForMasters(eUTxO_With_PoolDatum, eUTxOs_With_FundDatum)[0].toLocaleString("en-US") + " " + poolInfo.harvest_UI)
+            setTotalFundAmountsRemains_ForMasterUI(formatAmount(Number(getTotalFundAmountsRemains_ForMasters(eUTxO_With_PoolDatum, eUTxOs_With_FundDatum)[0]), harvest_Decimals, poolInfo.harvest_UI))
         }
         if (eUTxO_With_PoolDatum) {
             //------------------
@@ -241,20 +284,20 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
                 // console.log("useStatePoolData - " + poolInfo_.name + " - getEUTxOs: Can't find any UTxO with UserDatum.");
                 setEUTxOs_With_UserDatum([])
                 setCountEUTxOs_With_UserDatumUI('0')
-                setTotalStakedUI(Number(0).toLocaleString("en-US") + " " + poolInfo.staking_UI)
-                setTotalRewardsPaidUI(getTotalCashedOut(eUTxO_With_PoolDatum, eUTxOs_With_FundDatum).toLocaleString("en-US") + " " + poolInfo.harvest_UI)
-                setTotalRewardsToPayUI(Number(0).toLocaleString("en-US") + " " + poolInfo.harvest_UI)
-                setTotalUsersMinAdaUI(Number(0).toLocaleString("en-US") + " " + ADA_UI)
+                setTotalStakedUI(formatAmount(0, staking_Decimals, poolInfo.staking_UI))
+                setTotalRewardsPaidUI(formatAmount(Number(getTotalCashedOut(eUTxO_With_PoolDatum, eUTxOs_With_FundDatum)), harvest_Decimals, poolInfo.harvest_UI))
+                setTotalRewardsToPayUI(formatAmount(0, harvest_Decimals, poolInfo.harvest_UI))
+                setTotalUsersMinAdaUI(formatAmount(0, ADA_Decimals, ADA_UI))
                 setUserRegisteredUI('TODO')
                 setUserStakedDatas([])
             } else {
                 //console.log("useStatePoolData - " + poolInfo_.name + " - getEUTxOs: UTxOs with UserDatum lenght: " + eUTxOs_With_UserDatum.length)
                 setEUTxOs_With_UserDatum(eUTxOs_With_UserDatum)
                 setCountEUTxOs_With_UserDatumUI(eUTxOs_With_UserDatum.length.toString())
-                setTotalStakedUI(getTotalStakedAmount(eUTxOs_With_UserDatum).toLocaleString("en-US") + " " + poolInfo.staking_UI)
-                setTotalRewardsPaidUI(getTotalCashedOut(eUTxO_With_PoolDatum, eUTxOs_With_FundDatum).toLocaleString("en-US") + " " + poolInfo.harvest_UI)
-                setTotalRewardsToPayUI(getTotalRewardsToPay_In_EUTxOs_With_UserDatum(poolInfo, eUTxO_With_PoolDatum, eUTxOs_With_UserDatum).toLocaleString("en-US") + " " + poolInfo.harvest_UI)
-                setTotalUsersMinAdaUI(getTotalUsersMinAda_In_EUTxOs_With_UserDatum(poolInfo, eUTxOs_With_UserDatum).toLocaleString("en-US") + " " + ADA_UI)
+                setTotalStakedUI(formatAmount(Number(getTotalStakedAmount(eUTxOs_With_UserDatum)), staking_Decimals, poolInfo.staking_UI))
+                setTotalRewardsPaidUI(formatAmount(Number(getTotalCashedOut(eUTxO_With_PoolDatum, eUTxOs_With_FundDatum)), harvest_Decimals, poolInfo.harvest_UI))
+                setTotalRewardsToPayUI(formatAmount(Number(getTotalRewardsToPay_In_EUTxOs_With_UserDatum(poolInfo, eUTxO_With_PoolDatum, eUTxOs_With_UserDatum)), harvest_Decimals, poolInfo.harvest_UI))
+                setTotalUsersMinAdaUI(formatAmount(Number(getTotalUsersMinAda_In_EUTxOs_With_UserDatum(poolInfo, eUTxOs_With_UserDatum)), ADA_Decimals, ADA_UI))
                 setUserRegisteredUI('TODO')
                 if (getIfUserRegistered(walletStore.pkh!, eUTxOs_With_UserDatum)) {
                     setSwUserRegistered(true)
@@ -315,7 +358,7 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
         await getEUTxOs(poolInfo_)
         //await new Promise(r => setTimeout(r, 2000));
         //------------------
-        setPoolData(poolInfo_);
+        await setPoolData(poolInfo_);
         //await new Promise(r => setTimeout(r, 2000));    
         //------------------
         setIsPoolDataLoaded(true);
@@ -331,17 +374,17 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
         setLoading(ui_loading)
         //------------------
         await getEUTxOs(poolInfo)
-        await new Promise(r => setTimeout(r, 1000));
+        // await new Promise(r => setTimeout(r, 1000));
         //------------------
-        setPoolData(poolInfo);    
-        await new Promise(r => setTimeout(r, 1000));    
+        await setPoolData(poolInfo);    
+        // await new Promise(r => setTimeout(r, 1000));    
         //------------------
         setIsPoolDataLoaded(true)
         setIsPoolDataLoading(false)
         //------------------
     }
 
-    function setPoolData(poolInfo: StakingPoolDBInterface) {
+    async function setPoolData(poolInfo: StakingPoolDBInterface) {
         setSwShowOnHomeUI(poolInfo.swShowOnHome ? "Yes" : "No");
         setSwPreparadoUI(poolInfo.swPreparado ? "Yes" : "No");
         setSwIniciadoUI(poolInfo.swIniciado ? "Yes" : "No");
@@ -352,24 +395,26 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
         setSwPoolReadyForDeleteMainScriptsUI(poolInfo.swPoolReadyForDeleteMainScripts ? "Yes" : "No");
         setSwPoolReadyForDeletePoolInDBUI(poolInfo.swPoolReadyForDeletePoolInDB ? "Yes" : "No");
         //------------------
-        if(poolInfo.pParams.ppGraceTime < 1000){
-            setGraceTimeUI(poolInfo.pParams.ppGraceTime.toString() + " ms")
-        }else if(poolInfo.pParams.ppGraceTime < 1000 * 60){
-            setGraceTimeUI((Number(poolInfo.pParams.ppGraceTime) / 1000).toString() + " seconds")
-        }else if(poolInfo.pParams.ppGraceTime < 1000 * 60 * 60){
-            setGraceTimeUI((Number(poolInfo.pParams.ppGraceTime) / (1000 * 60)).toString() + " minutes")
-        }else if(poolInfo.pParams.ppGraceTime < 1000 * 60 * 60 * 24){
-            setGraceTimeUI((Number(poolInfo.pParams.ppGraceTime) / (1000 * 60 * 60)).toString() + " hours")
-        }else{
-            setGraceTimeUI((Number(poolInfo.pParams.ppGraceTime) / (1000 * 60 * 60 * 24)).toString() + " days")
-        }
+        setBeginAtUI(new Date(parseInt(poolInfo.pParams.ppBegintAt.toString())).toLocaleString("en-US"));
         //------------------
         if (poolInfo.closedAt !== undefined) {
-            setClosedAtUI(poolInfo.closedAt.toString());
-            setTerminatedAtUI(new Date(poolInfo.closedAt.getTime() + Number(poolInfo.graceTime)).toString());
+            setClosedAtUI(poolInfo.closedAt.toLocaleString("en-US"));
+            setTerminatedAtUI(new Date(poolInfo.closedAt.getTime() + Number(poolInfo.graceTime)).toLocaleString("en-US"));
         } else {
-            setClosedAtUI(new Date(parseInt(poolInfo.pParams.ppDeadline.toString())).toString());
-            setTerminatedAtUI(new Date(poolInfo.deadline.getTime() + Number(poolInfo.graceTime)).toString());
+            setClosedAtUI(new Date(parseInt(poolInfo.pParams.ppDeadline.toString())).toLocaleString("en-US"));
+            setTerminatedAtUI(new Date(poolInfo.deadline.getTime() + Number(poolInfo.graceTime)).toLocaleString("en-US"));
+        }
+        //------------------
+        if(poolInfo.pParams.ppGraceTime < 1000){
+            setGraceTimeUI(poolInfo.pParams.ppGraceTime.toLocaleString("en-US", {maximumFractionDigits: 2}) + " ms")
+        }else if(poolInfo.pParams.ppGraceTime < 1000 * 60){
+            setGraceTimeUI((Number(poolInfo.pParams.ppGraceTime) / 1000).toLocaleString("en-US", {maximumFractionDigits: 2}) + " seconds")
+        }else if(poolInfo.pParams.ppGraceTime < 1000 * 60 * 60){
+            setGraceTimeUI((Number(poolInfo.pParams.ppGraceTime) / (1000 * 60)).toLocaleString("en-US", {maximumFractionDigits: 2}) + " minutes")
+        }else if(poolInfo.pParams.ppGraceTime < 1000 * 60 * 60 * 24){
+            setGraceTimeUI((Number(poolInfo.pParams.ppGraceTime) / (1000 * 60 * 60)).toLocaleString("en-US", {maximumFractionDigits: 2}) + " hours")
+        }else{
+            setGraceTimeUI((Number(poolInfo.pParams.ppGraceTime) / (1000 * 60 * 60 * 24)).toLocaleString("en-US", {maximumFractionDigits: 2}) + " days")
         }
         //------------------
         const swAnyScriptsMaster = (
@@ -426,6 +471,7 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
         swFundedUI,
         swClosedUI, 
         swTerminatedUI, 
+        beginAtUI,
         closedAtUI, 
         graceTimeUI,
         terminatedAtUI,
@@ -444,6 +490,9 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
 
         masterFunders,
         userStakedDatas,
+
+        staking_Decimals,
+        harvest_Decimals,
 
         totalFundsAvailableUI, 
         totalFundAmountUI, 

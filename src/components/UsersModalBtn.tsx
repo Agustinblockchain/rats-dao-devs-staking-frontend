@@ -5,8 +5,9 @@ import Skeleton from "react-loading-skeleton";
 import { getRewardsToPay_In_EUTxO_With_UserDatum } from "../stakePool/helpersStakePool";
 import useStatePoolData from '../stakePool/useStatePoolData';
 import { EUTxO } from "../types";
-import { maxTokensWithDifferentNames } from "../types/constantes";
+import { ADA_Decimals, ADA_UI, maxTokensWithDifferentNames } from "../types/constantes";
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
+import { formatAmount } from "../utils/utils";
 import { useStoreState } from '../utils/walletProvider';
 import ActionWithInputModalBtn from './ActionWithInputModalBtn';
 import LoadingSpinner from "./LoadingSpinner";
@@ -64,6 +65,8 @@ export default function UsersModalBtn(
 		isPoolDataLoaded, 
 		eUTxO_With_PoolDatum,
 		eUTxOs_With_UserDatum, 
+		staking_Decimals,
+        harvest_Decimals,
 		totalStakedUI,
 		totalRewardsPaidUI,
 		totalRewardsToPayUI,
@@ -190,11 +193,11 @@ export default function UsersModalBtn(
 													<td style={{fontSize:8}}>{eUTxO.uTxO.txHash + "#" + eUTxO.uTxO.outputIndex}</td>
 													<td>{eUTxO.datum.udCreatedAt.toString()}</td>
 													<td style={{fontSize:8}}>{eUTxO.datum.udUser.toString()}</td>
-													<td>{Number(eUTxO.datum.udInvest).toLocaleString("en-US") + " " + poolInfo.staking_UI}</td>
-													<td>{Number(eUTxO.datum.udCashedOut).toLocaleString("en-US") + " " + poolInfo.harvest_UI}</td>
-													<td>{(typeof eUTxO_With_PoolDatum == "object" ? Number(getRewardsToPay_In_EUTxO_With_UserDatum (poolInfo, eUTxO_With_PoolDatum, eUTxO)).toLocaleString("en-US"):0)+ " " + poolInfo.harvest_UI}</td>
+													<td>{formatAmount(Number(eUTxO.datum.udInvest), staking_Decimals, poolInfo.staking_UI)}</td>
+													<td>{formatAmount(Number(eUTxO.datum.udCashedOut), harvest_Decimals, poolInfo.harvest_UI)}</td>
+													<td>{formatAmount((typeof eUTxO_With_PoolDatum == "object" ? Number(getRewardsToPay_In_EUTxO_With_UserDatum (poolInfo, eUTxO_With_PoolDatum, eUTxO)):0), harvest_Decimals, poolInfo.harvest_UI)}</td>
 													<td>{eUTxO.datum.udLastClaimAt.val==undefined?"":eUTxO.datum.udLastClaimAt.val.toString()}</td>
-													<td>{Number(eUTxO.datum.udMinAda).toLocaleString("en-US") + " ADA (lovelace)" }</td>
+													<td>{formatAmount(Number(eUTxO.datum.udMinAda), ADA_Decimals, ADA_UI) }</td>
 												</tr>
 										)}
 										<tr >

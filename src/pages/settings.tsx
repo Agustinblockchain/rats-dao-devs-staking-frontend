@@ -8,16 +8,16 @@ import SettingsForm from '../components/SettingsForm';
 import { toJson } from '../utils/utils';
 import { useStoreState } from '../utils/walletProvider';
 
-const Settings : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = ({swCreate, pkh} : InferGetServerSidePropsType<typeof getServerSideProps>) =>  {
+const Settings : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = ({pkh, swCreate} : InferGetServerSidePropsType<typeof getServerSideProps>) =>  {
 	const router = useRouter();
 
 	const [isRefreshing, setIsRefreshing] = useState(true);
 
 	const walletStore = useStoreState(state => state.wallet)
 
-	const refreshData = (pkh : string | undefined) => {
-		console.log ("Settings - refreshData - router.replace - pkh: "+ pkh + " - walletStore.connected " + walletStore.connected + " - router.asPath: " + router.asPath);
-		router.replace(router.basePath + "?pkh=" + pkh);
+	const refreshData = () => {
+		console.log ("Settings - refreshData - router.replace - walletStore.connected " + walletStore.connected + " - router.asPath: " + router.asPath);
+		router.replace(router.basePath)
 		setIsRefreshing(true);
 	};
 
@@ -26,24 +26,20 @@ const Settings : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>
 	}, []);
 	
 	useEffect(() => {
-		// console.log("Settings - useEffect - walletStore.connected: " + walletStore.connected)
-		if (walletStore.connected ) {
-			refreshData(walletStore.pkh)
-		}else{
-			refreshData(undefined)
-
+		if (walletStore.connected && pkh != walletStore.pkh) {
+			refreshData()
+		}else if (!walletStore.connected) {
+			refreshData()
 		}
 	}, [walletStore.connected])
 	
 	return (
 		<Layout swCreate={swCreate}>
-
 			{ !swCreate?
 					<div>You dont have access to this page</div>
 				:
 					<SettingsForm/>	
 			}
-
 		</Layout>
 	)
 }
@@ -51,8 +47,7 @@ const Settings : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>
 export async function getServerSideProps(context : any) { 
 	try {
 		console.log ("Settings getServerSideProps -------------------------------");
-		console.log ("Settings getServerSideProps - init - context.query?.pkh:", context.query?.pkh);
-
+		//console.log ("Settings getServerSideProps - init - context.query?.pkh:", context.query?.pkh);
 		const session = await getSession(context)
 		if (session) {
 			console.log ("Settings getServerSideProps - init - session:", toJson (session));
@@ -61,16 +56,16 @@ export async function getServerSideProps(context : any) {
 		}
 		return {
 			props: {
-				swCreate: session && session.user ? session.user.swCreate : false ,
-				pkh: context.query?.pkh !== undefined ? context.query?.pkh : ""
+				pkh: session?.user.pkh !== undefined ? session?.user.pkh : "",
+				swCreate: session && session.user ? session.user.swCreate : false 
 			}
 		};
 	} catch (error) {
 		console.error (error)
 		return {
 			props: { 
+				pkh: "",
 				swCreate: false,
-				pkh: context.query?.pkh !== undefined ? context.query?.pkh : ""
 			 }
 		};
 	}

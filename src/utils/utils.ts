@@ -1,6 +1,13 @@
 import { createHash } from 'crypto';
 //----------------------------------------------------------------------
 
+export function formatAmount(number: number, decimals: number, unit: string) {
+    const pot = Math.pow(10, decimals)
+    return (number / pot).toLocaleString("en-US", {minimumFractionDigits: decimals}) + " " + unit
+}
+
+//----------------------------------------------------------------------
+
 // export function string2Bin (str: string) {
 //         var result = [];
 //         for (var i = 0; i < str.length; i++) {

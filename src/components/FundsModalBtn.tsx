@@ -7,7 +7,7 @@ import useStatePoolData from '../stakePool/useStatePoolData';
 import { EUTxO, FundDatum } from "../types";
 import { maxTokensWithDifferentNames } from "../types/constantes";
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
-import { toJson } from "../utils/utils";
+import { formatAmount, toJson } from "../utils/utils";
 import { useStoreState } from '../utils/walletProvider';
 import ActionWithInputModalBtn from './ActionWithInputModalBtn';
 import LoadingSpinner from "./LoadingSpinner";
@@ -90,6 +90,8 @@ export default function FundsModalBtn(
 		poolInfo,
 		isPoolDataLoaded, 
 		eUTxOs_With_FundDatum, 
+		staking_Decimals,
+        harvest_Decimals,
 		totalFundsAvailableUI: totalFundsAvailableUI,
 		totalFundAmountUI: totalFundAmountUI,
 		totalRewardsPaidUI: totalRewardsPaidUI,
@@ -247,9 +249,9 @@ export default function FundsModalBtn(
 												</td>
 												<td style={{fontSize:8}}>{eUTxO.uTxO.txHash + "#" + eUTxO.uTxO.outputIndex}</td>
 												<td>{eUTxO.isPreparing.val !== undefined || eUTxO.isConsuming.val !== undefined? "No":"Yes"}</td>
-												<td>{Number(getFundAmount_In_EUTxO_With_FundDatum(eUTxO)).toLocaleString("en-US") + " " + poolInfo.harvest_UI}</td>
-												<td>{Number(eUTxO.datum.fdCashedOut).toLocaleString("en-US") + " " + poolInfo.harvest_UI}</td>
-												<td>{Number(getAvailaibleFunds_In_EUTxO_With_FundDatum(eUTxO)).toLocaleString("en-US") + " " + poolInfo.harvest_UI}</td>
+												<td>{formatAmount(Number(getFundAmount_In_EUTxO_With_FundDatum(eUTxO)), harvest_Decimals, poolInfo.harvest_UI)}</td>
+												<td>{formatAmount(Number(eUTxO.datum.fdCashedOut), harvest_Decimals, poolInfo.harvest_UI)}</td>
+												<td>{formatAmount(Number(getAvailaibleFunds_In_EUTxO_With_FundDatum(eUTxO)), harvest_Decimals, poolInfo.harvest_UI)}</td>
 											</tr>
 									)}
 									<tr >

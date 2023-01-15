@@ -1,7 +1,8 @@
 
+import { useEffect } from 'react';
 import Footer from './Footer';
 import Navbar from './Navbar';
-
+import dynamic from 'next/dynamic'
 //--------------------------------------
 
 export default function Layout({
@@ -12,8 +13,7 @@ export default function Layout({
 	home?: boolean
 	swCreate?: boolean
 }) {
-	//const Navbar = dynamic(() => import('./Navbar'), { ssr: false })
-	
+
 	return (
 		// <Html className="primary_content">
 		<div className="primary_content"> 

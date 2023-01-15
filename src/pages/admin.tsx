@@ -4,26 +4,42 @@ import Layout from '../components/Layout'
 import dynamic from 'next/dynamic'
 import { toJson } from '../utils/utils'
 import { connect } from '../utils/dbConnect'
-import { useStoreState } from '../utils/walletProvider';
+import { useStoreActions, useStoreState } from '../utils/walletProvider';
 import { StakingPoolDBInterface, getStakingPools } from '../types/stakePoolDBModel'
 import { createContext, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { stakingPoolDBParser } from '../stakePool/helpersStakePool'
 import { getSession, useSession } from 'next-auth/react'
+import StakingPoolAdmin from '../components/StakingPoolAdmin'
 //--------------------------------------
-const Admin : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> =  ({stakingPools, pkh, swCreate} : InferGetServerSidePropsType<typeof getServerSideProps>) =>  {
+const Admin : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> =  ({pkh, swCreate, stakingPools} : InferGetServerSidePropsType<typeof getServerSideProps>) =>  {
 	
 	const router = useRouter();
+
+	// const { data: session } = useSession()
 
 	const [isRefreshing, setIsRefreshing] = useState(true);
 
 	const walletStore = useStoreState(state => state.wallet)
-
+	// const {  isWalletDataLoaded } = useStoreState(state => {
+	// 	return { isWalletDataLoaded: state.isWalletDataLoaded };
+	// });
+	
 	const [stakingPoolsParsed, setStakingPoolsParsed] = useState<StakingPoolDBInterface [] > ([]);
 
-	const refreshData = (pkh : string | undefined) => {
-		console.log ("Admin - refreshData - router.replace - pkh: "+ pkh + " - walletStore.connected " + walletStore.connected + " - router.asPath: " + router.asPath);
-		router.replace(router.basePath + "?pkh=" + pkh);
+	// const refreshData = (pkh : string | undefined) => {
+	// 	console.log ("Admin - refreshData - router.replace - pkh: "+ pkh + " - walletStore.connected " + walletStore.connected + " - router.asPath: " + router.asPath);
+	// 	if(pkh !== undefined){
+	// 		router.replace(router.basePath + "?pkh=" + pkh);
+	// 	}else{
+	// 		router.replace(router.basePath)
+	// 	}
+	// 	setIsRefreshing(true);
+	// };
+
+	const refreshData = () => {
+		console.log ("Admin - refreshData - router.replace - walletStore.connected " + walletStore.connected + " - router.asPath: " + router.asPath);
+		router.replace(router.basePath)
 		setIsRefreshing(true);
 	};
 
@@ -32,12 +48,10 @@ const Admin : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> =
 	}, []);
 
 	useEffect(() => {
-		// console.log("Admin - useEffect - walletStore.connected: " + walletStore.connected + " - walletStore.pkh: " + walletStore.pkh + " - pkh: " + pkh)
-		if (walletStore.connected ) {
-			refreshData(walletStore.pkh)
-		}else{
-			refreshData(undefined)
-
+		if (walletStore.connected && pkh != walletStore.pkh) {
+			refreshData()
+		}else if (!walletStore.connected) {
+			refreshData()
 		}
 	}, [walletStore.connected])
 
@@ -48,21 +62,24 @@ const Admin : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> =
 			}
 			setStakingPoolsParsed (stakingPools)
 		}
+		setIsRefreshing(false);
 	}, [stakingPools]);
-
-	const StakingPoolAdmin = dynamic(() => import('../components/StakingPoolAdmin'), { ssr: false, loading: () => <p>Loading...</p> })
 
 	return (
 		<Layout swCreate={swCreate}>
-			{ !walletStore.connected?
+			{ (!walletStore.connected) ?
 					<div>Connect you wallet to see Staking Pools to Admin</div>
 				:
-					stakingPoolsParsed.length > 0 ? 
-						stakingPoolsParsed.map(
-							sp => <StakingPoolAdmin key={sp.name} stakingPoolInfo={sp}  />
-						)
+					(isRefreshing) ?
+						<div>Loading Staking Pools...</div>
 					:
-						<p>Can't find any Staking Pool to Admin</p> 
+						stakingPoolsParsed.length > 0 ? 
+							stakingPoolsParsed.map(
+								sp => 
+								(typeof window !== 'undefined' && <StakingPoolAdmin key={sp.name} stakingPoolInfo={sp}  />)
+							)
+						:
+							<p>Can't find any Staking Pool to Admin</p> 
 			}
 
 		</Layout>
@@ -72,47 +89,53 @@ const Admin : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> =
 export async function getServerSideProps(context : any) { 
 
 	try {
-		
 		console.log ("Admin getServerSideProps -------------------------------");
-		console.log ("Admin getServerSideProps - init - context.query?.pkh:", context.query?.pkh);
-
+		//console.log ("Admin getServerSideProps - init - context.query?.pkh:", context.query?.pkh);
 		await connect();
-
 		const session = await getSession(context)
-
 		var rawDataStakingPools : StakingPoolDBInterface []
-		if (context.query?.pkh != undefined) {
-			// console.log ("Admin getServerSideProps - init - context.query?.pkh:", context.query?.pkh);
-			if(context.query?.pkh != ""){
-				if (session) {
-					console.log ("Admin getServerSideProps - init - session:", toJson (session));
-					if (session.user.pkh === context.query?.pkh) {
-						rawDataStakingPools  = await getStakingPools(false, context.query?.pkh, session?.user.swAdmin)
-					}else{
-						rawDataStakingPools = []
-					}
-				}else{
-					//console.log ("Admin getServerSideProps - init - session: undefined");
-					rawDataStakingPools = []
-				}
+		if (session) {
+			console.log ("Admin getServerSideProps - init - session:", toJson (session));
+			if (session.user.pkh !== undefined) {
+				rawDataStakingPools  = await getStakingPools(false, session.user.pkh, session.user.swAdmin)
 			}else{
-				// console.log ("Admin getServerSideProps - init - context.query?.pkh:", context.query?.pkh);
 				rawDataStakingPools = []
 			}
-	 	}else{
-			// console.log ("Admin getServerSideProps - init - context.query?.pkh:", context.query?.pkh);
+		}else{
 			rawDataStakingPools = []
 		}
+
+		// if (context.query?.pkh != undefined) {
+		// 	// console.log ("Admin getServerSideProps - init - context.query?.pkh:", context.query?.pkh);
+		// 	if(context.query?.pkh != ""){
+		// 		if (session) {
+		// 			console.log ("Admin getServerSideProps - init - session:", toJson (session));
+		// 			if (session.user.pkh === context.query?.pkh) {
+		// 				rawDataStakingPools  = await getStakingPools(false, context.query?.pkh, session?.user.swAdmin)
+		// 			}else{
+		// 				rawDataStakingPools = []
+		// 			}
+		// 		}else{
+		// 			//console.log ("Admin getServerSideProps - init - session: undefined");
+		// 			rawDataStakingPools = []
+		// 		}
+		// 	}else{
+		// 		// console.log ("Admin getServerSideProps - init - context.query?.pkh:", context.query?.pkh);
+		// 		rawDataStakingPools = []
+		// 	}
+	 	// }else{
+		// 	// console.log ("Admin getServerSideProps - init - context.query?.pkh:", context.query?.pkh);
+		// 	rawDataStakingPools = []
+		// }
 
 		console.log ("Admin getServerSideProps - stakingPool - length: " + rawDataStakingPools.length)
 		const stringifiedDataStakingPools = toJson(rawDataStakingPools);
 		const dataStakingPools : StakingPoolDBInterface [] = JSON.parse(stringifiedDataStakingPools);
-
 		return {
 			props: {
-				stakingPools: dataStakingPools,
+				pkh: session?.user.pkh !== undefined ? session?.user.pkh : "",
 				swCreate: session && session.user ? session.user.swCreate : false ,
-				pkh: context.query?.pkh !== undefined ? context.query?.pkh : ""
+				stakingPools: dataStakingPools
 			}
 		};
 
@@ -121,9 +144,10 @@ export async function getServerSideProps(context : any) {
 		const dataStakingPools : StakingPoolDBInterface [] = [];
 		return {
 			props: { 
+				pkh: "",
 				swCreate: false,
-				stakingPools: dataStakingPools,
-				pkh: context.query?.pkh !== undefined ? context.query?.pkh : ""
+				stakingPools: dataStakingPools
+				// pkh: context.query?.pkh !== undefined ? context.query?.pkh : ""
 			}
 		};
 	}
