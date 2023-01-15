@@ -1328,7 +1328,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 									swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded}
 									swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded}
 									swShow={poolInfo.swPreparado && !poolInfo.swTerminated}
-									swShowInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={maxHarvestAmountUI}
+									swShowInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={maxHarvestAmountUI} inputDecimals={harvest_Decimals}
 									swHash={true}
 									swPaddintTop={false}
 								
@@ -1346,7 +1346,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 									swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded}
 									swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded}
 									swShow={poolInfo.swPreparado && !poolInfo.swTerminated}
-									swShowInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={maxHarvestAmountUI}
+									swShowInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={maxHarvestAmountUI} inputDecimals={harvest_Decimals}
 									swHash={false}
 									
 								/>
