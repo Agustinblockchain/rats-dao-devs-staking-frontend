@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Assets, UTxO } from "lucid-cardano";
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
-import { copyToClipboard, hexToStr, toJson } from '../utils/utils';
+import { copyToClipboard, formatAmount, hexToStr, toJson } from '../utils/utils';
 import { NumericFormat } from 'react-number-format';
 import { explainError } from "../stakePool/explainError";
 import { EUTxO, Master } from "../types";
@@ -70,6 +70,10 @@ export default function ActionWithSelectInputModalBtn(
 		} 
 ) {
 
+	//string '0' shows 0 in UI, Number 0 shows loading skeleton for dynamic values
+	const ui_loading = 0
+	const ui_notConnected = '...'
+
 	const actionNameWithIdx = actionName + "-" + actionIdx
 
 	const [status, setStatus] = useState<ActionStatus>('idle')
@@ -90,7 +94,7 @@ export default function ActionWithSelectInputModalBtn(
 	const [walletAssetsSelect, setWalletAssetsSelect] = useState<{tokenNameHEX: string, amount: string, amountFormatedValue: string, max: string }[]>([]);
 
 	useEffect(() => {
-		if (inputMax) {
+		if (inputMax && inputMax != ui_notConnected) {
 			setUserMaxTokens(inputMax!.toString())
 		}
 	}, [inputMax])
@@ -317,7 +321,7 @@ export default function ActionWithSelectInputModalBtn(
 							//no esta idle, esta procesando o termino de procesar ok o con error
 							<>
 								<h3>{title}</h3>
-								{message !== "" ? <div style={{ marginTop: 10 }}>{message}</div> : <></>}
+								{message !== "" ? <div style={{ textAlign:"center", width: "100%", paddingTop: 10 }}>{message}</div> : <></>}
 								{(swHash && hash !== "" && hash !== undefined) ?
 									<>
 										<div>
@@ -349,7 +353,6 @@ export default function ActionWithSelectInputModalBtn(
 										<></>
 									}
 								</div>
-								
 
 								<div style={{textAlign:"center", minWidth:320, paddingTop: 25}}>
 									{cancel && status === "loading"?
@@ -384,61 +387,69 @@ export default function ActionWithSelectInputModalBtn(
 							//esta idle, no esta procesando nada
 							<>
 								<h3>{title}</h3>
-								{description !== "" ?<div style={{ paddingTop: 10 }}><div dangerouslySetInnerHTML={{ __html: description! }} /></div> : <></>}
-								{message !== "" ? <div style={{ marginTop: 10 }}>{message}</div> : <></>}
-								<h4 style={{ paddingTop: 10 }}>How many {inputUnitForShowing}?</h4>		
-								<br></br>
-								{
-									(walletAssetsList.length > 0) ?
-										<>
-											{walletAssetsList.map((asset, idx) => 
-												<div key={idx} >
-													<b>{asset.tokenName}</b> (There are {asset.value.toLocaleString()} in your wallet)
-													<br></br>
-													<NumericFormat key={"NumericFormat" + idx} style={{ width: 300, fontSize: 12 }} type="text" value={ walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.amountFormatedValue}
-														onValueChange={(values) => {
-																const { formattedValue, value } = values;
-																handleChangeValue (asset.tokenNameHEX, value)
+								{description !== "" ?<div style={{ textAlign:"center", width: "100%", paddingTop: 10 }}><div dangerouslySetInnerHTML={{ __html: description! }} /></div> : <></>}
+								
+								{swEnabledBtnAction && BigInt(userMaxTokens) > 0 ?
+								<>
+									<h4 style={{ paddingTop: 10 }}>How many {inputUnitForShowing}?</h4>		
+									<br></br>
+									{
+										(walletAssetsList.length > 0) ?
+											<>
+												{walletAssetsList.map((asset, idx) => 
+													<div key={idx} >
+														<b>{asset.tokenName}</b> (There are {asset.value.toLocaleString()} in your wallet)
+														<br></br>
+														<NumericFormat key={"NumericFormat" + idx} style={{ width: 300, fontSize: 12 }} type="text" value={ walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.amountFormatedValue}
+															onValueChange={(values) => {
+																	const { formattedValue, value } = values;
+																	handleChangeValue (asset.tokenNameHEX, value)
+																}
 															}
-														}
-														thousandsGroupStyle="thousand" thousandSeparator="," decimalSeparator="." decimalScale={inputDecimals}
-													/>
-													<br></br>
-													<input key={"input" + idx} style={{ width: 300, fontSize: 12 }} type="range" min={0} max={walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.max} value={walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.amount}
-														onChange={e => {
-															handleChangeFormatedValue (asset.tokenNameHEX, Number(e.target.value).toString(), Number(e.target.value).toString())
-														}}
-													/>
-													<br></br>
-												</div>
-											)}
+															thousandsGroupStyle="thousand" thousandSeparator="," decimalSeparator="." decimalScale={inputDecimals}
+														/>
+														<br></br>
+														<input key={"input" + idx} style={{ width: 300, fontSize: 12 }} type="range" min={0} max={walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.max} value={walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.amount}
+															onChange={e => {
+																handleChangeFormatedValue (asset.tokenNameHEX, Number(e.target.value).toString(), Number(e.target.value).toString())
+															}}
+														/>
+														<br></br>
+													</div>
+												)}
+											</>
+										:
+										<>
+											<div style={{textAlign:"center", width: "100%", paddingTop: 10}}>You don't have <b>{inputUnitForShowing}</b> to <b>{actionName}</b></div>
 										</>
-									:
-										(<div style={{ textAlign: "center", paddingTop: 10 }}>	
-											<b>There are no {inputUnitForShowing} in your wallet</b>
-										</div>
-									)
 
+									}
+
+									<div style={{textAlign: "center", width: "100%", paddingTop: 10}}>
+										<b>Total:</b> {tokenAmount.toLocaleString()} {inputUnitForShowing} (Max: <b>{userMaxTokens.toLocaleString()}</b>)
+									</div>
+								</>
+								:
+									<>
+										{BigInt(userMaxTokens) == 0n ?<div style={{textAlign:"center", width: "100%", paddingTop: 10}}>You don't have <b>{inputUnitForShowing}</b> to <b>{actionName}</b></div> : <></>}
+									</>
 								}
 
-								<div style={{textAlign: "left", width: "100%", paddingTop: 10}}>
-									<b>Total: {tokenAmount.toLocaleString()} {inputUnitForShowing} (Max: {userMaxTokens.toLocaleString()})</b>
-								</div>
-								
+								{message !== "" ?<div style={{ textAlign:"center", width: "100%", paddingTop: 10 }}>{message}</div> : <></>}
 
 								<div style={{textAlign:"center", minWidth:320, paddingTop: 25}}>
 									<button
 										className="btn btnStakingPool"
-										disabled={!swEnabledBtnAction}
+										disabled={!swEnabledBtnAction || BigInt(userMaxTokens) == 0n}
 										onClick={(e) => {
 												e.preventDefault()
 												if (BigInt(tokenAmount) <= 0n) {
 													setMessage("Please enter a valid amount greater than zero")
 												} else if (BigInt(tokenAmount) > BigInt(userMaxTokens)) {
 													if (input_AC_isWithoutTokenName && BigInt(userMaxTokens) == BigInt(maxTokensWithDifferentNames)){
-														setMessage("You have exceeded the maximum amount per transaction for this token which is: " + maxTokensWithDifferentNames + "." )
+														setMessage("You have exceeded the maximum amount per transaction for this token which is: " + formatAmount(maxTokensWithDifferentNames, inputDecimals, inputUnitForShowing) )
 													}else{
-														setMessage("You have exceeded the maximum avalaible tokens which is: " + userMaxTokens )
+														setMessage("You have exceeded the maximum avalaible tokens which is: " + formatAmount(Number(userMaxTokens), inputDecimals, inputUnitForShowing) )
 													}
 												} else {
 													setMessage("")
@@ -451,7 +462,7 @@ export default function ActionWithSelectInputModalBtn(
 											}
 										}
 									>
-										{!swEnabledBtnAction?
+										{!swEnabledBtnAction || BigInt(userMaxTokens) == 0n?
 											<>
 												<span className="wallet__button_disabled">
 												Accept

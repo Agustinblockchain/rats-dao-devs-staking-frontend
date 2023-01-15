@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Assets } from "lucid-cardano";
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
-import { copyToClipboard } from '../utils/utils';
+import { copyToClipboard, formatAmount } from '../utils/utils';
 import { NumericFormat } from 'react-number-format';
 import { explainError } from "../stakePool/explainError";
 import { EUTxO, Master } from "../types";
@@ -70,6 +70,10 @@ export default function ActionWithInputModalBtn(
 		} 
 ) {
 
+	//string '0' shows 0 in UI, Number 0 shows loading skeleton for dynamic values
+	const ui_loading = 0
+	const ui_notConnected = '...'
+
 	const actionNameWithIdx = actionName + "-" + actionIdx
 
 	const [status, setStatus] = useState<ActionStatus>('idle')
@@ -83,7 +87,7 @@ export default function ActionWithInputModalBtn(
 	const [userMaxTokens, setUserMaxTokens] = useState<string>("0");
 
 	useEffect(() => {
-		if (swShowInput && inputMax) {
+		if (swShowInput && inputMax && inputMax != ui_notConnected) {
 			setUserMaxTokens(inputMax!.toString())
 		}
 	}, [inputMax])
@@ -260,7 +264,7 @@ export default function ActionWithInputModalBtn(
 							//no esta idle, esta procesando o termino de procesar ok o con error
 							<>
 								<h3>{title}</h3>
-								{message !== "" ? <div style={{ marginTop: 10 }}>{message}</div> : <></>}
+								{message !== "" ? <div style={{ textAlign:"center", width: "100%", paddingTop: 10 }}>{message}</div> : <></>}
 								{(swHash && hash !== "" && hash !== undefined) ?
 									<>
 										<div>
@@ -327,54 +331,66 @@ export default function ActionWithInputModalBtn(
 									//el modal muestra input
 									<>
 										<h3>{title}</h3>
-										{description !== "" ?<div style={{ paddingTop: 10 }}><div dangerouslySetInnerHTML={{ __html: description! }} /></div> : <></>}
-										{message !== "" ?<div style={{ paddingTop: 10 }}><b>{message}</b></div> : <></>}
-										<h4 style={{ paddingTop: 10 }}>How many {inputUnitForShowing}?</h4>
-										<br></br>
-										<NumericFormat style={{ width: 300, fontSize: 12 }} type="text" value={tokenAmountFormatedValue}
-											onValueChange={(values) => {
-													const { formattedValue, value } = values;
-													// formattedValue = $2,223
-													// floatValue = 2223
-													if(inputDecimals){
-														const pot = Math.pow(10, inputDecimals)
-														setTokenAmount((Number(value) * pot).toString())
-													}else{
-														setTokenAmount(value)
+										{description !== "" ?<div style={{ textAlign:"center", width: "100%", paddingTop: 10 }}><div dangerouslySetInnerHTML={{ __html: description! }} /></div> : <></>}
+										
+										{swEnabledBtnAction && BigInt(userMaxTokens) > 0 ?
+											<>
+												<h4 style={{ paddingTop: 10 }}>How many {inputUnitForShowing}?</h4>
+												<br></br>
+												<NumericFormat style={{ width: 300, fontSize: 12 }} type="text" value={tokenAmountFormatedValue}
+													onValueChange={(values) => {
+															const { formattedValue, value } = values;
+															// formattedValue = $2,223
+															// floatValue = 2223
+															if(inputDecimals){
+																const pot = Math.pow(10, inputDecimals)
+																setTokenAmount((Number(value) * pot).toString())
+															}else{
+																setTokenAmount(value)
+															}
+															
+														}
 													}
-													
-												}
-											}
-											thousandsGroupStyle="thousand" thousandSeparator="," decimalSeparator="." decimalScale={inputDecimals}
-										/>
+													thousandsGroupStyle="thousand" thousandSeparator="," decimalSeparator="." decimalScale={inputDecimals}
+												/>
 
-										{/* 
-										//antigua barra:
-										<input  style={{ width: 300, fontSize: 12 }}
-										type="number"
-										placeholder="Amount"
-										max={userMaxTokens?.toString()}
-										value={tokenAmount}
-										onChange={e => setTokenAmount(Number(e.target.value).toString())}
-										/> */}
+												{/* 
+												//antigua barra:
+												<input  style={{ width: 300, fontSize: 12 }}
+												type="number"
+												placeholder="Amount"
+												max={userMaxTokens?.toString()}
+												value={tokenAmount}
+												onChange={e => setTokenAmount(Number(e.target.value).toString())}
+												/> */}
 
-										<input style={{ width: 300, fontSize: 12 }} type="range" min={0} max={userMaxTokens?.toString()} value={tokenAmount}
-											onChange={e => {
-												setTokenAmount(Number(e.target.value).toString())
+												<input style={{ width: 300, fontSize: 12 }} type="range" min={0} max={userMaxTokens?.toString()} value={tokenAmount}
+													onChange={e => {
+														setTokenAmount(Number(e.target.value).toString())
 
-												if(inputDecimals){
-													const pot = Math.pow(10, inputDecimals)
-													setTokenAmountFormatedValue((Number(e.target.value)/pot).toString())
-												}else{
-													setTokenAmountFormatedValue(Number(e.target.value).toString())
-												}
-											}}
-										/>
+														if(inputDecimals){
+															const pot = Math.pow(10, inputDecimals)
+															setTokenAmountFormatedValue((Number(e.target.value)/pot).toString())
+														}else{
+															setTokenAmountFormatedValue(Number(e.target.value).toString())
+														}
+													}}
+												/>
+												
+
+											</>
+										:
+											<>
+												{BigInt(userMaxTokens) == 0n ?<div style={{textAlign:"center", width: "100%", paddingTop: 10 }}>You don't have <b>{inputUnitForShowing}</b> to <b>{actionName}</b></div> : <></>}
+											</>
+										}
+
+										{message !== "" ?<div style={{ textAlign:"center", width: "100%", paddingTop: 10 }}>{message}</div> : <></>}
 
 										<div style={{textAlign:"center", minWidth:320, paddingTop: 25}}>
 											<button
 												className="btn btnStakingPool"
-												disabled={!swEnabledBtnAction}
+												disabled={!swEnabledBtnAction || BigInt(userMaxTokens) == 0n}
 												onClick={(e) => {
 														e.preventDefault()
 														if (tokenAmount === "" || BigInt(tokenAmount) <= 0n) {
@@ -385,9 +401,9 @@ export default function ActionWithInputModalBtn(
 															const input_AC_isAda = (input_CS === 'lovelace')
 															const input_AC_isWithoutTokenName = !input_AC_isAda && input_TN == ""	
 															if (input_AC_isWithoutTokenName && BigInt(userMaxTokens) == BigInt(maxTokensWithDifferentNames)){
-																setMessage("You have exceeded the maximum amount per transaction for this token which is: " + maxTokensWithDifferentNames )
+																setMessage("You have exceeded the maximum amount per transaction for this token which is: " + formatAmount(maxTokensWithDifferentNames, inputDecimals, inputUnitForShowing) )
 															}else{
-																setMessage("You have exceeded the maximum avalaible tokens which is: " + userMaxTokens )
+																setMessage("You have exceeded the maximum avalaible tokens which is: " + formatAmount(Number(userMaxTokens), inputDecimals, inputUnitForShowing) )
 															}
 														} else {
 															setMessage("")
@@ -397,7 +413,7 @@ export default function ActionWithInputModalBtn(
 													}
 												}
 											>
-												{!swEnabledBtnAction?
+												{!swEnabledBtnAction || BigInt(userMaxTokens) == 0n?
 													<>
 														<span className="wallet__button_disabled">
 														Accept
@@ -427,7 +443,8 @@ export default function ActionWithInputModalBtn(
 									<>
 										<h3>{title}</h3>
 										{description !== "" ?<div style={{ paddingTop: 10 }}><div dangerouslySetInnerHTML={{ __html: description! }} /></div> : <></>}
-										{message !== "" ?<div style={{ paddingTop: 10 }}><b>{message}</b></div> : <></>}
+										
+										{message !== "" ?<div style={{ textAlign:"center", width: "100%", paddingTop: 10 }}>{message}</div> : <></>}
 										
 										<div style={{textAlign:"center", minWidth:320, paddingTop: 25}}>
 											<button
