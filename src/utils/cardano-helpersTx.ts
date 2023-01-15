@@ -39,8 +39,8 @@ export async function newTransaction (title : string, walletStore: Wallet, poolI
         await waitForTxConfirmation (lucid!, txHash, eUTxOs_for_consuming) 
 
         // if (isWorkingInABuffer) {
-        console.log(title + " - wainting extra safety time");
-        await new Promise(r => setTimeout(r, 10000));
+        console.log(title + " - Waiting extra safety time");
+        await new Promise(r => setTimeout(r, 20000));
         // }
 
         if (!isWorkingInABuffer) setIsWorking("")
