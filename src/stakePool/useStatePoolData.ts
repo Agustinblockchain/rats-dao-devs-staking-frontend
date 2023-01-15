@@ -178,7 +178,7 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
             if(staking_Metadata && staking_Metadata?.metadata?.decimals) {
                 staking_Decimals = staking_Metadata.metadata.decimals
             }else{
-                staking_Decimals = 3
+                staking_Decimals = 0
             }
         }
         setStaking_Decimals(staking_Decimals)
@@ -194,7 +194,7 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
             if(harvest_Metadata && harvest_Metadata?.metadata?.decimals) {
                 harvest_Decimals = harvest_Metadata.metadata.decimals
             }else{
-                harvest_Decimals = 3
+                harvest_Decimals = 0
             }
         }
         setHarvest_Decimals(harvest_Decimals)
