@@ -1071,7 +1071,7 @@ export async function masterGetBackFund(wallet: Wallet, poolInfo: StakingPoolDBI
     const masterAddr = await lucid!.wallet.address();
     //------------------
     const masterToSendBack = master
-    const masterToSendBackAddr = pubKeyHashToAddress(masterToSendBack!, 0)
+    const masterToSendBackAddr = pubKeyHashToAddress(masterToSendBack!, process.env.NEXT_PUBLIC_USE_MAINNET === 'true' ? 1 : 0)
     console.log(functionName + " - Master To Send Back Addr: " + toJson(masterToSendBackAddr))
     //------------------
     const scriptAddress: Address = poolInfo.scriptAddress
@@ -1195,7 +1195,7 @@ export async function masterSendBackFund(wallet: Wallet, poolInfo: StakingPoolDB
     const masterAddr = await lucid!.wallet.address();
     //------------------
     const masterToSendBack = master_Selected
-    const masterToSendBackAddr = pubKeyHashToAddress(masterToSendBack!, 0)
+    const masterToSendBackAddr = pubKeyHashToAddress(masterToSendBack!, process.env.NEXT_PUBLIC_USE_MAINNET === 'true' ? 1 : 0)
     console.log(functionName + " - Master To Send Back Addr: " + toJson(masterToSendBackAddr))
     //------------------
     const scriptAddress: Address = poolInfo.scriptAddress
@@ -1408,7 +1408,7 @@ export async function masterSendBackDeposit(wallet: Wallet, poolInfo: StakingPoo
     //------------------
     console.log(functionName + " - User to send Back Deposit: " + toJson(userDatum_In.udUser))
     const user_To_SendBack = userDatum_In.udUser
-    const user_To_SendBackAddr = pubKeyHashToAddress(userDatum_In.udUser, 0)
+    const user_To_SendBackAddr = pubKeyHashToAddress(userDatum_In.udUser, process.env.NEXT_PUBLIC_USE_MAINNET === 'true' ? 1 : 0)
     console.log(functionName + " - User to send Back Deposit Addr: " + toJson(user_To_SendBackAddr))
     //------------------
     const value_In_UserDatum = eUTxO_userDatums_To_SendBackDeposit.uTxO.assets

@@ -754,7 +754,7 @@ export async function masterDeleteScripts(wallet: Wallet, poolInfo: StakingPoolD
         const scriptDatum = eUTxO.datum as ScriptDatum;
         const master_In_ScriptDatum = scriptDatum.sdMaster;
         if (master_In_ScriptDatum !== undefined) {
-            const master_To_Send_Back_Addr = pubKeyHashToAddress(master_In_ScriptDatum!, 0);
+            const master_To_Send_Back_Addr = pubKeyHashToAddress(master_In_ScriptDatum!, process.env.NEXT_PUBLIC_USE_MAINNET === 'true' ? 1 : 0);
             const value_In_ScriptDatum = eUTxO.uTxO.assets;
             const value_ScriptIDS = getAssetsFromCS(value_In_ScriptDatum, txID_Master_AddScripts_CS);
             const value_For_Burn_ScriptIDS: Assets = subsAssets({}, value_ScriptIDS);
