@@ -498,8 +498,8 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 											actionName="Deposit" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
 											description={poolInfo.swClosed ? '<p className="info">This pool in already closed. You can\'t deposit anymore.</p>' : undefined}
 											poolInfo={poolInfo} 
-											swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded && Number(setWalletStakingAmountUI) > 0} 
-											swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded && Number(setWalletStakingAmountUI) > 0 && !poolInfo.swClosed} 
+											swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded } 
+											swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded && !poolInfo.swClosed} 
 											swShow={poolInfo.swFunded} 
 											swHash={true} 
 											inputUnitForLucid={poolInfo.staking_Lucid} inputUnitForShowing={poolInfo.staking_UI} inputMax={maxStakingAmountUI} inputDecimals={staking_Decimals} 
@@ -517,8 +517,8 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 											actionName="Deposit" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
 											description={poolInfo.swClosed ? '<p className="info">This pool in already closed. You can\'t deposit anymore.</p>' : undefined}
 											poolInfo={poolInfo} 
-											swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded && Number(setWalletStakingAmountUI) > 0} 
-											swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded && Number(setWalletStakingAmountUI) > 0 && !poolInfo.swClosed} 
+											swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded } 
+											swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded && !poolInfo.swClosed} 
 											swShow={poolInfo.swFunded} 
 											swShowInput={true} inputUnitForLucid={poolInfo.staking_Lucid} inputUnitForShowing={poolInfo.staking_UI} inputMax={maxStakingAmountUI} inputDecimals={staking_Decimals}  
 											swHash={true} 
@@ -538,8 +538,8 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 									description={poolInfo.swClosed ? '<p className="info">This pool in already closed. You can\'t deposit anymore.</p>' : '<p className="info">Create multiple transactions for new Deposits in one go, rather than manually entering each transaction individually. However, you will still need to individually sign each transaction.</p>'}
 									poolInfo={poolInfo} 
 									swShowInput={true} inputUnitForLucid={poolInfo.staking_Lucid} inputUnitForShowing={poolInfo.staking_UI} inputMax={maxStakingAmountUI} inputDecimals={staking_Decimals} 
-									swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded && Number(setWalletStakingAmountUI) > 0} 
-									swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded && Number(setWalletStakingAmountUI) > 0 && !poolInfo.swClosed} 
+									swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded } 
+									swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded && !poolInfo.swClosed} 
 									swShow={poolInfo.swFunded} 
 									swHash={false} 
 								/>
