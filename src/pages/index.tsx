@@ -14,33 +14,12 @@ import StakingPool from '../components/StakingPool'
 
 //--------------------------------------
 
-const Home : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> =  ({pkh, swCreate, stakingPools} : InferGetServerSidePropsType<typeof getServerSideProps>) =>  {
+const Home : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> =  ({pkh, stakingPools} : InferGetServerSidePropsType<typeof getServerSideProps>) =>  {
 	
-	const router = useRouter();
+	const { data: session, status } = useSession()
 
-	const [isRefreshing, setIsRefreshing] = useState(true);
-
-	const walletStore = useStoreState(state => state.wallet)
-	
 	const [stakingPoolsParsed, setStakingPoolsParsed] = useState<StakingPoolDBInterface [] > ([]);
-
-	const refreshData = () => {
-		console.log ("Home - refreshData - router.replace - walletStore.connected " + walletStore.connected + " - router.asPath: " + router.asPath);
-		router.replace(router.basePath)
-		setIsRefreshing(true);
-	};
-
-	useEffect(() => {
-		setIsRefreshing(false);
-	}, []);
-
-	useEffect(() => {
-		if (walletStore.connected && pkh != walletStore.pkh) {
-			refreshData()
-		}else if (!walletStore.connected) {
-			refreshData()
-		}
-	}, [walletStore.connected])
+	const [isRefreshing, setIsRefreshing] = useState(true);
 
 	useEffect(() => {
 		if (stakingPools){
@@ -55,8 +34,11 @@ const Home : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = 
 	// const StakingPool = dynamic(() => import('../components/StakingPool'), { ssr: false, loading: () => <p>Loading...</p> })
 
 	return (
-		<Layout swCreate={swCreate}>
-			{
+		<Layout swCreate={session?.user.swCreate}>
+		{
+			(status == "loading")? 
+				<p>Loading Session...</p>
+			:
 				(isRefreshing) ?
 					<div>Loading Staking Pools...</div>
 				:
@@ -64,11 +46,10 @@ const Home : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = 
 						stakingPoolsParsed.map(
 							sp => 
 								(typeof window !== 'undefined' && <StakingPool key={sp.name} stakingPoolInfo={sp}  />)
-								
 						)
 					:
 						<p>Can't find any Staking Pool available</p> 
-			}	
+		}
 		</Layout>
 	)
 }
@@ -92,7 +73,6 @@ export async function getServerSideProps(context : any) {
 		return {
 			props: {
 				pkh: session?.user.pkh !== undefined ? session?.user.pkh : "",
-				swCreate: session && session.user ? session.user.swCreate : false ,
 				stakingPools: dataStakingPools
 			}
 		};
@@ -103,7 +83,6 @@ export async function getServerSideProps(context : any) {
 		return {
 			props: { 
 				pkh: "",
-				swCreate: false,
 				stakingPools: dataStakingPools 
 			}
 		};

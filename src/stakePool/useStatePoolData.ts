@@ -16,6 +16,7 @@ import {
     getIfUserRegistered, getTotalAvailaibleFunds, getTotalCashedOut, getTotalFundAmount, getTotalFundAmountsRemains_ForMasters, getTotalMastersMinAda_In_EUTxOs_With_UserDatum, getTotalRewardsToPay_In_EUTxOs_With_UserDatum, getTotalStakedAmount, getTotalUsersMinAda_In_EUTxOs_With_UserDatum, getUserRewardsPaid,
     getUserRewardsToPay, getUserStaked, sortFundDatum
 } from "./helpersStakePool";
+import { useSession } from "next-auth/react";
 //--------------------------------------
 type UserStakedData = {
     eUTxO_With_UserDatum: EUTxO | undefined,
@@ -33,6 +34,8 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
     const ui_loading = 0
     const ui_notConnected = '...'
 
+    const { data: session, status } = useSession()
+    
     //console.log("useStatePoolData - " + stakingPoolInfo.name + " - INIT")
     
     const [poolInfo, setPoolInfo] = useState(stakingPoolInfo)
@@ -91,14 +94,17 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
 
     const [userRegisteredUI, setUserRegisteredUI] = useState<string | 0>(ui_loading)
 
-    const walletStore = useStoreState(state => state.wallet)
-
-    const { isWalletDataLoaded } = useStoreState(state => {
-        return { isWalletDataLoaded: state.isWalletDataLoaded };
-    });
+    // const walletStore = useStoreState(state => state.wallet)
+    // const { isWalletDataLoaded } = useStoreState(state => {
+    //     return { isWalletDataLoaded: state.isWalletDataLoaded };
+    // });
 
     useEffect(() => {
-        refreshEUTxOs()
+        if (status !== "loading"){
+            // console.log("useStatePoolData - " + poolInfo.name + " - useEffect - isPoolDataLoading: " + isPoolDataLoading + " - isPoolDataLoaded: " + isPoolDataLoaded + " - isWalletDataLoaded: " + isWalletDataLoaded)
+            console.log("useStatePoolData - " + poolInfo.name + " - useEffect - status: " + status )
+            refreshEUTxOs()
+        }
         // console.log("useStatePoolData - " + poolInfo.name + " - useEffect - isPoolDataLoading: " + isPoolDataLoading + " - isPoolDataLoaded: " + isPoolDataLoaded + " - isWalletDataLoaded: " + isWalletDataLoaded)
         // if (!walletStore.connected) {
         //     setLoading(ui_notConnected)
@@ -106,15 +112,7 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
         //     // console.log("useStatePoolData - " + poolInfo.name + " - useEffectB - isPoolDataLoading: " + isPoolDataLoading + " - isPoolDataLoaded: " + isPoolDataLoaded + " - isWalletDataLoaded: " + isWalletDataLoaded)
         //     refreshEUTxOs()
         // }
-    }, [walletStore.connected])
-
-    // useEffect(() => {
-    //    //console.log("useStatePoolData - " + poolInfo.name + " - useEffectA - isPoolDataLoading: " + isPoolDataLoading + " - isPoolDataLoaded: " + isPoolDataLoaded + " - isWalletDataLoaded: " + isWalletDataLoaded)
-    //     if (!isPoolDataLoaded && !isPoolDataLoading ) {
-    //         console.log("useStatePoolData - " + poolInfo.name + " - useEffectB - isPoolDataLoading: " + isPoolDataLoading + " - isPoolDataLoaded: " + isPoolDataLoaded + " - isWalletDataLoaded: " + isWalletDataLoaded)
-    //         refreshEUTxOs()
-    //     }
-    // }, [])
+    }, [status])
 
     const setLoading = (ui: string | 0) => {
         // console.log("useStatePoolData - " + poolInfo.name + " - setLoading: " + ui)
@@ -157,28 +155,15 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
 
     }
 
-
     const refreshPoolData = async () => {
         console.log("useStatePoolData - " + poolInfo.name + " - refreshPoolData - Init")
         //------------------
         setIsPoolDataLoading(true)
         setLoading(ui_loading)
         //------------------
-        // const eUTxOs_With_Datum1 = await walletStore.lucid!.utxosAt(poolInfo.scriptAddress);
-        // console.log("useStatePoolData - " + poolInfo.name + " - refreshPoolData - WAIT INIT - eUTxOs_With_Datum1.length: " + eUTxOs_With_Datum1.length)
-        // await new Promise(r => setTimeout(r, 6000));
-        // const eUTxOs_With_Datum2 = await walletStore.lucid!.utxosAt(poolInfo.scriptAddress);
-        // console.log("useStatePoolData - " + poolInfo.name + " - refreshPoolData - WAIT END - eUTxOs_With_Datum2.length: " + eUTxOs_With_Datum2.length)
         const poolInfo_ = await apiGetStakingPoolDB(poolInfo.name)
         //------------------
-        // setIsPoolInfoSet(false)
         setPoolInfo(poolInfo_)
-        //await new Promise(r => setTimeout(r, 2000));
-        // console.log("useStatePoolData - " + poolInfo.name + " - refreshPoolData - while (!isPoolInfoSet.current): " + isPoolInfoSet.current)
-        // while (!isPoolInfoSet.current){
-        //     console.log("useStatePoolData - " + poolInfo.name + " - refreshPoolData - while (!isPoolInfoSet.current)")
-        //     await new Promise(r => setTimeout(r, 500));
-        // }
         //------------------
         await setPoolData(poolInfo_);
         //await new Promise(r => setTimeout(r, 2000));    
@@ -225,7 +210,7 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
             staking_Decimals = 0
         }else{
             const staking_Metadata = await apiGetTokenMetadata(staking_AC)
-            console.log("useStatePoolData - " + poolInfo.name + " - setPoolData - staking_metadata: " + toJson(staking_Metadata))
+            //console.log("useStatePoolData - " + poolInfo.name + " - setPoolData - staking_metadata: " + toJson(staking_Metadata))
             if(staking_Metadata && staking_Metadata?.metadata?.decimals) {
                 staking_Decimals = staking_Metadata.metadata.decimals
             }else{
@@ -241,7 +226,7 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
             harvest_Decimals = 0
         }else{
             const harvest_Metadata = await apiGetTokenMetadata(harvest_AC)
-            console.log("useStatePoolData - " + poolInfo.name + " - setPoolData - harvest_metadata: " + toJson(harvest_Metadata))
+            //console.log("useStatePoolData - " + poolInfo.name + " - setPoolData - harvest_metadata: " + toJson(harvest_Metadata))
             if(harvest_Metadata && harvest_Metadata?.metadata?.decimals) {
                 harvest_Decimals = harvest_Metadata.metadata.decimals
             }else{
@@ -352,9 +337,10 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
                 setTotalRewardsToPayUI(formatAmount(Number(getTotalRewardsToPay_In_EUTxOs_With_UserDatum(poolInfo, eUTxO_With_PoolDatum, eUTxOs_With_UserDatum)), harvest_Decimals, poolInfo.harvest_UI))
                 setTotalUsersMinAdaUI(formatAmount(Number(getTotalUsersMinAda_In_EUTxOs_With_UserDatum(poolInfo, eUTxOs_With_UserDatum)), ADA_Decimals, ADA_UI))
                 setUserRegisteredUI('TODO')
-                if (getIfUserRegistered(walletStore.pkh!, eUTxOs_With_UserDatum)) {
+                
+                if (session && session.user && session.user.pkh && getIfUserRegistered( session.user.pkh, eUTxOs_With_UserDatum)) {
                     setSwUserRegistered(true)
-                    const eUTxOs_With_UserDatumOfUser = getEUTxOs_With_UserDatum_InEUxTOList_OfUser(eUTxOs_With_UserDatum, walletStore.pkh!)
+                    const eUTxOs_With_UserDatumOfUser = getEUTxOs_With_UserDatum_InEUxTOList_OfUser(eUTxOs_With_UserDatum, session.user.pkh)
                     var userStakedDatas: UserStakedData[] = []
                     for (var i = 0; i < eUTxOs_With_UserDatumOfUser.length; i += 1) {
                         const userDatum: UserDatum = eUTxOs_With_UserDatumOfUser[i].datum as UserDatum;
@@ -364,9 +350,9 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
                             :
                             ui_notConnected
                         )
-                        const userStaked = getUserStaked(walletStore.pkh!, [eUTxOs_With_UserDatumOfUser[i]]).toString()
-                        const userRewardsPaid = getUserRewardsPaid(walletStore.pkh!, [eUTxOs_With_UserDatumOfUser[i]]).toString()
-                        const userRewardsToPay = getUserRewardsToPay(poolInfo, walletStore.pkh!, eUTxO_With_PoolDatum, [eUTxOs_With_UserDatumOfUser[i]]).toString()
+                        const userStaked = getUserStaked(session.user.pkh, [eUTxOs_With_UserDatumOfUser[i]]).toString()
+                        const userRewardsPaid = getUserRewardsPaid(session.user.pkh, [eUTxOs_With_UserDatumOfUser[i]]).toString()
+                        const userRewardsToPay = getUserRewardsToPay(poolInfo, session.user.pkh, eUTxO_With_PoolDatum, [eUTxOs_With_UserDatumOfUser[i]]).toString()
                         const userStakedData: UserStakedData = {
                             eUTxO_With_UserDatum: eUTxOs_With_UserDatumOfUser[i],
                             userStaked: userStaked,
@@ -384,9 +370,6 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
                 }
             }
         }
-
-
-
 
         setSwShowOnHomeUI(poolInfo.swShowOnHome ? "Yes" : "No");
         setSwPreparadoUI(poolInfo.swPreparado ? "Yes" : "No");

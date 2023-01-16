@@ -4,23 +4,20 @@ import { useEffect, useState } from "react"
 import Skeleton from "react-loading-skeleton"
 import { initializeLucid, initializeLucidWithWalletFromSeed } from "../utils/initializeLucid"
 import { useLocalStorage } from "../utils/useLocalStorage"
-import { searchValueInArray } from "../utils/utils"
+import { searchKeyInObject, searchValueInArray } from "../utils/utils"
 import { useStoreActions, useStoreState } from '../utils/walletProvider'
 //--------------------------------------
 
 export default function WalletModalBtn() {
+
+	const { data: session, status } = useSession()
 
 	const walletMasterSeed1 = process.env.NEXT_PUBLIC_walletMasterSeed1
 	const walletMasterSeed2 = process.env.NEXT_PUBLIC_walletMasterSeed2
 	const walletMasterPrivateKey1 = process.env.NEXT_PUBLIC_walletMasterPrivateKey1
 
 	const [walletMessage, setWalletMessage] = useState("")
-
-	const [swSavedWalletConnected, setSavedWalletConnected] = useLocalStorage("swWalletConnected", false)
-	const [savedWalletName, setSavedWalletName] = useLocalStorage("walletName", "")
-	const [savedSwEnviarPorBlockfrost, setSavedSwEnviarPorBlockfrost] = useLocalStorage("SwEnviarPorBlockfrost", false)
-	const [savedIsWalletFromSeed, setSavedIsWalletFromSeed] = useLocalStorage("IsWalletFromSeed", false)
-
+	const [swEnviarPorBlockfrost, setSwEnviarPorBlockfrost] = useState(false)
 	const [pollWalletsCount, setPollWalletsCount] = useState(0)
 	const [availableWallets, setAvailableWallets] = useState<{ nami: boolean, yoroi: boolean, eternl: boolean, flint: boolean, typhon: boolean, nufi: boolean }>({ yoroi: false, nami: false, eternl: false, flint: false, typhon: false, nufi: false })
 	
@@ -33,11 +30,8 @@ export default function WalletModalBtn() {
 		"nufi" : "https://chrome.google.com/webstore/detail/nufi/gpnihlnnodeiiaakbikldcihojploeca" 
 	}
 
-	const handleChangeSavedSwEnviarPorBlockfrost = () => {
-		setSavedSwEnviarPorBlockfrost(!savedSwEnviarPorBlockfrost);
-	};
-
 	//--------------------------------------
+
 	const walletStore = useStoreState(state => state.wallet)
 	const uTxOsAtWallet = useStoreState(state => state.uTxOsAtWallet)
 	const isWalletDataLoaded = useStoreState(state => state.isWalletDataLoaded)
@@ -49,142 +43,133 @@ export default function WalletModalBtn() {
 	//--------------------------------------
 
 	const walletConnect = async (walletName: string, closeModal = true) => {
-
-		console.log("WalletModalBtn - walletConnect: " + walletName)
-
+		console.log("[Session] - walletConnect: " + walletName)
 		setWalletMessage("Connecting with " + walletName + "...")
-
 		try {
 
-			const walletApi = await window.cardano[walletName].enable()
-
+			var walletApi = undefined
+			var countError = 0
+			var error = ""
+			const maxError = 3
+			while (countError < maxError) {
+				try {
+				 	walletApi = await window.cardano[walletName].enable()
+					break
+				} catch (error) {
+					console.log("[Session] - try " + countError+" of "+maxError+" - walletConnect Error: " + error)
+					error = error
+					countError++
+					await new Promise(r => setTimeout(r, 2000)); //espero 2 segundos para que se cargue la wallet
+				}
+			}
+			if (!walletApi) {
+				throw error
+			}
 			const lucid = await initializeLucid(walletApi)
-
 			const adddressWallet = await lucid!.wallet.address()
-
 			//const pkh = C.Address.from_bech32(adddressWallet).as_base()?.payment_cred().to_keyhash()?.to_hex();
 			const pkh = lucid!.utils.getAddressDetails(adddressWallet)?.paymentCredential?.hash;
-
-			//console.log("WalletModalBtn - walletConnect: addr: " + adddressWallet)
-			console.log("WalletModalBtn - walletConnect: pkh: " + pkh)
-
+			//console.log("[Session] - walletConnect: addr: " + adddressWallet)
+			console.log("[Session] - walletConnect: pkh: " + pkh)
 			const protocolParameters = await lucid!.provider.getProtocolParameters();
-
-			const walletStore_ = { connected: true, name: walletName, walletApi: walletApi, pkh: pkh, lucid: lucid, swEnviarPorBlockfrost: savedSwEnviarPorBlockfrost, protocolParameters: protocolParameters }
-
-			await signIn('credentials', { pkh: pkh , redirect: false })
-
+			var swEnviarPorBlockfrost_ = swEnviarPorBlockfrost
+			if(status === "authenticated"){
+				if(session && session.user && session.user.swEnviarPorBlockfrost){
+					swEnviarPorBlockfrost_ = (session.user.swEnviarPorBlockfrost)
+				}
+			}
+			const walletStore_ = { connected: true, name: walletName, walletApi: walletApi, pkh: pkh, lucid: lucid, swEnviarPorBlockfrost: swEnviarPorBlockfrost_, protocolParameters: protocolParameters }
+			console.log("[Session] - walletConnect - signIn - status: " + status)
+			if (status !== "authenticated") {
+				await signIn('credentials', { pkh: pkh , walletName: walletName, swEnviarPorBlockfrost: swEnviarPorBlockfrost_?"true":"false", isWalletFromSeedletName: "false",redirect: false })
+			}
 			setWalletStore(walletStore_)
-
-			setSavedWalletConnected(true)
-			setSavedWalletName(walletName)
-			setSavedIsWalletFromSeed(false)
-
-			setWalletMessage("Loading Wallet info...")
-
-			await loadWalletData(walletStore_)
-
+			setWalletMessage("Loading Wallet info in parallel...")
+			loadWalletData(walletStore_)
 			setWalletMessage("Connected with " + walletName + "!")
-
 		} catch (error) {
-
-			console.error("WalletModalBtn - walletConnect Error2: " + error)
-
+			console.error("[Session] - walletConnect Error2: " + error)
 			setWalletMessage("Error connecting with " + walletName + ": " + error)
-
+			if (status === "authenticated") {
+				await signOut({ redirect: false })
+			}
 		}
 
 	}
 
 	const walletFromSeedConnect = async (walletName: string, closeModal = true) => {
-
-		console.log("WalletModalBtn - walletMasterConnect")
-
-		setWalletMessage("Connecting with " + walletName + "...")
-
-		try {
-
-			var walletSeed: string = ""
-
-			if (walletName === "Master1") {
-				walletSeed = walletMasterSeed1? walletMasterSeed1 : ""
-			} else if (walletName === "Master2") {
-				walletSeed = walletMasterSeed2? walletMasterSeed2 : ""
-			}
-
-			//const newBech32PrivateKey = C.PrivateKey.generate_ed25519().to_bech32()
-			//const walletPrivateKey ="ed25519_sk10lc2huyqqx53qkcj8u9x794cesmtrpn95330aurcvkex8wmysljsz062s8" // walletMasterPrivateKey1
-			//alert ("walletPrivateKey: " + walletPrivateKey)
-			// const lucid = await initializeLucidWithWalletFromPrivateKey(walletPrivateKey)
-
-			const lucid = await initializeLucidWithWalletFromSeed(walletSeed)
-
-			const adddressWallet = await lucid!.wallet.address()
-
-			//const pkh = C.Address.from_bech32(adddressWallet).as_base()?.payment_cred().to_keyhash()?.to_hex();
-			const pkh = lucid!.utils.getAddressDetails(adddressWallet)?.paymentCredential?.hash;
-
-			//console.log("WalletModalBtn - walletConnect: addr: " + adddressWallet)
-			console.log("WalletModalBtn - walletConnect: pkh: " + pkh)
-
-			const protocolParameters = await lucid!.provider.getProtocolParameters();
-
-			const walletStore = { connected: true, name: walletName, walletApi: undefined, pkh: pkh, lucid: lucid, swEnviarPorBlockfrost: savedSwEnviarPorBlockfrost, protocolParameters: protocolParameters }
-
-			await signIn('credentials', { pkh: pkh , redirect: false })
-
-			setWalletStore(walletStore)
-
-			setSavedWalletConnected(true)
-			setSavedWalletName(walletName)
-			setSavedIsWalletFromSeed(true)
-
-			setWalletMessage("Loading Wallet info...")
-
-			await loadWalletData(walletStore)
-
-			setWalletMessage("Connected with " + walletName + "!")
-
-		} catch (error) {
-
-			console.error("WalletModalBtn - walletConnect Error2: " + error)
-
-			setWalletMessage("Error Connecting with " + walletName + ": " + error)
-
-		}
-
+		console.log("[Session] - walletFromSeedConnect")
+		// setWalletMessage("Connecting with " + walletName + "...")
+		// try {
+		// 	var walletSeed: string = ""
+		// 	if (walletName === "Master1") {
+		// 		walletSeed = walletMasterSeed1? walletMasterSeed1 : ""
+		// 	} else if (walletName === "Master2") {
+		// 		walletSeed = walletMasterSeed2? walletMasterSeed2 : ""
+		// 	}
+		// 	//const newBech32PrivateKey = C.PrivateKey.generate_ed25519().to_bech32()
+		// 	//const walletPrivateKey ="ed25519_sk10lc2huyqqx53qkcj8u9x794cesmtrpn95330aurcvkex8wmysljsz062s8" // walletMasterPrivateKey1
+		// 	//alert ("walletPrivateKey: " + walletPrivateKey)
+		// 	// const lucid = await initializeLucidWithWalletFromPrivateKey(walletPrivateKey)
+		// 	const lucid = await initializeLucidWithWalletFromSeed(walletSeed)
+		// 	const adddressWallet = await lucid!.wallet.address()
+		// 	//const pkh = C.Address.from_bech32(adddressWallet).as_base()?.payment_cred().to_keyhash()?.to_hex();
+		// 	const pkh = lucid!.utils.getAddressDetails(adddressWallet)?.paymentCredential?.hash;
+		// 	//console.log("[Session] - walletConnect: addr: " + adddressWallet)
+		// 	console.log("[Session] - walletConnect: pkh: " + pkh)
+		// 	const protocolParameters = await lucid!.provider.getProtocolParameters();
+		// 	const walletStore = { connected: true, name: walletName, walletApi: undefined, pkh: pkh, lucid: lucid, swEnviarPorBlockfrost: savedSwEnviarPorBlockfrost, protocolParameters: protocolParameters }
+		// 	await signIn('credentials', { pkh: pkh , redirect: false })
+		// 	setWalletStore(walletStore)
+		// 	setSavedWalletConnected(true)
+		// 	setSavedWalletName(walletName)
+		// 	setSavedIsWalletFromSeed(true)
+		// 	setWalletMessage("Loading Wallet info...")
+		// 	await loadWalletData(walletStore)
+		// 	setWalletMessage("Connected with " + walletName + "!")
+		// } catch (error) {
+		// 	console.error("[Session] - walletConnect Error2: " + error)
+		// 	setWalletMessage("Error Connecting with " + walletName + ": " + error)
+		// }
 	}
 
 	const walletDisconnect = async (closeModal = true) => {
-
-		console.log("WalletModalBtn - walletDisconnect")
-
+		console.log("[Session] - walletDisconnect")
 		setWalletMessage("Disconnecting Wallet ...")
-
 		try {
-
 			const walletStore = { connected: false, name: '', walletApi: undefined, pkh: "", lucid: undefined, swEnviarPorBlockfrost: false, protocolParameters: undefined }
-
 			await signOut({ redirect: false })
-
 			setWalletStore(walletStore)
-
-			setSavedWalletConnected(false)
-			setSavedWalletName("")
-			setSavedSwEnviarPorBlockfrost(false)
-			setSavedIsWalletFromSeed(false)
-
+			// setSavedWalletConnected(false)
+			// setSavedWalletName("")
+			// setSavedSwEnviarPorBlockfrost(false)
+			// setSavedIsWalletFromSeed(false)
 			setWalletMessage("Wallet Disconnected!")
-
 		} catch (error) {
-
-			console.error("WalletModalBtn - walletDisconnect Error2: " + error)
-
+			console.error("[Session] - walletDisconnect Error2: " + error)
 			setWalletMessage("Error Disconnecting Wallet: " + error)
-
 		}
-
 	}
+
+	const sessionWalletConnect = async () => {
+		try{
+			if(session && session.user && session.user.walletName){
+				//console.log("[Session] - walletConnect - session.walletName: " + session.user.walletName)
+				if (window.cardano && searchKeyInObject(availableWallets, session.user.walletName)) {
+					//si la wallet estaba conectada en la session anterior, tengo que reconectarla
+					await walletConnect(session.user.walletName, false)
+				} else {
+					console.log("[Session] - sessionWalletConnect: Not connecting to any wallet. Wallet of previus session not found: " + session.user.walletName)
+					throw "Wallet of previus session not found"
+				}
+			}else{
+				throw "No walletName in session"
+			}
+		} catch (error) {
+			await signOut({ redirect: false })
+		}
+	}
+
 
 	const pollWallets = async () => {
 		var wallets = [];
@@ -198,87 +183,57 @@ export default function WalletModalBtn() {
 		}
 
 		if (wallets.length === 0 && pollWalletsCount < 3) {
-			console.log("WalletModalBtn - POLLWALLETS Try again - Count: " + pollWalletsCount)
-
+			console.log("[Session] - POLLWALLETS Try again - Count: " + pollWalletsCount)
 			setTimeout(async () => {
-				console.log("WalletModalBtn - POLLWALLETS timeout call - Count:  " + pollWalletsCount)
+				console.log("[Session] - POLLWALLETS timeout call - Count:  " + pollWalletsCount)
 				setPollWalletsCount(pollWalletsCount + 1)
 				wallets = await pollWallets();
 			}, 1000);
+			//iterate wallets
+			for (const walletName of wallets) {
+				setAvailableWallets((wallets: any) => ({ ...wallets, [walletName]: true }))
+			}
 			return wallets;
 		}
 
-		console.log("WalletModalBtn - POLLWALLETS wallets: " + wallets)
+		console.log("[Session] - POLLWALLETS wallets: " + wallets)
+		//iterate wallets
+		for (const walletName of wallets) {
+			setAvailableWallets((wallets: any) => ({ ...wallets, [walletName]: true }))
+		}
 
 		return wallets
 	}
 
-	const poolWalletsAndConnect = async () => {
-
-		const availableWallets = await pollWallets();
-		//iterate wallets
-		for (const walletName of availableWallets) {
-			setAvailableWallets((availableWallets: any) => ({ ...availableWallets, [walletName]: true }))
-		}
-
-		if (!walletStore.connected) {
-
-			if (swSavedWalletConnected && savedWalletName != "") {
-				if (savedIsWalletFromSeed) {
-					try {
-						await walletFromSeedConnect(savedWalletName)
-					} catch (error) {
-						console.error("WalletModalBtn - poolWalletsAndConnect - Error: " + error)
-					}
-				} else {
-					if (window.cardano && searchValueInArray(availableWallets, savedWalletName)) {
-						//si la wallet estaba conectada en la session anterior, tengo que reconectarla
-						//fuerzo a que la wallet no este enabled ni conectada
-						try {
-							await walletConnect(savedWalletName, false)
-						} catch (error) {
-							console.error("WalletModalBtn - poolWalletsAndConnect - Error: " + error)
-						}
-					} else {
-
-						console.log("WalletModalBtn - poolWalletsAndConnect: Not connecting to any wallet. Wallet of previus session not found: " + savedWalletName)
-
-					}
-
-				}
-
-			} else {
-
-				console.log("WalletModalBtn - poolWalletsAndConnect: Not connecting to any wallet, there were not previus session")
-
-			}
-
-		}
-	}
-
-	useEffect(() => {
-		// console.log ("WalletModalBtn - useEffect1 - savedSwEnviarPorBlockfrost: " + savedSwEnviarPorBlockfrost )
-
-		if (walletStore.connected && savedSwEnviarPorBlockfrost != walletStore.swEnviarPorBlockfrost) {
-			if (savedIsWalletFromSeed) {
-				try {
-					walletFromSeedConnect(savedWalletName)
-				} catch (error) {
-					console.error("WalletModalBtn - useEffect1 - Error: " + error)
-				}
-			} else {
-				try {
-					walletConnect(walletStore.name, false)
-				} catch (error) {
-					console.error("WalletModalBtn - useEffect2 - Error: " + error)
-				}
+	const handleChangeSavedSwEnviarPorBlockfrost = async () => {
+		console.log ("[Session] - handleChangeSavedSwEnviarPorBlockfrost: " + !swEnviarPorBlockfrost)
+		setSwEnviarPorBlockfrost(!swEnviarPorBlockfrost);
+		if(status === "authenticated"){
+			if(session && session.user ){
+				console.log ("[Session] - refreshing session with new swEnviarPorBlockfrost: " + !swEnviarPorBlockfrost)
+				await signIn('credentials', { pkh: session.user.pkh , walletName: session.user.walletName, swEnviarPorBlockfrost: !swEnviarPorBlockfrost?"true":"false", isWalletFromSeedletName: session.user.isWalletFromSeedletName?"true":"false",redirect: false, })
 			}
 		}
-	}, [savedSwEnviarPorBlockfrost])
+	};
 
 	useEffect(() => {
-		poolWalletsAndConnect()
+		pollWallets();
 	}, [])
+
+	useEffect(() => {
+		
+		if(status === "authenticated"){
+			console.log("[Session] - Session authenticated")
+			if(session && session.user && session.user.swEnviarPorBlockfrost){
+				setSwEnviarPorBlockfrost(session.user.swEnviarPorBlockfrost)
+			}
+			sessionWalletConnect()
+		} else if (status === "unauthenticated"){
+			console.log("[Session] - Not connecting to any Wallet, there were not previus session")
+		} else if (status === "loading"){
+			console.log("[Session] - Loading Session")
+		}
+	}, [status])
 
 	return (
 		<div>
@@ -315,7 +270,7 @@ export default function WalletModalBtn() {
 						<label>
 							<input
 								type="checkbox"
-								checked={savedSwEnviarPorBlockfrost}
+								checked={swEnviarPorBlockfrost}
 								onChange={handleChangeSavedSwEnviarPorBlockfrost}
 							/>
 							Usar BlockFrost API en lugar de la Wallet para realizar las transacciones
@@ -332,7 +287,7 @@ export default function WalletModalBtn() {
 											e.preventDefault()
 											walletDisconnect(false)
 										} catch (error) {
-											console.error("WalletModalBtn - Error disconnecting wallet: " + error)
+											console.error("[Session] - Error disconnecting wallet: " + error)
 										}
 									}}
 								>
@@ -357,7 +312,7 @@ export default function WalletModalBtn() {
 																e.preventDefault()
 																walletConnect(wallet)
 															} catch (error) {
-																console.error("WalletModalBtn - Error connecting with wallet: " + error)
+																console.error("[Session] - Error connecting with wallet: " + error)
 															}
 														}}
 													>
@@ -375,7 +330,6 @@ export default function WalletModalBtn() {
 															try {
 																e.preventDefault()
 
-
 																const url = installWallet[wallet as keyof typeof installWallet]
 																window.open(url, '_blank');
 
@@ -386,10 +340,9 @@ export default function WalletModalBtn() {
 																// 		window.open(url, '_blank');
 																// 	}
 																// }
-													
 
 															} catch (error) {
-																console.error("WalletModalBtn - Error installing with wallet: " + error)
+																console.error("[Session] - Error installing with wallet: " + error)
 															}
 														}}
 													>
@@ -413,7 +366,7 @@ export default function WalletModalBtn() {
 														e.preventDefault()
 														walletFromSeedConnect("Master1", false)
 													} catch (error) {
-														console.error("WalletModalBtn - Error connecting with wallet from seed" + error)
+														console.error("[Session] - Error connecting with wallet from seed" + error)
 													}
 												}}
 											>
@@ -429,7 +382,7 @@ export default function WalletModalBtn() {
 														e.preventDefault()
 														walletFromSeedConnect("Master2", false)
 													} catch (error) {
-														console.error("WalletModalBtn - Error connecting with wallet from seed" + error)
+														console.error("[Session] - Error connecting with wallet from seed" + error)
 													}
 												}}
 											>

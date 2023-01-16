@@ -25,12 +25,17 @@ export default NextAuth({
 			// e.g. domain, username, password, 2FA token, etc.
 			// You can pass any HTML attribute to the <input> tag through the object.
 			credentials: {
-				pkh: { label: "PKH", type: "text", placeholder: "" }
+				pkh: { label: "PKH", type: "text", placeholder: "" },
+				walletName: { label: "WalletName", type: "text", placeholder: "" },
+				swEnviarPorBlockfrost: { label: "swEnviarPorBlockfrost", type: "text", placeholder: "" },
+				isWalletFromSeedletName: { label: "isWalletFromSeedletName", type: "text", placeholder: "" }
 			},
-			
+
 			async authorize(credentials, req) : Promise<User | null> {
+				//console.log("/api/auth/[...nextauth].ts - authorize - user: " + toJson(req))
+
 				// Add logic here to look up the user from the credentials supplied
-				if(credentials?.pkh != "" ){
+				if(credentials?.pkh != "" && credentials?.walletName != ""){ 
 
 					const pkhAdmins = process.env.pkhAdmins?.split (",") || [];
 					const pkhCreators = process.env.pkhCreators?.split (",") || [];
@@ -38,7 +43,15 @@ export default NextAuth({
 					const swAdmin = pkhAdmins.includes (credentials?.pkh!)
 					const swCreate = pkhAdmins.includes (credentials?.pkh!) || pkhCreators.includes (credentials?.pkh!)
 
-					const user : User = { id: credentials?.pkh!, pkh: credentials?.pkh!, swAdmin: swAdmin, swCreate: swCreate }
+					const user : User = { 
+						id: credentials?.pkh!, 
+						pkh: credentials?.pkh!, 
+						swAdmin: swAdmin, 
+						swCreate: swCreate, 
+						walletName: credentials?.walletName! ,
+						swEnviarPorBlockfrost: credentials?.swEnviarPorBlockfrost! === "true" ? true : false ,
+						isWalletFromSeedletName: credentials?.isWalletFromSeedletName! === "true" ? true : false
+					}
 
 					console.log("/api/auth/[...nextauth].ts - authorize - user: " + toJson(user))
 

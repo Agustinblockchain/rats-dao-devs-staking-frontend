@@ -7,7 +7,7 @@ import { useStoreState } from '../utils/walletProvider';
 import { StakingPoolDBInterface, getStakingPools } from '../types/stakePoolDBModel'
 import { createContext, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import { getSession } from 'next-auth/react'
+import { getSession, useSession } from 'next-auth/react'
 
 const getFaqText = (n : number) => {
 	switch(n) {
@@ -43,34 +43,12 @@ const getFaqTitle = (n : number) => {
 	}
 }
 
-const Faq : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = ({pkh, swCreate} : InferGetServerSidePropsType<typeof getServerSideProps>) =>  {
-	const router = useRouter();
-
-	const [isRefreshing, setIsRefreshing] = useState(true);
-
-	const walletStore = useStoreState(state => state.wallet)
-
-	const refreshData = () => {
-		console.log ("FAQ - refreshData - router.replace - walletStore.connected " + walletStore.connected + " - router.asPath: " + router.asPath);
-		router.replace(router.basePath)
-		setIsRefreshing(true);
-	};
-
-	useEffect(() => {
-		setIsRefreshing(false);
-	}, []);
+const Faq : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = ({} : InferGetServerSidePropsType<typeof getServerSideProps>) =>  {
 	
-	useEffect(() => {
-		if (walletStore.connected && pkh != walletStore.pkh) {
-			refreshData()
-		}else if (!walletStore.connected) {
-			refreshData()
-		}
-	}, [walletStore.connected])
+	const { data: session, status } = useSession()
 	
 	return (
-		<Layout swCreate={swCreate}>
-
+		<Layout swCreate={session?.user.swCreate}>
 			<div className="section__text">
 				<div className="faq">
 					{
@@ -83,36 +61,15 @@ const Faq : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = (
 					}
 				</div>
 			</div>
-
 		</Layout>
 	)
 }
 
 export async function getServerSideProps(context : any) { 
-	try {
-		console.log ("FAQ getServerSideProps -------------------------------");
-		//console.log ("FAQ getServerSideProps - init - context.query?.pkh:", context.query?.pkh);
-		const session = await getSession(context)
-		if (session) {
-			console.log ("FAQ getServerSideProps - init - session:", toJson (session));
-		}else{
-			//console.log ("FAQ getServerSideProps - init - session: undefined");
-		}
-		return {
-			props: {
-				pkh: session?.user.pkh !== undefined ? session?.user.pkh : "",
-				swCreate: session && session.user ? session.user.swCreate : false 
-			}
+
+	return {
+			props: {  }
 		};
-	} catch (error) {
-		console.error (error)
-		return {
-			props: { 
-				pkh: "",
-				swCreate: false,
-			 }
-		};
-	}
 }
 
 export default Faq

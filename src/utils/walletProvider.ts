@@ -40,6 +40,7 @@ export const storeWallet = createStore<AppStoreModel> (({
 		// console.log("storeWallet - setWallet: " + toJson(newWallet.name))
 
 		state.wallet = newWallet 
+		state.isWalletDataLoaded = false 
 	}),
 
 	isWalletDataLoaded: false,

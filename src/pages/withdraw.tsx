@@ -12,16 +12,15 @@ import { getSession, useSession } from 'next-auth/react'
 import StakingPool from '../components/StakingPool'
 //--------------------------------------
 
-const Withdraw : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> =  ({pkh, swCreate, stakingPools} : InferGetServerSidePropsType<typeof getServerSideProps>) =>  {
+const Withdraw : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> =  ({pkh, stakingPools} : InferGetServerSidePropsType<typeof getServerSideProps>) =>  {
 	
-	const router = useRouter();
+	const { data: session, status } = useSession()
 
 	const [isRefreshing, setIsRefreshing] = useState(true);
-
-	const walletStore = useStoreState(state => state.wallet)
-
 	const [stakingPoolsParsed, setStakingPoolsParsed] = useState<StakingPoolDBInterface [] > ([]);
 
+	const walletStore = useStoreState(state => state.wallet)
+	const router = useRouter();
 	const refreshData = () => {
 		console.log ("Withdraw - refreshData - router.replace - walletStore.connected " + walletStore.connected + " - router.asPath: " + router.asPath);
 		router.replace(router.basePath)
@@ -29,16 +28,12 @@ const Withdraw : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>
 	};
 
 	useEffect(() => {
-		setIsRefreshing(false);
-	}, []);
-
-	useEffect(() => {
-		if (walletStore.connected && pkh != walletStore.pkh) {
+		if (status == "authenticated" && session?.user.pkh != pkh) {
 			refreshData()
-		}else if (!walletStore.connected) {
+		} else if (status == "unauthenticated" && pkh != "") {
 			refreshData()
 		}
-	}, [walletStore.connected])
+	}, [status])
 
 	useEffect(() => {
 		if (stakingPools){
@@ -51,12 +46,16 @@ const Withdraw : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>
 	}, [stakingPools]);
 	
 	return (
-		<Layout swCreate={swCreate}>
-			{ (!walletStore.connected) ?
-					<div>Connect you wallet to see your Deposits</div>
+		<Layout swCreate={session?.user.swCreate}>
+		{
+			(status == "loading")? 
+				<p>Loading Session...</p>
+			:
+				(isRefreshing) ?
+					<div>Loading Staking Pools...</div>
 				:
-					(isRefreshing) ?
-						<div>Loading Staking Pools...</div>
+					(status === "unauthenticated")? 
+						<p>Connect you wallet to see your Deposits</p>
 					:
 						stakingPoolsParsed.length > 0 ? 
 							stakingPoolsParsed.map(
@@ -65,7 +64,7 @@ const Withdraw : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>
 							)
 						:
 							<p>Can't find any Staking Pool that you have deposited into.</p> 
-			}
+		}
 		</Layout>
 	)
 }
@@ -94,7 +93,6 @@ export async function getServerSideProps(context : any) {
 		return {
 			props: {
 				pkh: session?.user.pkh !== undefined ? session?.user.pkh : "",
-				swCreate: session && session.user ? session.user.swCreate : false ,
 				stakingPools: dataStakingPools
 			}
 		};
@@ -105,7 +103,6 @@ export async function getServerSideProps(context : any) {
 		return {
 			props: { 
 				pkh: "",
-				swCreate: false,
 				stakingPools: dataStakingPools, 
 			}
 		};
