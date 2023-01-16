@@ -22,6 +22,8 @@ export interface StakingPoolDBInterface {
 	closedAt: Date | undefined,
 	swTerminated: boolean,
 	swZeroFunds: boolean,
+
+	swPoolReadyForDeleteMasterAndUserScripts: boolean,
 	swPoolReadyForDeleteMainScripts: boolean,
 	swPoolReadyForDeletePoolInDB: boolean,
 
@@ -122,6 +124,8 @@ const stakingPoolDBSchema = new Schema<StakingPoolDBInterface>({
 	closedAt: { type: Date, required: false },
 	swTerminated: { type: Boolean, required: true },
 	swZeroFunds: { type: Boolean, required: true },
+
+	swPoolReadyForDeleteMasterAndUserScripts: { type: Boolean, required: true },
 	swPoolReadyForDeleteMainScripts : { type: Boolean, required: true },
 	swPoolReadyForDeletePoolInDB : { type: Boolean, required: true },
 

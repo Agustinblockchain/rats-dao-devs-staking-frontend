@@ -87,6 +87,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 		graceTimeUI,
         terminatedAtUI,
         swPoolReadyForGiveBackFundsUI,
+		swPoolReadyForDeleteMasterAndUserScriptsUI,
         swPoolReadyForDeleteMainScriptsUI,
         swPoolReadyForDeletePoolInDBUI,
 
@@ -489,9 +490,13 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 		setIsCanceling(false)
 		//------------------
 		try {
+			if (!poolInfo!.swPoolReadyForDeleteMasterAndUserScripts){
+				throw "Pool is not ready to Delete Master Scripts"
+			}
 			if (!swAnyScriptsMaster) {
 				throw "No Master Scripts to Delete"
 			}
+			//------------------
 			var poolInfo_updated = poolInfo!
 			var swSeparate = false
 			if (poolInfo_updated.eUTxO_With_Script_TxID_Master_Fund_Datum !== undefined) {
@@ -649,7 +654,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 		//------------------
 		try {
 			if (!poolInfo!.swPoolReadyForDeleteMainScripts){
-				throw "Pool is not ready to delete main scripts"
+				throw "Pool is not ready to Delete Main Scripts"
 			}
 			if (!swAnyMainScripts) {
 				throw "No Main Scripts to Delete"
@@ -798,9 +803,13 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 		setIsCanceling(false)
 		//------------------
 		try {
+			if (!poolInfo!.swPoolReadyForDeleteMasterAndUserScripts){
+				throw "Pool is not ready to Delete User Scripts"
+			}
 			if (!swAnyScriptsUser) {
 				throw "No User Scripts to Delete"
 			}
+			//------------------
 			var poolInfo_updated = poolInfo!
 			var swSeparate = false
 			if (poolInfo_updated.eUTxO_With_Script_TxID_User_Deposit_Datum !== undefined) {
@@ -1063,6 +1072,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 						{process.env.NODE_ENV==="development"?
 							<>
 								<div>Pool is Ready For Give Back Fund: {swPoolReadyForGiveBackFundsUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
+								<div>Pool is Ready For Deleted Master And User Scripts: {swPoolReadyForDeleteMasterAndUserScriptsUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
 								<div>Pool is Ready For Deleted Main Scripts: {swPoolReadyForDeleteMainScriptsUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
 								<div>Pool is Ready For Deleted In DB: {swPoolReadyForDeletePoolInDBUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
 							</>
@@ -1224,7 +1234,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 									cancel={handleCancel}
 									actionName="Add Scripts Master" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking}
 									description={'<li className="info">Add All the Master Scripts to the Blockchain.</li>\
-									<li className="info">Please note that a small amount of ADA will be required to add the scripts to the UTXO.</li>\
+									<li className="info">Please note that a small amount of ADA will be required to add the Scripts to the UTxO.</li>\
 									<li className="info">Don\'t worry, you will get your ADA back once the scripts are deleted.</li>'}
 									poolInfo={poolInfo}
 									swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded}
@@ -1242,10 +1252,11 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 									cancel={handleCancel}
 									actionName="Delete Scripts Master" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking}
 									description={'<li className="info">Delete All the Master Scripts from the Blockchain.</li>\
-									<li className="info">Also Master who added them will also receive a refund of the ADA used to hold the script in the UTXO.</li>'}
+									<li className="info">Also Master who added them will also receive a refund of the ADA used to hold the Script in the UTxO.</li>\
+									<li className="info">In order to Delete Scripts, you must first Terminate the Pool.</li>'}
 									poolInfo={poolInfo}
 									swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded}
-									swEnabledBtnAction={walletStore.connected && isPoolDataLoaded}
+									swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && poolInfo.swPoolReadyForDeleteMasterAndUserScripts}
 									swShow={poolInfo.swPreparado && poolInfo.swTerminated && swAnyScriptsMaster}
 									swHash={false}
 									swPaddintTop={poolInfo.swPreparado && !swAllScriptsMaster}
@@ -1259,7 +1270,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 									cancel={handleCancel}
 									actionName="Add Scripts User" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking}
 									description={'<li className="info">Add All the User Scripts to the Blockchain.</li>\
-									<li className="info">Please note that a small amount of ADA will be required to add the scripts to the UTXO.</li>\
+									<li className="info">Please note that a small amount of ADA will be required to add the Scripts to the UTxO.</li>\
 									<li className="info">Don\'t worry, you will get your ADA back once the scripts are deleted.</li>'}
 									poolInfo={poolInfo}
 									swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded}
@@ -1277,10 +1288,11 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 									cancel={handleCancel}
 									actionName="Delete Scripts User" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking}
 									description={'<li className="info">Delete All the User Scripts from the Blockchain.</li>\
-									<li className="info">Also Master who added them will also receive a refund of the ADA used to hold the script in the UTXO.</li>'}
+									<li className="info">Also Master who added them will also receive a refund of the ADA used to hold the Script in the UTxO.</li>\
+									<li className="info">In order to Delete Scripts, you must first Terminate the Pool.</li>'}
 									poolInfo={poolInfo}
 									swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded}
-									swEnabledBtnAction={walletStore.connected && isPoolDataLoaded}
+									swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && poolInfo.swPoolReadyForDeleteMasterAndUserScripts}
 									swShow={poolInfo.swPreparado && poolInfo.swTerminated && swAnyScriptsUser}
 									swHash={false}
 									swPaddintTop={poolInfo.swPreparado && ((!swAllScriptsMaster) || (poolInfo.swTerminated && swAnyScriptsMaster) || (!swAllScriptsUser))}
@@ -1321,8 +1333,8 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 									postActionError={updateDetailsStakingPoolAndWallet}
 									setIsWorking={handleSetIsWorking} 
 									actionName="New Fund" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-									description={'<li className="info">To ensure a smooth user experience, it\'s recommended to create multiple Funds instead of using just one. This helps to avoid potential collisions and allows more users to interact with the contract simultaneously.</li>\
-									<li className="info">It\'s recommended to have two Funds with less amount each one rather than one Fund with all the amount together.</li>\
+									description={'<li className="info">To ensure a smooth User experience, it\'s recommended to create multiple Funds instead of using just one. This helps to avoid potential collisions and allows more Users to interact with the Contract simultaneously.</li>\
+									<li className="info">It\'s recommended to have two Funds with less fund amount each one rather than one Fund with all the fund amount together.</li>\
 									<li className="info">It\'s important to regularly check the availability of Funds and create additional ones as needed.</li>'}
 									poolInfo={poolInfo}
 									swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded}
@@ -1341,7 +1353,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 									setIsWorking={handleSetIsWorking}
 									cancel={handleCancel}
 									actionName="New Funds Batch" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking}
-									description={'<p className="info">Create multiple transactions for new funds in one go, rather than manually entering each transaction individually. However, you will still need to individually sign each transaction.</p>'}
+									description={'<p className="info">Create multiple Transactions for New Funds in one go, rather than manually entering each transaction individually. However, you will still need to individually sign each Transaction.</p>'}
 									poolInfo={poolInfo}
 									swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded}
 									swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded}
@@ -1402,7 +1414,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 									postActionError={updateDetailsStakingPoolAndWallet}
 									setIsWorking={handleSetIsWorking} 
 									actionName="Split Wallet UTxOs" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-									description={'<p className="info">It is recommended to split your wallet\'s UTXOs (unspent transaction outputs) into smaller amounts. This will make it easier to use them as collateral for smart contracts and will provide more flexibility in managing your funds.</p>'}
+									description={'<p className="info">It is recommended to Split your Wallet\'s UTxOs (Unspent Transaction Outputs) into smaller amounts. This will make it easier to use them as Collateral for Smart Contracts and will provide more flexibility in managing your funds.</p>'}
 									swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded}
 									swEnabledBtnAction={walletStore.connected && isPoolDataLoaded}
 									swShow={poolInfo.swPreparado}
@@ -1435,9 +1447,9 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 									setIsWorking={handleSetIsWorking} 
 									actionName="Close Pool" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
 									description={'<li className="info">Close the Pool at this time, instead of waiting for the Deadline.</li> \
-									<li className="info">Users will only be able to collect rewards accumulated so far.</li> \
-									<li className="info">Masters can keep adding Funds so there are funds to pay rewards.</li> \
-									<li className="info">After Grace Time the Pool will be finished.</li>'}
+									<li className="info">Users will only be able to collect Rewards accumulated so far.</li> \
+									<li className="info">Masters can keep adding Funds so there are funds to pay Rewards.</li> \
+									<li className="info">After Grace Time the Pool will be Terminated.</li>'}
 									poolInfo={poolInfo}
 									swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded}
 									swEnabledBtnAction={walletStore.connected && isPoolDataLoaded}
@@ -1453,7 +1465,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 									poolInfo={poolInfo}
 									actionName="Terminate Pool" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
 									description={'<li className="info">Finish the Pool now, instead of waiting for Deadline and Grace Time.</li> \
-									<li className="info">Users will not be able to collect any more rewards.</li> \
+									<li className="info">Users will not be able to collect any more Rewards.</li> \
 									<li className="info">After Deleteing all Funds, Masters can recover any funds left over, proportionally to what each one has put in.</li>'}
 									swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded}
 									swEnabledBtnAction={walletStore.connected && isPoolDataLoaded}
@@ -1470,15 +1482,16 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 									actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
 									actionName="Delete Main Scrips"
 									description={'<li className="info">This actions is irreversible.</li>\
-									<li className="info">It will delete the Main Scripts and send back the locked ADA in that UTXOs to the respective Masters.</li>\
-									<li className="info">Please, do not delete Main Scripts if you need to continue using the Staking Pool.</li>\
+									<li className="info">It will Delete the Main Scripts and send back the locked ADA in that UTxOs to the respective Masters.</li>\
+									<li className="info">Please, do not Delete Main Scripts if you need to continue using the Staking Pool.</li>\
 									<li className="info">After deleting Main Scripts you will no be able to interact with the Script anymore.</li>\
-									<li className="info">You can delete them if there are no registered users. Use Send Back Deposits to unregister users.</li>\
-									<li className="info">You can delete them if there are no remaining funds. Use Send Back Funds to use all remaining funds.</li>\
-									<li className="info">You can delete them if there are no Master nor User scripts at the contract address. Use Delete Master and User Scripts.</li>'}
+									<li className="info">You can Delete them if there are no registered Users. Use Send Back Deposits to unregister Users.</li>\
+									<li className="info">You can Delete them if there are no remaining funds. Use Send Back Funds to use all remaining funds.</li>\
+									<li className="info">You can Delete them if there are no other Scripts at the contract address. Use Delete Master and User Scripts before.</li>\
+									<li className="info">In order to Delete Scripts, you must first Terminate the Pool.</li>'}
 									swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded}
 									swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && poolInfo.swPoolReadyForDeleteMainScripts} 
-									swShow={poolInfo.swPreparado && swAnyMainScripts}
+									swShow={poolInfo.swPreparado && poolInfo.swTerminated && swAnyMainScripts}
 									swHash={false}
 								/>
 
@@ -1490,10 +1503,11 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 									poolInfo={poolInfo}
 									actionName="Delete Pool" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
 									description={'<li className="info">This actions is irreversible.</li>\
-									<li className="info">It will delete the Pool and it will not be show in the site anymore.</li>\
-									<li className="info">You can delete the Pool if there are no registered users. Use Send Back Deposits to unregister users.</li>\
-									<li className="info">You can delete the Main Scripts if there are no remaining funds. Use Send Back Funds to use all remaining funds.</li>\
-									<li className="info">You can delete the Main Scripts if there are no scripts at the contract address. Use Delete Main, Master and User Scripts.</li>'}
+									<li className="info">It will Delete the Pool and it will not be show in the site anymore.</li>\
+									<li className="info">You can Delete the Pool if there are no registered Users. Use Send Back Deposits to unregister Users.</li>\
+									<li className="info">You can Delete the Pool if there are no remaining funds. Use Send Back Funds to use all remaining funds.</li>\
+									<li className="info">You can Delete the Pool if there are no scripts at the contract address. Use Delete Main, Master and User Scripts.</li>\
+									<li className="info">In order to Delete Scripts, you must first Terminate the Pool.</li>'}
 									swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded}
 									swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && poolInfo.swPoolReadyForDeletePoolInDB } 
 									swShow={true}

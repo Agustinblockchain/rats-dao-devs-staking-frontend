@@ -440,7 +440,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 															postActionError={updateDetailsStakingPoolAndWallet}
 															setIsWorking={handleSetIsWorking} 
 															actionName="Harvest" actionIdx={poolInfo.name + "-" + userStakedData.eUTxO_With_UserDatum!.uTxO.txHash + "-" + userStakedData.eUTxO_With_UserDatum!.uTxO.outputIndex} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-															description={poolInfo.swTerminated ? '<p className="info">This pool in already terminated. You can\'t harvest anymore.</p>' : undefined}
+															description={poolInfo.swTerminated ? '<p className="info">This Pool in already terminated. You can\'t Harvest anymore.</p>' : undefined}
 															poolInfo={poolInfo} 
 															swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && swUserRegistered} 
 															swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && swUserRegistered && !poolInfo.swTerminated} 
@@ -463,8 +463,8 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 															setIsWorking={handleSetIsWorking} 
 															actionName="Withdraw" actionIdx={poolInfo.name + "-" + userStakedData.eUTxO_With_UserDatum!.uTxO.txHash + "-" + userStakedData.eUTxO_With_UserDatum!.uTxO.outputIndex} 
 															messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-															description={'<li className="info">Do you want to withdraw your deposit?</li> \
-															<li className="info">Please, make sure you have taken care of any outstanding rewards before withdrawing your deposit.</li>\
+															description={'<li className="info">Do you want to withdraw your Deposit?</li> \
+															<li className="info">Please, make sure you have taken care of any outstanding Rewards before withdrawing your Deposit.</li>\
 															<li className="info">You can\'t claim them after withdrawing.</li>'}
 															swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && swUserRegistered} 
 															swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && swUserRegistered} 
@@ -496,7 +496,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 											postActionError={updateDetailsStakingPoolAndWallet}
 											setIsWorking={handleSetIsWorking} 
 											actionName="Deposit" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-											description={poolInfo.swClosed ? '<p className="info">This pool in already closed. You can\'t deposit anymore.</p>' : undefined}
+											description={poolInfo.swClosed ? '<p className="info">This Pool in already closed. You can\'t Deposit anymore.</p>' : undefined}
 											poolInfo={poolInfo} 
 											swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded } 
 											swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded && !poolInfo.swClosed} 
@@ -515,7 +515,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 											postActionError={updateDetailsStakingPoolAndWallet}
 											setIsWorking={handleSetIsWorking} 
 											actionName="Deposit" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-											description={poolInfo.swClosed ? '<p className="info">This pool in already closed. You can\'t deposit anymore.</p>' : undefined}
+											description={poolInfo.swClosed ? '<p className="info">This Pool in already closed. You can\'t Deposit anymore.</p>' : undefined}
 											poolInfo={poolInfo} 
 											swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded } 
 											swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded && !poolInfo.swClosed} 
@@ -535,7 +535,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 									setIsWorking={handleSetIsWorking} 
 									cancel={handleCancel}
 									actionName="Deposit Batch" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-									description={poolInfo.swClosed ? '<p className="info">This pool in already closed. You can\'t deposit anymore.</p>' : '<p className="info">Create multiple transactions for new Deposits in one go, rather than manually entering each transaction individually. However, you will still need to individually sign each transaction.</p>'}
+									description={poolInfo.swClosed ? '<p className="info">This Pool in already closed. You can\'t Deposit anymore.</p>' : '<p className="info">Create multiple Transactions for new Deposits in one go, rather than manually entering each Transaction individually. However, you will still need to individually sign each Transaction.</p>'}
 									poolInfo={poolInfo} 
 									swShowInput={true} inputUnitForLucid={poolInfo.staking_Lucid} inputUnitForShowing={poolInfo.staking_UI} inputMax={maxStakingAmountUI} inputDecimals={staking_Decimals} 
 									swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded } 
@@ -555,7 +555,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 								postActionError={updateDetailsStakingPoolAndWallet}
 								setIsWorking={handleSetIsWorking} 
 								actionName="Split Wallet UTxOs" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-								description={'<p className="info">It is recommended to split your wallet\'s UTXOs (unspent transaction outputs) into smaller amounts. This will make it easier to use them as collateral for smart contracts and will provide more flexibility in managing your funds.</p>'}
+								description={'<p className="info">It is recommended to Split your Wallet\'s UTxOs (Unspent Transaction Outputs) into smaller amounts. This will make it easier to use them as collateral for Smart Contracts and will provide more flexibility in managing your funds.</p>'}
 								swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded} 
 								swEnabledBtnAction={walletStore.connected && isPoolDataLoaded}
 								swShow={true }

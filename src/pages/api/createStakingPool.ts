@@ -339,6 +339,7 @@ async function crearStakingPool(nombrePool: any, staking_UI: any, harvest_UI: an
 
 		swZeroFunds: true,
 
+		swPoolReadyForDeleteMasterAndUserScripts: true,
 		swPoolReadyForDeleteMainScripts: true,
 		swPoolReadyForDeletePoolInDB: true,
 

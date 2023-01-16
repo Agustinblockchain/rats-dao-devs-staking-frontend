@@ -209,8 +209,8 @@ export default function CreateStakingPool( ) {
 					<br></br>
 					<div>
 
-					<li className="info">Prepare your newly created pool immediately.</li>
-					<li className="info">Avoid making other transactions as the contract is dependent on a specific UTxO to mint the PoolID NFT that should not be consumed before.</li>
+					<li className="info">Prepare your newly created Pool immediately.</li>
+					<li className="info">Avoid making other Transactions as the Contract is dependent on a specific UTxO to mint the PoolID NFT that should not be consumed before.</li>
 					</div>
 					<br></br>
 
@@ -373,8 +373,8 @@ export default function CreateStakingPool( ) {
 											postActionError={undefined}
 											setIsWorking={handleSetIsWorking} 
 											actionName="Create Staking Pool" actionIdx="1" messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-											description={'<li className="info">Prepare your newly created pool immediately.</li>\
-											<li className="info">Avoid making other transactions as the contract is dependent on a specific UTxO to mint the PoolID NFT that should not be consumed before.</li>'}
+											description={'<li className="info">Prepare your newly created Pool immediately.</li>\
+											<li className="info">Avoid making other Transactions as the Contract is dependent on a specific UTxO to mint the PoolID NFT that should not be consumed before.</li>'}
 											swEnabledBtnOpenModal={walletStore.connected && uTxOsAtWalllet.length > 0} 
 											swEnabledBtnAction={walletStore.connected && uTxOsAtWalllet.length > 0} 
 											swShow={true}
@@ -387,7 +387,7 @@ export default function CreateStakingPool( ) {
 											postActionError={getDataFromWallet}
 											setIsWorking={handleSetIsWorking}
 											actionName="Split Wallet UTxOs" actionIdx="1" messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-											description={'<p className="info">It is recommended to split your wallet\'s UTXOs (unspent transaction outputs) into smaller amounts. This will make it easier to use them as collateral for smart contracts and will provide more flexibility in managing your funds.</p>'}
+											description={'<p className="info">It is recommended to Split your Wallet\'s UTxOs (Unspent Transaction Outputs) into smaller amounts. This will make it easier to use them as collateral for Smart Contracts and will provide more flexibility in managing your funds.</p>'}
 											swEnabledBtnOpenModal={walletStore.connected}
 											swEnabledBtnAction={walletStore.connected}
 											swShow={true}

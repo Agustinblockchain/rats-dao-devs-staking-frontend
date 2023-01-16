@@ -168,6 +168,7 @@ export async function serverSide_updateStakingPool (poolInfo: StakingPoolDBInter
     var swClosed = poolInfo.swClosed
     var swTerminated = poolInfo.swTerminated
     var swZeroFunds = poolInfo.swZeroFunds
+    var swPoolReadyForDeleteMasterAndUserScripts = poolInfo.swPoolReadyForDeleteMasterAndUserScripts
     var swPoolReadyForDeleteMainScripts = poolInfo.swPoolReadyForDeleteMainScripts
     var swPoolReadyForDeletePoolInDB = poolInfo.swPoolReadyForDeletePoolInDB
     var closedAt = poolInfo.closedAt
@@ -439,6 +440,7 @@ export async function serverSide_updateStakingPool (poolInfo: StakingPoolDBInter
     } 
     //------------------
     if (eUTxO_With_PoolDatum === undefined || poolDatum === undefined) {
+        swPoolReadyForDeleteMasterAndUserScripts = true
         swPoolReadyForDeleteMainScripts = true
         swPoolReadyForDeletePoolInDB = true
     }else{
@@ -473,20 +475,21 @@ export async function serverSide_updateStakingPool (poolInfo: StakingPoolDBInter
 
         const swAnyScriptsAtAll = swAnyScriptsMaster || swAnyScriptsUser || swAnyMainScript
         
-        swPoolReadyForDeleteMainScripts = swAllMasterFundersClaimed && (eUTxOs_With_FundDatum.length === 0) && (eUTxOs_With_UserDatum.length === 0) && !swAnyScriptsMaster && !swAnyScriptsUser
+        swPoolReadyForDeleteMasterAndUserScripts = swAllMasterFundersClaimed && (eUTxOs_With_FundDatum.length === 0) && (eUTxOs_With_UserDatum.length === 0) && (swAnyScriptsMaster || swAnyScriptsUser) && swTerminated
+        swPoolReadyForDeleteMainScripts = swAllMasterFundersClaimed && (eUTxOs_With_FundDatum.length === 0) && (eUTxOs_With_UserDatum.length === 0) && !swAnyScriptsMaster && !swAnyScriptsUser && swTerminated
         swPoolReadyForDeletePoolInDB = swAllMasterFundersClaimed && (eUTxOs_With_FundDatum.length === 0) && (eUTxOs_With_UserDatum.length === 0) && !swAnyScriptsAtAll
        
-        console.log ("swAnyScriptsMasters: " + swAnyScriptsMaster)
-        console.log ("swAnyScriptsUser: " + swAnyScriptsUser)
-        console.log ("swAnyMainScript: " + swAnyMainScript)
-        console.log ("swAnyScriptsAtAll: " + swAnyScriptsAtAll)
-        console.log ("swAllMasterFundersClaimed: " + swAllMasterFundersClaimed)
-        console.log ("swPoolReadyForDeleteMainScripts: " + swPoolReadyForDeleteMainScripts)
-        console.log ("swPoolReadyForDeletePoolInDB: " + swPoolReadyForDeletePoolInDB)
-
-        console.log ("eUTxOs_With_Datum.length: " + eUTxOs_With_Datum.length)
-        console.log ("eUTxOs_With_FundDatum.length: " + eUTxOs_With_FundDatum.length)
-        console.log ("eUTxOs_With_UserDatum.length: " + eUTxOs_With_UserDatum.length)
+        // console.log ("swAnyScriptsMasters: " + swAnyScriptsMaster)
+        // console.log ("swAnyScriptsUser: " + swAnyScriptsUser)
+        // console.log ("swAnyMainScript: " + swAnyMainScript)
+        // console.log ("swAnyScriptsAtAll: " + swAnyScriptsAtAll)
+        // console.log ("swAllMasterFundersClaimed: " + swAllMasterFundersClaimed)
+        // console.log ("swPoolReadyForDeleteMasterAndUserScripts: " + swPoolReadyForDeleteMasterAndUserScripts)
+        // console.log ("swPoolReadyForDeleteMainScripts: " + swPoolReadyForDeleteMainScripts)
+        // console.log ("swPoolReadyForDeletePoolInDB: " + swPoolReadyForDeletePoolInDB)
+        // console.log ("eUTxOs_With_Datum.length: " + eUTxOs_With_Datum.length)
+        // console.log ("eUTxOs_With_FundDatum.length: " + eUTxOs_With_FundDatum.length)
+        // console.log ("eUTxOs_With_UserDatum.length: " + eUTxOs_With_UserDatum.length)
 
     }
 
@@ -525,6 +528,10 @@ export async function serverSide_updateStakingPool (poolInfo: StakingPoolDBInter
         swUpdate = true
     }
 
+    if (poolInfo.swPoolReadyForDeleteMasterAndUserScripts != swPoolReadyForDeleteMasterAndUserScripts) {
+        swUpdate = true
+    }
+
     if (poolInfo.swPoolReadyForDeleteMainScripts != swPoolReadyForDeleteMainScripts) {
         swUpdate = true
     }
@@ -545,6 +552,7 @@ export async function serverSide_updateStakingPool (poolInfo: StakingPoolDBInter
             closedAt: closedAt != undefined? new Date(closedAt) : undefined,
             swTerminated: swTerminated,
             swZeroFunds: swZeroFunds,
+            swPoolReadyForDeleteMasterAndUserScripts: swPoolReadyForDeleteMasterAndUserScripts,
             swPoolReadyForDeleteMainScripts: swPoolReadyForDeleteMainScripts,
             swPoolReadyForDeletePoolInDB: swPoolReadyForDeletePoolInDB,
             eUTxO_With_ScriptDatum: eUTxO_With_ScriptDatum? JSON.parse(toJson(eUTxO_With_ScriptDatum)) : undefined,
@@ -588,6 +596,7 @@ export async function serverSide_updateStakingPool (poolInfo: StakingPoolDBInter
     poolInfo.closedAt = closedAt != undefined? new Date(closedAt) : undefined,
     poolInfo.swTerminated = swTerminated,
     poolInfo.swZeroFunds = swZeroFunds,
+    poolInfo.swPoolReadyForDeleteMasterAndUserScripts = swPoolReadyForDeleteMasterAndUserScripts,
     poolInfo.swPoolReadyForDeleteMainScripts = swPoolReadyForDeleteMainScripts,
     poolInfo.swPoolReadyForDeletePoolInDB = swPoolReadyForDeletePoolInDB,
     poolInfo.eUTxO_With_ScriptDatum = eUTxO_With_ScriptDatum? JSON.parse(toJson(eUTxO_With_ScriptDatum)) : undefined,

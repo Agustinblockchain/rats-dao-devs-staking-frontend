@@ -63,22 +63,22 @@ export function explainError(errorIn: any): string {
             if (error.includes("\"FDOV\"")) { res += sep + "Wrong FundDatum or Value"; sep = ", "; }
 
             if (error.includes("\"BEGINATREACHED\"")) { res += sep + "The Pool is already started"; sep = ", "; }
-            if (error.includes("\"BEGINATNOTREACHED\"")) { res += sep + "The start date has not arrived yet"; sep = ", "; }
+            if (error.includes("\"BEGINATNOTREACHED\"")) { res += sep + "The Pool hasn't started yet."; sep = ", "; }
 
-            if (error.includes("\"DEADLINEREACHED\"")) { res += sep + "The Pool is already closed"; sep = ", "; }
+            if (error.includes("\"DEADLINEREACHED\"")) { res += sep + "The Pool is already Closed"; sep = ", "; }
             if (error.includes("\"DEADLINENOTREACHED\"")) { res += sep + "Deadline has not arrived yet"; sep = ", "; }
 
-            if (error.includes("\"TERMINATED\"")) { res += sep + "The Pool is already finished"; sep = ", "; }
-            if (error.includes("\"NOTTERMINATED\"")) { res += sep + "The Pool is not finished yet"; sep = ", "; }
-            if (error.includes("\"CLOSED\"")) { res += sep + "The Pool is already closed"; sep = ", "; }
+            if (error.includes("\"TERMINATED\"")) { res += sep + "The Pool is already Terminated"; sep = ", "; }
+            if (error.includes("\"NOTTERMINATED\"")) { res += sep + "The Pool is not Terminated yet"; sep = ", "; }
+            if (error.includes("\"CLOSED\"")) { res += sep + "The Pool is already Closed"; sep = ", "; }
 
             if (error.includes("\"PPMSM\"")) { res += sep + "The signature of one of the Pool Masters is required"; sep = ", "; }
-            if (error.includes("\"MSM\"")) { res += sep + "The signature of the master and the redeemer do not match"; sep = ", "; }
+            if (error.includes("\"MSM\"")) { res += sep + "The signature of the Master and the Redeemer do not match"; sep = ", "; }
 
-            if (error.includes("\"USM\"")) { res += sep + "Signature of user and redeemer do not match"; sep = ", "; }
-            if (error.includes("\"UR\"")) { res += sep + "User signature and datum do not match"; sep = ", "; }
+            if (error.includes("\"USM\"")) { res += sep + "Signature of user and Redeemer do not match"; sep = ", "; }
+            if (error.includes("\"UR\"")) { res += sep + "User signature and Datum do not match"; sep = ", "; }
 
-            if (error.includes("\"RANGE\"")) { res += sep + "The transaction validation time is incorrect"; sep = ", "; }
+            if (error.includes("\"RANGE\"")) { res += sep + "The Transaction validation time is incorrect"; sep = ", "; }
 
             if (error.includes("\"MAMT\"")) { res += sep + "Wrong Mint amount"; sep = ", "; }
             if (error.includes("\"BNFTAMT\"")) { res += sep + "Wrong NFT Burn amount"; sep = ", "; }
@@ -89,7 +89,7 @@ export function explainError(errorIn: any): string {
             if (error.includes("\"INVIO\"")) { res += sep + "Invalid Inputs and Outputs"; sep = ", "; }
             if (error.includes("\"INVR\"")) { res += sep + "Invalid Redeemers"; sep = ", "; }
 
-            if (error.includes("\"DATE\"")) { res += sep + "Invalid Datum date"; sep = ", "; }
+            if (error.includes("\"DATE\"")) { res += sep + "Invalid Datum Date"; sep = ", "; }
             if (error.includes("\"CLAIM\"")) { res += sep + "Invalid Rewards amount"; sep = ", "; }
             if (error.includes("\"INVEST\"")) { res += sep + "Invalid Deposit amount"; sep = ", "; }
 
@@ -114,8 +114,8 @@ export function explainError(errorIn: any): string {
             if (error.includes("\"UGI\"")) { res += sep + "Missing Minted TxID User Withdraw NFT"; sep = ", "; }
 
             if (error.includes("\"SA\"")) { res += sep + "Wrong Split Amount"; sep = ", "; }
-            if (error.includes("\"CA\"")) { res += sep + "Invalid Close date"; sep = ", "; }
-            if (error.includes("\"CLA\"")) { res += sep + "Invalid Claim date"; sep = ", "; }
+            if (error.includes("\"CA\"")) { res += sep + "Invalid Close Date"; sep = ", "; }
+            if (error.includes("\"CLA\"")) { res += sep + "Invalid Claim Date"; sep = ", "; }
 
             if (error.includes("\"MSBFV\"")) { res += sep + "Wrong Value paid to Master "; sep = ", "; }
             if (error.includes("\"MSBIV\"")) { res += sep + "Wrong Value paid to User "; sep = ", "; }
@@ -133,10 +133,10 @@ export function explainError(errorIn: any): string {
             }
 
             if (res === "" && error.includes("Cannot read properties of undefined")) {
-                res += sep + "You are missing ADAs or Tokens in your wallet to make this transaction. It is possible that some transfer is still in the process of being validated"; sep = ", ";
+                res += sep + "You are missing ADAs or Tokens in your wallet to make this Transaction. It is possible that some transfer is still in the process of being validated"; sep = ", ";
             }
 
-            if (res === "" && error.includes("Insufficient input in transaction")) {
+            if (res === "" && error.includes("Insufficient input in Transaction")) {
                 res += sep + "You have no funds in your wallet!"; sep = ", ";
             }
            
@@ -169,7 +169,7 @@ export function explainError(errorIn: any): string {
             }
 
             if (res === "" && error.includes("InputsExhaustedError")) {
-                res += sep + "You are dont have enought ADAs or Tokens in your wallet to make this transaction. It is possible that some transfer is still in the process of being validated. please try again later!"; sep = ", ";
+                res += sep + "You are dont have enought ADAs or Tokens in your wallet to make this Transaction. It is possible that some transfer is still in the process of being validated. please try again later!"; sep = ", ";
             }
 
             if (res === "" && error.includes("Not enough ADA leftover to cover minADA")) {
@@ -201,11 +201,11 @@ export function explainError(errorIn: any): string {
             }
 
             if (res === "" && error.includes("OutsideValidityIntervalUTxO")) {
-                res += sep + "Invalid transaction date, please try again later!"; sep = ", ";
+                res += sep + "Invalid Transaction Date, please try again later!"; sep = ", ";
             }
 
             if (res === "" && error.includes("invalidBefore")) {
-                res += sep + "Invalid transaction date, please try again later!"; sep = ", ";
+                res += sep + "Invalid Transaction Date, please try again later!"; sep = ", ";
             }
 
             if (res === "") {

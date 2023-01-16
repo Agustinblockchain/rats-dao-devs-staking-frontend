@@ -47,6 +47,7 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
     const [swClosedUI, setSwClosedUI] = useState<string | 0 > (ui_loading)
     const [swTerminatedUI, setSwTerminatedUI] = useState<string | 0 > (ui_loading)
     const [swPoolReadyForGiveBackFundsUI, setSwPoolReadyForGiveBackFundsUI] = useState<string | 0 > (ui_loading)
+    const [swPoolReadyForDeleteMasterAndUserScriptsUI, setSwPoolReadyForDeleteMasterAndUserScriptsUI] = useState<string | 0 > (ui_loading)
     const [swPoolReadyForDeleteMainScriptsUI, setSwPoolReadyForDeleteMainScriptsUI] = useState<string | 0 > (ui_loading)
     const [swPoolReadyForDeletePoolInDBUI, setSwPoolReadyForDeletePoolInDBUI] = useState<string | 0 > (ui_loading)
     const [beginAtUI, setBeginAtUI] = useState<string | 0 > (ui_loading)
@@ -392,6 +393,7 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
         setSwClosedUI(poolInfo.swClosed ? "Yes" : "No");
         setSwTerminatedUI(poolInfo.swTerminated ? "Yes" : "No");
         setSwPoolReadyForGiveBackFundsUI(poolInfo.swZeroFunds && poolInfo.swTerminated ? "Yes" : "No");
+        setSwPoolReadyForDeleteMasterAndUserScriptsUI(poolInfo.swPoolReadyForDeleteMasterAndUserScripts ? "Yes" : "No");
         setSwPoolReadyForDeleteMainScriptsUI(poolInfo.swPoolReadyForDeleteMainScripts ? "Yes" : "No");
         setSwPoolReadyForDeletePoolInDBUI(poolInfo.swPoolReadyForDeletePoolInDB ? "Yes" : "No");
         //------------------
@@ -476,6 +478,7 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
         graceTimeUI,
         terminatedAtUI,
         swPoolReadyForGiveBackFundsUI,
+        swPoolReadyForDeleteMasterAndUserScriptsUI,
         swPoolReadyForDeleteMainScriptsUI,
         swPoolReadyForDeletePoolInDBUI,
 
