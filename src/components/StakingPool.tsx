@@ -75,6 +75,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 
 		staking_Decimals,
         harvest_Decimals,
+		interestUI,
 
 		totalFundsAvailableUI,
 
@@ -292,7 +293,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 						<></>
 				}
 					
-					<p><>Begin At: {beginAtUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} {((!poolInfo.swIniciado) ? <>(It hasn't started yet)</>:<></>)}</></p>
+					<p><>Open: {beginAtUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} {((!poolInfo.swIniciado) ? <>(It hasn't started yet)</>:<></>)}</></p>
 					<br></br>
 
 					
@@ -310,13 +311,13 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 
 					
 					{(poolInfo.swTerminated) ?
-						<p><>Terminate Date: It's already Terminated</></p>
+						<p><>Claim Rewards until: It's already Terminated</></p>
 						:
-						<p><>Terminate Date: {terminatedAtUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</></p>
+						<p><>Claim Rewards until: {terminatedAtUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</></p>
 					}
 					<br></br>
 
-					<p><>Estimated Anual {poolInfo.harvest_UI} per each {poolInfo.staking_UI}:&nbsp;{Number(poolInfo.pParams.ppInterestRates[0].iPercentage).toLocaleString("en-US")}</></p>
+					<p><>Anual Rewards per each {poolInfo.staking_UI}: {interestUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</></p>
 					<br></br>
 
 					<div>
