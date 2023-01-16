@@ -1252,8 +1252,11 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 									cancel={handleCancel}
 									actionName="Delete Scripts Master" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking}
 									description={'<li className="info">Delete All the Master Scripts from the Blockchain.</li>\
-									<li className="info">Also Master who added them will also receive a refund of the ADA used to hold the Script in the UTxO.</li>\
-									<li className="info">In order to Delete Scripts, you must first Terminate the Pool.</li>'}
+									<li className="info">The Master who added them will also receive a refund of the ADA used to hold the Script in the UTxO.</li>\
+									<li className="info">In order to Delete Scripts, you must first Terminate the Pool.</li>\
+									<li className="info">Please, do not Delete Master Scripts if you need to continue using the Staking Pool and the Master Actions.</li>\
+									<li className="info">You can Delete Master Scripts if there are no registered Users. Use Send Back Deposits to unregister Users.</li>\
+									<li className="info">You can Delete Master Scripts if there are no remaining funds. Use Send Back Funds to use all remaining funds.</li>'}
 									poolInfo={poolInfo}
 									swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded}
 									swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && poolInfo.swPoolReadyForDeleteMasterAndUserScripts}
@@ -1288,8 +1291,11 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 									cancel={handleCancel}
 									actionName="Delete Scripts User" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking}
 									description={'<li className="info">Delete All the User Scripts from the Blockchain.</li>\
-									<li className="info">Also Master who added them will also receive a refund of the ADA used to hold the Script in the UTxO.</li>\
-									<li className="info">In order to Delete Scripts, you must first Terminate the Pool.</li>'}
+									<li className="info">The Master who added them will also receive a refund of the ADA used to hold the Script in the UTxO.</li>\
+									<li className="info">In order to Delete Scripts, you must first Terminate the Pool.</li>\
+									<li className="info">Please, do not Delete User Scripts if you need to continue using the Staking Pool and the User Actions.</li>\
+									<li className="info">You can Delete User Scripts if there are no registered Users. Use Send Back Deposits to unregister Users.</li>\
+									<li className="info">You can Delete User Scripts if there are no remaining funds. Use Send Back Funds to use all remaining funds.</li>'}
 									poolInfo={poolInfo}
 									swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded}
 									swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && poolInfo.swPoolReadyForDeleteMasterAndUserScripts}
@@ -1485,9 +1491,9 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 									<li className="info">It will Delete the Main Scripts and send back the locked ADA in that UTxOs to the respective Masters.</li>\
 									<li className="info">Please, do not Delete Main Scripts if you need to continue using the Staking Pool.</li>\
 									<li className="info">After deleting Main Scripts you will no be able to interact with the Script anymore.</li>\
-									<li className="info">You can Delete them if there are no registered Users. Use Send Back Deposits to unregister Users.</li>\
-									<li className="info">You can Delete them if there are no remaining funds. Use Send Back Funds to use all remaining funds.</li>\
-									<li className="info">You can Delete them if there are no other Scripts at the contract address. Use Delete Master and User Scripts before.</li>\
+									<li className="info">You can Delete Main Scripts if there are no registered Users. Use Send Back Deposits to unregister Users.</li>\
+									<li className="info">You can Delete Main Scripts if there are no remaining funds. Use Send Back Funds to use all remaining funds.</li>\
+									<li className="info">You can Delete Main Scripts if there are no other Scripts at the contract address. Use Delete Master and User Scripts before.</li>\
 									<li className="info">In order to Delete Scripts, you must first Terminate the Pool.</li>'}
 									swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded}
 									swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && poolInfo.swPoolReadyForDeleteMainScripts} 

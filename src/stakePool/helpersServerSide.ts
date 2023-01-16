@@ -475,7 +475,7 @@ export async function serverSide_updateStakingPool (poolInfo: StakingPoolDBInter
 
         const swAnyScriptsAtAll = swAnyScriptsMaster || swAnyScriptsUser || swAnyMainScript
         
-        swPoolReadyForDeleteMasterAndUserScripts = swAllMasterFundersClaimed && (eUTxOs_With_FundDatum.length === 0) && (eUTxOs_With_UserDatum.length === 0) && (swAnyScriptsMaster || swAnyScriptsUser) && swTerminated
+        swPoolReadyForDeleteMasterAndUserScripts = swAllMasterFundersClaimed && (eUTxOs_With_FundDatum.length === 0) && (eUTxOs_With_UserDatum.length === 0) && swTerminated
         swPoolReadyForDeleteMainScripts = swAllMasterFundersClaimed && (eUTxOs_With_FundDatum.length === 0) && (eUTxOs_With_UserDatum.length === 0) && !swAnyScriptsMaster && !swAnyScriptsUser && swTerminated
         swPoolReadyForDeletePoolInDB = swAllMasterFundersClaimed && (eUTxOs_With_FundDatum.length === 0) && (eUTxOs_With_UserDatum.length === 0) && !swAnyScriptsAtAll
        
