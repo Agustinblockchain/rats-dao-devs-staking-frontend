@@ -59,6 +59,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 
             const filter = {name : nombrePool};
             const update = { 
+                name: nombrePool + "_DELETED_" + Date.now(),
                 swDeleted: true
             };
 
