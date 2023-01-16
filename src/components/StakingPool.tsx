@@ -279,23 +279,16 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 							<div>Pool Closed:  {swClosedUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
 							<div>Pool Terminated: {swTerminatedUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
 							<br></br>
-
-							{process.env.NODE_ENV==="development"?
-									<>
-										<div>EUTxOs At Contract: {countEUTxOs_With_DatumUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</div>
-										<br></br>
-									</>
-								:
-									<></>
-							}
+							
+							<div>EUTxOs At Contract: {countEUTxOs_With_DatumUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</div>
+							<br></br>
+									
 						</>
 						:
 						<></>
 				}
 					
 					<p><>Open: {beginAtUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} {((!poolInfo.swIniciado) ? <>(It hasn't started yet)</>:<></>)}</></p>
-					<br></br>
-
 					
 					{poolInfo.closedAt?
 						<p><>Forzed Deadline: {closedAtUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} {((poolInfo.swClosed) ? <>(It's already Closed)</>:<></>)}</></p>
@@ -304,18 +297,14 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 							<p><>Deadline: {closedAtUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} {((poolInfo.swClosed) ? <>(It's already Closed)</>:<></>)}</></p>
 						</>
 					}
-					<br></br>
 
 					<p><>Grace Time: {graceTimeUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</></p>
-					<br></br>
-
 					
 					{(poolInfo.swTerminated) ?
 						<p><>Claim Rewards until: It's already Terminated</></p>
 						:
 						<p><>Claim Rewards until: {terminatedAtUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</></p>
 					}
-					<br></br>
 
 					<p><>Anual Rewards per each {poolInfo.staking_UI}: {interestUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</></p>
 					<br></br>
@@ -329,11 +318,9 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 					<br></br>
 
 					<p>Active Users: {countEUTxOs_With_UserDatumUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</p>
-					<br></br>
 					<p>Total Staked: {totalStakedUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</p>
 					<p>Rewards Harvested: {totalRewardsPaidUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</p>
 					<p>Rewards to Pay: {totalRewardsToPayUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</p>
-					<br></br>
 					<p>Availaible Funds: {totalFundsAvailableUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</p>
 					<br></br>
 
