@@ -1154,8 +1154,6 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 						}
 						<br></br>
 
-						{/* s */}
-
 						<p><>Anual Rewards per each {poolInfo.staking_UI}: {interestUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</></p>
 						<br></br>
 

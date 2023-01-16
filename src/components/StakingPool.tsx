@@ -305,6 +305,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 						:
 						<p><>Claim Rewards until: {terminatedAtUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</></p>
 					}
+					<br></br>
 
 					<p><>Anual Rewards per each {poolInfo.staking_UI}: {interestUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</></p>
 					<br></br>
