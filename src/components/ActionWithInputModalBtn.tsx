@@ -331,7 +331,7 @@ export default function ActionWithInputModalBtn(
 									//el modal muestra input
 									<>
 										<h3>{title}</h3>
-										{description !== "" ?<div style={{ textAlign:"center", width: "100%", paddingTop: 10 }}><div dangerouslySetInnerHTML={{ __html: description! }} /></div> : <></>}
+										{description !== "" ?<div style={{ textAlign:"left", width: "100%", paddingTop: 10 }}><div dangerouslySetInnerHTML={{ __html: description! }} /></div> : <></>}
 										
 										{swEnabledBtnAction && BigInt(userMaxTokens) > 0 ?
 											<>
@@ -442,7 +442,7 @@ export default function ActionWithInputModalBtn(
 									//Si esta en idle pero no hay input... 
 									<>
 										<h3>{title}</h3>
-										{description !== "" ?<div style={{ paddingTop: 10 }}><div dangerouslySetInnerHTML={{ __html: description! }} /></div> : <></>}
+										{description !== "" ?<div style={{ textAlign:"left", width: "100%", paddingTop: 10 }}><div dangerouslySetInnerHTML={{ __html: description! }} /></div> : <></>}
 										
 										{message !== "" ?<div style={{ textAlign:"center", width: "100%", paddingTop: 10 }}>{message}</div> : <></>}
 										

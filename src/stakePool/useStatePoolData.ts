@@ -1,6 +1,6 @@
 //--------------------------------------
 import { useEffect, useRef, useState } from "react";
-import { AssetClass, EUTxO, Master_Funder, PoolDatum, UserDatum } from "../types";
+import { AssetClass, BIGINT, EUTxO, Master_Funder, PoolDatum, UserDatum } from "../types";
 import { ADA_Decimals, ADA_UI, fundID_TN, poolDatum_ClaimedFund, poolID_TN, scriptID_Master_AddScripts_TN, scriptID_Master_ClosePool_TN, scriptID_Master_DeleteFund_TN, scriptID_Master_DeleteScripts_TN, scriptID_Master_FundAndMerge_TN, scriptID_Master_Fund_TN, scriptID_Master_SendBackDeposit_TN, scriptID_Master_SendBackFund_TN, scriptID_Master_SplitFund_TN, scriptID_Master_TerminatePool_TN, scriptID_User_Deposit_TN, scriptID_User_Harvest_TN, scriptID_User_Withdraw_TN, scriptID_Validator_TN, txID_Master_AddScripts_TN, userID_TN } from "../types/constantes";
 import { StakingPoolDBInterface } from "../types/stakePoolDBModel";
 import { apiSaveEUTxODB, apiGetEUTxOsDBByStakingPool,
@@ -20,11 +20,14 @@ import { useSession } from "next-auth/react";
 //--------------------------------------
 type UserStakedData = {
     eUTxO_With_UserDatum: EUTxO | undefined,
-    userStaked: string | 0;
-    userCreatedAt: string | 0;
-    userLastClaimAt: string | 0;
-    userRewardsPaid: string | 0;
-    userRewardsToPay: string | 0;
+    stakedAmountUI: string | 0;
+    minADA: BIGINT;
+    minADAUI: string | 0;
+    createdAtUI: string | 0;
+    lastClaimAtUI: string | 0;
+    rewardsPaidUI: string | 0;
+    rewardsToPay: BIGINT;
+    rewardsToPayUI: string | 0;
     isLoading: boolean;
 }
 //--------------------------------------
@@ -344,22 +347,30 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
                     var userStakedDatas: UserStakedData[] = []
                     for (var i = 0; i < eUTxOs_With_UserDatumOfUser.length; i += 1) {
                         const userDatum: UserDatum = eUTxOs_With_UserDatumOfUser[i].datum as UserDatum;
-                        const userCreatedAt = new Date(parseInt(userDatum.udCreatedAt.toString())).toString()
-                        const userLastClaimAt = ((userDatum.udLastClaimAt.val !== undefined) ?
-                            new Date(parseInt(userDatum.udLastClaimAt.val.toString())).toString()
+                        const createdAtUI = new Date(parseInt(userDatum.udCreatedAt.toString())).toLocaleString("en-US")
+                        const lastClaimAtUI = ((userDatum.udLastClaimAt.val !== undefined) ?
+                            new Date(parseInt(userDatum.udLastClaimAt.val.toString())).toLocaleString("en-US")
                             :
                             ui_notConnected
                         )
-                        const userStaked = getUserStaked(session.user.pkh, [eUTxOs_With_UserDatumOfUser[i]]).toString()
-                        const userRewardsPaid = getUserRewardsPaid(session.user.pkh, [eUTxOs_With_UserDatumOfUser[i]]).toString()
-                        const userRewardsToPay = getUserRewardsToPay(poolInfo, session.user.pkh, eUTxO_With_PoolDatum, [eUTxOs_With_UserDatumOfUser[i]]).toString()
+                        const stakedAmountUI = formatAmount(Number(getUserStaked(session.user.pkh, [eUTxOs_With_UserDatumOfUser[i]])), staking_Decimals, poolInfo.staking_UI)
+                        const minADA = getTotalUsersMinAda_In_EUTxOs_With_UserDatum(poolInfo, [eUTxOs_With_UserDatumOfUser[i]])
+                        const minADAUI = formatAmount(Number(minADA), ADA_Decimals, ADA_UI)
+                        const rewardsPaidUI = formatAmount(Number(getUserRewardsPaid(session.user.pkh, [eUTxOs_With_UserDatumOfUser[i]])), harvest_Decimals, poolInfo.harvest_UI)
+                        
+                        const rewardsToPay = getUserRewardsToPay(poolInfo, session.user.pkh, eUTxO_With_PoolDatum, [eUTxOs_With_UserDatumOfUser[i]])
+                        const rewardsToPayUI = formatAmount(Number(rewardsToPay), harvest_Decimals, poolInfo.harvest_UI)
+
                         const userStakedData: UserStakedData = {
                             eUTxO_With_UserDatum: eUTxOs_With_UserDatumOfUser[i],
-                            userStaked: userStaked,
-                            userCreatedAt: userCreatedAt,
-                            userLastClaimAt: userLastClaimAt,
-                            userRewardsPaid: userRewardsPaid,
-                            userRewardsToPay: userRewardsToPay,
+                            stakedAmountUI: stakedAmountUI,
+                            minADA: minADA,
+                            minADAUI: minADAUI,
+                            createdAtUI: createdAtUI,
+                            lastClaimAtUI: lastClaimAtUI,
+                            rewardsPaidUI: rewardsPaidUI,
+                            rewardsToPay: rewardsToPay,
+                            rewardsToPayUI: rewardsToPayUI,
                             isLoading: false
                         }
                         userStakedDatas.push(userStakedData)
