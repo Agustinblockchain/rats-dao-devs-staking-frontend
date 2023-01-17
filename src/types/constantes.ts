@@ -87,9 +87,9 @@ export const txID_User_Withdraw_TN = "UW"
 
 export const maxDiffTokensForPoolAndFundDatum = 11
 
-export const maxDiffTokensForUserDatum = 3
+export const maxDiffTokensForUserDatum = 2
 
-export const tokenNameLenght = 20
+export const tokenNameLenght = 3
 
 //------------------------------------------
 

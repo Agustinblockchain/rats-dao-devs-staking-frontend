@@ -96,7 +96,7 @@ export async function masterPreparePool(wallet: Wallet, poolInfo: StakingPoolDBI
     //------------------
     var value_For_PoolDatum: Assets = value_For_Mint_PoolID
     const minAda_For_PoolDatum_Normal = calculateMinAdaOfAssets(value_For_PoolDatum, true)
-    const minAda_For_PoolDatum_ExtraTokens = calculateMinAda(maxDiffTokensForPoolAndFundDatum, maxDiffTokensForPoolAndFundDatum * tokenNameLenght, maxDiffTokensForPoolAndFundDatum, true)
+    const minAda_For_PoolDatum_ExtraTokens = calculateMinAda(maxDiffTokensForPoolAndFundDatum, maxDiffTokensForPoolAndFundDatum * tokenNameLenght, maxDiffTokensForPoolAndFundDatum, false)
     const minAda_For_PoolDatum = minAda_For_PoolDatum_Normal + minAda_For_PoolDatum_ExtraTokens
     const value_MinAda_For_PoolDatum: Assets = { lovelace: minAda_For_PoolDatum }
     value_For_PoolDatum = addAssets(value_MinAda_For_PoolDatum, value_For_PoolDatum);
@@ -210,7 +210,7 @@ export async function masterNewFund(wallet: Wallet, poolInfo: StakingPoolDBInter
     // el min ada del fund datum debe considerar los futuros tokens que va a contener.
     // todas las acciones que eliminen user datums, generan un token que no quiero regresar al usuarioo ni al master.
     const minAda_For_FundDatum_Normal = calculateMinAdaOfAssets(value_For_FundDatum, true)
-    const minAda_For_FundDatum_ExtraTokens = calculateMinAda(maxDiffTokensForPoolAndFundDatum, tokenNameLenght * maxDiffTokensForPoolAndFundDatum, maxDiffTokensForPoolAndFundDatum, true)
+    const minAda_For_FundDatum_ExtraTokens = calculateMinAda(maxDiffTokensForPoolAndFundDatum, tokenNameLenght * maxDiffTokensForPoolAndFundDatum, maxDiffTokensForPoolAndFundDatum, false)
     const minAda_For_FundDatum = minAda_For_FundDatum_Normal + minAda_For_FundDatum_ExtraTokens
     const value_MinAda_For_FundDatum: Assets = { lovelace: minAda_For_FundDatum }
     //------------------
@@ -671,7 +671,7 @@ export async function masterSplitFund(wallet: Wallet, poolInfo: StakingPoolDBInt
     //------------------
     var value_For_FundDatum_New = addAssetsList([value_SplitFundAmount, value_For_Mint_FundID, value_For_Mint_TxID_Master_SplitFund])
     const minAda_For_FundDatum_New_Normal = calculateMinAdaOfAssets(value_For_FundDatum_New, true)
-    const minAda_For_FundDatum_New_ExtraTokens = calculateMinAda(maxDiffTokensForPoolAndFundDatum, (tokenNameLenght * maxDiffTokensForPoolAndFundDatum), maxDiffTokensForPoolAndFundDatum, true)
+    const minAda_For_FundDatum_New_ExtraTokens = calculateMinAda(maxDiffTokensForPoolAndFundDatum, (tokenNameLenght * maxDiffTokensForPoolAndFundDatum), maxDiffTokensForPoolAndFundDatum, false)
     const minAda_For_FundDatum_New = minAda_For_FundDatum_New_Normal + minAda_For_FundDatum_New_ExtraTokens
     const value_MinAda_For_FundDatum_New: Assets = { lovelace: minAda_For_FundDatum_New }
     value_For_FundDatum_New = addAssets(value_For_FundDatum_New, value_MinAda_For_FundDatum_New)

@@ -104,7 +104,7 @@ export async function userDeposit(wallet: Wallet, poolInfo: StakingPoolDBInterfa
     var value_For_UserDatum: Assets = addAssets(value_Deposit, value_For_Mint_UserID);
     //------------------
     const minAda_For_UserDatum_Normal = calculateMinAdaOfAssets(value_For_UserDatum, true);
-    const minAda_For_UserDatum_ExtraTokens = calculateMinAda(maxDiffTokensForUserDatum, (tokenNameLenght * maxDiffTokensForUserDatum), maxDiffTokensForUserDatum, true);
+    const minAda_For_UserDatum_ExtraTokens = calculateMinAda(maxDiffTokensForUserDatum, (tokenNameLenght * maxDiffTokensForUserDatum), maxDiffTokensForUserDatum, false);
     var minAda_For_UserDatum_If_StakingIsNotAda = minAda_For_UserDatum_Normal + minAda_For_UserDatum_ExtraTokens;
     //------------------
     if (staking_AC_isAda) {
