@@ -166,6 +166,26 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
         setUserRewardsPaidUI(ui)
         setUserRewardsToPayUI(ui)
 
+        var userStakedDatas_: UserStakedData[] = []
+        for (var i = 0; i < userStakedDatas.length; i += 1) {
+            const u = userStakedDatas[i];
+
+            const userStakedData: UserStakedData = {
+                eUTxO_With_UserDatum: u.eUTxO_With_UserDatum,
+                stakedAmountUI: ui,
+                minADA: u.minADA,
+                minADAUI: ui,
+                createdAtUI: ui,
+                lastClaimAtUI: ui,
+                rewardsPaidUI: ui,
+                rewardsToPay: 0n,
+                rewardsToPayUI: ui,
+                isLoading: true
+            }
+            userStakedDatas_.push(userStakedData)
+        }
+        setUserStakedDatas(userStakedDatas_)
+
     }
 
     const refreshPoolData = async () => {
@@ -201,6 +221,55 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
         //------------------
     }
 
+    const refreshUserStakedData = async ( userStakedData: UserStakedData) => {
+        console.log("useStatePoolData - " + poolInfo.name + " - refreshUserStakedData - Init")
+        //------------------
+        var userStakedDatas_: UserStakedData[] = []
+        for (var i = 0; i < userStakedDatas.length; i += 1) {
+            const u = userStakedDatas[i];
+
+            if (eUTxO_With_PoolDatum && u.eUTxO_With_UserDatum && userStakedData.eUTxO_With_UserDatum && u.eUTxO_With_UserDatum.uTxO.txHash === userStakedData.eUTxO_With_UserDatum.uTxO.txHash && u.eUTxO_With_UserDatum.uTxO.outputIndex === userStakedData.eUTxO_With_UserDatum.uTxO.outputIndex) {
+
+                const userDatum: UserDatum = u.eUTxO_With_UserDatum.datum as UserDatum;
+                const pkh = userDatum.udUser
+
+                const createdAtUI = new Date(parseInt(userDatum.udCreatedAt.toString())).toLocaleString("en-US")
+                const lastClaimAtUI = ((userDatum.udLastClaimAt.val !== undefined) ?
+                    new Date(parseInt(userDatum.udLastClaimAt.val.toString())).toLocaleString("en-US")
+                    :
+                    ui_notConnected
+                )
+                const stakedAmountUI = formatAmount(Number(getUserStaked(pkh, [u.eUTxO_With_UserDatum])), staking_Decimals, poolInfo.staking_UI)
+                const minADA = getTotalUsersMinAda_In_EUTxOs_With_UserDatum(poolInfo, [u.eUTxO_With_UserDatum])
+                const minADAUI = formatAmount(Number(minADA), ADA_Decimals, ADA_UI)
+                const rewardsPaidUI = formatAmount(Number(getUserRewardsPaid(pkh, [u.eUTxO_With_UserDatum])), harvest_Decimals, poolInfo.harvest_UI)
+                
+                const rewardsToPay = getUserRewardsToPay(poolInfo, pkh, eUTxO_With_PoolDatum, [u.eUTxO_With_UserDatum])
+                const rewardsToPayUI = formatAmount(Number(rewardsToPay), harvest_Decimals, poolInfo.harvest_UI)
+
+                const userStakedData: UserStakedData = {
+                    eUTxO_With_UserDatum: u.eUTxO_With_UserDatum,
+                    stakedAmountUI: stakedAmountUI,
+                    minADA: minADA,
+                    minADAUI: minADAUI,
+                    createdAtUI: createdAtUI,
+                    lastClaimAtUI: lastClaimAtUI,
+                    rewardsPaidUI: rewardsPaidUI,
+                    rewardsToPay: rewardsToPay,
+                    rewardsToPayUI: rewardsToPayUI,
+                    isLoading: false
+                }
+
+                userStakedDatas_.push(userStakedData)
+            } else {
+                userStakedDatas_.push(u)
+            }
+        }
+        setUserStakedDatas(userStakedDatas_)
+        //------------------
+    }
+    
+
     async function setPoolData(poolInfo: StakingPoolDBInterface) {
         console.log("useStatePoolData - " + poolInfo.name + " - setPoolData - Init")
         //------------------
@@ -220,14 +289,14 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
         if (staking_AC_isAda){
             staking_Decimals = ADA_Decimals
         }else if (staking_AC_isWithoutTokenName){
-            staking_Decimals = 0
+            staking_Decimals = 2
         }else{
             const staking_Metadata = await apiGetTokenMetadata(staking_AC)
             //console.log("useStatePoolData - " + poolInfo.name + " - setPoolData - staking_metadata: " + toJson(staking_Metadata))
             if(staking_Metadata && staking_Metadata?.metadata?.decimals) {
                 staking_Decimals = staking_Metadata.metadata.decimals
             }else{
-                staking_Decimals = 0
+                staking_Decimals = 3
             }
         }
         setStaking_Decimals(staking_Decimals)
@@ -236,14 +305,14 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
         if (harvest_AC_isAda){
             harvest_Decimals = ADA_Decimals
         }else if (harvest_AC_isWithoutTokenName){
-            harvest_Decimals = 0
+            harvest_Decimals = 2
         }else{
             const harvest_Metadata = await apiGetTokenMetadata(harvest_AC)
             //console.log("useStatePoolData - " + poolInfo.name + " - setPoolData - harvest_metadata: " + toJson(harvest_Metadata))
             if(harvest_Metadata && harvest_Metadata?.metadata?.decimals) {
                 harvest_Decimals = harvest_Metadata.metadata.decimals
             }else{
-                harvest_Decimals = 0
+                harvest_Decimals = 3
             }
         }
         setHarvest_Decimals(harvest_Decimals)
@@ -553,7 +622,8 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
         isPoolDataLoaded,
 
         refreshPoolData, 
-        refreshEUTxOs
+        refreshEUTxOs,
+        refreshUserStakedData
     }
 
     

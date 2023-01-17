@@ -95,7 +95,9 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 		swUserRegistered,
 		
 		refreshPoolData,
-		refreshEUTxOs
+		refreshEUTxOs,
+		
+		refreshUserStakedData
 	
 		} = statePoolData
 
@@ -380,7 +382,16 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 										<p>Rewards to Claim <b>{userRewardsToPayUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></p>
 									</>
 								:
-									<></>
+								<>
+									{ isPoolDataLoading ?
+										<>
+											<br></br>
+											<Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />
+										</>
+									:
+										<></>
+									}
+								</>
 								}
 							</div>
 						</div>
@@ -496,128 +507,89 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 							<div key={`${userStakedData.eUTxO_With_UserDatum!.uTxO.txHash}-${userStakedData.eUTxO_With_UserDatum!.uTxO.outputIndex}`} >
 								
 								<div className="pool__action_card "  >
-									{userStakedData.isLoading? 
+								
+									<div className="pool__stat">
+										<br></br>
+										<div style={{textAlign: 'left', width:"100%"}}><b>Date</b> {userStakedData.createdAtUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</div>
+										{userStakedData.lastClaimAtUI !== "..." ?
 											<>
-												<div className="pool__stat" style={{width: 220}}>
-													<br></br>
-													<div style={{textAlign: 'left', width:"100%"}}><b>Date</b> {userStakedData.createdAtUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</div>
-													{userStakedData.lastClaimAtUI !== "..." ?
-														<>
-															<div style={{textAlign: 'left', width:"100%"}}><b>Last Claim</b> {userStakedData.lastClaimAtUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</div>
-														</>
-														:
-														<></>
-													}
-													<br></br>
-													{userStakedData.minADA > 0? 
-														<>
-															<div style={{textAlign: 'left', width:"100%"}}>Min ADA locked <b>{userStakedData.minADAUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></div>
-														</>
-														:
-														<></>
-													}
-													
-													<div style={{textAlign: 'left', width:"100%"}}>Harvested: <b>{userStakedData.rewardsPaidUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></div>
-												</div>
-												<div className="pool__flex_gap"></div>
-												<div className="pool__stat">
-													<h4 className="pool__stat-title">
-													Rewards
-													</h4>
-													<h3 className="pool__stat-value">{userStakedData.rewardsToPayUI || <Skeleton baseColor='#e2a7a7' />}</h3>
-													<div className="pool__stat-actions" style={{width: 200}}>
-													</div>
-													
-												</div>
-												<div className="pool__flex_gap"></div>
-												<div className="pool__stat">
-													<h4 className="pool__stat-title">Staked</h4>
-													<h3 className="pool__stat-value">{userStakedData.stakedAmountUI || <Skeleton baseColor='#e2a7a7' />}</h3>
-													<div className="pool__stat-actions" style={{width: 200}}>
-													</div>
-												</div>
+												<div style={{textAlign: 'left', width:"100%"}}><b>Last Claim</b> {userStakedData.lastClaimAtUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</div>
+												
 											</>
-										:
-											<>
-												<div className="pool__stat">
-													<br></br>
-													<div style={{textAlign: 'left', width:"100%"}}><b>Date</b> {userStakedData.createdAtUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</div>
-													{userStakedData.lastClaimAtUI !== "..." ?
-														<>
-															<div style={{textAlign: 'left', width:"100%"}}><b>Last Claim</b> {userStakedData.lastClaimAtUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</div>
-															
-														</>
-														:
-														<></>
-													}
-													<br></br>
-													{userStakedData.minADA > 0? 
-														<>
-															<div style={{textAlign: 'left', width:"100%"}}>Min ADA locked <b>{userStakedData.minADAUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></div>
-														</>
-														:
-														<></>
-													}
-													
-													<div style={{textAlign: 'left', width:"100%"}}>Harvested <b>{userStakedData.rewardsPaidUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></div>
-												</div>
-												<div className="pool__flex_gap"></div>
-												<div className="pool__stat">
-													<h4 className="pool__stat-title">
-														Rewards
-														{/* <button onClick={() => { if (walletStore.connected) { } }} className='btn__ghost icon' style={walletStore.connected ? { cursor: 'pointer' } : { cursor: 'default' }} >
-															<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" className="bi bi-arrow-repeat" viewBox="0 0 16 16">
-																<path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z" />
-																<path fillRule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z" />
-															</svg>
-														</button> */}
-													</h4>
-													<h3 className="pool__stat-value">{userStakedData.rewardsToPayUI || <Skeleton baseColor='#e2a7a7' />}</h3>
-													<div className="pool__stat-actions">
-														<ActionWithInputModalBtn 
-															action={userHarvestAction} 
-															postActionSuccess={updateDetailsStakingPoolAndWallet}
-															postActionError={updateDetailsStakingPoolAndWallet}
-															setIsWorking={handleSetIsWorking} 
-															actionName="Harvest" actionIdx={poolInfo.name + "-" + userStakedData.eUTxO_With_UserDatum!.uTxO.txHash + "-" + userStakedData.eUTxO_With_UserDatum!.uTxO.outputIndex} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-															description={poolInfo.swTerminated ? '<p className="info">This Pool in already terminated. You can\'t Harvest anymore.</p>' : undefined}
-															poolInfo={poolInfo} 
-															swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && swUserRegistered} 
-															swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && swUserRegistered && !poolInfo.swTerminated} 
-															swShow={true} 
-															swShowInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={userStakedData.rewardsToPay.toString()} inputDecimals={harvest_Decimals} 
-															swHash={true} 
-															eUTxOs_Selected={[userStakedData.eUTxO_With_UserDatum!]} 
-														/>
-													</div>
-												</div>
-												<div className="pool__flex_gap"></div>
-												<div className="pool__stat">
-													<h4 className="pool__stat-title">Staked</h4>
-													<h3 className="pool__stat-value">{userStakedData.stakedAmountUI || <Skeleton baseColor='#e2a7a7' />}</h3>
-													<div className="pool__stat-actions">
-														<ActionWithInputModalBtn 
-															action={userWithdrawAction} 
-															postActionSuccess={updateDetailsStakingPoolAndWallet}
-															postActionError={updateDetailsStakingPoolAndWallet}
-															setIsWorking={handleSetIsWorking} 
-															actionName="Withdraw" actionIdx={poolInfo.name + "-" + userStakedData.eUTxO_With_UserDatum!.uTxO.txHash + "-" + userStakedData.eUTxO_With_UserDatum!.uTxO.outputIndex} 
-															messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-															description={'<li className="info">Do you want to withdraw your Deposit?</li> \
-															<li className="info">Please, make sure you have taken care of any outstanding Rewards before withdrawing your Deposit.</li>\
-															<li className="info">You can\'t claim them after withdrawing.</li>\
-															<li className="info">You will recover all the ADA used to Deposit your Tokens.</li>'}
-															swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && swUserRegistered} 
-															swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && swUserRegistered} 
-															swShow={true} 
-															swHash={true} 
-															eUTxOs_Selected={[userStakedData.eUTxO_With_UserDatum!]} poolInfo={poolInfo} 
-
-														/>
-													</div>
-												</div>
-											</>
+											:
+											<></>
 										}
+										<br></br>
+										{userStakedData.minADA > 0n? 
+											<>
+												<div style={{textAlign: 'left', width:"100%"}}>Min ADA locked <b>{userStakedData.minADAUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></div>
+											</>
+											:
+											<></>
+										}
+										
+										<div style={{textAlign: 'left', width:"100%"}}>Harvested <b>{userStakedData.rewardsPaidUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></div>
+									</div>
+									<div className="pool__flex_gap"></div>
+									<div className="pool__stat">
+										<div>
+											<h4 className="pool__stat-title">
+												Rewards&nbsp;
+												<button onClick={() => { if (walletStore.connected) { refreshUserStakedData (userStakedData) } }} className='btn__ghost icon' style={walletStore.connected ? { cursor: 'pointer' } : { cursor: 'default' }} >
+													<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" className="bi bi-arrow-repeat" viewBox="0 0 16 16">
+														<path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z" />
+														<path fillRule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z" />
+													</svg>
+												</button>
+											</h4>
+											<h3 className="pool__stat-value">{userStakedData.rewardsToPayUI || <Skeleton baseColor='#e2a7a7' />}</h3>
+											<div className="pool__stat-actions">
+												<ActionWithInputModalBtn 
+													action={userHarvestAction} 
+													postActionSuccess={updateDetailsStakingPoolAndWallet}
+													postActionError={updateDetailsStakingPoolAndWallet}
+													setIsWorking={handleSetIsWorking} 
+													actionName="Harvest" actionIdx={poolInfo.name + "-" + userStakedData.eUTxO_With_UserDatum!.uTxO.txHash + "-" + userStakedData.eUTxO_With_UserDatum!.uTxO.outputIndex} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
+													description={poolInfo.swTerminated ? '<p className="info">This Pool in already terminated. You can\'t Harvest anymore.</p>' : undefined}
+													poolInfo={poolInfo} 
+													swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && swUserRegistered && !userStakedData.isLoading} 
+													swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && swUserRegistered && !userStakedData.isLoading && !poolInfo.swTerminated} 
+													swShow={true} 
+													swShowInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={userStakedData.rewardsToPay.toString()} inputDecimals={harvest_Decimals} 
+													swHash={true} 
+													eUTxOs_Selected={[userStakedData.eUTxO_With_UserDatum!]} 
+												/>
+											</div>
+										</div>
+									</div>
+									<div className="pool__flex_gap"></div>
+									<div className="pool__stat">
+										<div>
+											<h4 className="pool__stat-title">Staked</h4>
+											<h3 className="pool__stat-value">{userStakedData.stakedAmountUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</h3>
+											<div className="pool__stat-actions">
+												<ActionWithInputModalBtn 
+													action={userWithdrawAction} 
+													postActionSuccess={updateDetailsStakingPoolAndWallet}
+													postActionError={updateDetailsStakingPoolAndWallet}
+													setIsWorking={handleSetIsWorking} 
+													actionName="Withdraw" actionIdx={poolInfo.name + "-" + userStakedData.eUTxO_With_UserDatum!.uTxO.txHash + "-" + userStakedData.eUTxO_With_UserDatum!.uTxO.outputIndex} 
+													messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
+													description={'<li className="info">Do you want to withdraw your Deposit?</li> \
+													<li className="info">Please, make sure you have taken care of any outstanding Rewards before withdrawing your Deposit.</li>\
+													<li className="info">You can\'t claim them after withdrawing.</li>\
+													<li className="info">You will recover all the ADA used to Deposit your Tokens.</li>'}
+													swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && swUserRegistered && !userStakedData.isLoading} 
+													swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && swUserRegistered && !userStakedData.isLoading} 
+													swShow={true} 
+													swHash={true} 
+													eUTxOs_Selected={[userStakedData.eUTxO_With_UserDatum!]} poolInfo={poolInfo} 
+
+												/>
+											</div>
+										</div>
+									</div>
+									
 								</div>
 
 								<div className="pool__flex_break" ><br></br></div>
@@ -626,8 +598,6 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 					)}
 
 					<div className="pool__action_smallcard"  >
-						
-
 						<div className="pool__stat">
 							<div style={{textAlign: 'left', width:"100%"}}>
 								<h4 >Totals</h4>

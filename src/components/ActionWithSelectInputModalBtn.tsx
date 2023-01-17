@@ -204,14 +204,15 @@ export default function ActionWithSelectInputModalBtn(
 		}
 	}
 
-	function handleChangeValue (tokenNameHEX: string, v: string) {
+	function handleChangeFormatedValue (tokenNameHEX: string, f: string) {
 		const walletAssetsSelect_ = walletAssetsSelect.map((a, i) => {
 			if (tokenNameHEX === a.tokenNameHEX) {
+				a.amountFormatedValue = f
 				if(inputDecimals){
 					const pot = Math.pow(10, inputDecimals)
-					a.amount = (Number(v) * pot).toString()
+					a.amount = (Number(f) * pot).toString()
 				}else{
-					a.amount = v
+					a.amount = f
 				}
 				return a
 			} else {
@@ -220,15 +221,16 @@ export default function ActionWithSelectInputModalBtn(
 		  });
 		  setWalletAssetsSelect(walletAssetsSelect_);
 	}
-	function handleChangeFormatedValue (tokenNameHEX: string, v: string, f: string) {
+
+	function handleChangeValue (tokenNameHEX: string, v: string) {
 		const walletAssetsSelect_ = walletAssetsSelect.map((a, i) => {
 			if (tokenNameHEX === a.tokenNameHEX) {
 				a.amount = v
 				if(inputDecimals){
 					const pot = Math.pow(10, inputDecimals)
-					a.amountFormatedValue = (Number(f)/pot).toString()
+					a.amountFormatedValue = (Number(v)/pot).toString()
 				}else{
-					a.amountFormatedValue = f
+					a.amountFormatedValue = v
 				}
 			  	return a
 			} else {
@@ -400,18 +402,25 @@ export default function ActionWithSelectInputModalBtn(
 													<div key={idx} >
 														<b>{asset.tokenName}</b> (There are {formatAmount(Number(asset.value), inputDecimals, undefined)} in your wallet)
 														<br></br>
-														<NumericFormat key={"NumericFormat" + idx} style={{ width: 300, fontSize: 12 }} type="text" value={ walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.amountFormatedValue}
-															onValueChange={(values) => {
-																	const { formattedValue, value } = values;
-																	handleChangeValue (asset.tokenNameHEX, value)
+														<div>
+															<NumericFormat key={"NumericFormat" + idx} style={{ width: 300, fontSize: 12 }} type="text" value={ walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.amountFormatedValue}
+																onValueChange={(values) => {
+																		const { formattedValue, value } = values;
+																		handleChangeFormatedValue (asset.tokenNameHEX, value)
+																	}
 																}
-															}
-															thousandsGroupStyle="thousand" thousandSeparator="," decimalSeparator="." decimalScale={inputDecimals}
-														/>
+																thousandsGroupStyle="thousand" thousandSeparator="," decimalSeparator="." decimalScale={inputDecimals}
+															/>
+															<button style={{ width: 45}} onClick={e => {
+																const v = walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.max
+																if (v !== undefined) handleChangeValue(asset.tokenNameHEX, v)
+															}}>MAX</button>
+														</div>
+
 														<br></br>
 														<input key={"input" + idx} style={{ width: 300, fontSize: 12 }} type="range" min={0} max={walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.max} value={walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.amount}
 															onChange={e => {
-																handleChangeFormatedValue (asset.tokenNameHEX, Number(e.target.value).toString(), Number(e.target.value).toString())
+																handleChangeValue (asset.tokenNameHEX, Number(e.target.value).toString())
 															}}
 														/>
 														<br></br>

@@ -337,23 +337,35 @@ export default function ActionWithInputModalBtn(
 											<>
 												<h4 style={{ paddingTop: 10 }}>How many {inputUnitForShowing}?</h4>
 												<br></br>
-												<NumericFormat style={{ width: 300, fontSize: 12 }} type="text" value={tokenAmountFormatedValue}
-													onValueChange={(values) => {
-															const { formattedValue, value } = values;
-															// formattedValue = $2,223
-															// floatValue = 2223
+												<div>
+													<NumericFormat style={{ width: 255, fontSize: 12 }} type="text" value={tokenAmountFormatedValue}
+														onValueChange={(values) => {
+																const { formattedValue, value } = values;
+																// formattedValue = $2,223
+																// floatValue = 2223
+																if(inputDecimals){
+																	const pot = Math.pow(10, inputDecimals)
+																	setTokenAmount((Number(value) * pot).toString())
+																}else{
+																	setTokenAmount(value)
+																}
+																
+															}
+														}
+														thousandsGroupStyle="thousand" thousandSeparator="," decimalSeparator="." decimalScale={inputDecimals}
+													/>
+
+													<button style={{ width: 45}} onClick={e => {
+															setTokenAmount(userMaxTokens?.toString())
 															if(inputDecimals){
 																const pot = Math.pow(10, inputDecimals)
-																setTokenAmount((Number(value) * pot).toString())
+																setTokenAmountFormatedValue((Number(userMaxTokens?.toString())/pot).toString())
 															}else{
-																setTokenAmount(value)
+																setTokenAmountFormatedValue(Number(userMaxTokens?.toString()).toString())
 															}
-															
-														}
-													}
-													thousandsGroupStyle="thousand" thousandSeparator="," decimalSeparator="." decimalScale={inputDecimals}
-												/>
-
+														}}>MAX</button>
+												</div>
+														
 												{/* 
 												//antigua barra:
 												<input  style={{ width: 300, fontSize: 12 }}
