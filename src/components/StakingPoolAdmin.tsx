@@ -1314,12 +1314,25 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 									swPaddintTop={poolInfo.swPreparado && ((!swAllScriptsMaster) || (poolInfo.swTerminated && swAnyScriptsMaster) || (!swAllScriptsUser) || (poolInfo.swTerminated && swAnyScriptsUser))}
 								/>
 
+								<ActionWithInputModalBtn
+									action={splitUTxOsAction}
+									postActionSuccess={updateDetailsStakingPoolAndWallet}
+									postActionError={updateDetailsStakingPoolAndWallet}
+									setIsWorking={handleSetIsWorking} 
+									actionName="Split Wallet UTxOs" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
+									description={'<p className="info" style="text-align: center;">It is recommended to Split your Wallet\'s UTxOs (Unspent Transaction Outputs) into smaller amounts. This will make it easier to use them as Collateral for Smart Contracts and will provide more flexibility in managing your funds.</p>'}
+									swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded}
+									swEnabledBtnAction={walletStore.connected && isPoolDataLoaded}
+									swShow={poolInfo.swPreparado}
+									swHash={true}
+								/>
+
 							</div>
 						</div>
 						<div className="pool__stat">
 							<div className="pool__column">
 
-								<ActionWithInputModalBtn
+								{/* <ActionWithInputModalBtn
 									action={masterNewFundAction}
 									postActionSuccess={updateDetailsStakingPoolAndWallet}
 									postActionError={updateDetailsStakingPoolAndWallet}
@@ -1353,7 +1366,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 									swShowInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={maxHarvestAmountUI} inputDecimals={harvest_Decimals}
 									swHash={false}
 									
-								/>
+								/> */}
 
 								<FundsModalBtn
 									masterNewFundAction={masterNewFundAction}
@@ -1400,18 +1413,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 									swShow={poolInfo.swPreparado}
 								/>
 
-								<ActionWithInputModalBtn
-									action={splitUTxOsAction}
-									postActionSuccess={updateDetailsStakingPoolAndWallet}
-									postActionError={updateDetailsStakingPoolAndWallet}
-									setIsWorking={handleSetIsWorking} 
-									actionName="Split Wallet UTxOs" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-									description={'<p className="info" style="text-align: center;">It is recommended to Split your Wallet\'s UTxOs (Unspent Transaction Outputs) into smaller amounts. This will make it easier to use them as Collateral for Smart Contracts and will provide more flexibility in managing your funds.</p>'}
-									swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded}
-									swEnabledBtnAction={walletStore.connected && isPoolDataLoaded}
-									swShow={poolInfo.swPreparado}
-									swHash={true}
-								/>
+								
 
 							</div>
 						</div>
