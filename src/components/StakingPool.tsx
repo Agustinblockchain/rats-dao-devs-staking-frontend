@@ -507,12 +507,12 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 												: 
 												staking_AC_isAda? 
 													'<li className="info">You are about to Deposit ' + poolInfo.staking_UI + ' to this Pool.</li>\
-													<li className="info">In return, you will receive ' + txID_User_Deposit_For_User_TN + ' Tokens (Policy ID: ' + poolInfo.txID_User_Deposit_CS + ')</li>\
-													<li className="info">You can withdraw your ' + poolInfo.staking_UI + ' at any time in exchange for the ' + txID_User_Deposit_For_User_TN + ' Tokens.</li>' 
+													<li className="info">In return, you will receive User Deposit Tokens.</li>\
+													<li className="info">You can withdraw your ' + poolInfo.staking_UI + ' at any time in exchange for the User Deposit Tokens.</li>' 
 												: 
 													'<li className="info">You are about to deposit ' + poolInfo.staking_UI + ' to this pool.</li>\
-													<li className="info">In return, you will receive ' + txID_User_Deposit_For_User_TN + ' Tokens (Policy ID: ' + poolInfo.txID_User_Deposit_CS + ')</li>\
-													<li className="info">You can withdraw your ' + poolInfo.staking_UI + ' at any time in exchange for the ' + txID_User_Deposit_For_User_TN + ' Tokens.</li>\
+													<li className="info">In return, you will receive User Deposit Tokens.</li>\
+													<li className="info">You can withdraw your ' + poolInfo.staking_UI + ' at any time in exchange for the User Deposit Tokens.</li>\
 													<li className="info">Please note that, in addition to the Transactions Fees, a minimum of ADA is required to be sent along with your ' + poolInfo.staking_UI + ', as they will be locked in the blockchain.</li>\
 													<li className="info">You will receive the ADA back when you withdraw your deposit.</li>'
 												}
@@ -539,12 +539,12 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 												: 
 													staking_AC_isAda? 
 														'<li className="info">You are about to Deposit ' + poolInfo.staking_UI + ' to this Pool.</li>\
-														<li className="info">In return, you will receive ' + txID_User_Deposit_For_User_TN + ' Tokens (Policy ID: ' + poolInfo.txID_User_Deposit_CS + ')</li>\
-														<li className="info">You can withdraw your ' + poolInfo.staking_UI + ' at any time in exchange for the ' + txID_User_Deposit_For_User_TN + ' Tokens.</li>' 
+														<li className="info">In return, you will receive User Deposit Tokens.</li>\
+														<li className="info">You can withdraw your ' + poolInfo.staking_UI + ' at any time in exchange for the User Deposit Tokens.</li>' 
 													: 
 														'<li className="info">You are about to deposit ' + poolInfo.staking_UI + ' to this pool.</li>\
-														<li className="info">In return, you will receive ' + txID_User_Deposit_For_User_TN + ' Tokens (Policy ID: ' + poolInfo.txID_User_Deposit_CS + ')</li>\
-														<li className="info">You can withdraw your ' + poolInfo.staking_UI + ' at any time in exchange for the ' + txID_User_Deposit_For_User_TN + ' Tokens.</li>\
+														<li className="info">In return, you will receive User Deposit Tokens.</li>\
+														<li className="info">You can withdraw your ' + poolInfo.staking_UI + ' at any time in exchange for the User Deposit Tokens.</li>\
 														<li className="info">Please note that, in addition to the Transactions Fees, a minimum of ADA is required to be sent along with your ' + poolInfo.staking_UI + ', as they will be locked in the blockchain.</li>\
 														<li className="info">You will receive the ADA back when you withdraw your deposit.</li>'
 												}
