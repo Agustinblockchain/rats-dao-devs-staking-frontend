@@ -80,7 +80,7 @@ export default function WalletModalBtn() {
 			}
 			const walletStore_ = { connected: true, name: walletName, walletApi: walletApi, pkh: pkh, lucid: lucid, swEnviarPorBlockfrost: swEnviarPorBlockfrost_, protocolParameters: protocolParameters }
 			console.log("[Session] - walletConnect - signIn - status: " + status)
-			if (status !== "authenticated") {
+			if (status !== "authenticated" || (status === "authenticated" && session && session.user && session.user.pkh !== pkh)) {
 				await signIn('credentials', { pkh: pkh , walletName: walletName, swEnviarPorBlockfrost: swEnviarPorBlockfrost_?"true":"false", isWalletFromSeedletName: "false",redirect: false })
 			}
 			setWalletStore(walletStore_)
@@ -227,7 +227,9 @@ export default function WalletModalBtn() {
 			if(session && session.user && session.user.swEnviarPorBlockfrost){
 				setSwEnviarPorBlockfrost(session.user.swEnviarPorBlockfrost)
 			}
-			sessionWalletConnect()
+			if (!walletStore.connected || (walletStore.connected && session && session.user && session.user.pkh !== walletStore.pkh)) {
+				sessionWalletConnect()
+			}
 		} else if (status === "unauthenticated"){
 			console.log("[Session] - Not connecting to any Wallet, there were not previus session")
 		} else if (status === "loading"){
