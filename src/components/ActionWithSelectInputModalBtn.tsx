@@ -403,7 +403,7 @@ export default function ActionWithSelectInputModalBtn(
 														<b>{asset.tokenName}</b> (There are {formatAmount(Number(asset.value), inputDecimals, undefined)} in your wallet)
 														<br></br>
 														<div>
-															<NumericFormat key={"NumericFormat" + idx} style={{ width: 300, fontSize: 12 }} type="text" value={ walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.amountFormatedValue}
+															<NumericFormat key={"NumericFormat" + idx} style={{ width: 255, fontSize: 12 }} type="text" value={ walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.amountFormatedValue}
 																onValueChange={(values) => {
 																		const { formattedValue, value } = values;
 																		handleChangeFormatedValue (asset.tokenNameHEX, value)
