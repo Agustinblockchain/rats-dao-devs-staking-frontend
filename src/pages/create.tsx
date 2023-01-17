@@ -41,7 +41,7 @@ const Create : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> 
 				<Message message={"Loading Page..."} />
 			:
 				(status === "unauthenticated")? 
-						<Message message={"Connect you wallet to Create a Staking Pool<"} />
+						<Message message={"Connect you wallet to Create a Staking Pool"} />
 					:
 						session?.user.swCreate? 
 							(typeof window !== 'undefined' && <CreateStakingPool/>)
