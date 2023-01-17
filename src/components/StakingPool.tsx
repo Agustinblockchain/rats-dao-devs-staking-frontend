@@ -345,7 +345,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 						</div>
 						<div className="pool__stat">
 							<div style={{textAlign: 'left', width:"100%"}}>
-								<p><><b>Grace Time</b> {graceTimeUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</></p>
+								<p><><b>Grace time</b> {graceTimeUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</></p>
 								{(poolInfo.swTerminated) ?
 									<p><><b>Claims until</b> It's already Terminated</></p>
 									:
