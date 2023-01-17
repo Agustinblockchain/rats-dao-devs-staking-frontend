@@ -1073,7 +1073,6 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 								<div>Pool Closed:  {swClosedUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
 								<div>Pool Terminated: {swTerminatedUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
 								
-								
 								<div>Pool is Ready For Give Back Fund: {swPoolReadyForGiveBackFundsUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
 								<div>Pool is Ready For Deleted Master And User Scripts: {swPoolReadyForDeleteMasterAndUserScriptsUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
 								<div>Pool is Ready For Deleted Main Scripts: {swPoolReadyForDeleteMainScriptsUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
@@ -1083,11 +1082,21 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 							<>
 							</>
 						}
-						
 						<br></br>
 
-						<div>EUTxOs At Contract: {countEUTxOs_With_DatumUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</div>
+						<p><>Earn <b>{interestUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b> per year</></p>
 						<br></br>
+
+
+						<div>
+							Staking Unit In Wallet: {(walletStakingAmountUI === ui_loading || walletStakingAmountUI === ui_notConnected ? walletStakingAmountUI : formatAmount(Number(walletStakingAmountUI), staking_Decimals, poolInfo.staking_UI)) || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}
+						</div>
+						<div>
+							Harvest Unit In Wallet: {(walletHarvestAmountUI === ui_loading || walletHarvestAmountUI === ui_notConnected ? walletHarvestAmountUI : formatAmount(Number(walletHarvestAmountUI), harvest_Decimals, poolInfo.harvest_UI)) || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}
+						</div>
+						<br></br>
+
+						
 
 						{process.env.NODE_ENV==="development"?
 							<>
@@ -1134,45 +1143,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 							<>
 							</>
 						}
-
-						<p><>Open: {beginAtUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} {((!poolInfo.swIniciado) ? <>(It hasn't started yet)</>:<></>)}</></p>
-
-						{poolInfo.closedAt?
-						<p><>Forzed Deadline: {closedAtUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} {((poolInfo.swClosed) ? <>(It's already Closed)</>:<></>)}</></p>
-						:
-						<>
-							<p><>Deadline: {closedAtUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} {((poolInfo.swClosed) ? <>(It's already Closed)</>:<></>)}</></p>
-						</>
-						}
-
-						<p><>Grace Time: {graceTimeUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</></p>
-
-						{(poolInfo.swTerminated) ?
-							<p><>Claim Rewards until: It's already Terminated</></p>
-							:
-							<p><>Claim Rewards until: {terminatedAtUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</></p>
-						}
-						<br></br>
-
-						<p><>Anual Rewards per each {poolInfo.staking_UI}: {interestUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</></p>
-						<br></br>
-
-						<div>
-							Staking Unit In Wallet: {(walletStakingAmountUI === ui_loading || walletStakingAmountUI === ui_notConnected ? walletStakingAmountUI : formatAmount(Number(walletStakingAmountUI), staking_Decimals, poolInfo.staking_UI)) || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}
-						</div>
-						<div>
-							Harvest Unit In Wallet: {(walletHarvestAmountUI === ui_loading || walletHarvestAmountUI === ui_notConnected ? walletHarvestAmountUI : formatAmount(Number(walletHarvestAmountUI), harvest_Decimals, poolInfo.harvest_UI)) || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}
-						</div>
-						<br></br>
-
-						<p>Active Users: {countEUTxOs_With_UserDatumUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</p>
-						{/* <p>Registered Users: {countEUTxOs_With_UserDatum || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</p> */}
-						<p>Total Staked: {totalStakedUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</p>
-						<p>Rewards Harvested: {totalRewardsPaidUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</p>
-						<p>Rewards to Pay: {totalRewardsToPayUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</p>
-						<p>UTxOs with Funds: {countEUTxOs_With_FundDatumUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</p>
-						<p>Availaible Funds: {totalFundsAvailableUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</p>
-						<br></br>
+						
 						<div className='pool__contract_address'>
 							User Deposit Policy ID
 							<button onClick={() => copyToClipboard(poolInfo.txID_User_Deposit_CS)} className='btn__ghost icon' style={{ cursor: 'pointer' }}>
@@ -1203,6 +1174,34 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 						</div>
 				</div>
 				<div className="pool__action_cards ">
+
+				<div className="pool__action_smallcard"  >
+						<div className="pool__stat">
+							<div style={{textAlign: 'left', width:"100%"}}>
+								<p><><b>From</b> {beginAtUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} {((!poolInfo.swIniciado) ? <>(It hasn't started yet)</>:<></>)}</></p>
+								{poolInfo.closedAt?
+									<p><><b>To</b> {closedAtUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} {((poolInfo.swClosed) ? <>(It's already Closed)</>:<></>)}</></p>
+									:
+									<>
+										<p><><b>To</b> {closedAtUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} {((poolInfo.swClosed) ? <>(It's already Closed)</>:<></>)}</></p>
+									</>
+								}
+							</div>
+						</div>
+						<div className="pool__stat">
+							<div style={{textAlign: 'left', width:"100%"}}>
+								<p><><b>Grace Time</b> {graceTimeUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</></p>
+								{(poolInfo.swTerminated) ?
+									<p><><b>Claims until</b> It's already Terminated</></p>
+									:
+									<p><><b>Claims until</b> {terminatedAtUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</></p>
+								}
+							</div>
+						</div>
+					</div>
+
+					<div className="pool__flex_break" ><br></br></div>
+					
 					<div className="pool__action_card ">
 						<div className="pool__stat">
 							<div className="pool__column">
@@ -1516,6 +1515,31 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 									swHash={false}
 								/>
 
+							</div>
+						</div>
+					</div>
+
+					<div className="pool__flex_break" ><br></br></div>
+
+					<div className="pool__action_smallcard"  >
+						<div className="pool__stat">
+							<div style={{textAlign: 'left', width:"100%"}}>
+								<h4 >Info</h4>
+								<br></br> 
+								<div>EUTxOs At Contract <b>{countEUTxOs_With_DatumUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></div>
+								<p>EUTxO with Users <b>{countEUTxOs_With_UserDatumUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></p>
+								<p>EUTxOs with Funds <b>{countEUTxOs_With_FundDatumUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></p>
+							</div>
+						</div>
+						<div className="pool__stat">
+							<div style={{textAlign: 'left', width:"100%"}}>
+								<h4 >Totals</h4>
+								<br></br> 
+								{/* <p>Registered Users: {countEUTxOs_With_UserDatum || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</p> */}
+								<p>Staked <b>{totalStakedUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></p>
+								<p>Rewards Harvested <b>{totalRewardsPaidUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></p>
+								<p>Rewards to Pay <b>{totalRewardsToPayUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></p>
+								<p>Availaible Funds <b>{totalFundsAvailableUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></p>
 							</div>
 						</div>
 					</div>

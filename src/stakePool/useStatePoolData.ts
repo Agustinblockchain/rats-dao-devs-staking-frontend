@@ -95,6 +95,11 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
     const [totalMastersMinAdaUI, setTotalMastersMinAdaUI] = useState<string | 0>(ui_loading)
     const [totalUsersMinAdaUI, setTotalUsersMinAdaUI] = useState<string | 0>(ui_loading)
 
+    const [userStaked,         setUserStaked] = useState<BIGINT>(0n)
+    const [userStakedUI,       setUserStakedUI] = useState<string | 0>(ui_loading)
+    const [userRewardsPaidUI,  setUserRewardsPaidUI] = useState<string | 0>(ui_loading)
+    const [userRewardsToPayUI, setUserRewardsToPayUI] = useState<string | 0>(ui_loading)
+
     const [userRegisteredUI, setUserRegisteredUI] = useState<string | 0>(ui_loading)
 
     // const walletStore = useStoreState(state => state.wallet)
@@ -155,6 +160,11 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
         setTotalMastersMinAdaUI(ui)
         setTotalUsersMinAdaUI(ui)
         setUserRegisteredUI(ui)
+
+        setUserStaked(0n)
+        setUserStakedUI(ui)
+        setUserRewardsPaidUI(ui)
+        setUserRewardsToPayUI(ui)
 
     }
 
@@ -288,6 +298,10 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
                 setTotalMastersMinAdaUI(formatAmount(0, ADA_Decimals, ADA_UI))
                 setTotalUsersMinAdaUI(formatAmount(0, ADA_Decimals, ADA_UI))
                 setUserRegisteredUI('0')
+                setUserStaked(0n)
+                setUserStakedUI(formatAmount(0, staking_Decimals, poolInfo.staking_UI))
+                setUserRewardsPaidUI(formatAmount(0, harvest_Decimals, poolInfo.harvest_UI))
+                setUserRewardsToPayUI(formatAmount(0, harvest_Decimals, poolInfo.harvest_UI))
             } else {
                 //console.log("useStatePoolData - " + poolInfo.name + " - setPoolData: UTxO with PoolDatum: " + eUTxO_With_PoolDatum.uTxO.txHash + "#" + eUTxO_With_PoolDatum.uTxO.outputIndex)
                 setEUTxO_With_PoolDatum(eUTxO_With_PoolDatum)
@@ -330,11 +344,16 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
                 setTotalRewardsToPayUI(formatAmount(0, harvest_Decimals, poolInfo.harvest_UI))
                 setTotalUsersMinAdaUI(formatAmount(0, ADA_Decimals, ADA_UI))
                 setUserRegisteredUI('TODO')
+                setUserStaked(0n)
+                setUserStakedUI(formatAmount(0, staking_Decimals, poolInfo.staking_UI))
+                setUserRewardsPaidUI(formatAmount(0, harvest_Decimals, poolInfo.harvest_UI))
+                setUserRewardsToPayUI(formatAmount(0, harvest_Decimals, poolInfo.harvest_UI))
                 setUserStakedDatas([])
             } else {
                 //console.log("useStatePoolData - " + poolInfo.name + " - setPoolData: UTxOs with UserDatum lenght: " + eUTxOs_With_UserDatum.length)
                 setEUTxOs_With_UserDatum(eUTxOs_With_UserDatum)
                 setCountEUTxOs_With_UserDatumUI(eUTxOs_With_UserDatum.length.toString())
+
                 setTotalStakedUI(formatAmount(Number(getTotalStakedAmount(eUTxOs_With_UserDatum)), staking_Decimals, poolInfo.staking_UI))
                 setTotalRewardsPaidUI(formatAmount(Number(getTotalCashedOut(eUTxO_With_PoolDatum, eUTxOs_With_FundDatum)), harvest_Decimals, poolInfo.harvest_UI))
                 setTotalRewardsToPayUI(formatAmount(Number(getTotalRewardsToPay_In_EUTxOs_With_UserDatum(poolInfo, eUTxO_With_PoolDatum, eUTxOs_With_UserDatum)), harvest_Decimals, poolInfo.harvest_UI))
@@ -344,6 +363,16 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
                 if (session && session.user && session.user.pkh && getIfUserRegistered( session.user.pkh, eUTxOs_With_UserDatum)) {
                     setSwUserRegistered(true)
                     const eUTxOs_With_UserDatumOfUser = getEUTxOs_With_UserDatum_InEUxTOList_OfUser(eUTxOs_With_UserDatum, session.user.pkh)
+
+                    const stakedAmount = getUserStaked(session.user.pkh, eUTxOs_With_UserDatumOfUser)
+                    const stakedAmountUI = formatAmount(Number(stakedAmount), staking_Decimals, poolInfo.staking_UI)
+                    const rewardsPaidUI = formatAmount(Number(getUserRewardsPaid(session.user.pkh, eUTxOs_With_UserDatumOfUser)), harvest_Decimals, poolInfo.harvest_UI)
+                    const rewardsToPayUI = formatAmount(Number(getUserRewardsToPay(poolInfo, session.user.pkh, eUTxO_With_PoolDatum, eUTxOs_With_UserDatumOfUser)), harvest_Decimals, poolInfo.harvest_UI)
+                    setUserStaked(stakedAmount)
+                    setUserStakedUI(stakedAmountUI)
+                    setUserRewardsPaidUI(rewardsPaidUI)
+                    setUserRewardsToPayUI(rewardsToPayUI)
+                    
                     var userStakedDatas: UserStakedData[] = []
                     for (var i = 0; i < eUTxOs_With_UserDatumOfUser.length; i += 1) {
                         const userDatum: UserDatum = eUTxOs_With_UserDatumOfUser[i].datum as UserDatum;
@@ -377,6 +406,10 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
                     }
                     setUserStakedDatas(userStakedDatas)
                 } else {
+                    setUserStaked(0n)
+                    setUserStakedUI(formatAmount(0, staking_Decimals, poolInfo.staking_UI))
+                    setUserRewardsPaidUI(formatAmount(0, harvest_Decimals, poolInfo.harvest_UI))
+                    setUserRewardsToPayUI(formatAmount(0, harvest_Decimals, poolInfo.harvest_UI))
                     setUserStakedDatas([])
                 }
             }
@@ -502,6 +535,11 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
         totalRewardsToPayUI, 
         totalUsersMinAdaUI, 
         totalMastersMinAdaUI,
+
+        userStaked,
+		userStakedUI, 
+		userRewardsPaidUI, 
+		userRewardsToPayUI,
 
         swUserRegistered,
         swAnyScriptsMaster,
