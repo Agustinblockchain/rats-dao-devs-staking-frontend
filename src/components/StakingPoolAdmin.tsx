@@ -1385,7 +1385,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 									statePoolData={statePoolData}
 									swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded}
 									swShow={poolInfo.swPreparado}
-									swPaddintTop={poolInfo.swPreparado && !poolInfo.swTerminated}
+									swPaddintTop={false}
 								/>
 
 								<UsersModalBtn
