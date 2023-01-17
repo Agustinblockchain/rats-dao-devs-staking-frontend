@@ -376,9 +376,9 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 								{userStaked > 0n?
 									<>
 										<br></br>
-										<p>Staked <b>{userStakedUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></p>
-										<p>Harvested <b>{userRewardsPaidUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></p>
-										<p>For Claim <b>{userRewardsToPayUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></p>
+										<p>Already staked <b>{userStakedUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></p>
+										<p>Already harvested <b>{userRewardsPaidUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></p>
+										<p>Rewards to Claim <b>{userRewardsToPayUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></p>
 									</>
 								:
 									<></>
@@ -633,7 +633,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 							<div style={{textAlign: 'left', width:"100%"}}>
 								<h4 >Totals</h4>
 								<br></br> 
-								<p>Staked <b>{totalStakedUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></p>
+								<p>Users Stake <b>{totalStakedUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></p>
 								<p>Rewards Harvested <b>{totalRewardsPaidUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></p>
 							</div>
 						</div>
@@ -642,7 +642,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 								<h4 ></h4>
 								<br></br> <br></br> 
 								<p>Rewards to Pay <b>{totalRewardsToPayUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></p>
-								<p>Availaible Funds <b>{totalFundsAvailableUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></p>
+								<p>Availaible Funds in Pool<b>{totalFundsAvailableUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></p>
 							</div>
 						</div>
 					</div>
