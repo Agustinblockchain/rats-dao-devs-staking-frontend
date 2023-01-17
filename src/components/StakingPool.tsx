@@ -363,7 +363,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 								
 								<div>
 									You can Stake {(walletStakingAmountUI === ui_loading || walletStakingAmountUI === ui_notConnected) ? 
-										<Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' /> 
+										walletStakingAmountUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' /> 
 									: 
 										<b>
 											{formatAmount(Number(walletStakingAmountUI), staking_Decimals, poolInfo.staking_UI)}
