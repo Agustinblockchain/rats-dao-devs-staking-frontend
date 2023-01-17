@@ -289,14 +289,14 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
         if (staking_AC_isAda){
             staking_Decimals = ADA_Decimals
         }else if (staking_AC_isWithoutTokenName){
-            staking_Decimals = 2
+            staking_Decimals = 0
         }else{
             const staking_Metadata = await apiGetTokenMetadata(staking_AC)
             //console.log("useStatePoolData - " + poolInfo.name + " - setPoolData - staking_metadata: " + toJson(staking_Metadata))
             if(staking_Metadata && staking_Metadata?.metadata?.decimals) {
                 staking_Decimals = staking_Metadata.metadata.decimals
             }else{
-                staking_Decimals = 3
+                staking_Decimals = 0
             }
         }
         setStaking_Decimals(staking_Decimals)
@@ -305,14 +305,14 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
         if (harvest_AC_isAda){
             harvest_Decimals = ADA_Decimals
         }else if (harvest_AC_isWithoutTokenName){
-            harvest_Decimals = 2
+            harvest_Decimals = 0
         }else{
             const harvest_Metadata = await apiGetTokenMetadata(harvest_AC)
             //console.log("useStatePoolData - " + poolInfo.name + " - setPoolData - harvest_metadata: " + toJson(harvest_Metadata))
             if(harvest_Metadata && harvest_Metadata?.metadata?.decimals) {
                 harvest_Decimals = harvest_Metadata.metadata.decimals
             }else{
-                harvest_Decimals = 3
+                harvest_Decimals = 0
             }
         }
         setHarvest_Decimals(harvest_Decimals)
