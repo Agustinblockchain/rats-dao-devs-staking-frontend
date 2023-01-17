@@ -11,22 +11,28 @@ import { getSession, useSession } from 'next-auth/react'
 
 const getFaqText = (n : number) => {
 	switch(n) {
-		case 1: return 'The Rats Staking Portal is a frontend interface that interacts with Cardano Smart Contract. \
-		It allows you to stake Cardano Assets and earn rewards.'
-		case 2: return 'On the Homepage, you can see the Pool list and available staking rewards. \
-		Simply deposit the assets via the “Deposit” buttom and periodically claim your rewards with “Harvest” buttom. \
-		In order to make a deposit, you must have “Staking Unit” assets in your wallet. Upon harvesting, you will receive “Harvest Unit” assets.'
-		case 3: return 'The Staking is trustless. When you stake your assets in a Pool, them are held in a Plutus on-chain smart-contract. \
-		Them are owned by your private keys and withdrawable only by that same private key.'
-		case 4: return 'Each Staking Pool is created with unique settings and reward conditions. \
-		The “Annual Pay” for each Staking Pool, which can be found alongside the Pool, represents the payment in “Havest Units” per every “Staking Unit” per year. \
-		Rewards are then calculated based on the number of tokens an individual has staked and the length of time since they made their deposit or last claim.'
-		case 5: return 'It is the responsibility of the administrator of the Staking Pool to fund it with "Harvest Unit" assets that will be held and available in the smart contract. \
-		When you claim your rewards, a new transaction will be initiated to transfer a portion of those assets to your wallet depending on your deposit.'  
-		case 6: return 'Yes! All the validation code/smart contracts are open source and them can be found in the RatsDAO GitHub (https://github.com/CardanoRatsDAO). \
-		Always demand open source.'
+		case 1: return '<p>The Rats Staking Portal is a frontend interface that interacts with Cardano Smart Contract.</p>\
+		<p>It allows you to stake Cardano Assets and earn rewards.</p>'
+		case 2: return '<p>On the Homepage, you can see the Pool list and available staking rewards.</p>\
+		<p>Simply deposit the assets via the “Deposit” buttom and periodically claim your rewards with “Harvest” buttom.</p>\
+		<p>In order to make a deposit, you must have “Staking Unit” assets in your wallet. Upon harvesting, you will receive “Harvest Unit” assets.</p>'
+		case 3: return '<p>The Staking is trustless. When you stake your assets in a Pool, them are held in a Plutus on-chain smart-contract.</p>\
+		<p>Them are owned by your private keys and withdrawable only by that same private key.</p>'
+		case 4: return 'Each Staking Pool is created with unique settings and reward conditions.</p>\
+		<p>The “Annual Pay” for each Staking Pool, which can be found alongside the Pool, represents the payment in “Havest Units” per every “Staking Unit” per year.</p>\
+		<p>Rewards are then calculated based on the number of tokens an individual has staked and the length of time since they made their deposit or last claim.</p>'
+		case 5: return 'It is the responsibility of the administrator of the Staking Pool to fund it with "Harvest Unit" assets that will be held and available in the smart contract.</p>\
+		<p>When you claim your rewards, a new transaction will be initiated to transfer a portion of those assets to your wallet depending on your deposit.</p>'  
+		case 6: return 'Yes! All the validation code/smart contracts are open source and them can be found in the RatsDAO GitHub (https://github.com/CardanoRatsDAO).</p>\
+		<p>Always demand open source.</p>'
+		case 7: return 'When a transaction is confirmed on the blockchain, it means that the transaction has been added to a block and is on its way to being permanently recorded on the blockchain. However, there is still a small chance that the impact of the transaction may not be immediately visible on the Portal. This can happen if there is a delay in the site updating its information to reflect the new transaction.</p>\
+		<p>If you do not see your new deposit right away, do not despair. Give it a few minutes and then refresh the page to check again. If the deposit still does not appear, you can check the contract address on the blockchain to see if the transaction has been recorded there. This can give you peace of mind and confirm that the transaction has been completed successfully.</p>'
+		case 8: return '1- Although everything has been thoroughly tested, there is still a chance that errors or security holes may be present.</p>\
+		<p>2- If a bug or vulnerability is found, or if our funds or Users\' funds are compromised, Pool masters can close or forcibly terminate the Pool and return the funds to Users before they are exploited further.</p>\
+		<p>3- If an exploit is discovered in the initial version that uses our RATS NFTs and as all transactions are backed by the blockchain, we can invalidate all used tokens and mint new ones, giving each User what they had when everything started. The treasury funds of RATS DAO are held outside of this platform and will not be compromised in any way.</p>\
+		<p>4- Once the contracts are online, they cannot be changed. If an error is found, the Pool must be closed and terminated, and new and improved contracts can be created again. Users\' funds can be reimbursed (or Users can make withdrawals) and new deposits can be made again.</p>'
 		default: return 'ooba booba'
-	}  
+	} 
 }
 
 const getFaqTitle = (n : number) => {
@@ -37,7 +43,8 @@ const getFaqTitle = (n : number) => {
 		case 4: return 'How are rewards calculated?'
 		case 5: return 'Who is providing the rewards?'
 		case 6: return 'Is it open source?'
-			
+		case 7: return 'I can\'t see my new Deposit'
+		case 8: return 'What are the steps taken to ensure the security of User\'s funds and protect against potential errors or vulnerabilities in the RATS DAO platform?'
 		default: return 'EXAMPLE Staking portal'
 	}
 }
@@ -51,7 +58,7 @@ const Faq : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = (
 			<div className="section__text">
 				<div className="faq">
 					{
-						[1,2,3,4,5,6].map((n) => <FaqItem
+						[1,2,3,4,5,6,7,8].map((n) => <FaqItem
 								key={n}
 								heading= {getFaqTitle(n)}
 								text= {getFaqText(n)}
@@ -79,9 +86,9 @@ function FaqItem({heading, text} : {heading: string, text: string}) {
 		<div tabIndex={0} className="faq__item">
 			<h4 className="faq__header">
 			{heading}
-			</h4>
+			</h4><br></br>
 			<div className="faq__text">
-				<p>{text}</p>
+				<div><div dangerouslySetInnerHTML={{ __html: text }} /></div>
 			</div>
 		</div>
 	)

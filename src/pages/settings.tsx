@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import Layout from '../components/Layout';
+import Message from '../components/Message';
 import SettingsForm from '../components/SettingsForm';
 import { toJson } from '../utils/utils';
 import { useStoreState } from '../utils/walletProvider';
@@ -36,15 +37,15 @@ const Settings : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>
 		<Layout swCreate={session?.user.swCreate}>
 		{
 			(status == "loading")? 
-				<p>Loading Session...</p>
+				<Message message={"Loading Page..."} />
 			:
 				(status === "unauthenticated")? 
-						<p>Connect you wallet to enter in Settings Page</p>
+						<Message message={"Connect you wallet to enter in Settings Page"} />
 					:
 						session?.user.swCreate? 
 							(typeof window !== 'undefined' && <SettingsForm/>)
 						:
-							<p>Settings Page is restricted</p>
+							<Message message={"Settings Page is restricted to especific Wallets"} />
 		}
 		</Layout>
 	)

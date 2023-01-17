@@ -10,6 +10,7 @@ import { useRouter } from 'next/router'
 import { stakingPoolDBParser } from '../stakePool/helpersStakePool'
 import { getSession, useSession } from 'next-auth/react'
 import StakingPool from '../components/StakingPool'
+import Message from '../components/Message'
 //--------------------------------------
 
 const Withdraw : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> =  ({pkh, stakingPools} : InferGetServerSidePropsType<typeof getServerSideProps>) =>  {
@@ -28,6 +29,7 @@ const Withdraw : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>
 	};
 
 	useEffect(() => {
+		console.log ("Withdraw - status " + status + " - session?.user.pkh: " + session?.user.pkh + " - pkh: " + pkh);
 		if (status == "authenticated" && session?.user.pkh != pkh) {
 			refreshData()
 		} else if (status == "unauthenticated" && pkh != "") {
@@ -49,13 +51,13 @@ const Withdraw : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>
 		<Layout swCreate={session?.user.swCreate}>
 		{
 			(status == "loading")? 
-				<p>Loading Session...</p>
+				<Message message={"Loading Page..."} />
 			:
 				(isRefreshing) ?
-					<div>Loading Staking Pools...</div>
+					<Message message={"Loading Page..."} />
 				:
 					(status === "unauthenticated")? 
-						<p>Connect you wallet to see your Deposits</p>
+						<Message message={"Connect you wallet to see your Deposits"} />
 					:
 						stakingPoolsParsed.length > 0 ? 
 							stakingPoolsParsed.map(
@@ -63,7 +65,7 @@ const Withdraw : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>
 								(typeof window !== 'undefined' && <StakingPool key={sp.name} stakingPoolInfo={sp}  />)
 							)
 						:
-							<p>Can't find any Staking Pool that you have deposited into.</p> 
+							<Message message={"Can't find any Staking Pool that you have deposited into"} />
 		}
 		</Layout>
 	)

@@ -6,6 +6,7 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import CreateStakingPool from '../components/CreateStakingPool';
 import Layout from '../components/Layout';
+import Message from '../components/Message';
 import { toJson } from '../utils/utils';
 import { useStoreState } from '../utils/walletProvider';
 
@@ -37,15 +38,15 @@ const Create : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> 
 		<Layout swCreate={session?.user.swCreate}>
 		{
 			(status == "loading")? 
-				<p>Loading Session...</p>
+				<Message message={"Loading Page..."} />
 			:
 				(status === "unauthenticated")? 
-						<p>Connect you wallet to Create a Staking Pool</p>
+						<Message message={"Connect you wallet to Create a Staking Pool<"} />
 					:
 						session?.user.swCreate? 
 							(typeof window !== 'undefined' && <CreateStakingPool/>)
 						:
-							<p>Create Staking Pool is restricted</p>
+							<Message message={"Create Staking Pool is restricted to especific Wallets"} />
 		}
 		</Layout>
 	)

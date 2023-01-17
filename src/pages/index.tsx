@@ -11,6 +11,7 @@ import { useRouter } from 'next/router'
 import { stakingPoolDBParser } from '../stakePool/helpersStakePool'
 import { getSession, useSession } from 'next-auth/react'
 import StakingPool from '../components/StakingPool'
+import Message from '../components/Message'
 
 //--------------------------------------
 
@@ -37,10 +38,10 @@ const Home : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = 
 		<Layout swCreate={session?.user.swCreate}>
 		{
 			(status == "loading")? 
-				<p>Loading Session...</p>
+				<Message message={"Loading Page..."} />
 			:
 				(isRefreshing) ?
-					<div>Loading Staking Pools...</div>
+					<Message message={"Loading Page..."} />
 				:
 					stakingPoolsParsed.length > 0 ? 
 						stakingPoolsParsed.map(
@@ -48,7 +49,7 @@ const Home : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = 
 								(typeof window !== 'undefined' && <StakingPool key={sp.name} stakingPoolInfo={sp}  />)
 						)
 					:
-						<p>Can't find any Staking Pool available</p> 
+						<Message message={"Can't find any Staking Pool available"} />
 		}
 		</Layout>
 	)

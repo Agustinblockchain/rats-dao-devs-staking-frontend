@@ -11,6 +11,7 @@ import { useRouter } from 'next/router'
 import { stakingPoolDBParser } from '../stakePool/helpersStakePool'
 import { getSession, useSession } from 'next-auth/react'
 import StakingPoolAdmin from '../components/StakingPoolAdmin'
+import Message from '../components/Message'
 //--------------------------------------
 const Admin : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> =  ({pkh, stakingPools} : InferGetServerSidePropsType<typeof getServerSideProps>) =>  {
 	
@@ -48,13 +49,13 @@ const Admin : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> =
 		<Layout swCreate={session?.user.swCreate}>
 		{
 			(status == "loading")? 
-				<p>Loading Session...</p>
+				<Message message={"Loading Page..."} />
 			:
 				(isRefreshing) ?
-					<div>Loading Staking Pools...</div>
+					<Message message={"Loading Page..."} />
 				:
 					(status === "unauthenticated")? 
-						<p>Connect you wallet to see Staking Pools to Admin</p>
+						<Message message={"Connect you wallet to see Staking Pools to Admin"} />
 					:
 						stakingPoolsParsed.length > 0 ? 
 							stakingPoolsParsed.map(
@@ -62,7 +63,7 @@ const Admin : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> =
 								(typeof window !== 'undefined' && <StakingPoolAdmin key={sp.name} stakingPoolInfo={sp}  />)
 							)
 						:
-							<p>Can't find any Staking Pool to Admin.</p> 
+							<Message message={"Can't find any Staking Pool to Admin"} />
 		}
 		</Layout>
 	)

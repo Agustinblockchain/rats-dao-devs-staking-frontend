@@ -79,8 +79,10 @@ export default function WalletModalBtn() {
 				}
 			}
 			const walletStore_ = { connected: true, name: walletName, walletApi: walletApi, pkh: pkh, lucid: lucid, swEnviarPorBlockfrost: swEnviarPorBlockfrost_, protocolParameters: protocolParameters }
-			console.log("[Session] - walletConnect - signIn - status: " + status)
+			console.log("[Session] - walletConnect - status: " + status + " - session.user.pkh: " + session?.user?.pkh + " - pkh: " + pkh)
 			if (status !== "authenticated" || (status === "authenticated" && session && session.user && session.user.pkh !== pkh)) {
+				// console.log("LOGIN")
+				await signOut({ redirect: false })
 				await signIn('credentials', { pkh: pkh , walletName: walletName, swEnviarPorBlockfrost: swEnviarPorBlockfrost_?"true":"false", isWalletFromSeedletName: "false",redirect: false })
 			}
 			setWalletStore(walletStore_)
@@ -262,7 +264,7 @@ export default function WalletModalBtn() {
 
 						{walletStore.connected ?
 							<>
-								<div>Pkh: {isWalletDataLoaded ? walletStore.pkh : <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
+								<div>Pkh: {walletStore.connected ? walletStore.pkh : <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
 								<div>UTxOs: {isWalletDataLoaded ? uTxOsAtWallet.length : <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</div>
 								<br></br>
 							</>
