@@ -1145,7 +1145,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 					}
 					
 					<div>
-						Deposit Token <b>{txID_User_Deposit_For_User_TN}</b>&nbsp; 
+						User Token <b>{txID_User_Deposit_For_User_TN}</b>&nbsp; 
 						{/* + " (" + poolInfo.txID_User_Deposit_CS.slice(0,4)+"..."+poolInfo.txID_User_Deposit_CS.slice(52)+")" */}
 						<button onClick={() => copyToClipboard(poolInfo.txID_User_Deposit_CS)} className='btn__ghost icon' style={{ cursor: 'pointer' }}>
 							<svg xmlns="http://www.w3.org/2000/svg" className="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -1520,7 +1520,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 								<h4 >Info</h4>
 								<br></br> 
 								<div>EUTxOs At Contract <b>{countEUTxOs_With_DatumUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></div>
-								<p>EUTxO with Users <b>{countEUTxOs_With_UserDatumUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></p>
+								<p>EUTxOs with Users <b>{countEUTxOs_With_UserDatumUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></p>
 								<p>EUTxOs with Funds <b>{countEUTxOs_With_FundDatumUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></p>
 							</div>
 						</div>
