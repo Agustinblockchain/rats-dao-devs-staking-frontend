@@ -1033,145 +1033,147 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 				</div>
 
 				<div className="pool__data_item">
-						<h4 className="pool_title">{poolInfo.name}&nbsp;
-							{isPoolDataLoading ?
-								<>
-									<br></br>
-									<br></br>
-									<LoadingSpinner size={25} border={5} />
-									<br></br>
-								</>
-								:
-								<>
-									<button onClick={() => { if (true) { updateDetailsStakingPoolAndWallet() } }} className='btn__ghost icon' style={true ? { cursor: 'pointer' } : { cursor: 'default' }} >
-										<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" className="bi bi-arrow-repeat" viewBox="0 0 16 16">
-											<path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z" />
-											<path fillRule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z" />
-										</svg>
-									</button>
-									<br></br>
-									<br></br>
-								</>
-							}
-						</h4>
-
-						{process.env.NODE_ENV==="development"?
+					<h4 className="pool_title">{poolInfo.name}&nbsp;
+						{isPoolDataLoading ?
 							<>
-							<div>Are you Master: {isMasterUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
+								<br></br>
+								<br></br>
+								<LoadingSpinner size={25} border={5} />
+								<br></br>
+							</>
+							:
+							<>
+								<button onClick={() => { if (true) { updateDetailsStakingPoolAndWallet() } }} className='btn__ghost icon' style={true ? { cursor: 'pointer' } : { cursor: 'default' }} >
+									<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" className="bi bi-arrow-repeat" viewBox="0 0 16 16">
+										<path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z" />
+										<path fillRule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z" />
+									</svg>
+								</button>
+								<br></br>
+								<br></br>
+							</>
+						}
+					</h4>
+
+					{process.env.NODE_ENV==="development"?
+						<>
+						<div>Are you Master: {isMasterUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
+						<br></br>
+						</>
+						:
+						<></>
+					}
+					<div>Pool Show on Home: {swShowOnHomeUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
+					
+					{process.env.NODE_ENV==="development"?
+						<>
+							<div>Pool Prepared:  {swPreparadoUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
+							<div>Pool Started:  {swIniciadoUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
+							<div>Pool has Funds:  {swFundedUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
+							<div>Pool Closed:  {swClosedUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
+							<div>Pool Terminated: {swTerminatedUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
+							
+							<div>Pool is Ready For Give Back Fund: {swPoolReadyForGiveBackFundsUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
+							<div>Pool is Ready For Deleted Master And User Scripts: {swPoolReadyForDeleteMasterAndUserScriptsUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
+							<div>Pool is Ready For Deleted Main Scripts: {swPoolReadyForDeleteMainScriptsUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
+							<div>Pool is Ready For Deleted In DB: {swPoolReadyForDeletePoolInDBUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
+						</>
+						:
+						<>
+						</>
+					}
+					<br></br>
+
+					<p><>Earn <b>{interestUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b> per year</></p>
+					<br></br>
+
+
+					<div>
+						Staking Unit In Wallet: {(walletStakingAmountUI === ui_loading || walletStakingAmountUI === ui_notConnected ? walletStakingAmountUI : formatAmount(Number(walletStakingAmountUI), staking_Decimals, poolInfo.staking_UI)) || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}
+					</div>
+					<div>
+						Harvest Unit In Wallet: {(walletHarvestAmountUI === ui_loading || walletHarvestAmountUI === ui_notConnected ? walletHarvestAmountUI : formatAmount(Number(walletHarvestAmountUI), harvest_Decimals, poolInfo.harvest_UI)) || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}
+					</div>
+					<br></br>
+
+					
+
+					{process.env.NODE_ENV==="development"?
+						<>
+							<div style={{fontSize:8}}>
+
+							{/* <div>UTxO required: <br></br>{poolInfo.poolID_TxOutRef.txHash + "#" + poolInfo.poolID_TxOutRef.outputIndex}</div>
+							<br></br> */}
+
+							<div>UTxO At Script With Pool Datum: {eUTxO_With_PoolDatum ? eUTxO_With_PoolDatum.uTxO.txHash + "#" + eUTxO_With_PoolDatum.uTxO.outputIndex : ""} </div>
 							<br></br>
-							</>
-							:
-							<></>
-						}
-						<div>Pool Show on Home: {swShowOnHomeUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
-						
-						{process.env.NODE_ENV==="development"?
-							<>
-								<div>Pool Prepared:  {swPreparadoUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
-								<div>Pool Started:  {swIniciadoUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
-								<div>Pool has Funds:  {swFundedUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
-								<div>Pool Closed:  {swClosedUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
-								<div>Pool Terminated: {swTerminatedUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
-								
-								<div>Pool is Ready For Give Back Fund: {swPoolReadyForGiveBackFundsUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
-								<div>Pool is Ready For Deleted Master And User Scripts: {swPoolReadyForDeleteMasterAndUserScriptsUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
-								<div>Pool is Ready For Deleted Main Scripts: {swPoolReadyForDeleteMainScriptsUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
-								<div>Pool is Ready For Deleted In DB: {swPoolReadyForDeletePoolInDBUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
-							</>
-							:
-							<>
-							</>
-						}
-						<br></br>
 
-						<p><>Earn <b>{interestUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b> per year</></p>
-						<br></br>
+							<div>EUTxO At Script With Script Datum: { poolInfo.eUTxO_With_ScriptDatum ? poolInfo.eUTxO_With_ScriptDatum.uTxO.txHash + "#" + poolInfo.eUTxO_With_ScriptDatum.uTxO.outputIndex : ""} </div>
+							<br></br>
 
+							<div>EUTxO At Script With Script TxID_Master_Fund_Datum: { poolInfo.eUTxO_With_Script_TxID_Master_Fund_Datum ? poolInfo.eUTxO_With_Script_TxID_Master_Fund_Datum.uTxO.txHash + "#" + poolInfo.eUTxO_With_Script_TxID_Master_Fund_Datum.uTxO.outputIndex : ""} </div>
+							<br></br>
+							<div>EUTxO At Script With Script TxID_Master_FundAndMerge_Datum: { poolInfo.eUTxO_With_Script_TxID_Master_FundAndMerge_Datum ? poolInfo.eUTxO_With_Script_TxID_Master_FundAndMerge_Datum.uTxO.txHash + "#" + poolInfo.eUTxO_With_Script_TxID_Master_FundAndMerge_Datum.uTxO.outputIndex : ""} </div>
+							<br></br>
+							<div>EUTxO At Script With Script TxID_Master_SplitFund_Datum: { poolInfo.eUTxO_With_Script_TxID_Master_SplitFund_Datum ? poolInfo.eUTxO_With_Script_TxID_Master_SplitFund_Datum.uTxO.txHash + "#" + poolInfo.eUTxO_With_Script_TxID_Master_SplitFund_Datum.uTxO.outputIndex : ""} </div>
+							<br></br>
+							<div>EUTxO At Script With Script TxID_Master_ClosePool_Datum: { poolInfo.eUTxO_With_Script_TxID_Master_ClosePool_Datum ? poolInfo.eUTxO_With_Script_TxID_Master_ClosePool_Datum.uTxO.txHash + "#" + poolInfo.eUTxO_With_Script_TxID_Master_ClosePool_Datum.uTxO.outputIndex : ""} </div>
+							<br></br>
+							<div>EUTxO At Script With Script TxID_Master_TerminatePool_Datum: { poolInfo.eUTxO_With_Script_TxID_Master_TerminatePool_Datum ? poolInfo.eUTxO_With_Script_TxID_Master_TerminatePool_Datum.uTxO.txHash + "#" + poolInfo.eUTxO_With_Script_TxID_Master_TerminatePool_Datum.uTxO.outputIndex : ""} </div>
+							<br></br>
+							<div>EUTxO At Script With Script TxID_Master_DeleteFund_Datum: { poolInfo.eUTxO_With_Script_TxID_Master_DeleteFund_Datum ? poolInfo.eUTxO_With_Script_TxID_Master_DeleteFund_Datum.uTxO.txHash + "#" + poolInfo.eUTxO_With_Script_TxID_Master_DeleteFund_Datum.uTxO.outputIndex : ""} </div>
+							<br></br>
+							<div>EUTxO At Script With Script TxID_Master_SendBackFund_Datum: { poolInfo.eUTxO_With_Script_TxID_Master_SendBackFund_Datum ? poolInfo.eUTxO_With_Script_TxID_Master_SendBackFund_Datum.uTxO.txHash + "#" + poolInfo.eUTxO_With_Script_TxID_Master_SendBackFund_Datum.uTxO.outputIndex : ""} </div>
+							<br></br>
+							<div>EUTxO At Script With Script TxID_Master_SendBackDeposit_Datum: { poolInfo.eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum ? poolInfo.eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum.uTxO.txHash + "#" + poolInfo.eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum.uTxO.outputIndex : ""} </div>
+							<br></br>
+							<div>EUTxO At Script With Script TxID_Master_AddScripts_Datum: { poolInfo.eUTxO_With_Script_TxID_Master_AddScripts_Datum ? poolInfo.eUTxO_With_Script_TxID_Master_AddScripts_Datum.uTxO.txHash + "#" + poolInfo.eUTxO_With_Script_TxID_Master_AddScripts_Datum.uTxO.outputIndex : ""} </div>
+							<br></br>
+							<div>EUTxO At Script With Script TxID_Master_DeleteScripts_Datum: { poolInfo.eUTxO_With_Script_TxID_Master_DeleteScripts_Datum ? poolInfo.eUTxO_With_Script_TxID_Master_DeleteScripts_Datum.uTxO.txHash + "#" + poolInfo.eUTxO_With_Script_TxID_Master_DeleteScripts_Datum.uTxO.outputIndex : ""} </div>
+							<br></br>
+							<div>EUTxO At Script With Script TxID_User_Deposit_Datum: { poolInfo.eUTxO_With_Script_TxID_User_Deposit_Datum ? poolInfo.eUTxO_With_Script_TxID_User_Deposit_Datum.uTxO.txHash + "#" + poolInfo.eUTxO_With_Script_TxID_User_Deposit_Datum.uTxO.outputIndex : ""} </div>
+							<br></br>
+							<div>EUTxO At Script With Script TxID_User_Harvest_Datum: { poolInfo.eUTxO_With_Script_TxID_User_Harvest_Datum ? poolInfo.eUTxO_With_Script_TxID_User_Harvest_Datum.uTxO.txHash + "#" + poolInfo.eUTxO_With_Script_TxID_User_Harvest_Datum.uTxO.outputIndex : ""} </div>
+							<br></br>
+							<div>EUTxO At Script With Script TxID_User_Withdraw_Datum: { poolInfo.eUTxO_With_Script_TxID_User_Withdraw_Datum ? poolInfo.eUTxO_With_Script_TxID_User_Withdraw_Datum.uTxO.txHash + "#" + poolInfo.eUTxO_With_Script_TxID_User_Withdraw_Datum.uTxO.outputIndex : ""} </div>
+							<br></br>
+							</div>
+						</>
+						:
+						<>
+						</>
+					}
+					
+					<div>
+						Deposit Token <b>{txID_User_Deposit_For_User_TN}</b>&nbsp; 
+						{/* + " (" + poolInfo.txID_User_Deposit_CS.slice(0,4)+"..."+poolInfo.txID_User_Deposit_CS.slice(52)+")" */}
+						<button onClick={() => copyToClipboard(poolInfo.txID_User_Deposit_CS)} className='btn__ghost icon' style={{ cursor: 'pointer' }}>
+							<svg xmlns="http://www.w3.org/2000/svg" className="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+								<path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+							</svg>
+						</button>
+						<a target={'_blank'} href={`${process.env.NEXT_PUBLIC_BLOCKCHAIN_EXPLORER_URL}policy/${poolInfo.txID_User_Deposit_CS}`} className='btn__ghost icon' style={{ cursor: 'pointer' }}>
+							<svg xmlns="http://www.w3.org/2000/svg" className="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+								<path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+							</svg>
+						</a>
+					</div>
+					<br></br>
+					
+					<div className='pool__contract_address'>
+						Contract Address&nbsp;
+						<button onClick={() => copyToClipboard(poolInfo.scriptAddress)} className='btn__ghost icon' style={{ cursor: 'pointer' }}>
+							<svg xmlns="http://www.w3.org/2000/svg" className="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+								<path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+							</svg>
+						</button>
+						<a target={'_blank'} href={`${process.env.NEXT_PUBLIC_BLOCKCHAIN_EXPLORER_URL}address/${poolInfo.scriptAddress}`} className='btn__ghost icon' style={{ cursor: 'pointer' }}>
+							<svg xmlns="http://www.w3.org/2000/svg" className="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+								<path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+							</svg>
+						</a>
+					</div>
 
-						<div>
-							Staking Unit In Wallet: {(walletStakingAmountUI === ui_loading || walletStakingAmountUI === ui_notConnected ? walletStakingAmountUI : formatAmount(Number(walletStakingAmountUI), staking_Decimals, poolInfo.staking_UI)) || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}
-						</div>
-						<div>
-							Harvest Unit In Wallet: {(walletHarvestAmountUI === ui_loading || walletHarvestAmountUI === ui_notConnected ? walletHarvestAmountUI : formatAmount(Number(walletHarvestAmountUI), harvest_Decimals, poolInfo.harvest_UI)) || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}
-						</div>
-						<br></br>
-
-						
-
-						{process.env.NODE_ENV==="development"?
-							<>
-								<div style={{fontSize:8}}>
-
-								{/* <div>UTxO required: <br></br>{poolInfo.poolID_TxOutRef.txHash + "#" + poolInfo.poolID_TxOutRef.outputIndex}</div>
-								<br></br> */}
-
-								<div>UTxO At Script With Pool Datum: {eUTxO_With_PoolDatum ? eUTxO_With_PoolDatum.uTxO.txHash + "#" + eUTxO_With_PoolDatum.uTxO.outputIndex : ""} </div>
-								<br></br>
-
-								<div>EUTxO At Script With Script Datum: { poolInfo.eUTxO_With_ScriptDatum ? poolInfo.eUTxO_With_ScriptDatum.uTxO.txHash + "#" + poolInfo.eUTxO_With_ScriptDatum.uTxO.outputIndex : ""} </div>
-								<br></br>
-
-								<div>EUTxO At Script With Script TxID_Master_Fund_Datum: { poolInfo.eUTxO_With_Script_TxID_Master_Fund_Datum ? poolInfo.eUTxO_With_Script_TxID_Master_Fund_Datum.uTxO.txHash + "#" + poolInfo.eUTxO_With_Script_TxID_Master_Fund_Datum.uTxO.outputIndex : ""} </div>
-								<br></br>
-								<div>EUTxO At Script With Script TxID_Master_FundAndMerge_Datum: { poolInfo.eUTxO_With_Script_TxID_Master_FundAndMerge_Datum ? poolInfo.eUTxO_With_Script_TxID_Master_FundAndMerge_Datum.uTxO.txHash + "#" + poolInfo.eUTxO_With_Script_TxID_Master_FundAndMerge_Datum.uTxO.outputIndex : ""} </div>
-								<br></br>
-								<div>EUTxO At Script With Script TxID_Master_SplitFund_Datum: { poolInfo.eUTxO_With_Script_TxID_Master_SplitFund_Datum ? poolInfo.eUTxO_With_Script_TxID_Master_SplitFund_Datum.uTxO.txHash + "#" + poolInfo.eUTxO_With_Script_TxID_Master_SplitFund_Datum.uTxO.outputIndex : ""} </div>
-								<br></br>
-								<div>EUTxO At Script With Script TxID_Master_ClosePool_Datum: { poolInfo.eUTxO_With_Script_TxID_Master_ClosePool_Datum ? poolInfo.eUTxO_With_Script_TxID_Master_ClosePool_Datum.uTxO.txHash + "#" + poolInfo.eUTxO_With_Script_TxID_Master_ClosePool_Datum.uTxO.outputIndex : ""} </div>
-								<br></br>
-								<div>EUTxO At Script With Script TxID_Master_TerminatePool_Datum: { poolInfo.eUTxO_With_Script_TxID_Master_TerminatePool_Datum ? poolInfo.eUTxO_With_Script_TxID_Master_TerminatePool_Datum.uTxO.txHash + "#" + poolInfo.eUTxO_With_Script_TxID_Master_TerminatePool_Datum.uTxO.outputIndex : ""} </div>
-								<br></br>
-								<div>EUTxO At Script With Script TxID_Master_DeleteFund_Datum: { poolInfo.eUTxO_With_Script_TxID_Master_DeleteFund_Datum ? poolInfo.eUTxO_With_Script_TxID_Master_DeleteFund_Datum.uTxO.txHash + "#" + poolInfo.eUTxO_With_Script_TxID_Master_DeleteFund_Datum.uTxO.outputIndex : ""} </div>
-								<br></br>
-								<div>EUTxO At Script With Script TxID_Master_SendBackFund_Datum: { poolInfo.eUTxO_With_Script_TxID_Master_SendBackFund_Datum ? poolInfo.eUTxO_With_Script_TxID_Master_SendBackFund_Datum.uTxO.txHash + "#" + poolInfo.eUTxO_With_Script_TxID_Master_SendBackFund_Datum.uTxO.outputIndex : ""} </div>
-								<br></br>
-								<div>EUTxO At Script With Script TxID_Master_SendBackDeposit_Datum: { poolInfo.eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum ? poolInfo.eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum.uTxO.txHash + "#" + poolInfo.eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum.uTxO.outputIndex : ""} </div>
-								<br></br>
-								<div>EUTxO At Script With Script TxID_Master_AddScripts_Datum: { poolInfo.eUTxO_With_Script_TxID_Master_AddScripts_Datum ? poolInfo.eUTxO_With_Script_TxID_Master_AddScripts_Datum.uTxO.txHash + "#" + poolInfo.eUTxO_With_Script_TxID_Master_AddScripts_Datum.uTxO.outputIndex : ""} </div>
-								<br></br>
-								<div>EUTxO At Script With Script TxID_Master_DeleteScripts_Datum: { poolInfo.eUTxO_With_Script_TxID_Master_DeleteScripts_Datum ? poolInfo.eUTxO_With_Script_TxID_Master_DeleteScripts_Datum.uTxO.txHash + "#" + poolInfo.eUTxO_With_Script_TxID_Master_DeleteScripts_Datum.uTxO.outputIndex : ""} </div>
-								<br></br>
-								<div>EUTxO At Script With Script TxID_User_Deposit_Datum: { poolInfo.eUTxO_With_Script_TxID_User_Deposit_Datum ? poolInfo.eUTxO_With_Script_TxID_User_Deposit_Datum.uTxO.txHash + "#" + poolInfo.eUTxO_With_Script_TxID_User_Deposit_Datum.uTxO.outputIndex : ""} </div>
-								<br></br>
-								<div>EUTxO At Script With Script TxID_User_Harvest_Datum: { poolInfo.eUTxO_With_Script_TxID_User_Harvest_Datum ? poolInfo.eUTxO_With_Script_TxID_User_Harvest_Datum.uTxO.txHash + "#" + poolInfo.eUTxO_With_Script_TxID_User_Harvest_Datum.uTxO.outputIndex : ""} </div>
-								<br></br>
-								<div>EUTxO At Script With Script TxID_User_Withdraw_Datum: { poolInfo.eUTxO_With_Script_TxID_User_Withdraw_Datum ? poolInfo.eUTxO_With_Script_TxID_User_Withdraw_Datum.uTxO.txHash + "#" + poolInfo.eUTxO_With_Script_TxID_User_Withdraw_Datum.uTxO.outputIndex : ""} </div>
-								<br></br>
-								</div>
-							</>
-							:
-							<>
-							</>
-						}
-						
-						<div className='pool__contract_address'>
-							User Deposit Policy ID
-							<button onClick={() => copyToClipboard(poolInfo.txID_User_Deposit_CS)} className='btn__ghost icon' style={{ cursor: 'pointer' }}>
-								<svg xmlns="http://www.w3.org/2000/svg" className="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-									<path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-								</svg>
-							</button>
-							<a target={'_blank'} href={`${process.env.NEXT_PUBLIC_BLOCKCHAIN_EXPLORER_URL}policy/${poolInfo.txID_User_Deposit_CS}`} className='btn__ghost icon' style={{ cursor: 'pointer' }}>
-								<svg xmlns="http://www.w3.org/2000/svg" className="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-									<path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-								</svg>
-							</a>
-						</div>
-						<p>User Deposit TokenName: {txID_User_Deposit_For_User_TN}</p>
-						<br></br>
-						<div className='pool__contract_address'>
-							Contract Address
-							<button onClick={() => copyToClipboard(poolInfo.scriptAddress)} className='btn__ghost icon' style={{ cursor: 'pointer' }}>
-								<svg xmlns="http://www.w3.org/2000/svg" className="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-									<path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-								</svg>
-							</button>
-							<a target={'_blank'} href={`${process.env.NEXT_PUBLIC_BLOCKCHAIN_EXPLORER_URL}address/${poolInfo.scriptAddress}`} className='btn__ghost icon' style={{ cursor: 'pointer' }}>
-								<svg xmlns="http://www.w3.org/2000/svg" className="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-									<path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-								</svg>
-							</a>
-						</div>
 				</div>
 				<div className="pool__action_cards ">
 
