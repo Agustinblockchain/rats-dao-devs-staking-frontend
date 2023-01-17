@@ -30,6 +30,8 @@ export default function FundsModalBtn(
 		masterDeleteFundsBatchAction,
 		postActionSuccess,
 		postActionError,
+		setIsWorkingParent, 
+		cancel, 
 		poolInfo_, 
 		statePoolData, 
 		swEnabledBtnOpenModal, 
@@ -37,8 +39,6 @@ export default function FundsModalBtn(
 		messageFromParent, 
 		hashFromParent, 
 		isWorkingFromParent, 
-		setIsWorkingParent, 
-		cancel, 
 		swPaddintTop}:
 		{
 			actionName: string, 
@@ -273,7 +273,7 @@ export default function FundsModalBtn(
 								postActionError={postActionError}  
 								setIsWorking={handleSetIsWorking} 
 								actionName="New Fund" actionIdx={poolInfo.name + "-FundsModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-								description={'<li className="info">To ensure a smooth user experience, it\'s recommended to create multiple Funds instead of using just one. This helps to avoid potential collisions and allows more users to interact with the contract simultaneously.</li>\
+								description={'<li className="info">To ensure a smooth User experience, it\'s recommended to create multiple Funds instead of using just one. This helps to avoid potential collisions and allows more Users to interact with the contract simultaneously.</li>\
 								<li className="info">It\'s recommended to have two Funds with less amount each one rather than one Fund with all the amount together.</li>\
 								<li className="info">It\'s important to regularly check the availability of Funds and create additional ones as needed.</li>'}
 								poolInfo={poolInfo} 
@@ -291,7 +291,7 @@ export default function FundsModalBtn(
 								setIsWorking={handleSetIsWorking} 
 								cancel={handleCancel}
 								actionName="New Funds Batch" actionIdx={poolInfo.name + "-FundsModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-								description={'<p className="info">Create multiple transactions for new funds in one go, rather than manually entering each transaction individually. However, you will still need to individually sign each transaction.</p>'}
+								description={'<p className="info" style="text-align: center;">Create multiple Transactions for new Funds in one go, rather than manually entering each Transaction individually. However, you will still need to individually sign each Transaction.</p>'}
 								poolInfo={poolInfo} 
 								swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded} 
 								swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded} 
@@ -307,7 +307,7 @@ export default function FundsModalBtn(
 								postActionError={postActionError} 
 								setIsWorking={handleSetIsWorking} 
 								actionName="Fund And Merge" actionIdx={poolInfo.name + "-FundsModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-								description={'<p className="info">Increase the amount in a pre-existing fund by adding more funds to it. Combine the new funds with the existing funds, merging them together to create a larger fund</p>'} 
+								description={'<p className="info" style="text-align: center;">Increase the amount in a pre-existing Fund by adding more funds to it</p>'} 
 								poolInfo={poolInfo} 
 								swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded && poolInfo.swFunded && eUTxOs_FundDatum_Selected.length > 0} 
 								swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded && poolInfo.swFunded && eUTxOs_FundDatum_Selected.length > 0} 
@@ -323,7 +323,7 @@ export default function FundsModalBtn(
 								postActionError={postActionError} 
 								setIsWorking={handleSetIsWorking} 
 								actionName="Merge Funds" actionIdx={poolInfo.name + "-FundsModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-								description={'<p className="info">Combine two separate funds into a single fund</p>'} 
+								description={'<p className="info" style="text-align: center;">Combine two separate Funds into a single and larger Fund</p>'} 
 								poolInfo={poolInfo} 
 								swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && poolInfo.swFunded && eUTxOs_FundDatum_Selected.length > 1} 
 								swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && poolInfo.swFunded && eUTxOs_FundDatum_Selected.length > 1} 
@@ -338,7 +338,7 @@ export default function FundsModalBtn(
 								postActionError={postActionError} 
 								setIsWorking={handleSetIsWorking} 
 								actionName="Split Fund" actionIdx={poolInfo.name + "-FundsModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-								description={'<p className="info">Divide a single fund into two separate funds. Having more funds with smaller amounts is more efficient than having fewer funds with larger amounts because more Funds allows for greater user concurrency, making it easier for users to harvest their rewards</p>'} 
+								description={'<p className="info" style="text-align: center;">Divide a single Fund into two separate smalls Funds. Having more Funds with smaller amounts is more efficient than having fewer Funds with larger amounts because more Funds allows for greater User concurrency, making it easier for Users to harvest their Rewards</p>'} 
 								poolInfo={poolInfo} 
 								swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && poolInfo.swFunded && eUTxOs_FundDatum_Selected.length == 1} 
 								swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && poolInfo.swFunded && eUTxOs_FundDatum_Selected.length == 1} 
@@ -372,8 +372,8 @@ export default function FundsModalBtn(
 								setIsWorking={handleSetIsWorking} 
 								cancel={handleCancel}
 								actionName="Delete Funds Batch" actionIdx={poolInfo.name + "-FundsModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-								description={'<li className="info">This process will generate multiple transactions that you will need to sign in order to confirm the deletion of the funds</li>\
-								<li className="info">Once all of the funds have been deleted, the masters will be able to claim the remaining funds.</li>'} 
+								description={'<li className="info">This process will generate multiple Transactions that you will need to sign in order to confirm the deletion of the Funds</li>\
+								<li className="info">Once all of the Funds have been deleted, the Masters will be able to claim the remaining funds.</li>'} 
 								poolInfo={poolInfo} 
 								swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && poolInfo.swFunded} 
 								swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && poolInfo.swFunded} 

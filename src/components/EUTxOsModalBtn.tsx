@@ -1,4 +1,5 @@
 //--------------------------------------
+import { Assets } from "lucid-cardano";
 import { useEffect, useState } from "react";
 import { apiGetEUTxOsDBByStakingPool } from "../stakePool/apis";
 import { getDatumType } from "../stakePool/helpersDatumsAndRedeemers";
@@ -7,6 +8,7 @@ import { EUTxO } from "../types";
 import { txConsumingTime, txPreparingTime } from "../types/constantes";
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
 import { useStoreState } from '../utils/walletProvider';
+import ActionWithInputModalBtn from "./ActionWithInputModalBtn";
 import LoadingSpinner from "./LoadingSpinner";
 //--------------------------------------
 
@@ -18,6 +20,10 @@ export default function EUTxOsModalBtn(
 
 	{ 	actionName, 
 		actionIdx, 
+		masterUpdateEUTxODBAction,
+		postActionSuccess,
+		postActionError,
+		setIsWorkingParent, 
 		poolInfo_, 
 		statePoolData, 
 		swEnabledBtnOpenModal, 
@@ -25,11 +31,14 @@ export default function EUTxOsModalBtn(
 		messageFromParent, 
 		hashFromParent, 
 		isWorkingFromParent, 
-		setIsWorkingParent, 
 		swPaddintTop }:
 		{
 			actionName: string, 
 			actionIdx: string,
+			masterUpdateEUTxODBAction: (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[], assets?: Assets) => Promise<any>,
+			postActionSuccess?: () => Promise<any>,
+			postActionError?: () => Promise<any>,
+			setIsWorkingParent?: (isWorking: string) => Promise<any>,
 			poolInfo_: StakingPoolDBInterface, 
 			statePoolData: ReturnType<typeof useStatePoolData>,
 			swEnabledBtnOpenModal: boolean, 
@@ -37,7 +46,6 @@ export default function EUTxOsModalBtn(
 			messageFromParent?: string, 
 			hashFromParent?: string, 
 			isWorkingFromParent?: string, 
-			setIsWorkingParent?: (isWorking: string) => Promise<any>,
 			swPaddintTop?: Boolean 
 		}) {
 
@@ -46,6 +54,8 @@ export default function EUTxOsModalBtn(
 	const ui_notConnected = '...'
 
 	const actionNameWithIdx = actionName + "-" + actionIdx
+
+	const walletStore = useStoreState(state => state.wallet)
 
 	const [isWorking, setIsWorking] = useState("")
 	const [actionMessage, setActionMessage] = useState("")
@@ -107,6 +117,13 @@ export default function EUTxOsModalBtn(
 		}
 
 	}, [isWorkingFromParent])
+
+	const handleSetIsWorking = async (isWorking: string) => {
+		console.log("EUTxOsModalBtn - " + poolInfo.name + " - handleCallback isWorking: ", isWorking)
+		setIsWorking(isWorking)
+		setIsWorkingParent ? await setIsWorkingParent(actionNameWithIdx) : null
+		return isWorking
+	}
 
 	return (
 		<div className="modal__action_separator">
@@ -198,8 +215,23 @@ export default function EUTxOsModalBtn(
 								</table>
 							</div>
 						}
-
+					
 						<div className="modal__content_btns">
+
+							<ActionWithInputModalBtn
+									action={masterUpdateEUTxODBAction}
+									postActionSuccess={postActionSuccess}
+									postActionError={postActionError}
+									setIsWorking={handleSetIsWorking}
+									actionName="Update EUTxOs in DB" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
+									description={'<p className="info" style="text-align: center;">Update EUTxOs list in Database</p>'}
+									poolInfo={poolInfo}
+									swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded}
+									swEnabledBtnAction={walletStore.connected && isPoolDataLoaded}
+									swShow={poolInfo.swPreparado}
+									swHash={false}
+								/>
+						
 							<div className="modal__action_separator">
 								<br></br>
 								<button className="btn btnStakingPool"

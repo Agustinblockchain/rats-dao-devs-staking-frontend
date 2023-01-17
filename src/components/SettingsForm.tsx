@@ -101,7 +101,7 @@ export default function SettingsForm() {
 							postActionError={undefined}
 							setIsWorking={handleSetIsWorking} 
 							actionName="Delete Datums" actionIdx="1" messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-							description={'<p className="info">Delete All Datums in Database</p>'}
+							description={'<p className="info" style="text-align: center;">Delete All Datums in Database</p>'}
 							swEnabledBtnOpenModal={true} 
 							swEnabledBtnAction={true} 
 							swShow={true}

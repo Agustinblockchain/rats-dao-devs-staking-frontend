@@ -1300,6 +1300,9 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 								/>
 
 								<EUTxOsModalBtn
+									masterUpdateEUTxODBAction={masterUpdateEUTxODBAction}
+									postActionSuccess={updateDetailsStakingPoolAndWallet}
+									postActionError={updateDetailsStakingPoolAndWallet}
 									setIsWorkingParent={handleSetIsWorking} 
 									actionName="View EUTxOs in DB" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorkingFromParent={isWorking} 
 									poolInfo_={poolInfo}
@@ -1307,20 +1310,6 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 									swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded}
 									swShow={poolInfo.swPreparado}
 									swPaddintTop={poolInfo.swPreparado && ((!swAllScriptsMaster) || (poolInfo.swTerminated && swAnyScriptsMaster) || (!swAllScriptsUser) || (poolInfo.swTerminated && swAnyScriptsUser))}
-								/>
-
-								<ActionWithInputModalBtn
-									action={masterUpdateEUTxODBAction}
-									postActionSuccess={updateDetailsStakingPoolAndWallet}
-									postActionError={updateDetailsStakingPoolAndWallet}
-									setIsWorking={handleSetIsWorking}
-									actionName="Update EUTxOs in DB" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-									description={'<p className="info">Update EUTxOs list in Database.</p>'}
-									poolInfo={poolInfo}
-									swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded}
-									swEnabledBtnAction={walletStore.connected && isPoolDataLoaded}
-									swShow={poolInfo.swPreparado}
-									swHash={false}
 								/>
 
 							</div>
@@ -1354,7 +1343,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 									setIsWorking={handleSetIsWorking}
 									cancel={handleCancel}
 									actionName="New Funds Batch" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking}
-									description={'<p className="info">Create multiple Transactions for New Funds in one go, rather than manually entering each transaction individually. However, you will still need to individually sign each Transaction.</p>'}
+									description={'<p className="info" style="text-align: center;">Create multiple Transactions for New Funds in one go, rather than manually entering each transaction individually. However, you will still need to individually sign each Transaction.</p>'}
 									poolInfo={poolInfo}
 									swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded}
 									swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded}
@@ -1415,7 +1404,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 									postActionError={updateDetailsStakingPoolAndWallet}
 									setIsWorking={handleSetIsWorking} 
 									actionName="Split Wallet UTxOs" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-									description={'<p className="info">It is recommended to Split your Wallet\'s UTxOs (Unspent Transaction Outputs) into smaller amounts. This will make it easier to use them as Collateral for Smart Contracts and will provide more flexibility in managing your funds.</p>'}
+									description={'<p className="info" style="text-align: center;">It is recommended to Split your Wallet\'s UTxOs (Unspent Transaction Outputs) into smaller amounts. This will make it easier to use them as Collateral for Smart Contracts and will provide more flexibility in managing your funds.</p>'}
 									swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded}
 									swEnabledBtnAction={walletStore.connected && isPoolDataLoaded}
 									swShow={poolInfo.swPreparado}
@@ -1432,7 +1421,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 									postActionError={updateDetailsStakingPoolAndWallet}
 									setIsWorking={handleSetIsWorking} 
 									actionName="Show / Hide" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-									description={'<p className="info">Show or hide the Staking Pool in the Home Page.</p>'}
+									description={'<p className="info" style="text-align: center;">Show or hide the Staking Pool in the Home Page</p>'}
 									poolInfo={poolInfo}
 									swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded}
 									swEnabledBtnAction={walletStore.connected && isPoolDataLoaded} 

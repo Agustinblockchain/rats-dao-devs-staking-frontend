@@ -387,7 +387,7 @@ export default function CreateStakingPool( ) {
 											postActionError={getDataFromWallet}
 											setIsWorking={handleSetIsWorking}
 											actionName="Split Wallet UTxOs" actionIdx="1" messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-											description={'<p className="info">It is recommended to Split your Wallet\'s UTxOs (Unspent Transaction Outputs) into smaller amounts. This will make it easier to use them as collateral for Smart Contracts and will provide more flexibility in managing your funds.</p>'}
+											description={'<p className="info" style="text-align: center;">It is recommended to Split your Wallet\'s UTxOs (Unspent Transaction Outputs) into smaller amounts. This will make it easier to use them as collateral for Smart Contracts and will provide more flexibility in managing your funds.</p>'}
 											swEnabledBtnOpenModal={walletStore.connected}
 											swEnabledBtnAction={walletStore.connected}
 											swShow={true}
