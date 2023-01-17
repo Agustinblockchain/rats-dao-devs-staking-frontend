@@ -1145,8 +1145,8 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 					}
 					
 					<div>
-						User Token <b>{txID_User_Deposit_For_User_TN}</b>&nbsp; 
-						{/* + " (" + poolInfo.txID_User_Deposit_CS.slice(0,4)+"..."+poolInfo.txID_User_Deposit_CS.slice(52)+")" */}
+						User Token&nbsp;
+						{/* (<b>{txID_User_Deposit_For_User_TN}</b>) + " (" + poolInfo.txID_User_Deposit_CS.slice(0,4)+"..."+poolInfo.txID_User_Deposit_CS.slice(52)+")" */}
 						<button onClick={() => copyToClipboard(poolInfo.txID_User_Deposit_CS)} className='btn__ghost icon' style={{ cursor: 'pointer' }}>
 							<svg xmlns="http://www.w3.org/2000/svg" className="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
 								<path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -1158,7 +1158,6 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 							</svg>
 						</a>
 					</div>
-					<br></br>
 					
 					<div className='pool__contract_address'>
 						Contract Address&nbsp;
