@@ -207,7 +207,7 @@ export default function ActionWithSelectInputModalBtn(
 	function handleChangeFormatedValue (tokenNameHEX: string, f: string) {
 		const walletAssetsSelect_ = walletAssetsSelect.map((a, i) => {
 			if (tokenNameHEX === a.tokenNameHEX) {
-				a.amountFormatedValue = f
+				//a.amountFormatedValue = f
 				if(inputDecimals){
 					const pot = Math.pow(10, inputDecimals)
 					a.amount = (Number(f) * pot).toString()
