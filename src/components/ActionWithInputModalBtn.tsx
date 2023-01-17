@@ -338,32 +338,38 @@ export default function ActionWithInputModalBtn(
 												<h4 style={{ paddingTop: 10 }}>How many {inputUnitForShowing}?</h4>
 												<br></br>
 												<div>
-													<NumericFormat style={{ width: 255, fontSize: 12 }} type="text" value={tokenAmountFormatedValue}
+													<NumericFormat style={{ width: 255, fontSize: 12 }} type="text" value={tokenAmountFormatedValue} 
 														onValueChange={(values) => {
 																const { formattedValue, value } = values;
 																// formattedValue = $2,223
 																// floatValue = 2223
+																// console.log("onChange NumericFormat f:" +  formattedValue + " - v: " + value)
 																if(inputDecimals){
 																	const pot = Math.pow(10, inputDecimals)
+																	// console.log("onChange NumericFormat - setTokenAmount " + (Number(value) * pot).toString())
 																	setTokenAmount((Number(value) * pot).toString())
 																}else{
+																	// console.log("onChange NumericFormat - setTokenAmount " + (value).toString())
 																	setTokenAmount(value)
 																}
-																
 															}
 														}
 														thousandsGroupStyle="thousand" thousandSeparator="," decimalSeparator="." decimalScale={inputDecimals}
 													/>
 
 													<button style={{ width: 45}} onClick={e => {
-															setTokenAmount(userMaxTokens?.toString())
-															if(inputDecimals){
-																const pot = Math.pow(10, inputDecimals)
-																setTokenAmountFormatedValue((Number(userMaxTokens?.toString())/pot).toString())
-															}else{
-																setTokenAmountFormatedValue(Number(userMaxTokens?.toString()).toString())
+																// console.log("max - setTokenAmount " +  userMaxTokens?.toString())
+																if(inputDecimals){
+																	const pot = Math.pow(10, inputDecimals)
+																	// console.log("max - setTokenAmountFormatedValue " + (Number(userMaxTokens?.toString())/pot).toString())
+																	setTokenAmountFormatedValue((Number(userMaxTokens?.toString())/pot).toString())
+																}else{
+																	// console.log("max - setTokenAmountFormatedValue " + Number(userMaxTokens?.toString()).toString())
+																	setTokenAmountFormatedValue(Number(userMaxTokens?.toString()).toString())
+																}
+																setTokenAmount(userMaxTokens?.toString())
 															}
-														}}>MAX</button>
+														}>MAX</button>
 												</div>
 														
 												{/* 
@@ -378,14 +384,16 @@ export default function ActionWithInputModalBtn(
 
 												<input style={{ width: 300, fontSize: 12 }} type="range" min={0} max={userMaxTokens?.toString()} value={tokenAmount}
 													onChange={e => {
-														setTokenAmount(Number(e.target.value).toString())
-
 														if(inputDecimals){
 															const pot = Math.pow(10, inputDecimals)
+															// console.log("onChange slide setTokenAmountFormatedValue: " +  (Number(e.target.value)/pot).toString())
 															setTokenAmountFormatedValue((Number(e.target.value)/pot).toString())
 														}else{
+															// console.log("onChange slide setTokenAmountFormatedValue: " +  Number(e.target.value).toString())
 															setTokenAmountFormatedValue(Number(e.target.value).toString())
 														}
+														// console.log("onChange slide setTokenAmount: " +  Number(e.target.value).toString())
+														setTokenAmount(Number(e.target.value).toString())
 													}}
 												/>
 												

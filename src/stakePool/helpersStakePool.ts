@@ -263,17 +263,38 @@ export function calculate_Sort_FundDatum(poolInfo: StakingPoolDBInterface, eUTxO
 
 //---------------------------------------------------------------
 
-export function selectFundDatum_WithEnoughValueToClaim(eUTxOs_With_FundDatum: EUTxO[], claimLeft: BIGINT) {
+export function selectFundDatum_WithEnoughValueToClaim(eUTxOs_With_FundDatum: EUTxO[], claim: BIGINT) {
 
+    function findNextEUTxO_WithEnoughValueToClaimButMinSize(eUTxOs_With_FundDatum: EUTxO[], claim: BIGINT){
+        //busco si puedo cubrirlo con uno solo. para ello busco cual es el menor que puede cubrir el claim
+        var eUTxO_With_FundDatum_WithEnoughValueToClaimButMinSize: EUTxO |undefined = undefined;
+        for (var i = 0; i < eUTxOs_With_FundDatum.length; i += 1) {
+            var eUTxO = eUTxOs_With_FundDatum[i];
+            var valueCanUse = getAvailaibleFunds_In_EUTxO_With_FundDatum(eUTxO);
+            if (claim - valueCanUse <= 0) {
+                eUTxO_With_FundDatum_WithEnoughValueToClaimButMinSize = eUTxO;
+            }else{
+                break;
+            }
+        }
+        return eUTxO_With_FundDatum_WithEnoughValueToClaimButMinSize
+    }
+
+    var claimLeft = claim;
     var eUTxOs_With_FundDatum_WithEnoughValueToClaim: EUTxO[] = [];
-
     for (var i = 0; i < eUTxOs_With_FundDatum.length; i += 1) {
-        var eUTxO = eUTxOs_With_FundDatum[i];
-        var valueCanUse = getAvailaibleFunds_In_EUTxO_With_FundDatum(eUTxO);
-        claimLeft = claimLeft - valueCanUse;
-        eUTxOs_With_FundDatum_WithEnoughValueToClaim.push(eUTxO);
-        if (claimLeft <= 0) {
-            break;
+        var eUTxO = findNextEUTxO_WithEnoughValueToClaimButMinSize (eUTxOs_With_FundDatum.slice(i), claimLeft);
+        if(eUTxO){
+            eUTxOs_With_FundDatum_WithEnoughValueToClaim.push(eUTxO);
+            break
+        }else{
+            eUTxO = eUTxOs_With_FundDatum[i];
+            var valueCanUse = getAvailaibleFunds_In_EUTxO_With_FundDatum(eUTxO);
+            claimLeft = claimLeft - valueCanUse;
+            eUTxOs_With_FundDatum_WithEnoughValueToClaim.push(eUTxO);
+            if (claimLeft <= 0) {
+                break;
+            }
         }
     }
 

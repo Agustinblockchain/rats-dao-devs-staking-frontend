@@ -413,11 +413,11 @@ export default function ActionWithSelectInputModalBtn(
 															/>
 															<button style={{ width: 45}} onClick={e => {
 																const v = walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.max
+																// console.log(asset.tokenNameHEX + " - max: " +  v)
 																if (v !== undefined) handleChangeValue(asset.tokenNameHEX, v)
 															}}>MAX</button>
 														</div>
 
-														<br></br>
 														<input key={"input" + idx} style={{ width: 300, fontSize: 12 }} type="range" min={0} max={walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.max} value={walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.amount}
 															onChange={e => {
 																handleChangeValue (asset.tokenNameHEX, Number(e.target.value).toString())
