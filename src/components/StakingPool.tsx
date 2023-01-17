@@ -504,12 +504,11 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 													{userStakedData.lastClaimAtUI !== "..." ?
 														<>
 															<div style={{textAlign: 'left', width:"100%"}}><b>Last Claim</b> {userStakedData.lastClaimAtUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</div>
-															<br></br>
 														</>
 														:
 														<></>
 													}
-													
+													<br></br>
 													{userStakedData.minADA > 0? 
 														<>
 															<div style={{textAlign: 'left', width:"100%"}}>Min ADA locked <b>{userStakedData.minADAUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></div>
@@ -546,11 +545,12 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 													{userStakedData.lastClaimAtUI !== "..." ?
 														<>
 															<div style={{textAlign: 'left', width:"100%"}}><b>Last Claim</b> {userStakedData.lastClaimAtUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</div>
-															<br></br>
+															
 														</>
 														:
 														<></>
 													}
+													<br></br>
 													{userStakedData.minADA > 0? 
 														<>
 															<div style={{textAlign: 'left', width:"100%"}}>Min ADA locked <b>{userStakedData.minADAUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></div>
