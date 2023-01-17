@@ -395,6 +395,7 @@ export default function ActionWithSelectInputModalBtn(
 								<>
 									<h4 style={{ paddingTop: 10 }}>How many {inputUnitForShowing}?</h4>		
 									<br></br>
+									<div style={{overflow:"hidden", maxHeight: 200, overscrollBehaviorY:"auto"}} >
 									{
 										(walletAssetsList.length > 0) ?
 											<>
@@ -433,6 +434,7 @@ export default function ActionWithSelectInputModalBtn(
 										</>
 
 									}
+									</div>
 
 									<div style={{textAlign: "center", width: "100%", paddingTop: 10}}>
 										<b>Total:</b> {formatAmount(tokenAmount, inputDecimals, inputUnitForShowing)} (Max: <b>{formatAmount(Number(userMaxTokens), inputDecimals, undefined)}</b>)
