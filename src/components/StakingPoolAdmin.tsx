@@ -1085,8 +1085,8 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 					<br></br>
 
 					<p><>Earn <b>{interestUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b> per year</></p>
+					<p><>per every <b>{poolInfo.staking_UI}</b> you Deposit</></p>
 					<br></br>
-
 
 					<div>
 						Staking Unit In Wallet: {(walletStakingAmountUI === ui_loading || walletStakingAmountUI === ui_notConnected ? walletStakingAmountUI : formatAmount(Number(walletStakingAmountUI), staking_Decimals, poolInfo.staking_UI)) || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}

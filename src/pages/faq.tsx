@@ -13,19 +13,18 @@ const getFaqText = (n : number) => {
 	switch(n) {
 		case 1: return 'The Rats Staking Portal is a frontend interface that interacts with Cardano Smart Contract. \
 		It allows you to stake Cardano Assets and earn rewards.'
-		case 2: return 'On the Homepage, you can see the pool list and available staking rewards. \
+		case 2: return 'On the Homepage, you can see the Pool list and available staking rewards. \
 		Simply deposit the assets via the “Deposit” buttom and periodically claim your rewards with “Harvest” buttom. \
 		In order to make a deposit, you must have “Staking Unit” assets in your wallet. Upon harvesting, you will receive “Harvest Unit” assets.'
-		case 3: return 'The Staking is trustless. When you stake your assets in a pool, them are held in a Plutus on-chain smart-contract. \
+		case 3: return 'The Staking is trustless. When you stake your assets in a Pool, them are held in a Plutus on-chain smart-contract. \
 		Them are owned by your private keys and withdrawable only by that same private key.'
-		case 4: return 'Yes! All the validation code/smart contracts are open source and them can be found in the RatsDAO GitHub (https://github.com/CardanoRatsDAO). \
-		Always demand open source.'
-		case 5: return 'Each Staking Pool is created with unique settings and reward conditions. \
-		The "Estimated Annual Pay" for each Staking Pool, which can be found alongside the pool, represents the payment in “Havest Units” per “Staking Unit” per year. \
+		case 4: return 'Each Staking Pool is created with unique settings and reward conditions. \
+		The “Annual Pay” for each Staking Pool, which can be found alongside the Pool, represents the payment in “Havest Units” per every “Staking Unit” per year. \
 		Rewards are then calculated based on the number of tokens an individual has staked and the length of time since they made their deposit or last claim.'
-		case 6: return 'It is the responsibility of the administrator of the Staking Pool to fund it with "Harvest Unit" assets that will be held and available in the smart contract. \
+		case 5: return 'It is the responsibility of the administrator of the Staking Pool to fund it with "Harvest Unit" assets that will be held and available in the smart contract. \
 		When you claim your rewards, a new transaction will be initiated to transfer a portion of those assets to your wallet depending on your deposit.'  
-	
+		case 6: return 'Yes! All the validation code/smart contracts are open source and them can be found in the RatsDAO GitHub (https://github.com/CardanoRatsDAO). \
+		Always demand open source.'
 		default: return 'ooba booba'
 	}  
 }
@@ -35,9 +34,9 @@ const getFaqTitle = (n : number) => {
 		case 1: return 'What is Rats DAO staking portal?'
 		case 2: return 'How can I use the Rats DAO staking portal?'
 		case 3: return 'Where are my assets held?'
-		case 4: return 'Is it open source?'
-		case 5: return 'How are rewards calculated?'
-		case 6: return 'Who is providing the rewards?'
+		case 4: return 'How are rewards calculated?'
+		case 5: return 'Who is providing the rewards?'
+		case 6: return 'Is it open source?'
 			
 		default: return 'EXAMPLE Staking portal'
 	}
