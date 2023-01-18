@@ -107,8 +107,9 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 		countEUTxOs_With_FundDatumUI,
 		countEUTxOs_With_UserDatumUI,
 
-		staking_Decimals,
-        harvest_Decimals,
+		//staking_Decimals,
+        //harvest_Decimals,
+
 		interestUI,
 
 		totalFundsAvailableUI,
@@ -1064,7 +1065,6 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 						:
 						<></>
 					}
-					<div>Pool Show on Home: {swShowOnHomeUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
 					
 					{process.env.NODE_ENV==="development"?
 						<>
@@ -1093,10 +1093,10 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 					<br></br>
 
 					<div>
-						Staking Unit In Wallet <b>{(walletStakingAmountUI === ui_loading || walletStakingAmountUI === ui_notConnected ? walletStakingAmountUI : formatAmount(Number(walletStakingAmountUI), staking_Decimals, poolInfo.staking_UI)) || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b>
+						Staking Unit In Wallet <b>{(walletStakingAmountUI === ui_loading || walletStakingAmountUI === ui_notConnected ? walletStakingAmountUI : formatAmount(Number(walletStakingAmountUI), poolInfo.staking_Decimals, poolInfo.staking_UI)) || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b>
 					</div>
 					<div>
-						Harvest Unit In Wallet <b>{(walletHarvestAmountUI === ui_loading || walletHarvestAmountUI === ui_notConnected ? walletHarvestAmountUI : formatAmount(Number(walletHarvestAmountUI), harvest_Decimals, poolInfo.harvest_UI)) || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b>
+						Harvest Unit In Wallet <b>{(walletHarvestAmountUI === ui_loading || walletHarvestAmountUI === ui_notConnected ? walletHarvestAmountUI : formatAmount(Number(walletHarvestAmountUI), poolInfo.harvest_Decimals, poolInfo.harvest_UI)) || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b>
 					</div>
 					<br></br>
 
@@ -1347,7 +1347,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 									swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded}
 									swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded}
 									swShow={poolInfo.swPreparado && !poolInfo.swTerminated}
-									swShowInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={maxHarvestAmountUI} inputDecimals={harvest_Decimals}
+									swShowInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={maxHarvestAmountUI} inputDecimals={poolInfo.harvest_Decimals}
 									swHash={true}
 									swPaddintTop={false}
 								
@@ -1365,7 +1365,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 									swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded}
 									swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded}
 									swShow={poolInfo.swPreparado && !poolInfo.swTerminated}
-									swShowInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={maxHarvestAmountUI} inputDecimals={harvest_Decimals}
+									swShowInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={maxHarvestAmountUI} inputDecimals={poolInfo.harvest_Decimals}
 									swHash={false}
 									
 								/> */}
@@ -1426,7 +1426,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 									postActionSuccess={updateDetailsStakingPoolAndWallet}
 									postActionError={updateDetailsStakingPoolAndWallet}
 									setIsWorking={handleSetIsWorking} 
-									actionName="Show / Hide" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
+									actionName={poolInfo.swShowOnHome?"Hide":"Show"} actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
 									description={'<p className="info" style="text-align: center;">Show or hide the Staking Pool in the Home Page</p>'}
 									poolInfo={poolInfo}
 									swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded}

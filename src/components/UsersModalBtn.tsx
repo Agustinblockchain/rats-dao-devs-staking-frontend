@@ -65,8 +65,8 @@ export default function UsersModalBtn(
 		isPoolDataLoaded, 
 		eUTxO_With_PoolDatum,
 		eUTxOs_With_UserDatum, 
-		staking_Decimals,
-        harvest_Decimals,
+		// poolInfo.staking_Decimals,
+        // poolInfo.harvest_Decimals,
 		totalStakedUI,
 		totalRewardsPaidUI,
 		totalRewardsToPayUI,
@@ -191,12 +191,12 @@ export default function UsersModalBtn(
 														/>
 													</td>
 													<td style={{fontSize:8}}>{eUTxO.uTxO.txHash + "#" + eUTxO.uTxO.outputIndex}</td>
-													<td>{eUTxO.datum.udCreatedAt.toString()}</td>
+													<td>{new Date(parseInt(eUTxO.datum.udCreatedAt.toString())).toLocaleString("en-US")}</td>
 													<td style={{fontSize:8}}>{eUTxO.datum.udUser.toString()}</td>
-													<td>{formatAmount(Number(eUTxO.datum.udInvest), staking_Decimals, poolInfo.staking_UI)}</td>
-													<td>{formatAmount(Number(eUTxO.datum.udCashedOut), harvest_Decimals, poolInfo.harvest_UI)}</td>
-													<td>{formatAmount((typeof eUTxO_With_PoolDatum == "object" ? Number(getRewardsToPay_In_EUTxO_With_UserDatum (poolInfo, eUTxO_With_PoolDatum, eUTxO)):0), harvest_Decimals, poolInfo.harvest_UI)}</td>
-													<td>{eUTxO.datum.udLastClaimAt.val==undefined?"":eUTxO.datum.udLastClaimAt.val.toString()}</td>
+													<td>{formatAmount(Number(eUTxO.datum.udInvest), poolInfo.staking_Decimals, poolInfo.staking_UI)}</td>
+													<td>{formatAmount(Number(eUTxO.datum.udCashedOut), poolInfo.harvest_Decimals, poolInfo.harvest_UI)}</td>
+													<td>{formatAmount((typeof eUTxO_With_PoolDatum == "object" ? Number(getRewardsToPay_In_EUTxO_With_UserDatum (poolInfo, eUTxO_With_PoolDatum, eUTxO)):0), poolInfo.harvest_Decimals, poolInfo.harvest_UI)}</td>
+													<td>{eUTxO.datum.udLastClaimAt.val==undefined?"":new Date(parseInt(eUTxO.datum.udLastClaimAt.val.toString())).toLocaleString("en-US")}</td>
 													<td>{formatAmount(Number(eUTxO.datum.udMinAda), ADA_Decimals, ADA_UI) }</td>
 												</tr>
 										)}

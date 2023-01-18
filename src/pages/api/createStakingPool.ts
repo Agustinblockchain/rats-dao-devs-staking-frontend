@@ -51,6 +51,10 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 	const harvest_UI = req.body.harvest_UI
 	const harvest_CS = req.body.harvest_CS
 	const harvest_TN = req.body.harvest_TN
+
+	const staking_Decimals = req.body.harvest_Decimals
+	const harvest_Decimals = req.body.harvest_Decimals
+
 	const interest = req.body.interest
 
 	const ruta = process.env.REACT_SERVER_PATH_FOR_SCRIPTS
@@ -101,7 +105,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 						const estado = await getEstadoDeployFromFile(estadoJsonFileName);
 						if (estado.includes("Done!") ) {
 							clearInterval(timeoutGetEstadoDeploy)
-							return await crearStakingPool(nombrePool, staking_UI, harvest_UI, res);
+							return await crearStakingPool(nombrePool, staking_UI, harvest_UI, staking_Decimals, harvest_Decimals, res);
 						}
 					}, 4000); 
 					
@@ -114,13 +118,13 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 			const estado = await getEstadoDeployFromFile(estadoJsonFileName);
 			if (estado.includes("Done!") ) {
 				clearInterval(timeoutGetEstadoDeploy)
-				return await crearStakingPool(nombrePool, staking_UI, harvest_UI, res);
+				return await crearStakingPool(nombrePool, staking_UI, harvest_UI, staking_Decimals, harvest_Decimals, res);
 			}
 		}, 4000); 
 	}
 }
 
-async function crearStakingPool(nombrePool: any, staking_UI: any, harvest_UI: any, res: NextApiResponse<string | Data>) {
+async function crearStakingPool(nombrePool: any, staking_UI: any, harvest_UI: any, staking_Decimals: any, harvest_Decimals: any, res: NextApiResponse<string | Data>) {
 	
 	console.log("/api/createStakingPool - StakingPool Files Created!");
 
@@ -371,6 +375,9 @@ async function crearStakingPool(nombrePool: any, staking_UI: any, harvest_UI: an
 
 		staking_UI: staking_UI,
 		harvest_UI: harvest_UI,
+
+		staking_Decimals: staking_Decimals,
+		harvest_Decimals: harvest_Decimals,
 
 		pParams: (poolParams),
 

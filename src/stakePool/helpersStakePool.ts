@@ -63,6 +63,9 @@ export function stakingPoolDBParser(stakingPoolDB: StakingPoolDBInterface) {
         staking_Lucid: stakingPoolDB.staking_Lucid,
         harvest_Lucid: stakingPoolDB.harvest_Lucid,
 
+        staking_Decimals: stakingPoolDB.staking_Decimals,
+	    harvest_Decimals: stakingPoolDB.harvest_Decimals,
+
         pParams: (stakingPoolDB.pParams),
 
         poolID_TxOutRef: (stakingPoolDB.poolID_TxOutRef),

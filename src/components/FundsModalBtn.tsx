@@ -90,8 +90,8 @@ export default function FundsModalBtn(
 		poolInfo,
 		isPoolDataLoaded, 
 		eUTxOs_With_FundDatum, 
-		staking_Decimals,
-        harvest_Decimals,
+		// poolInfo.staking_Decimals,
+        // poolInfo.harvest_Decimals,
 		totalFundsAvailableUI: totalFundsAvailableUI,
 		totalFundAmountUI: totalFundAmountUI,
 		totalRewardsPaidUI: totalRewardsPaidUI,
@@ -249,9 +249,9 @@ export default function FundsModalBtn(
 												</td>
 												<td style={{fontSize:8}}>{eUTxO.uTxO.txHash + "#" + eUTxO.uTxO.outputIndex}</td>
 												<td>{eUTxO.isPreparing.val !== undefined || eUTxO.isConsuming.val !== undefined? "No":"Yes"}</td>
-												<td>{formatAmount(Number(getFundAmount_In_EUTxO_With_FundDatum(eUTxO)), harvest_Decimals, poolInfo.harvest_UI)}</td>
-												<td>{formatAmount(Number(eUTxO.datum.fdCashedOut), harvest_Decimals, poolInfo.harvest_UI)}</td>
-												<td>{formatAmount(Number(getAvailaibleFunds_In_EUTxO_With_FundDatum(eUTxO)), harvest_Decimals, poolInfo.harvest_UI)}</td>
+												<td>{formatAmount(Number(getFundAmount_In_EUTxO_With_FundDatum(eUTxO)), poolInfo.harvest_Decimals, poolInfo.harvest_UI)}</td>
+												<td>{formatAmount(Number(eUTxO.datum.fdCashedOut), poolInfo.harvest_Decimals, poolInfo.harvest_UI)}</td>
+												<td>{formatAmount(Number(getAvailaibleFunds_In_EUTxO_With_FundDatum(eUTxO)), poolInfo.harvest_Decimals, poolInfo.harvest_UI)}</td>
 											</tr>
 									)}
 									<tr >
@@ -280,7 +280,7 @@ export default function FundsModalBtn(
 								swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded} 
 								swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded} 
 								swShow={poolInfo.swPreparado && !poolInfo.swTerminated}
-								swShowInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={maxHarvestAmount} inputDecimals={harvest_Decimals}
+								swShowInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={maxHarvestAmount} inputDecimals={poolInfo.harvest_Decimals}
 								swHash={true} 
 							/>
 
@@ -296,7 +296,7 @@ export default function FundsModalBtn(
 								swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded} 
 								swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded} 
 								swShow={poolInfo.swPreparado && !poolInfo.swTerminated}
-								swShowInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={maxHarvestAmount} inputDecimals={harvest_Decimals}
+								swShowInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={maxHarvestAmount} inputDecimals={poolInfo.harvest_Decimals}
 								swHash={false} 
 								
 							/>
@@ -312,7 +312,7 @@ export default function FundsModalBtn(
 								swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded && poolInfo.swFunded && eUTxOs_FundDatum_Selected.length > 0} 
 								swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded && poolInfo.swFunded && eUTxOs_FundDatum_Selected.length > 0} 
 								swShow={poolInfo.swPreparado && !poolInfo.swTerminated}
-								swShowInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={maxHarvestAmount} inputDecimals={harvest_Decimals} 
+								swShowInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={maxHarvestAmount} inputDecimals={poolInfo.harvest_Decimals} 
 								swHash={true} 
 								eUTxOs_Selected={eUTxOs_FundDatum_Selected}
 							/>
@@ -343,7 +343,7 @@ export default function FundsModalBtn(
 								swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && poolInfo.swFunded && eUTxOs_FundDatum_Selected.length == 1} 
 								swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && poolInfo.swFunded && eUTxOs_FundDatum_Selected.length == 1} 
 								swShow={poolInfo.swPreparado && !poolInfo.swTerminated}
-								swShowInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={eUTxOs_FundDatum_Selected.length == 1 ? getAvailaibleFunds_In_EUTxO_With_FundDatum(eUTxOs_FundDatum_Selected[0]).toString() : "0"} inputDecimals={harvest_Decimals}
+								swShowInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={eUTxOs_FundDatum_Selected.length == 1 ? getAvailaibleFunds_In_EUTxO_With_FundDatum(eUTxOs_FundDatum_Selected[0]).toString() : "0"} inputDecimals={poolInfo.harvest_Decimals}
 								swHash={true} 
 								eUTxOs_Selected={eUTxOs_FundDatum_Selected} 
 

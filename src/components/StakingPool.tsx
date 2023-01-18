@@ -74,8 +74,8 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 		countEUTxOs_With_DatumUI,
 		countEUTxOs_With_UserDatumUI,
 
-		staking_Decimals,
-        harvest_Decimals,
+		// staking_Decimals,
+        // harvest_Decimals,
 		interestUI,
 
 		totalFundsAvailableUI,
@@ -366,7 +366,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 										walletStakingAmountUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' /> 
 									: 
 										<b>
-											{formatAmount(Number(walletStakingAmountUI), staking_Decimals, poolInfo.staking_UI)}
+											{formatAmount(Number(walletStakingAmountUI), poolInfo.staking_Decimals, poolInfo.staking_UI)}
 										</b> 
 									}
 								</div>
@@ -422,7 +422,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 											swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded && !poolInfo.swClosed} 
 											swShow={poolInfo.swFunded} 
 											swHash={true} 
-											inputUnitForLucid={poolInfo.staking_Lucid} inputUnitForShowing={poolInfo.staking_UI} inputMax={maxStakingAmountUI} inputDecimals={staking_Decimals} 
+											inputUnitForLucid={poolInfo.staking_Lucid} inputUnitForShowing={poolInfo.staking_UI} inputMax={maxStakingAmountUI} inputDecimals={poolInfo.staking_Decimals} 
 											walletAssets={walletStakingAssets}
 											swPaddintTop={false} 
 										/>
@@ -453,7 +453,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 											swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded } 
 											swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded && !poolInfo.swClosed} 
 											swShow={poolInfo.swFunded} 
-											swShowInput={true} inputUnitForLucid={poolInfo.staking_Lucid} inputUnitForShowing={poolInfo.staking_UI} inputMax={maxStakingAmountUI} inputDecimals={staking_Decimals}  
+											swShowInput={true} inputUnitForLucid={poolInfo.staking_Lucid} inputUnitForShowing={poolInfo.staking_UI} inputMax={maxStakingAmountUI} inputDecimals={poolInfo.staking_Decimals}  
 											swHash={true} 
 											swPaddintTop={false} 
 										/>
@@ -470,7 +470,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 									actionName="Deposit Batch" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
 									description={poolInfo.swClosed ? '<p className="info">This Pool in already closed. You can\'t Deposit anymore.</p>' : '<p className="info">Create multiple Transactions for new Deposits in one go, rather than manually entering each Transaction individually. However, you will still need to individually sign each Transaction.</p>'}
 									poolInfo={poolInfo} 
-									swShowInput={true} inputUnitForLucid={poolInfo.staking_Lucid} inputUnitForShowing={poolInfo.staking_UI} inputMax={maxStakingAmountUI} inputDecimals={staking_Decimals} 
+									swShowInput={true} inputUnitForLucid={poolInfo.staking_Lucid} inputUnitForShowing={poolInfo.staking_UI} inputMax={maxStakingAmountUI} inputDecimals={poolInfo.staking_Decimals} 
 									swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded } 
 									swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded && !poolInfo.swClosed} 
 									swShow={poolInfo.swFunded} 
@@ -553,7 +553,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 													swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && swUserRegistered && !userStakedData.isLoading} 
 													swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && swUserRegistered && !userStakedData.isLoading && !poolInfo.swTerminated} 
 													swShow={true} 
-													swShowInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={userStakedData.rewardsToPay.toString()} inputDecimals={harvest_Decimals} 
+													swShowInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={userStakedData.rewardsToPay.toString()} inputDecimals={poolInfo.harvest_Decimals} 
 													swHash={true} 
 													eUTxOs_Selected={[userStakedData.eUTxO_With_UserDatum!]} 
 												/>

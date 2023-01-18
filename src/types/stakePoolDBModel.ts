@@ -60,6 +60,9 @@ export interface StakingPoolDBInterface {
 	staking_Lucid: string,
 	harvest_Lucid: string,
 
+	staking_Decimals: number,
+	harvest_Decimals: number,
+
 	pParams : PoolParams,
 
 	poolID_TxOutRef: TxOutRef,
@@ -159,6 +162,9 @@ const stakingPoolDBSchema = new Schema<StakingPoolDBInterface>({
 	harvest_UI: { type: String, required: true },
 	staking_Lucid: { type: String, required: true },
 	harvest_Lucid: { type: String, required: true },
+
+	staking_Decimals: { type: Number, required: true },
+	harvest_Decimals: { type: Number, required: true },
 
 	pParams : { type: Object, required: true },
 

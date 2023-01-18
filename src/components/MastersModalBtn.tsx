@@ -69,8 +69,8 @@ export default function MasterModalBtn(
 		eUTxO_With_PoolDatum,
 		eUTxOs_With_FundDatum, 
         masterFunders,
-		staking_Decimals,
-        harvest_Decimals,
+		// poolInfo.staking_Decimals,
+        // poolInfo.harvest_Decimals,
 		totalFundAmountUI,
 		totalFundAmountsRemains_ForMasterUI,
 		totalMastersMinAdaUI,
@@ -193,8 +193,8 @@ export default function MasterModalBtn(
 													</td>
 													<td>{index + 1}</td>
 													<td>{masterFunder.mfMaster}</td>
-													<td>{formatAmount(Number(masterFunder.mfFundAmount), harvest_Decimals, poolInfo.harvest_UI)}</td>
-													<td>{formatAmount((typeof eUTxO_With_PoolDatum == "object" ? Number(getFundAmountsRemains_ForMaster(eUTxO_With_PoolDatum, eUTxOs_With_FundDatum, masterFunder.mfMaster)[0]):0), harvest_Decimals, poolInfo.harvest_UI)}</td>
+													<td>{formatAmount(Number(masterFunder.mfFundAmount), poolInfo.harvest_Decimals, poolInfo.harvest_UI)}</td>
+													<td>{formatAmount((typeof eUTxO_With_PoolDatum == "object" ? Number(getFundAmountsRemains_ForMaster(eUTxO_With_PoolDatum, eUTxOs_With_FundDatum, masterFunder.mfMaster)[0]):0), poolInfo.harvest_Decimals, poolInfo.harvest_UI)}</td>
 													<td>{masterFunder.mfClaimedFund==poolDatum_ClaimedFund?"Claimed":"Not Claimed"}</td>
 													<td>{formatAmount(Number(masterFunder.mfMinAda), ADA_Decimals, ADA_UI) }</td>
 
