@@ -1331,42 +1331,6 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 						<div className="pool__stat">
 							<div className="pool__column">
 
-								{/* <ActionWithInputModalBtn
-									action={masterNewFundAction}
-									postActionSuccess={updateDetailsStakingPoolAndWallet}
-									postActionError={updateDetailsStakingPoolAndWallet}
-									setIsWorking={handleSetIsWorking} 
-									actionName="New Fund" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-									description={'<li className="info">To ensure a smooth User experience, it\'s recommended to create multiple Funds instead of using just one. This helps to avoid potential collisions and allows more Users to interact with the Contract simultaneously.</li>\
-									<li className="info">It\'s recommended to have two Funds with less fund amount each one rather than one Fund with all the fund amount together.</li>\
-									<li className="info">It\'s important to regularly check the availability of Funds and create additional ones as needed.</li>'}
-									poolInfo={poolInfo}
-									swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded}
-									swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded}
-									swShow={poolInfo.swPreparado && !poolInfo.swTerminated}
-									swShowInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={maxHarvestAmountUI} inputDecimals={poolInfo.harvest_Decimals}
-									swHash={true}
-									swPaddintTop={false}
-								
-								/>
-
-								<ActionWithInputModalBtn
-									action={masterNewFundsBatchAction}
-									postActionSuccess={updateDetailsStakingPoolAndWallet}
-									postActionError={updateDetailsStakingPoolAndWallet}
-									setIsWorking={handleSetIsWorking}
-									cancel={handleCancel}
-									actionName="New Funds Batch" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking}
-									description={'<p className="info" style="text-align: center;">Create multiple Transactions for New Funds in one go, rather than manually entering each transaction individually. However, you will still need to individually sign each Transaction.</p>'}
-									poolInfo={poolInfo}
-									swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded}
-									swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded}
-									swShow={poolInfo.swPreparado && !poolInfo.swTerminated}
-									swShowInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={maxHarvestAmountUI} inputDecimals={poolInfo.harvest_Decimals}
-									swHash={false}
-									
-								/> */}
-
 								<FundsModalBtn
 									masterNewFundAction={masterNewFundAction}
 									masterNewFundsBatchAction={masterNewFundsBatchAction}

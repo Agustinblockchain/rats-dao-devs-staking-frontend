@@ -271,15 +271,23 @@ export default function WalletModalBtn() {
 							:
 							<></>
 						}
-						<label>
-							<input
-								type="checkbox"
-								checked={swEnviarPorBlockfrost}
-								onChange={handleChangeSavedSwEnviarPorBlockfrost}
-							/>
-							Usar BlockFrost API en lugar de la Wallet para realizar las transacciones
-						</label>
-						<br></br>
+
+						{process.env.NODE_ENV==="development"?
+							<>
+								<label>
+									<input
+										type="checkbox"
+										checked={swEnviarPorBlockfrost}
+										onChange={handleChangeSavedSwEnviarPorBlockfrost}
+									/>
+									Use the BlockFrost API instead of the Wallet to make transactions
+								</label>
+								<br></br>
+							</>
+							:
+							<>
+							</>
+						}
 
 						<div className="wallet__buttons vr">
 							{walletStore.connected ?
