@@ -280,8 +280,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 					<div>Status <b>{statusUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></div>
 					<br></br>
 
-					<p><>Earn <b>{interestUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b> per year</></p>
-					<p><>per every <b>{poolInfo.staking_UI}</b> you Deposit</></p>
+					<p><>Earn <b>{interestUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b> a year for every <b>{poolInfo.staking_UI}</b>!</></p>
 					<br></br>
 					
 					<div>

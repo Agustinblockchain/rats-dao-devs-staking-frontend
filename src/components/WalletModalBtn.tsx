@@ -43,31 +43,29 @@ export default function WalletModalBtn() {
 
 	//--------------------------------------
 
-	const walletConnect = async (walletName: string, closeModal = true) => {
+	const walletConnect = async (walletName: string, closeModal = true, tryAgain = false) => {
 		console.log("[Session] - walletConnect: " + walletName)
-		setWalletMessage("Connecting with " + walletName + "...")
+		setWalletMessage("Connecting with <b>" + walletName + "</b>...")
 		try {
 
 			var walletApi = undefined
-			// var countError = 0
-			// var errorStr = ""
-			// const maxError = 3
-			// while (countError < maxError) {
-			// 	try {
-			// 	 	walletApi = await window.cardano[walletName].enable()
-			// 		break
-			// 	} catch (error) {
-			// 		console.log("[Session] - try " + countError+" of "+maxError+" - walletConnect Error: " + error)
-			// 		errorStr = explainError(error) 
-			// 		countError++
-			// 		await new Promise(r => setTimeout(r, 2000)); //espero 2 segundos para que se cargue la wallet
-			// 	}
-			// }
-			// if (!walletApi) {
-			// 	throw errorStr
-			// }
-
-			walletApi = await window.cardano[walletName].enable()
+			var countError = 0
+			var errorStr = ""
+			const maxError = tryAgain ? 2 : 1
+			while (countError < maxError) {
+				try {
+					if (countError>0) await new Promise(r => setTimeout(r, 4000)); //espero 4 segundos para que se cargue la wallet
+				 	walletApi = await window.cardano[walletName].enable()
+					break
+				} catch (error) {
+					console.log("[Session] - try " + countError+" of "+maxError+" - walletConnect Error: " + error)
+					errorStr = explainError(error) 
+					countError++
+				}
+			}
+			if (!walletApi) {
+				throw errorStr
+			}
 
 			const lucid = await initializeLucid(walletApi)
 			const adddressWallet = await lucid!.wallet.address()
@@ -82,6 +80,9 @@ export default function WalletModalBtn() {
 					swEnviarPorBlockfrost_ = (session.user.swEnviarPorBlockfrost)
 				}
 			}
+			//seteo a la fuerza el no enviar por blockfrost, por las dudas de que alguien haya creado ya la session con este campo
+			//y yo lo estoy sacando del formulario, no podria desacativarlo
+			swEnviarPorBlockfrost_ = false
 			const walletStore_ = { connected: true, name: walletName, walletApi: walletApi, pkh: pkh, lucid: lucid, swEnviarPorBlockfrost: swEnviarPorBlockfrost_, protocolParameters: protocolParameters }
 			console.log("[Session] - walletConnect - status: " + status + " - session.user.pkh: " + session?.user?.pkh + " - pkh: " + pkh)
 			if (status !== "authenticated" || (status === "authenticated" && session && session.user && session.user.pkh !== pkh)) {
@@ -90,9 +91,9 @@ export default function WalletModalBtn() {
 				await signIn('credentials', { pkh: pkh , walletName: walletName, swEnviarPorBlockfrost: swEnviarPorBlockfrost_?"true":"false", isWalletFromSeedletName: "false",redirect: false })
 			}
 			setWalletStore(walletStore_)
-			setWalletMessage("Loading Wallet info in parallel...")
+			//setWalletMessage("Loading Wallet info in parallel...")
 			loadWalletData(walletStore_)
-			setWalletMessage("Connected with " + walletName + "!")
+			setWalletMessage("Connected with <b>" + walletName + "</b>!")
 		} catch (error) {
 			console.error("[Session] - walletConnect Error2: " + error)
 			const error_explained = explainError(error)
@@ -165,8 +166,9 @@ export default function WalletModalBtn() {
 				if (window.cardano && searchKeyInObject(availableWallets, session.user.walletName)) {
 					//si la wallet estaba conectada en la session anterior, tengo que reconectarla
 					console.log("[Session] - sessionWalletConnect - session.walletName: " + session.user.walletName)
-					//await new Promise(r => setTimeout(r, 3000));
-					await walletConnect(session.user.walletName, false)
+					setWalletMessage("Loading session...")
+					await new Promise(r => setTimeout(r, 2000));
+					await walletConnect(session.user.walletName, false, true)
 				} else {
 					console.log("[Session] - sessionWalletConnect: Not connecting to any wallet. Wallet of previus session not found: " + session.user.walletName)
 					throw "Wallet of previus session not found"
@@ -283,10 +285,10 @@ export default function WalletModalBtn() {
 
 						{walletStore.connected ?
 							<>
-								<div>Pkh: {walletStore.connected ? walletStore.pkh : <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
-								<div>UTxOs: {isWalletDataLoaded ? uTxOsAtWallet.length : <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</div>
+								<div><b>Pkh</b> {walletStore.connected ? walletStore.pkh : <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
+								<div><b>UTxOs</b> {isWalletDataLoaded ? uTxOsAtWallet.length : <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</div>
 								<br></br>
-								{process.env.NODE_ENV==="development" || true?
+								{process.env.NODE_ENV==="development" && false?
 									<>
 										<label>
 											<input
@@ -345,7 +347,7 @@ export default function WalletModalBtn() {
 														onClick={async (e) => {
 															try {
 																e.preventDefault()
-																walletConnect(wallet)
+																walletConnect(wallet, false, false)
 															} catch (error) {
 																console.error("[Session] - Error connecting with wallet: " + error)
 															}
