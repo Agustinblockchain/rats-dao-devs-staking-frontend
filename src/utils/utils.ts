@@ -9,7 +9,7 @@ export function formatAmount(number: number, decimals: number | undefined, unit:
         unit = " " + unit
     }
     const pot = Math.pow(10, decimals)
-    return (number / pot).toLocaleString("en-US", {minimumFractionDigits: decimals}) + unit
+    return (number / pot).toLocaleString("en-US") + unit //, {minimumFractionDigits: decimals}
 }
 
 //----------------------------------------------------------------------

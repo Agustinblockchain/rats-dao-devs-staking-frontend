@@ -600,8 +600,8 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 							<div style={{textAlign: 'left', width:"100%"}}>
 								<h4 >Totals</h4>
 								<br></br> 
-								<p>Users Stake <b>{totalStakedUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></p>
-								<p>Rewards Harvested <b>{totalRewardsPaidUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></p>
+								<p>Total Staked <b>{totalStakedUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></p>
+								<p>Total Claimed <b>{totalRewardsPaidUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></p>
 							</div>
 						</div>
 						<div className="pool__stat">
@@ -609,7 +609,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 								<h4 ></h4>
 								<br></br> <br></br> 
 								<p>Rewards to Pay <b>{totalRewardsToPayUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></p>
-								<p>Availaible Funds in Pool <b>{totalFundsAvailableUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></p>
+								<p>Availaible Funds <b>{totalFundsAvailableUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></p>
 							</div>
 						</div>
 					</div>
