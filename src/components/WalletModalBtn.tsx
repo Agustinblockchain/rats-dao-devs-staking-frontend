@@ -17,7 +17,9 @@ export default function WalletModalBtn() {
 	const walletMasterSeed2 = process.env.NEXT_PUBLIC_walletMasterSeed2
 	const walletMasterPrivateKey1 = process.env.NEXT_PUBLIC_walletMasterPrivateKey1
 
+	const [walletError, setWalletError] = useState("")
 	const [walletMessage, setWalletMessage] = useState("")
+
 	const [swEnviarPorBlockfrost, setSwEnviarPorBlockfrost] = useState(false)
 	const [pollWalletsCount, setPollWalletsCount] = useState(0)
 	const [availableWallets, setAvailableWallets] = useState<{ nami: boolean, yoroi: boolean, eternl: boolean, flint: boolean, typhon: boolean, nufi: boolean }>({ yoroi: false, nami: false, eternl: false, flint: false, typhon: false, nufi: false })
@@ -97,7 +99,8 @@ export default function WalletModalBtn() {
 		} catch (error) {
 			console.error("[Session] - walletConnect Error2: " + error)
 			const error_explained = explainError(error)
-			setWalletMessage("Error connecting with <b>" + walletName + "</b><br></br> " + error_explained)
+			setWalletError("Error connecting with <b>" + walletName + "</b><br></br> " + error_explained)
+			setWalletMessage("")
 			if (status === "authenticated") {
 				await signOut({ redirect: false })
 			}
@@ -156,7 +159,9 @@ export default function WalletModalBtn() {
 			setWalletMessage("")
 		} catch (error) {
 			console.error("[Session] - walletDisconnect Error2: " + error)
-			setWalletMessage("Error Disconnecting Wallet: " + error)
+			setWalletError("Error Disconnecting Wallet: " + error)
+			setWalletMessage("")
+
 		}
 	}
 
@@ -263,7 +268,9 @@ export default function WalletModalBtn() {
 			<input
 				type="checkbox" id="wallet-modal-toggle" className="modal__toggle"
 				onChange={(e) => {
-					setWalletMessage("")
+					if (!e.target.checked) {
+						setWalletError("")
+					}
 				}}
 			/>
 
@@ -290,6 +297,12 @@ export default function WalletModalBtn() {
 						{walletMessage ? 
 							<div>
 								<div dangerouslySetInnerHTML={{ __html: walletMessage! }} />
+								<br></br>
+							</div> : <></>}
+
+						{walletError ? 
+							<div>
+								<div dangerouslySetInnerHTML={{ __html: walletError! }} />
 								<br></br>
 							</div> : <></>}
 
