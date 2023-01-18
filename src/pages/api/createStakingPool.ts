@@ -37,6 +37,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
     //--------------------------------
 
 	const nombrePool = req.body.nombrePool
+	const image = req.body.image
 
 	const swDummyStakingPool = req.body.swDummyStakingPool
 
@@ -105,7 +106,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 						const estado = await getEstadoDeployFromFile(estadoJsonFileName);
 						if (estado.includes("Done!") ) {
 							clearInterval(timeoutGetEstadoDeploy)
-							return await crearStakingPool(nombrePool, staking_UI, harvest_UI, staking_Decimals, harvest_Decimals, res);
+							return await crearStakingPool(nombrePool, image, staking_UI, harvest_UI, staking_Decimals, harvest_Decimals, res);
 						}
 					}, 4000); 
 					
@@ -118,13 +119,13 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 			const estado = await getEstadoDeployFromFile(estadoJsonFileName);
 			if (estado.includes("Done!") ) {
 				clearInterval(timeoutGetEstadoDeploy)
-				return await crearStakingPool(nombrePool, staking_UI, harvest_UI, staking_Decimals, harvest_Decimals, res);
+				return await crearStakingPool(nombrePool, image, staking_UI, harvest_UI, staking_Decimals, harvest_Decimals, res);
 			}
 		}, 4000); 
 	}
 }
 
-async function crearStakingPool(nombrePool: any, staking_UI: any, harvest_UI: any, staking_Decimals: any, harvest_Decimals: any, res: NextApiResponse<string | Data>) {
+async function crearStakingPool(nombrePool: any, image: any, staking_UI: any, harvest_UI: any, staking_Decimals: any, harvest_Decimals: any, res: NextApiResponse<string | Data>) {
 	
 	console.log("/api/createStakingPool - StakingPool Files Created!");
 
@@ -322,7 +323,7 @@ async function crearStakingPool(nombrePool: any, staking_UI: any, harvest_UI: an
 	const newStakingPoolDB = new StakingPoolDBModel({
 		name: nombrePool,
 
-		imageSrc: "https://ratsdao.io/img/ratsdao.png",
+		imageSrc: image,
 
 		swDeleted: false,
 
@@ -383,6 +384,7 @@ async function crearStakingPool(nombrePool: any, staking_UI: any, harvest_UI: an
 
 		scriptAddress: stakePlusV2Addr,
 		script: (stakePlusV2Script),
+		tx_count: 0,
 
 		poolID_TxOutRef: (pabPoolParams.poolID_TxOutRef),
 		poolID_CS: poolID_CS,

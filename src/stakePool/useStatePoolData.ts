@@ -47,6 +47,7 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
     const [isPoolDataLoading, setIsPoolDataLoading] = useState(false)
     
     const [statusUI, setStatusUI] = useState<string | 0> (ui_loading)
+    const [tx_countUI, setTx_countUI] = useState<string | 0> (ui_loading)
 
     const [swShowOnHomeUI, setSwShowOnHomeUI] = useState<string | 0 > (ui_loading)
     const [swPreparadoUI, setSwPreparadoUI] = useState<string | 0 > (ui_loading)
@@ -130,6 +131,7 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
         setIsPoolDataLoaded(false)
 
         setStatusUI(ui)
+        setTx_countUI(ui)
 
         setSwShowOnHomeUI(ui)
         setSwPreparadoUI(ui)
@@ -453,7 +455,7 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
                 }
             }
         }
-
+        //------------------
         if(poolInfo.swTerminated){
             setStatusUI("Terminated")
         }else if (poolInfo.swClosed){
@@ -471,7 +473,9 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
         }else{
             setStatusUI("Not Ready")
         }
-
+        //------------------
+        setTx_countUI(formatAmount(Number(poolInfo.tx_count), 0, ""))
+        //------------------
         setSwShowOnHomeUI(poolInfo.swShowOnHome ? "Yes" : "No");
         setSwPreparadoUI(poolInfo.swPreparado ? "Yes" : "No");
         setSwIniciadoUI(poolInfo.swIniciado ? "Yes" : "No");
@@ -554,6 +558,7 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
         poolInfo,
 
         statusUI,
+        tx_countUI,
         swShowOnHomeUI,
         swPreparadoUI, 
         swIniciadoUI, 

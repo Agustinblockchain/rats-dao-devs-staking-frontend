@@ -7,7 +7,7 @@ import { getStakingPoolDBModel, StakingPoolDBInterface } from '../types/stakePoo
 
 import { apiSaveEUTxODB } from "./apis";
 import { initializeLucid } from '../utils/initializeLucid';
-import { strToHex, toJson } from '../utils/utils';
+import { isEqual, strToHex, toJson } from '../utils/utils';
 import { getMissingEUTxOsInDB, getEUTxO_With_PoolDatum_InEUxTOList, getEUTxOs_With_FundDatum_InEUxTOList, getEUTxOs_With_UserDatum_InEUxTOList, getEUTxOs_With_UserDatum_InEUxTOList_OfUser, getEUTxO_With_ScriptDatum_InEUxTOList, eUTxODBParser, getExtraEUTxOsInDB, getEUTxO_With_AnyScriptDatum_InEUxTOList } from './helpersEUTxOs';
 import { getTotalFundAmount, getTotalMastersMinAda_In_EUTxOs_With_UserDatum, sortFundDatum, getTotalAvailaibleFunds, getTotalFundAmountsRemains_ForMasters, getTotalCashedOut, getTotalStakedAmount, getTotalRewardsToPay_In_EUTxOs_With_UserDatum, getTotalUsersMinAda_In_EUTxOs_With_UserDatum, getIfUserRegistered, getUserStaked, getUserRewardsPaid, getUserRewardsToPay } from './helpersStakePool';
 //---------------------------------------------------------------
@@ -152,7 +152,6 @@ export async function getEstadoDeployFromFile(filename: string) {
 //---------------------------------------------------------------
 
 export async function serverSide_updateStakingPool (poolInfo: StakingPoolDBInterface) {
-
     console.log("------------------------------")
     console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - INIT")
     //------------------
@@ -161,7 +160,9 @@ export async function serverSide_updateStakingPool (poolInfo: StakingPoolDBInter
     var swUpdate = false
     //------------------
     const scriptAddress = poolInfo.scriptAddress
-    //------------------
+    //-----------------
+    var tx_count = poolInfo.tx_count
+    //-----------------
     var swPreparado = poolInfo.swPreparado
     var swIniciado = poolInfo.swIniciado
     var swFunded = poolInfo.swFunded
@@ -200,9 +201,25 @@ export async function serverSide_updateStakingPool (poolInfo: StakingPoolDBInter
     const scriptID_User_Harvest_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_User_Harvest_TN)
     const scriptID_User_Withdraw_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_User_Withdraw_TN)
     //------------------
-    // elimino todas las eutxos que estan en la base de datos marcadas como preparadas o consumidas y que paso el tiempo de espera
-    const count = await deleteEUTxOsFromDBPreparingOrConsumingByAddress(scriptAddress) 
-    console.log ("ServerSide - Update StakingPool - " + poolInfo.name + " - eUTxOs Delete in DB Preparing Or Consuming: "+count)
+    var new_tx_count: number | undefined = undefined
+    const urlApi = process.env.NEXT_PUBLIC_REACT_SERVER_URL + "/api/blockfrost" + '/addresses/' + scriptAddress + '/total'
+    const requestOptions = {
+        method: 'GET',
+        headers: {
+          'project_id': "xxxxx"
+        },
+      }
+    await fetch(urlApi, requestOptions)
+        .then(response => response.json())
+        .then(json => {
+            //console.log(toJson(json))
+            new_tx_count = Number(json.tx_count)
+        }
+        );
+    if (new_tx_count === undefined) {
+        console.log ("ServerSide - Update StakingPool - " + poolInfo.name + " - Error: Can't get tx_count from Blockfrost")	
+        // throw "Error: Can't get tx_count from Blockfrost"
+    }
     //------------------
     var poolDatum: PoolDatum | undefined
     var eUTxOs_With_Datum : EUTxO [] = []
@@ -214,42 +231,54 @@ export async function serverSide_updateStakingPool (poolInfo: StakingPoolDBInter
         if (eUTxOParsed) eUTxOs_With_Datum[i] = eUTxOParsed
     }
     //------------------
-    const uTxOsAtScript = await lucid!.utxosAt(scriptAddress)
-    //------------------
-    var eUTxOs_With_Datum_Extras : EUTxO [] = await getExtraEUTxOsInDB(lucid!, uTxOsAtScript, eUTxOs_With_Datum)   
-    for (let i = 0; i < eUTxOs_With_Datum_Extras.length; i++) {
-        const eUTxO = eUTxOs_With_Datum_Extras[i]
-        await deleteEUTxOsFromDBByTxHashAndIndex(eUTxO.uTxO.txHash, eUTxO.uTxO.outputIndex) 
-        eUTxOs_With_Datum = eUTxOs_With_Datum.filter(eUTxO_ => ! (eUTxO_.uTxO.txHash == eUTxO.uTxO.txHash && eUTxO_.uTxO.outputIndex == eUTxO.uTxO.outputIndex))
-    }
-    console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - eUTxOs Delete in db ones that not exist in blockchain: " + eUTxOs_With_Datum_Extras.length)
-    //------------------
-    if (uTxOsAtScript.length != eUTxOs_With_Datum.length){
-        console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - eUTxOs At Script ("+uTxOsAtScript.length+") and DB ("+eUTxOs_With_Datum.length+") Not Match")
-        var eUTxOs_With_Datum_Missing : EUTxO [] = await getMissingEUTxOsInDB(lucid!, uTxOsAtScript, eUTxOs_With_Datum)   
-        for (let i = 0; i < eUTxOs_With_Datum_Missing.length; i++) {
-            const eUTxO = eUTxOs_With_Datum_Missing[i]
-            const eUTxO_ = await getEUTxOFromDBByTxHashAndIndex (eUTxO.uTxO.txHash, eUTxO.uTxO.outputIndex)
-            if (eUTxO_.length == 0 ){
-                var EUTxODBModel = getEUTxODBModel()
-                const newEUTxODB = new EUTxODBModel({
-                    eUTxO: JSON.parse(toJson(eUTxO))
-                });
-                try {
-                    await newEUTxODB.save()
-                    console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - eUTxO added")
-                } catch (error) {
-                    console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - eUTxO Error saving in DB")
-                    console.log(error)
-                }
-            } else {
-                console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - eUTxO Error saving in DB, already there")
-            }
+    if (new_tx_count !== undefined && new_tx_count > tx_count) {
+        console.log ("ServerSide - Update StakingPool - " + poolInfo.name + " - new_tx_count: " +  new_tx_count + " > old_tx_count: " + tx_count)	
+        //------------------ 
+        tx_count = new_tx_count
+        swUpdate = true
+        // elimino todas las eutxos que estan en la base de datos marcadas como preparadas o consumidas y que paso el tiempo de espera
+        const count = await deleteEUTxOsFromDBPreparingOrConsumingByAddress(scriptAddress) 
+        console.log ("ServerSide - Update StakingPool - " + poolInfo.name + " - eUTxOs Delete in DB Preparing Or Consuming: "+count)
+        //------------------
+        const uTxOsAtScript = await lucid!.utxosAt(scriptAddress)
+        //------------------
+        var eUTxOs_With_Datum_Extras : EUTxO [] = await getExtraEUTxOsInDB(lucid!, uTxOsAtScript, eUTxOs_With_Datum)   
+        for (let i = 0; i < eUTxOs_With_Datum_Extras.length; i++) {
+            const eUTxO = eUTxOs_With_Datum_Extras[i]
+            await deleteEUTxOsFromDBByTxHashAndIndex(eUTxO.uTxO.txHash, eUTxO.uTxO.outputIndex) 
+            eUTxOs_With_Datum = eUTxOs_With_Datum.filter(eUTxO_ => ! (eUTxO_.uTxO.txHash == eUTxO.uTxO.txHash && eUTxO_.uTxO.outputIndex == eUTxO.uTxO.outputIndex))
         }
-        eUTxOs_With_Datum = eUTxOs_With_Datum.concat(eUTxOs_With_Datum_Missing)
-        console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - eUTxOs added (" + eUTxOs_With_Datum_Missing.length + ")")
+        console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - eUTxOs Delete in db ones that not exist in blockchain: " + eUTxOs_With_Datum_Extras.length)
+        //------------------
+        if (uTxOsAtScript.length != eUTxOs_With_Datum.length){
+            console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - eUTxOs At Script ("+uTxOsAtScript.length+") and DB ("+eUTxOs_With_Datum.length+") Not Match")
+            var eUTxOs_With_Datum_Missing : EUTxO [] = await getMissingEUTxOsInDB(lucid!, uTxOsAtScript, eUTxOs_With_Datum)   
+            for (let i = 0; i < eUTxOs_With_Datum_Missing.length; i++) {
+                const eUTxO = eUTxOs_With_Datum_Missing[i]
+                const eUTxO_ = await getEUTxOFromDBByTxHashAndIndex (eUTxO.uTxO.txHash, eUTxO.uTxO.outputIndex)
+                if (eUTxO_.length == 0 ){
+                    var EUTxODBModel = getEUTxODBModel()
+                    const newEUTxODB = new EUTxODBModel({
+                        eUTxO: JSON.parse(toJson(eUTxO))
+                    });
+                    try {
+                        await newEUTxODB.save()
+                        console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - eUTxO added")
+                    } catch (error) {
+                        console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - eUTxO Error saving in DB")
+                        console.log(error)
+                    }
+                } else {
+                    console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - eUTxO Error saving in DB, already there")
+                }
+            }
+            eUTxOs_With_Datum = eUTxOs_With_Datum.concat(eUTxOs_With_Datum_Missing)
+            console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - eUTxOs added (" + eUTxOs_With_Datum_Missing.length + ")")
+        }else{
+            console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - eUTxOs At Script Match (" + uTxOsAtScript.length + ")")
+        }
     }else{
-        console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - eUTxOs At Script Match (" + uTxOsAtScript.length + ")")
+        console.log ("ServerSide - Update StakingPool - " + poolInfo.name + " - new_tx_count: " +  new_tx_count + " == old_tx_count: " + tx_count)
     }
     //------------------
     console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - eUTxOs final: " + eUTxOs_With_Datum.length + "")
@@ -280,40 +309,10 @@ export async function serverSide_updateStakingPool (poolInfo: StakingPoolDBInter
             swClosed = true
             swTerminated = true
         } else {
-            // if (poolDatum.pdClosedAt.val !== undefined && poolDatum.pdClosedAt.val < poolInfo.deadline.getTime())
-            // console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - Dates: poolDatum.pdClosedAt FOUND or deadline REACHED - setting closed")
-            // swClosed = true
-            // closedAt = (poolDatum.pdClosedAt.val !== undefined && poolDatum.pdClosedAt.val < poolInfo.deadline.getTime()) ? new Date(parseInt(poolDatum.pdClosedAt.val.toString())) : undefined
-            // var closedOrDeadline = closedAt ? closedAt : poolInfo.deadline
-            // if (BigInt(closedOrDeadline.getTime()) + BigInt(poolInfo.graceTime) < BigInt(now.getTime())) {
-            // console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - dates: closedOrDeadline plus grace Time REACHED - setting terminated")
-            // swTerminated = true
-            // }else{
-            // swTerminated = false
-            // }
-            // if ((poolDatum.pdClosedAt.val !== undefined && poolDatum.pdClosedAt.val < poolInfo.deadline.getTime()) || poolInfo.deadline < now) {
-            // if (poolDatum.pdClosedAt.val !== undefined && poolDatum.pdClosedAt.val < poolInfo.deadline.getTime())
-            // console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - Dates: poolDatum.pdClosedAt FOUND or deadline REACHED - setting closed")
-            // swClosed = true
-            // closedAt = (poolDatum.pdClosedAt.val !== undefined && poolDatum.pdClosedAt.val < poolInfo.deadline.getTime()) ? new Date(parseInt(poolDatum.pdClosedAt.val.toString())) : undefined
-            // var closedOrDeadline = closedAt ? closedAt : poolInfo.deadline
-            // if (BigInt(closedOrDeadline.getTime()) + BigInt(poolInfo.graceTime) < BigInt(now.getTime())) {
-            // console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - dates: closedOrDeadline plus grace Time REACHED - setting terminated")
-            // swTerminated = true
-            // }else{
-            // swTerminated = false
-            // }
-            // }else{
-            // swClosed = false
-            // swTerminated = false
-            // }
-            if (poolDatum.pdClosedAt.val !== undefined){
-                console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - pdClosedAt: " + poolDatum.pdClosedAt.val + " - " + new Date(parseInt(poolDatum.pdClosedAt.val.toString())).toISOString() + "")
-            }
-
             if (poolDatum.pdClosedAt.val !== undefined && poolDatum.pdClosedAt.val < BigInt(poolInfo.deadline.getTime()) && poolDatum.pdClosedAt.val < BigInt(now.getTime())) {
                 if (!swClosed){
                     console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - Dates: poolDatum.pdClosedAt FOUND - setting forzed closed")
+                    console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - pdClosedAt: " + poolDatum.pdClosedAt.val + " - " + new Date(parseInt(poolDatum.pdClosedAt.val.toString())).toISOString() + "")
                 }    
                 swClosed = true
                 closedAt = new Date(parseInt(poolDatum.pdClosedAt.val.toString()))
@@ -369,72 +368,72 @@ export async function serverSide_updateStakingPool (poolInfo: StakingPoolDBInter
     const eUTxOs_With_ScriptDatum = getEUTxO_With_AnyScriptDatum_InEUxTOList (txID_Master_AddScripts_AC_Lucid, eUTxOs_With_Datum)
     //------------------
     var eUTxO_With_ScriptDatum: EUTxO | undefined = getEUTxO_With_ScriptDatum_InEUxTOList(scriptID_Validator_AC_Lucid, eUTxOs_With_ScriptDatum)
-    if (eUTxO_With_ScriptDatum !== poolInfo.eUTxO_With_ScriptDatum) {
+    if (!isEqual (eUTxO_With_ScriptDatum, poolInfo.eUTxO_With_ScriptDatum)) {
         poolInfo.eUTxO_With_ScriptDatum = eUTxO_With_ScriptDatum
         swUpdate = true
     } 
     var eUTxO_With_Script_TxID_Master_Fund_Datum: EUTxO | undefined = getEUTxO_With_ScriptDatum_InEUxTOList(scriptID_Master_Fund_AC_Lucid, eUTxOs_With_ScriptDatum)
-    if (eUTxO_With_Script_TxID_Master_Fund_Datum !== poolInfo.eUTxO_With_Script_TxID_Master_Fund_Datum) {
+    if (!isEqual (eUTxO_With_Script_TxID_Master_Fund_Datum, poolInfo.eUTxO_With_Script_TxID_Master_Fund_Datum)) {
         poolInfo.eUTxO_With_Script_TxID_Master_Fund_Datum = eUTxO_With_Script_TxID_Master_Fund_Datum
         swUpdate = true
     } 
     var eUTxO_With_Script_TxID_Master_FundAndMerge_Datum: EUTxO | undefined = getEUTxO_With_ScriptDatum_InEUxTOList(scriptID_Master_FundAndMerge_AC_Lucid, eUTxOs_With_ScriptDatum)
-    if (eUTxO_With_Script_TxID_Master_FundAndMerge_Datum !== poolInfo.eUTxO_With_Script_TxID_Master_FundAndMerge_Datum) {
+    if (!isEqual (eUTxO_With_Script_TxID_Master_FundAndMerge_Datum, poolInfo.eUTxO_With_Script_TxID_Master_FundAndMerge_Datum)) {
         poolInfo.eUTxO_With_Script_TxID_Master_FundAndMerge_Datum = eUTxO_With_Script_TxID_Master_FundAndMerge_Datum
         swUpdate = true
     } 
     var eUTxO_With_Script_TxID_Master_SplitFund_Datum: EUTxO | undefined = getEUTxO_With_ScriptDatum_InEUxTOList(scriptID_Master_SplitFund_AC_Lucid, eUTxOs_With_ScriptDatum)
-    if (eUTxO_With_Script_TxID_Master_SplitFund_Datum !== poolInfo.eUTxO_With_Script_TxID_Master_SplitFund_Datum) {
+    if (!isEqual (eUTxO_With_Script_TxID_Master_SplitFund_Datum, poolInfo.eUTxO_With_Script_TxID_Master_SplitFund_Datum)) {
         poolInfo.eUTxO_With_Script_TxID_Master_SplitFund_Datum = eUTxO_With_Script_TxID_Master_SplitFund_Datum
         swUpdate = true
     } 
     var eUTxO_With_Script_TxID_Master_ClosePool_Datum: EUTxO | undefined = getEUTxO_With_ScriptDatum_InEUxTOList(scriptID_Master_ClosePool_AC_Lucid, eUTxOs_With_ScriptDatum)
-    if (eUTxO_With_Script_TxID_Master_ClosePool_Datum !== poolInfo.eUTxO_With_Script_TxID_Master_ClosePool_Datum) {
+    if (!isEqual (eUTxO_With_Script_TxID_Master_ClosePool_Datum, poolInfo.eUTxO_With_Script_TxID_Master_ClosePool_Datum)) {
         poolInfo.eUTxO_With_Script_TxID_Master_ClosePool_Datum = eUTxO_With_Script_TxID_Master_ClosePool_Datum
         swUpdate = true
     } 
     var eUTxO_With_Script_TxID_Master_TerminatePool_Datum: EUTxO | undefined = getEUTxO_With_ScriptDatum_InEUxTOList(scriptID_Master_TerminatePool_AC_Lucid, eUTxOs_With_ScriptDatum)
-    if (eUTxO_With_Script_TxID_Master_TerminatePool_Datum !== poolInfo.eUTxO_With_Script_TxID_Master_TerminatePool_Datum) {
+    if (!isEqual (eUTxO_With_Script_TxID_Master_TerminatePool_Datum, poolInfo.eUTxO_With_Script_TxID_Master_TerminatePool_Datum)) {
         poolInfo.eUTxO_With_Script_TxID_Master_TerminatePool_Datum = eUTxO_With_Script_TxID_Master_TerminatePool_Datum
         swUpdate = true
     } 
     var eUTxO_With_Script_TxID_Master_DeleteFund_Datum: EUTxO | undefined = getEUTxO_With_ScriptDatum_InEUxTOList(scriptID_Master_DeleteFund_AC_Lucid, eUTxOs_With_ScriptDatum)
-    if (eUTxO_With_Script_TxID_Master_DeleteFund_Datum !== poolInfo.eUTxO_With_Script_TxID_Master_DeleteFund_Datum) {
+    if (!isEqual (eUTxO_With_Script_TxID_Master_DeleteFund_Datum, poolInfo.eUTxO_With_Script_TxID_Master_DeleteFund_Datum)) {
         poolInfo.eUTxO_With_Script_TxID_Master_DeleteFund_Datum = eUTxO_With_Script_TxID_Master_DeleteFund_Datum
         swUpdate = true
     } 
     var eUTxO_With_Script_TxID_Master_SendBackFund_Datum: EUTxO | undefined = getEUTxO_With_ScriptDatum_InEUxTOList(scriptID_Master_SendBackFund_AC_Lucid, eUTxOs_With_ScriptDatum)
-    if (eUTxO_With_Script_TxID_Master_SendBackFund_Datum !== poolInfo.eUTxO_With_Script_TxID_Master_SendBackFund_Datum) {
+    if (!isEqual (eUTxO_With_Script_TxID_Master_SendBackFund_Datum, poolInfo.eUTxO_With_Script_TxID_Master_SendBackFund_Datum)) {
         poolInfo.eUTxO_With_Script_TxID_Master_SendBackFund_Datum = eUTxO_With_Script_TxID_Master_SendBackFund_Datum
         swUpdate = true
     } 
     var eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum: EUTxO | undefined = getEUTxO_With_ScriptDatum_InEUxTOList(scriptID_Master_SendBackDeposit_AC_Lucid, eUTxOs_With_ScriptDatum)
-    if (eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum !== poolInfo.eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum) {
+    if (!isEqual (eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum, poolInfo.eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum)) {
         poolInfo.eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum = eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum
         swUpdate = true
     } 
     var eUTxO_With_Script_TxID_Master_AddScripts_Datum: EUTxO | undefined = getEUTxO_With_ScriptDatum_InEUxTOList(scriptID_Master_AddScripts_AC_Lucid, eUTxOs_With_ScriptDatum)
-    if (eUTxO_With_Script_TxID_Master_AddScripts_Datum !== poolInfo.eUTxO_With_Script_TxID_Master_AddScripts_Datum) {
+    if (!isEqual (eUTxO_With_Script_TxID_Master_AddScripts_Datum, poolInfo.eUTxO_With_Script_TxID_Master_AddScripts_Datum)) {
         poolInfo.eUTxO_With_Script_TxID_Master_AddScripts_Datum = eUTxO_With_Script_TxID_Master_AddScripts_Datum
         swUpdate = true
     } 
     var eUTxO_With_Script_TxID_Master_DeleteScripts_Datum: EUTxO | undefined = getEUTxO_With_ScriptDatum_InEUxTOList(scriptID_Master_DeleteScripts_AC_Lucid, eUTxOs_With_ScriptDatum)
-    if (eUTxO_With_Script_TxID_Master_DeleteScripts_Datum !== poolInfo.eUTxO_With_Script_TxID_Master_DeleteScripts_Datum) {
+    if (!isEqual (eUTxO_With_Script_TxID_Master_DeleteScripts_Datum, poolInfo.eUTxO_With_Script_TxID_Master_DeleteScripts_Datum)) {
         poolInfo.eUTxO_With_Script_TxID_Master_DeleteScripts_Datum = eUTxO_With_Script_TxID_Master_DeleteScripts_Datum
         swUpdate = true
     } 
     var eUTxO_With_Script_TxID_User_Deposit_Datum: EUTxO | undefined = getEUTxO_With_ScriptDatum_InEUxTOList(scriptID_User_Deposit_AC_Lucid, eUTxOs_With_ScriptDatum)
-    if (eUTxO_With_Script_TxID_User_Deposit_Datum !== poolInfo.eUTxO_With_Script_TxID_User_Deposit_Datum) {
+    if (!isEqual (eUTxO_With_Script_TxID_User_Deposit_Datum, poolInfo.eUTxO_With_Script_TxID_User_Deposit_Datum)) {
         poolInfo.eUTxO_With_Script_TxID_User_Deposit_Datum = eUTxO_With_Script_TxID_User_Deposit_Datum
         swUpdate = true
     } 
     var eUTxO_With_Script_TxID_User_Harvest_Datum: EUTxO | undefined = getEUTxO_With_ScriptDatum_InEUxTOList(scriptID_User_Harvest_AC_Lucid, eUTxOs_With_ScriptDatum)
-    if (eUTxO_With_Script_TxID_User_Harvest_Datum !== poolInfo.eUTxO_With_Script_TxID_User_Harvest_Datum) {
+    if (!isEqual (eUTxO_With_Script_TxID_User_Harvest_Datum, poolInfo.eUTxO_With_Script_TxID_User_Harvest_Datum)) {
         poolInfo.eUTxO_With_Script_TxID_User_Harvest_Datum = eUTxO_With_Script_TxID_User_Harvest_Datum
         swUpdate = true
     } 
     var eUTxO_With_Script_TxID_User_Withdraw_Datum: EUTxO | undefined = getEUTxO_With_ScriptDatum_InEUxTOList(scriptID_User_Withdraw_AC_Lucid, eUTxOs_With_ScriptDatum)
-    if (eUTxO_With_Script_TxID_User_Withdraw_Datum !== poolInfo.eUTxO_With_Script_TxID_User_Withdraw_Datum) {
+    if (!isEqual (eUTxO_With_Script_TxID_User_Withdraw_Datum, poolInfo.eUTxO_With_Script_TxID_User_Withdraw_Datum)) {
         poolInfo.eUTxO_With_Script_TxID_User_Withdraw_Datum = eUTxO_With_Script_TxID_User_Withdraw_Datum
         swUpdate = true
     } 
@@ -515,11 +514,11 @@ export async function serverSide_updateStakingPool (poolInfo: StakingPoolDBInter
         swUpdate = true
     }
 
-    if (poolInfo.closedAt != closedAt) {
+    if (poolInfo.closedAt?.getTime() != closedAt?.getTime()) {
         poolInfo.closedAt = closedAt
         swUpdate = true
     }
-
+    
     if (poolInfo.swTerminated != swTerminated) {
         swUpdate = true
     }
@@ -545,6 +544,7 @@ export async function serverSide_updateStakingPool (poolInfo: StakingPoolDBInter
         var StakingPoolDBModel = getStakingPoolDBModel()
         const filter = {name : poolInfo.name};
         const update = { 
+            tx_count : tx_count,
             swPreparado: swPreparado, 
             swIniciado: swIniciado, 
             swFunded: swFunded,
@@ -589,6 +589,7 @@ export async function serverSide_updateStakingPool (poolInfo: StakingPoolDBInter
     }else{
         //console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - NO UPDATING POOL DATA")
     }
+    poolInfo.tx_count = tx_count
     poolInfo.swPreparado = swPreparado
     poolInfo.swIniciado = swIniciado
     poolInfo.swFunded = swFunded

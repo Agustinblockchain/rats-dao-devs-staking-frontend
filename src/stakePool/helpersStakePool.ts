@@ -56,6 +56,7 @@ export function stakingPoolDBParser(stakingPoolDB: StakingPoolDBInterface) {
 
         scriptAddress: stakingPoolDB.scriptAddress,
         script: (stakingPoolDB.script),
+        tx_count: (stakingPoolDB.tx_count),
 
         staking_UI: stakingPoolDB.staking_UI,
         harvest_UI: stakingPoolDB.harvest_UI,

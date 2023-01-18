@@ -76,6 +76,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 		poolInfo,
 
 		statusUI,
+		tx_countUI,
 		swShowOnHomeUI,
         swPreparadoUI,
         swIniciadoUI,
@@ -1485,6 +1486,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 								<p>EUTxOs At Contract <b>{countEUTxOs_With_DatumUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></p>
 								<p>EUTxOs with Users <b>{countEUTxOs_With_UserDatumUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></p>
 								<p>EUTxOs with Funds <b>{countEUTxOs_With_FundDatumUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></p>
+								<p>Tx Count <b>{tx_countUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></p>
 							</div>
 						</div>
 						<div className="pool__stat">

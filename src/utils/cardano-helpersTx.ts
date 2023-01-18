@@ -105,11 +105,15 @@ export async function fixTx(tx_Building: any, lucid: Lucid, protocolParameters: 
 
     var blockLast: number | undefined = undefined
 
-    await fetch("/api/blockfrost" + '/blocks/latest', {
+    const urlApi = process.env.NEXT_PUBLIC_REACT_SERVER_URL + "/api/blockfrost" + '/blocks/latest'
+    const requestOptions = {
+        method: 'GET',
         headers: {
-            'project_id': "xxxxx"
-        }
-    })
+          'project_id': "xxxxx"
+        },
+      }
+
+    await fetch(urlApi, requestOptions)
         .then(response => response.json())
         .then(json => {
             //console.log(toJson(json))

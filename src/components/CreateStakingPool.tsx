@@ -36,6 +36,8 @@ export default function CreateStakingPool( ) {
 	};
 
 	const [nombrePool, setNombrePool] = useState("RATS")
+	const [image, setImage] = useState("https://ratsdao.io/img/ratsdao.png")
+	
 	const [masters, setMasters] = useState(walletStore.pkh)
 	const [poolID_TxOutRef, setPoolID_TxOutRef] = useState("")
 	const [beginAt, setBeginAt] = useState(Date.now().toString())
@@ -157,6 +159,7 @@ export default function CreateStakingPool( ) {
 
 			let data = {
 				nombrePool: nombrePool,
+				image: image,
 
 				swDummyStakingPool: swDummyStakingPool,
 
@@ -258,6 +261,10 @@ export default function CreateStakingPool( ) {
 
 											<h4 className="pool__stat-title">Name</h4>
 											<input name='nombrePool' value={nombrePool} style={{ width: 400, fontSize: 12 }} onChange={(event) => setNombrePool(event.target.value)}  ></input>
+											<br></br><br></br>
+
+											<h4 className="pool__stat-title">Image</h4>
+											<input name='image' value={image} style={{ width: 400, fontSize: 12 }} onChange={(event) => setImage(event.target.value)}  ></input>
 											<br></br><br></br>
 
 											<h4 className="pool__stat-title">Masters</h4>

@@ -221,4 +221,39 @@ export function htmlUnescape(str: string) {
 
 //----------------------------------------------------------------------
 
+export function isEqual(obj1: any, obj2: any) {
+    
+    if (obj1 === undefined && obj2 === undefined) {
+        return true;
+    }else if (obj1 === null && obj2 === null) {
+        return true;
+    }else if (obj1 === undefined && obj2 !== undefined) {
+        return false;
+    }else if (obj1 !== undefined && obj2 === undefined) {
+        return false;
+    }else if (obj1 === null && obj2 !== null) {
+        return false;
+    }else if (obj1 !== null && obj2 === null) {
+        return false;
+    }
+    var props1 = Object.getOwnPropertyNames(obj1);
+    var props2 = Object.getOwnPropertyNames(obj2);
+    if (props1.length != props2.length) {
+        return false;
+    }
+    for (var i = 0; i < props1.length; i++) {
+        let val1 = obj1[props1[i]];
+        let val2 = obj2[props1[i]];
+        let isObjects = isObject(val1) && isObject(val2);
+        if (isObjects && !isEqual(val1, val2) || !isObjects && val1 !== val2) {
+            return false;
+        }
+    }
+    return true;
+}
 
+export function isObject(object: any) {
+    return object != null && typeof object === 'object';
+}
+
+//----------------------------------------------------------------------

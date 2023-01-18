@@ -51,8 +51,8 @@ export interface StakingPoolDBInterface {
 	eUTxO_With_Script_TxID_User_Withdraw_Datum: EUTxO | undefined,
 
 	scriptAddress: string,
-
 	script: SpendingValidator,
+	tx_count: number,
 
 	staking_UI: string,
 	harvest_UI: string,
@@ -157,6 +157,7 @@ const stakingPoolDBSchema = new Schema<StakingPoolDBInterface>({
 
 	scriptAddress: { type: String, required: true },
 	script: { type: Object, required: true },
+	tx_count: { type: Number, required: true },
 
 	staking_UI: { type: String, required: true },
 	harvest_UI: { type: String, required: true },

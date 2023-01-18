@@ -63,8 +63,8 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 		poolInfo,
 
 		statusUI, 
+		tx_countUI,
 		swClosedUI,
-
 		beginAtUI,
 		closedAtUI, 
 		graceTimeUI,
