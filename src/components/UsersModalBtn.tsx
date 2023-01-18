@@ -172,7 +172,7 @@ export default function UsersModalBtn(
 											<th>Rewards Harvested</th>
 											<th>Rewards Not Claimed</th>
 											<th>Last Claim At</th>
-											<th>Min ADA</th>
+											<th>ADA locked</th>
 										</tr>
 									</thead>
 									<tbody>

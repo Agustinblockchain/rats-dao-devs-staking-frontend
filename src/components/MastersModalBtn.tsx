@@ -172,7 +172,7 @@ export default function MasterModalBtn(
 											<th>Fund Amount</th>
 											<th>Fund Amount To Get Back</th>
 											<th>Claimed Funds</th>
-											<th>Min ADA</th>
+											<th>ADA locked</th>
 										</tr>
 									</thead>
 									<tbody>

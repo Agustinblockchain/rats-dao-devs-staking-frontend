@@ -513,7 +513,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 										<br></br>
 										{userStakedData.minADA > 0n? 
 											<>
-												<div style={{textAlign: 'left', width:"100%"}}>Min ADA locked <b>{userStakedData.minADAUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></div>
+												<div style={{textAlign: 'left', width:"100%"}}>ADA locked <b>{userStakedData.minADAUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></div>
 											</>
 											:
 											<></>

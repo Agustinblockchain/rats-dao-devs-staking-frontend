@@ -288,7 +288,7 @@ export default function WalletModalBtn() {
 								<div><b>Pkh</b> {walletStore.connected ? walletStore.pkh : <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
 								<div><b>UTxOs</b> {isWalletDataLoaded ? uTxOsAtWallet.length : <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</div>
 								<br></br>
-								{process.env.NODE_ENV==="development" && false?
+								{process.env.NODE_ENV==="development" ?
 									<>
 										<label>
 											<input
