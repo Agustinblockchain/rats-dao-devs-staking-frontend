@@ -97,7 +97,7 @@ export default function WalletModalBtn() {
 		} catch (error) {
 			console.error("[Session] - walletConnect Error2: " + error)
 			const error_explained = explainError(error)
-			setWalletMessage("Error connecting with " + walletName + ": " + error_explained)
+			setWalletMessage("Error connecting with <b>" + walletName + "</b><br></br> " + error_explained)
 			if (status === "authenticated") {
 				await signOut({ redirect: false })
 			}
@@ -152,7 +152,8 @@ export default function WalletModalBtn() {
 			// setSavedWalletName("")
 			// setSavedSwEnviarPorBlockfrost(false)
 			// setSavedIsWalletFromSeed(false)
-			setWalletMessage("Wallet Disconnected!")
+			//setWalletMessage("Wallet Disconnected!")
+			setWalletMessage("")
 		} catch (error) {
 			console.error("[Session] - walletDisconnect Error2: " + error)
 			setWalletMessage("Error Disconnecting Wallet: " + error)
@@ -259,13 +260,18 @@ export default function WalletModalBtn() {
 				</svg>
 			</label>
 
-			<input type="checkbox" id="wallet-modal-toggle" className="modal__toggle" />
+			<input
+				type="checkbox" id="wallet-modal-toggle" className="modal__toggle"
+				onChange={(e) => {
+					setWalletMessage("")
+				}}
+			/>
 
 			<div id="wallet-modal" className="modal">
 				<label htmlFor="wallet-modal-toggle" className="modal__shade"></label>
 
 				<div className="modal__content">
-
+				
 					<div className="wallet__content" style={{minWidth:350}}>
 						<h3>
 							{
@@ -281,7 +287,11 @@ export default function WalletModalBtn() {
 						</h3>
 						<br></br>
 
-						{walletMessage ? <div>{walletMessage}<br></br><br></br></div> : <></>}
+						{walletMessage ? 
+							<div>
+								<div dangerouslySetInnerHTML={{ __html: walletMessage! }} />
+								<br></br>
+							</div> : <></>}
 
 						{walletStore.connected ?
 							<>
