@@ -9,7 +9,14 @@ export function formatAmount(number: number, decimals: number | undefined, unit:
         unit = " " + unit
     }
     const pot = Math.pow(10, decimals)
-    return (number / pot).toLocaleString("en-US") + unit //, {minimumFractionDigits: decimals}
+    var strConDecimals = (number / pot).toLocaleString("en-US", {minimumFractionDigits: decimals})
+    var posDec = strConDecimals.indexOf(".")
+    if(posDec !== -1 ){
+        //delete trailing zeros
+        strConDecimals = strConDecimals.replace(/0*$/,"")
+        strConDecimals = strConDecimals.replace(/\.$/,"")
+    }
+    return strConDecimals + unit
 }
 
 //----------------------------------------------------------------------
