@@ -52,7 +52,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 	const harvest_CS = req.body.harvest_CS
 	const harvest_TN = req.body.harvest_TN
 
-	const staking_Decimals = req.body.harvest_Decimals
+	const staking_Decimals = req.body.staking_Decimals
 	const harvest_Decimals = req.body.harvest_Decimals
 
 	const interest = req.body.interest

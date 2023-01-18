@@ -1036,14 +1036,9 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 
 				<div className="pool__data_item">
 					<h4 className="pool_title">{poolInfo.name}&nbsp;
-						{isPoolDataLoading ?
-							<>
-								<br></br>
-								<br></br>
-								<LoadingSpinner size={25} border={5} />
-								<br></br>
-							</>
-							:
+						{isPoolDataLoading?
+							<Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />
+						:
 							<>
 								<button onClick={() => { if (true) { updateDetailsStakingPoolAndWallet() } }} className='btn__ghost icon' style={true ? { cursor: 'pointer' } : { cursor: 'default' }} >
 									<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" className="bi bi-arrow-repeat" viewBox="0 0 16 16">
@@ -1052,10 +1047,10 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 									</svg>
 								</button>
 								<br></br>
-								<br></br>
 							</>
 						}
 					</h4>
+					<br></br>
 
 					{process.env.NODE_ENV==="development"?
 						<>
@@ -1078,19 +1073,21 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 							<div>Pool is Ready For Deleted Master And User Scripts: {swPoolReadyForDeleteMasterAndUserScriptsUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
 							<div>Pool is Ready For Deleted Main Scripts: {swPoolReadyForDeleteMainScriptsUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
 							<div>Pool is Ready For Deleted In DB: {swPoolReadyForDeletePoolInDBUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
+							<br></br>
 						</>
 						:
 						<>
 						</>
 					}
+
+					<div>Status <b>{statusUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></div>
 					<br></br>
 
 					<p><>Earn <b>{interestUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b> per year</></p>
 					<p><>per every <b>{poolInfo.staking_UI}</b> you Deposit</></p>
 					<br></br>
 					
-					<div>Status <b>{statusUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></div>
-					<br></br>
+					
 
 					<div>
 						Staking Unit In Wallet <b>{(walletStakingAmountUI === ui_loading || walletStakingAmountUI === ui_notConnected ? walletStakingAmountUI : formatAmount(Number(walletStakingAmountUI), poolInfo.staking_Decimals, poolInfo.staking_UI)) || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b>

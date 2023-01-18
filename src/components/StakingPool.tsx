@@ -261,12 +261,6 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 					<h4 className="pool_title">{poolInfo.name}&nbsp;
 						{isPoolDataLoading?
 							<Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />
-							// 
-							// 	<br></br>
-							// 	<br></br>
-							// 	<LoadingSpinner size={25} border={5} />
-							// 	<br></br>
-							// </>
 						:
 							<>
 								<button onClick={() => { if (true) { updateDetailsStakingPoolAndWallet() } }} className='btn__ghost icon' style={true ? { cursor: 'pointer' } : { cursor: 'default' }} >

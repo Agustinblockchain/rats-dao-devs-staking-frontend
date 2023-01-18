@@ -8,15 +8,17 @@ import { format } from 'date-fns';
 import { Assets, UTxO } from 'lucid-cardano';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { splitUTxOs } from "../stakePool/endPoints - splitUTxOs";
-import { apiCreateStakingPoolDB, getEstadoDeployAPI } from "../stakePool/apis";
-import { ADA_UI, maxMasters } from '../types/constantes';
+import { apiCreateStakingPoolDB, apiGetTokenMetadata, getEstadoDeployAPI } from "../stakePool/apis";
+import { ADA_Decimals, ADA_UI, maxMasters } from '../types/constantes';
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
 import { pushSucessNotification } from "../utils/pushNotification";
 import { useStoreState } from '../utils/walletProvider';
 import ActionWithInputModalBtn from './ActionWithInputModalBtn';
 import LoadingSpinner from "./LoadingSpinner";
-import { EUTxO } from '../types';
+import { AssetClass, EUTxO } from '../types';
 import { newTransaction } from '../utils/cardano-helpersTx';
+import { toJson } from '../utils/utils';
+import { getDecimalsInMetadata } from '../utils/cardano-helpers';
 
 //--------------------------------------
 
@@ -50,6 +52,9 @@ export default function CreateStakingPool( ) {
 	const [staking_UI, setStakingUnitForShowing] = useState(ADA_UI)
 	const [harvest_UI, setHarvestUnitForShowing] = useState(ADA_UI)
 
+	const [staking_Decimals, setppStakingDecimals] = useState("0")
+	const [harvest_Decimals, setppHarvestDecimals] = useState("0")
+
 	const [interest, setppInterest] = useState((365 * 24 * 60).toString()) //uno por minuto
 
 	const [dateInputValueppBeginAt, setDateInputValueppBeginAt] = useState(new Date(parseInt(beginAt)))
@@ -57,7 +62,8 @@ export default function CreateStakingPool( ) {
 
 	const [uTxOsAtWalllet, setUTxOsAtWalllet] = useState<UTxO[]>([])
 	const [isUTxOsFromWalletLoading, setIsUTxOsFromWalletLoading] = useState(false)
-
+	const [isDecimalsInMetadataLoading, setIsDecimalsInMetadataLoading] = useState(false)
+	
 	const [isWorking, setIsWorking] = useState("")
 	const [actionMessage, setActionMessage] = useState("")
 	const [actionHash, setActionHash] = useState("")
@@ -167,6 +173,10 @@ export default function CreateStakingPool( ) {
 				harvest_UI: harvest_UI,
 				harvest_CS: harvest_CS,
 				harvest_TN: harvest_TN,
+
+				staking_Decimals: staking_Decimals,
+				harvest_Decimals: harvest_Decimals,
+				
 				interest: interest
 			}
 
@@ -243,25 +253,32 @@ export default function CreateStakingPool( ) {
 									<div className="pool__stat-actions">
 
 										<form>
-											<h4 className="pool__stat-title">Staking Pool Name</h4>
-											<input name='nombrePool' value={nombrePool} style={{ width: 600, fontSize: 12 }} onChange={(event) => setNombrePool(event.target.value)}  ></input>
+											<h3 className="pool__stat-title">Staking Pool</h3>
+											<br></br>
+
+											<h4 className="pool__stat-title">Name</h4>
+											<input name='nombrePool' value={nombrePool} style={{ width: 400, fontSize: 12 }} onChange={(event) => setNombrePool(event.target.value)}  ></input>
 											<br></br><br></br>
 
-											<h4 className="pool__stat-title">Masters</h4><input name='ppMasters' value={masters} style={{ width: 600, fontSize: 12 }} onChange={(event) => setMasters(event.target.value)}  ></input>
+											<h4 className="pool__stat-title">Masters</h4>
+											<input name='ppMasters' value={masters} style={{ width: 400, fontSize: 12 }} onChange={(event) => setMasters(event.target.value)}  ></input>
 											<li className="info">Separate by comma the different <b>PaymentPubKeyHashes</b>, must by a Hexadecimal string of 56 characteres lenght each</li>
 											<li className="info">Up to a maximum of {maxMasters}</li>
 											<br></br>
 
 											<h4 className="pool__stat-title">UTxO for minting NFT PoolID</h4><p>txHash#OutputIndex</p>
-											<input name='ppPoolID_TxOutRef' value={poolID_TxOutRef} onChange={(event) => setPoolID_TxOutRef(event.target.value)} style={{ width: 600, fontSize: 12 }}></input>
-											{isUTxOsFromWalletLoading ? <div style={{ position: 'relative', top: -20, left: 10 }}><LoadingSpinner size={15} border={3} /></div> : <></>}
-
-											<button onClick={async (event) => {
-												setPoolID_TxOutRef(""); event.preventDefault(); await getPoolID_TxOutRef()
+											<input name='ppPoolID_TxOutRef' value={poolID_TxOutRef} onChange={(event) => setPoolID_TxOutRef(event.target.value)} style={{ width: 335, fontSize: 12 }}></input>
+											<button style={{ width: 65}} onClick={async (event) => {
+												setPoolID_TxOutRef(""); 
+												event.preventDefault(); 
+												await getPoolID_TxOutRef()
 
 											}}>Refresh</button>
-
-
+											{isUTxOsFromWalletLoading  ? 
+												<div style={{ position: 'relative', top: -20, left: 3 }}><LoadingSpinner size={15} border={3} align="left" /></div> 
+												: 
+												<></>
+											}
 
 											{uTxOsAtWalllet?.length > 1 ?
 												<div>
@@ -276,8 +293,11 @@ export default function CreateStakingPool( ) {
 											}
 											<br></br>
 
+											<h3 className="pool__stat-title">Dates</h3>
+											<br></br>
+
 											<h4 className="pool__stat-title">Begin At</h4>
-											<input name='beginAt' value={beginAt} style={{ width: 600, fontSize: 12 }} onChange={(event) => { setBeginAt(event.target.value); setDateInputValueppBeginAt(new Date(parseInt(event.target.value))) }} ></input>
+											<input name='beginAt' value={beginAt} style={{ width: 400, fontSize: 12 }} onChange={(event) => { setBeginAt(event.target.value); setDateInputValueppBeginAt(new Date(parseInt(event.target.value))) }} ></input>
 											<LocalizationProvider dateAdapter={AdapterDateFns}>
 												<DateTimePicker
 													renderInput={(props) => <TextField {...props} />}
@@ -288,10 +308,10 @@ export default function CreateStakingPool( ) {
 													}}
 												/>
 											</LocalizationProvider>
-											<br></br>
+											<br></br><br></br>
 
 											<h4 className="pool__stat-title">Deadline</h4>
-											<input name='deadline' value={deadline} style={{ width: 600, fontSize: 12 }} onChange={(event) => { setppDeadline(event.target.value); setDateInputValueppDeadline(new Date(parseInt(event.target.value))) }} ></input>
+											<input name='deadline' value={deadline} style={{ width: 400, fontSize: 12 }} onChange={(event) => { setppDeadline(event.target.value); setDateInputValueppDeadline(new Date(parseInt(event.target.value))) }} ></input>
 											<LocalizationProvider dateAdapter={AdapterDateFns}>
 												<DateTimePicker
 													renderInput={(props) => <TextField {...props} />}
@@ -307,7 +327,7 @@ export default function CreateStakingPool( ) {
 											<br></br>
 
 											<h4 className="pool__stat-title">Grace Time</h4>
-											<input name='ppGraceTieme' value={graceTime} style={{ width: 600, fontSize: 12 }} onChange={(event) => setppGraceTime(event.target.value)}  ></input>
+											<input name='ppGraceTieme' value={graceTime} style={{ width: 400, fontSize: 12 }} onChange={(event) => setppGraceTime(event.target.value)}  ></input>
 											<li className="info">Period for users to collect their rewards after the Deadline or forced close, in milliseconds.</li>
 											<li className="info">(To use 15 days, enter: 1000*60*60*24*15 = 1296000000)</li>
 											<li className="info">(To use 1 day, enter: 1000*60*60*24 = 86400000)</li>
@@ -315,47 +335,103 @@ export default function CreateStakingPool( ) {
 											<li className="info">(To use 15 minutes, enter: 1000*60*15 = 900000)</li>
 											
 											<br></br>
+											
+											<h3 className="pool__stat-title">Staking Unit</h3>
+											<br></br>
 
-											<h4 className="pool__stat-title">Staking Unit: Name to Show in User Interface </h4><input name='staking_UI' value={staking_UI} style={{ width: 600, fontSize: 12 }} onChange={(event) => setStakingUnitForShowing(event.target.value)}  ></input>
+											<h4 className="pool__stat-title">Name to Show in User Interface </h4>
+											<input name='staking_UI' value={staking_UI} style={{ width: 400, fontSize: 12 }} onChange={(event) => setStakingUnitForShowing(event.target.value)}  ></input>
 											<li className="info">Will be used to display a friendly name of the chosen unit.</li>
+											<br></br>
 
-											<h4 className="pool__stat-title">Staking Unit: Currency Symbol</h4>
-											<input name='staking_CS' value={staking_CS} style={{ width: 600, fontSize: 12 }} onChange={(event) => setppStakingCS(event.target.value)}  ></input>
+											<h4 className="pool__stat-title">Currency Symbol</h4>
+											<input name='staking_CS' value={staking_CS} style={{ width: 400, fontSize: 12 }} onChange={(event) => setppStakingCS(event.target.value)}  ></input>
 											<li className="info">Leave empty to use { ADA_UI }</li>
 											<li className="info">If you want to use another token you must enter its <b>Policy Id</b>, must by a Hexadecimal string of 56 characteres lenght</li>
-
-											<h4 className="pool__stat-title">Staking Unit: Token Name</h4><input name='staking_TN' value={staking_TN} style={{ width: 600, fontSize: 12 }} onChange={(event) => setppStakingTN(event.target.value)}  ></input>
+											<br></br>
+											
+											<h4 className="pool__stat-title">Token Name</h4>
+											<input name='staking_TN' value={staking_TN} style={{ width: 400, fontSize: 12 }} onChange={(event) => setppStakingTN(event.target.value)}  ></input>
 											<li className="info">Must leave empty if you choose to use { ADA_UI } as Currency Symbol</li>
 											<li className="info">Leave empty to use any Token Name within the chossen Currency Symbol</li>
 											<li className="info">If you want to an specific Token Name you must enter its <b>Token Name</b> in Hexadecimal</li>
+											<br></br>
+
+											<h4 className="pool__stat-title">Decimals</h4>
+											<input name='staking_Decimals' value={staking_Decimals} style={{ width: 315, fontSize: 12 }} onChange={(event) => setppStakingDecimals(event.target.value)}  ></input>
+											<button style={{ width: 85}} onClick={async (event) => {
+												
+												setIsDecimalsInMetadataLoading(true)
+												event.preventDefault(); 
+												setppStakingDecimals(""); 
+												setppStakingDecimals((await getDecimalsInMetadata(staking_CS, staking_TN)).toString())
+												setIsDecimalsInMetadataLoading(false)
+
+											}}>Metadata</button>
+											{isDecimalsInMetadataLoading  ? <div style={{ position: 'relative', top: -20, left: 3 }}><LoadingSpinner size={15} border={3} align="left" /></div> : <></>}
+											<li className="info">Decimals are only used for displaying in the user interface</li>	
+											<li className="info">Inside the system and calculations, all numbers are rounded and integers</li>	
+											<li className="info">If you already filled the currency symbol and token name you can try to get the decimals of this token from the metadata online</li>	
+
 
 											<br></br>
 
-											<h4 className="pool__stat-title">Harvest Unit: Name to Show in User Interface </h4><input name='harvest_UI' value={harvest_UI} style={{ width: 600, fontSize: 12 }} onChange={(event) => setHarvestUnitForShowing(event.target.value)}  ></input>
+											<h3 className="pool__stat-title">Harvest Unit</h3>
+											<br></br>
+											
+											<h4 className="pool__stat-title">Name to Show in User Interface </h4>
+											<input name='harvest_UI' value={harvest_UI} style={{ width: 400, fontSize: 12 }} onChange={(event) => setHarvestUnitForShowing(event.target.value)}  ></input>
 											<li className="info">Will be used to display a friendly name of the chosen unit.</li>
+											<br></br>
 
-											<h4 className="pool__stat-title">Harvest Unit: Currency Symbol</h4><input name='harvest_CS' value={harvest_CS} style={{ width: 600, fontSize: 12 }} onChange={(event) => setppHarvestCS(event.target.value)}  ></input>
+											<h4 className="pool__stat-title">Currency Symbol</h4>
+											<input name='harvest_CS' value={harvest_CS} style={{ width: 400, fontSize: 12 }} onChange={(event) => setppHarvestCS(event.target.value)}  ></input>
 											<li className="info">Leave empty to use { ADA_UI }</li>
 											<li className="info">If you want to use another token you must enter its <b>Policy Id</b>, must by a Hexadecimal string of 56 characteres lenght</li>
+											<br></br>
 
-											<h4 className="pool__stat-title">Harvest Unit: Token Name</h4><input name='harvest_TN' value={harvest_TN} style={{ width: 600, fontSize: 12 }} onChange={(event) => setppHarvestTN(event.target.value)}  ></input>
+											<h4 className="pool__stat-title">Token Name</h4>
+											<input name='harvest_TN' value={harvest_TN} style={{ width: 400, fontSize: 12 }} onChange={(event) => setppHarvestTN(event.target.value)}  ></input>
 											<li className="info">Must leave empty if you choose to use { ADA_UI } as Currency Symbol</li>
 											<li className="info">Can't be empty if you choose to use another Currency Symbol</li>
 											<li className="info">Enter the <b>Token Name</b> in Hexadecimal</li>
+											<br></br>
 
+											<h4 className="pool__stat-title">Decimals</h4>
+											<input name='harvest_Decimals' value={harvest_Decimals} style={{ width: 315, fontSize: 12 }} onChange={(event) => setppHarvestDecimals(event.target.value)}  ></input>
+											<button style={{ width: 85}} onClick={async (event) => {
+												
+												setIsDecimalsInMetadataLoading(true)
+												event.preventDefault(); 
+												setppHarvestDecimals("")
+												setppHarvestDecimals((await getDecimalsInMetadata(harvest_CS,harvest_TN)).toString())
+												setIsDecimalsInMetadataLoading(false)
+
+
+											}}>Metadata</button>
+											{isDecimalsInMetadataLoading  ? <div style={{ position: 'relative', top: -20, left: 3 }}><LoadingSpinner size={15} border={3} align="left" /></div> : <></>}
+											<li className="info">Decimals are only used for displaying in the user interface</li>	
+											<li className="info">Inside the system and calculations, all numbers are rounded and integers</li>	
+											<li className="info">If you already filled the currency symbol and token name you can try to get the decimals of this token from the metadata online</li>	
+
+											<br></br>
+
+											<h3 className="pool__stat-title">Rewards</h3>
 											<br></br>
 
 											<h4 className="pool__stat-title">Anual pay of Havest Unit per each Staking Unit</h4>
 
-											<input name='interest' value={interest} style={{ width: 600, fontSize: 12 }} onChange={(event) => setppInterest(event.target.value)}  ></input>
+											<input name='interest' value={interest} style={{ width: 400, fontSize: 12 }} onChange={(event) => setppInterest(event.target.value)}  ></input>
 											<li className="info">(To have 1 per year, enter: 1)</li>
 											<li className="info">(To have 1 per month, enter: 1*12 = 12)</li>
 											<li className="info">(To have 1 per day, enter: 1*365 = 365)</li>
 											<li className="info">(To have 1 per hour, enter: 1*365*24 = 8760)</li>
 											<li className="info">(To have 1 per minute, enter: 1*365*24*60 = 525600)</li>
 											<li className="info">(To have 1 per second, enter: 1*365*24*60*60 = 31536000)</li>
-
+											<li className="info">The Unit of the Asset refers to the smallest division of the token when using decimals</li>
+											<li className="info">For example, if you are using 6 decimals like in ADA and you enter 1, you are referring to 0.000001 ADA or just 1 lovelace</li>
 											<br></br>
+
 											<label>
 												<input
 													type="checkbox"

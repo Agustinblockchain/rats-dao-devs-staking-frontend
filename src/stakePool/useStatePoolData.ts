@@ -279,50 +279,13 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
         //------------------
         const staking_CS = stakingPoolInfo.staking_Lucid.slice(0, 56)
         const staking_TN = stakingPoolInfo.staking_Lucid.slice(56)
-        const staking_AC: AssetClass = { currencySymbol: staking_TN, tokenName: staking_CS };
         const staking_AC_isAda = (staking_CS === 'lovelace')
         const staking_AC_isWithoutTokenName = !staking_AC_isAda && staking_TN == ""
         //------------------
         const harvest_CS = stakingPoolInfo.harvest_Lucid.slice(0, 56)
         const harvest_TN = stakingPoolInfo.harvest_Lucid.slice(56)
-        const harvest_AC: AssetClass = { currencySymbol: harvest_CS, tokenName: harvest_TN };
         const harvest_AC_isAda = (harvest_CS === 'lovelace')
         const harvest_AC_isWithoutTokenName = !harvest_AC_isAda && harvest_TN == ""
-        //------------------
-        // var staking_Decimals = 0
-        // if (staking_AC_isAda){
-        //     staking_Decimals = ADA_Decimals
-        // }else if (staking_AC_isWithoutTokenName){
-        //     staking_Decimals = 0
-        // }else{
-        //     const staking_Metadata = await apiGetTokenMetadata(staking_AC)
-        //     //console.log("useStatePoolData - " + poolInfo.name + " - setPoolData - staking_metadata: " + toJson(staking_Metadata))
-        //     if(staking_Metadata && staking_Metadata?.metadata?.decimals) {
-        //         staking_Decimals = staking_Metadata.metadata.decimals
-        //     }else{
-        //         staking_Decimals = 0
-        //     }
-        // }
-        // setStaking_Decimals(staking_Decimals)
-        // //------------------
-        // var harvest_Decimals = 0
-        // if (harvest_AC_isAda){
-        //     harvest_Decimals = ADA_Decimals
-        // }else if (harvest_AC_isWithoutTokenName){
-        //     harvest_Decimals = 0
-        // }else{
-        //     const harvest_Metadata = await apiGetTokenMetadata(harvest_AC)
-        //     //console.log("useStatePoolData - " + poolInfo.name + " - setPoolData - harvest_metadata: " + toJson(harvest_Metadata))
-        //     if(harvest_Metadata && harvest_Metadata?.metadata?.decimals) {
-        //         harvest_Decimals = harvest_Metadata.metadata.decimals
-        //     }else{
-        //         harvest_Decimals = 0
-        //     }
-        // }
-        // setHarvest_Decimals(harvest_Decimals)
-
-       
-
         //------------------
         setInterestUI(formatAmount(Number(poolInfo.pParams.ppInterestRates[0].iPercentage), poolInfo.harvest_Decimals - poolInfo.staking_Decimals, poolInfo.harvest_UI))
         //------------------

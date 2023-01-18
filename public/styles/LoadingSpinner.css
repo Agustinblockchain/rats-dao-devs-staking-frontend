@@ -21,3 +21,15 @@
     align-items: center;
     /* height: 350px; */
   }
+
+  .spinner-left {
+    align-items: left!important;
+  }
+
+  .spinner-center {
+    align-items: center!important;
+  }
+
+  .spinner-right {
+    align-items: right!important;
+  }

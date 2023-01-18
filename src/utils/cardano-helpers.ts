@@ -1,7 +1,8 @@
 import { Assets, Lucid, UTxO } from "lucid-cardano";
-import { AC, BIGINT, CS, EUTxO, FundDatum, Master_Funder, Maybe, PoolDatum, POSIXTime, ScriptDatum, TxOutRef, UserDatum } from "../types";
-import { apiGetDatumDB, apiSaveDatumDB } from "../stakePool/apis";
-import { searchValueInArray } from "./utils";
+import { AC, AssetClass, BIGINT, CS, EUTxO, FundDatum, Master_Funder, Maybe, PoolDatum, POSIXTime, ScriptDatum, TxOutRef, UserDatum } from "../types";
+import { apiGetDatumDB, apiGetTokenMetadata, apiSaveDatumDB } from "../stakePool/apis";
+import { searchValueInArray, toJson } from "./utils";
+import { ADA_Decimals } from "../types/constantes";
 
 //---------------------------------------------------------------
 
@@ -401,4 +402,26 @@ export function calculateMinAdaOfAssets(assets: Assets, isHash: boolean): BIGINT
 
 //---------------------------------------------------------------
 
+export async function getDecimalsInMetadata(asset_CS: string, asset_TN: string) {
+    const asset_AC: AssetClass = { currencySymbol: asset_CS, tokenName: asset_TN };
+    const asset_AC_isAda = (asset_CS === '')
+    const asset_AC_isWithoutTokenName = !asset_AC_isAda && asset_TN == ""
+    // ------------------
+    var asset_Decimals = 0
+    if (asset_AC_isAda){
+        asset_Decimals = ADA_Decimals
+    }else if (asset_AC_isWithoutTokenName){
+        asset_Decimals = 0
+    }else{
+        const asset_Metadata = await apiGetTokenMetadata(asset_AC)
+        console.log("getDecimalsInMetadata: " + toJson(asset_Metadata))
+        if(asset_Metadata && asset_Metadata?.metadata?.decimals) {
+            asset_Decimals = asset_Metadata.metadata.decimals
+        }else{
+            asset_Decimals = 0
+        }
+    }
+    return asset_Decimals
+}
 
+//---------------------------------------------------------------
