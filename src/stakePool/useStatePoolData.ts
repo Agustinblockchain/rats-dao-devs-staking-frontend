@@ -46,6 +46,8 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
     const [isPoolDataLoaded, setIsPoolDataLoaded] = useState(false)
     const [isPoolDataLoading, setIsPoolDataLoading] = useState(false)
     
+    const [statusUI, setStatusUI] = useState<string | 0> (ui_loading)
+
     const [swShowOnHomeUI, setSwShowOnHomeUI] = useState<string | 0 > (ui_loading)
     const [swPreparadoUI, setSwPreparadoUI] = useState<string | 0 > (ui_loading)
     const [swIniciadoUI, setSwIniciadoUI] = useState<string | 0 > (ui_loading)
@@ -126,6 +128,8 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
         // console.log("useStatePoolData - " + poolInfo.name + " - setLoading: " + ui)
 
         setIsPoolDataLoaded(false)
+
+        setStatusUI(ui)
 
         setSwShowOnHomeUI(ui)
         setSwPreparadoUI(ui)
@@ -484,6 +488,24 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
             }
         }
 
+        if(poolInfo.swTerminated){
+            setStatusUI("Terminated")
+        }else if (poolInfo.swClosed){
+            setStatusUI("Closed")
+        }else if(poolInfo.swPreparado){
+            if(poolInfo.swIniciado){
+                if(poolInfo.swFunded){
+                    setStatusUI("Active")
+                }else{
+                    setStatusUI("Waiting for Funding")
+                }
+            }else{
+                setStatusUI("Not Started")
+            }
+        }else{
+            setStatusUI("Not Ready")
+        }
+
         setSwShowOnHomeUI(poolInfo.swShowOnHome ? "Yes" : "No");
         setSwPreparadoUI(poolInfo.swPreparado ? "Yes" : "No");
         setSwIniciadoUI(poolInfo.swIniciado ? "Yes" : "No");
@@ -565,6 +587,7 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
     return {
         poolInfo,
 
+        statusUI,
         swShowOnHomeUI,
         swPreparadoUI, 
         swIniciadoUI, 

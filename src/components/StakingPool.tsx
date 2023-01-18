@@ -62,6 +62,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 	const { 
 		poolInfo,
 
+		statusUI, 
 		swClosedUI,
 
 		beginAtUI,
@@ -282,19 +283,8 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 					</h4>
 					<br></br>
 
-					{process.env.NODE_ENV==="development"?
-						<>
-							<div>Pool Closed:  {swClosedUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
-							<div>Pool Terminated: {swTerminatedUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
-							<br></br>
-							
-							<div>EUTxOs At Contract: {countEUTxOs_With_DatumUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</div>
-							<br></br>
-									
-						</>
-						:
-						<></>
-					}
+					<div>Status <b>{statusUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></div>
+					<br></br>
 
 					<p><>Earn <b>{interestUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b> per year</></p>
 					<p><>per every <b>{poolInfo.staking_UI}</b> you Deposit</></p>
@@ -335,12 +325,20 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 					<div className="pool__action_smallcard"  >
 						<div className="pool__stat">
 							<div style={{textAlign: 'left', width:"100%"}}>
-								<p><><b>From</b> {beginAtUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} {((!poolInfo.swIniciado) ? <>(It hasn't started yet)</>:<></>)}</></p>
+								
+								<p><><b>From</b> {beginAtUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} 
+								{/* {((!poolInfo.swIniciado) ? <>(It hasn't started yet)</>:<></>)} */}
+								</></p>
+
 								{poolInfo.closedAt?
-									<p><><b>To</b> {closedAtUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} {((poolInfo.swClosed) ? <>(It's already Closed)</>:<></>)}</></p>
+									<p><><b>To</b> {closedAtUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} 
+									{/* {((poolInfo.swClosed) ? <>(It's already Closed)</>:<></>)} */}
+									</></p>
 									:
 									<>
-										<p><><b>To</b> {closedAtUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} {((poolInfo.swClosed) ? <>(It's already Closed)</>:<></>)}</></p>
+										<p><><b>To</b> {closedAtUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} 
+										{/* {((poolInfo.swClosed) ? <>(It's already Closed)</>:<></>)} */}
+										</></p>
 									</>
 								}
 							</div>
