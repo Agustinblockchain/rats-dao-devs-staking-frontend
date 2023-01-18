@@ -465,10 +465,17 @@ export default function ActionWithSelectInputModalBtn(
 												} else {
 													setMessage("")
 													let assets: Assets = {}
+													var swError = false
 													walletAssetsSelect.forEach((asset) => {
+														if(BigInt (asset.amount) > BigInt (asset.max)) {
+															const tn = walletAssetsList.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.tokenName
+															setMessage("You have exceeded the maximum avalaible tokens " + tn + " which is: " + formatAmount(Number(asset.max), inputDecimals, inputUnitForShowing) )
+															swError = true
+															return
+														}
 														assets[input_CS + asset.tokenNameHEX] = BigInt (asset.amount)
 													})
-													doAction(action, poolInfo, eUTxOs_Selected, assets, master_Selected)
+													if (!swError)doAction(action, poolInfo, eUTxOs_Selected, assets, master_Selected)
 												}
 											}
 										}
