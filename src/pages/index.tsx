@@ -18,10 +18,8 @@ import Message from '../components/Message'
 const Home : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> =  ({pkh, stakingPools} : InferGetServerSidePropsType<typeof getServerSideProps>) =>  {
 	
 	const { data: session, status } = useSession()
-
 	const [stakingPoolsParsed, setStakingPoolsParsed] = useState<StakingPoolDBInterface [] > ([]);
 	const [isRefreshing, setIsRefreshing] = useState(true);
-
 	useEffect(() => {
 		if (stakingPools){
 			for (let i = 0; i < stakingPools.length; i++) {

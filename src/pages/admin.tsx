@@ -16,17 +16,15 @@ import Message from '../components/Message'
 const Admin : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> =  ({pkh, stakingPools} : InferGetServerSidePropsType<typeof getServerSideProps>) =>  {
 	
 	const { data: session, status } = useSession()
-
 	const [isRefreshing, setIsRefreshing] = useState(true);
 	const [stakingPoolsParsed, setStakingPoolsParsed] = useState<StakingPoolDBInterface [] > ([]);
-
+	const walletStore = useStoreState(state => state.wallet)
 	const router = useRouter();
 	const refreshData = () => {
 		console.log ("Admin - refreshData");
 		router.replace(router.basePath)
 		setIsRefreshing(true);
 	};
-
 	useEffect(() => {
 		if (status == "authenticated" && session?.user.pkh != pkh) {
 			refreshData()
@@ -34,7 +32,6 @@ const Admin : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> =
 			refreshData()
 		}
 	}, [status])
-
 	useEffect(() => {
 		if (stakingPools){
 			for (let i = 0; i < stakingPools.length; i++) {
@@ -46,8 +43,17 @@ const Admin : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> =
 	}, [stakingPools]);
 
 	return (
+		<>
+			{/* pkh: {pkh}
+			<br></br>
+			session?.user.pkh: {session?.user.pkh}
+			<br></br>
+			walletStore?.pkh: {walletStore?.pkh}
+			<br></br> */}
 		<Layout swCreate={session?.user.swCreate}>
 		{
+			
+			
 			(status == "loading")? 
 				<Message message={"Loading Page..."} />
 			:
@@ -64,8 +70,11 @@ const Admin : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> =
 							)
 						:
 							<Message message={"Can't find any Staking Pool to Admin"} />
+			
 		}
 		</Layout>
+		</>
+		
 	)
 }
 

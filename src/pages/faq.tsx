@@ -1,13 +1,6 @@
-import type { InferGetStaticPropsType, InferGetServerSidePropsType, NextPage } from 'next'
+import type { InferGetServerSidePropsType, NextPage } from 'next'
+import { useSession } from 'next-auth/react'
 import Layout from '../components/Layout'
-import dynamic from 'next/dynamic'
-import { toJson } from '../utils/utils'
-import { connect } from '../utils/dbConnect'
-import { useStoreState } from '../utils/walletProvider';
-import { StakingPoolDBInterface, getStakingPools } from '../types/stakePoolDBModel'
-import { createContext, useEffect, useState } from 'react'
-import { useRouter } from 'next/router'
-import { getSession, useSession } from 'next-auth/react'
 
 const getFaqText = (n : number) => {
 	switch(n) {

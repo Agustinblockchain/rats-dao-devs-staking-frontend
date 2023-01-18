@@ -2,7 +2,7 @@ import { toJson } from "../utils/utils";
 
 //---------------------------------------------------------------
 
-export function explainError(errorIn: any): string {
+export function explainErrorTx(errorIn: any): string {
     //search if substring 'ScriptFailures' is in error
     var res = "";
     var sep = "";
@@ -206,6 +206,51 @@ export function explainError(errorIn: any): string {
 
             if (res === "" && error.includes("invalidBefore")) {
                 res += sep + "Invalid Transaction Date, please try again later!"; sep = ", ";
+            }
+
+            if (res === "") {
+                res = error;
+            }
+
+            console.log("Error explained: " + res);
+
+            return res;
+        } else {
+            return "Technical problems, please try again!";
+        }
+    }
+}
+
+export function explainError(errorIn: any): string {
+    //search if substring 'ScriptFailures' is in error
+    var res = "";
+    var sep = "";
+
+    const error_In2 = `${errorIn?.info || errorIn?.message || errorIn}`;
+    const error = (typeof error_In2 === 'object' ? toJson(error_In2) : error_In2);
+
+    console.error("Error: " + error);
+
+    if (error === undefined || error === null || error === "" || error == null || error == undefined || error == "null") {
+        res += sep + "Technical problems, please try again!"; sep = ", ";
+        console.error("Error Explained: " + res);
+        return res;
+    } else {
+
+        if (typeof error === 'string') {
+
+            if (error.includes("\"Failed to fetch\"")) { res += sep + "The connection was lost, please try again later!"; sep = ", "; }
+
+            if (res === "" && error.includes("Failed to fetch")) {
+                res += sep + "Technical problems, please try again!"; sep = ", ";
+            }
+
+            if (res === "" && error.includes("The request was refused due to lack of access - e.g. wallet disconnects.")) {
+                res += sep + "You have canceled the connection!"; sep = ", ";
+            }
+
+            if (res === "" && error.includes("account changed")) {
+                res += sep + "You have changed the wallet in the dApp Connector, please reconnect with your new wallet!"; sep = ", ";
             }
 
             if (res === "") {

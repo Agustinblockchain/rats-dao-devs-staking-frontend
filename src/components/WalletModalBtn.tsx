@@ -2,6 +2,7 @@
 import { signIn, signOut, useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
 import Skeleton from "react-loading-skeleton"
+import { explainError, explainErrorTx } from "../stakePool/explainError"
 import { initializeLucid, initializeLucidWithWalletFromSeed } from "../utils/initializeLucid"
 import { useLocalStorage } from "../utils/useLocalStorage"
 import { searchKeyInObject, searchValueInArray } from "../utils/utils"
@@ -48,23 +49,26 @@ export default function WalletModalBtn() {
 		try {
 
 			var walletApi = undefined
-			var countError = 0
-			var error = ""
-			const maxError = 3
-			while (countError < maxError) {
-				try {
-				 	walletApi = await window.cardano[walletName].enable()
-					break
-				} catch (error) {
-					console.log("[Session] - try " + countError+" of "+maxError+" - walletConnect Error: " + error)
-					error = error
-					countError++
-					await new Promise(r => setTimeout(r, 2000)); //espero 2 segundos para que se cargue la wallet
-				}
-			}
-			if (!walletApi) {
-				throw error
-			}
+			// var countError = 0
+			// var errorStr = ""
+			// const maxError = 3
+			// while (countError < maxError) {
+			// 	try {
+			// 	 	walletApi = await window.cardano[walletName].enable()
+			// 		break
+			// 	} catch (error) {
+			// 		console.log("[Session] - try " + countError+" of "+maxError+" - walletConnect Error: " + error)
+			// 		errorStr = explainError(error) 
+			// 		countError++
+			// 		await new Promise(r => setTimeout(r, 2000)); //espero 2 segundos para que se cargue la wallet
+			// 	}
+			// }
+			// if (!walletApi) {
+			// 	throw errorStr
+			// }
+
+			walletApi = await window.cardano[walletName].enable()
+
 			const lucid = await initializeLucid(walletApi)
 			const adddressWallet = await lucid!.wallet.address()
 			//const pkh = C.Address.from_bech32(adddressWallet).as_base()?.payment_cred().to_keyhash()?.to_hex();
@@ -91,7 +95,8 @@ export default function WalletModalBtn() {
 			setWalletMessage("Connected with " + walletName + "!")
 		} catch (error) {
 			console.error("[Session] - walletConnect Error2: " + error)
-			setWalletMessage("Error connecting with " + walletName + ": " + error)
+			const error_explained = explainError(error)
+			setWalletMessage("Error connecting with " + walletName + ": " + error_explained)
 			if (status === "authenticated") {
 				await signOut({ redirect: false })
 			}
@@ -159,6 +164,8 @@ export default function WalletModalBtn() {
 				//console.log("[Session] - walletConnect - session.walletName: " + session.user.walletName)
 				if (window.cardano && searchKeyInObject(availableWallets, session.user.walletName)) {
 					//si la wallet estaba conectada en la session anterior, tengo que reconectarla
+					console.log("[Session] - sessionWalletConnect - session.walletName: " + session.user.walletName)
+					//await new Promise(r => setTimeout(r, 3000));
 					await walletConnect(session.user.walletName, false)
 				} else {
 					console.log("[Session] - sessionWalletConnect: Not connecting to any wallet. Wallet of previus session not found: " + session.user.walletName)

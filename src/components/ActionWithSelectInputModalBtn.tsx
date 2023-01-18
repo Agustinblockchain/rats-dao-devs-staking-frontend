@@ -4,7 +4,7 @@ import { Assets, UTxO } from "lucid-cardano";
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
 import { copyToClipboard, formatAmount, hexToStr, toJson } from '../utils/utils';
 import { NumericFormat } from 'react-number-format';
-import { explainError } from "../stakePool/explainError";
+import { explainErrorTx } from "../stakePool/explainError";
 import { EUTxO, Master } from "../types";
 import { maxTokensWithDifferentNames } from "../types/constantes";
 import { pushSucessNotification, pushWarningNotification } from "../utils/pushNotification";
@@ -183,7 +183,7 @@ export default function ActionWithSelectInputModalBtn(
 				await postActionSuccess()
 			}
 		} catch (error: any) {
-			const error_explained = explainError(error)
+			const error_explained = explainErrorTx(error)
 			console.error("ActionModalBtn - doAction - " + actionName + " - Error: " + error_explained)
 			pushWarningNotification(actionName, error_explained);
 			setStatus('error')

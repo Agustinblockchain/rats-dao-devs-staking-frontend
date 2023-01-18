@@ -16,20 +16,17 @@ import Message from '../components/Message'
 const Withdraw : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> =  ({pkh, stakingPools} : InferGetServerSidePropsType<typeof getServerSideProps>) =>  {
 	
 	const { data: session, status } = useSession()
-
 	const [isRefreshing, setIsRefreshing] = useState(true);
 	const [stakingPoolsParsed, setStakingPoolsParsed] = useState<StakingPoolDBInterface [] > ([]);
-
 	const walletStore = useStoreState(state => state.wallet)
 	const router = useRouter();
 	const refreshData = () => {
-		console.log ("Withdraw - refreshData - router.replace - walletStore.connected " + walletStore.connected + " - router.asPath: " + router.asPath);
+		console.log ("Withdraw - refreshData");
 		router.replace(router.basePath)
 		setIsRefreshing(true);
 	};
 
 	useEffect(() => {
-		console.log ("Withdraw - status " + status + " - session?.user.pkh: " + session?.user.pkh + " - pkh: " + pkh);
 		if (status == "authenticated" && session?.user.pkh != pkh) {
 			refreshData()
 		} else if (status == "unauthenticated" && pkh != "") {

@@ -7,7 +7,7 @@ import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { splitUTxOs } from "../stakePool/endPoints - splitUTxOs";
 import { userDeposit, userHarvest, userWithdraw } from '../stakePool/endPoints - user';
-import { explainError } from "../stakePool/explainError";
+import { explainErrorTx } from "../stakePool/explainError";
 import { stakingPoolDBParser } from "../stakePool/helpersStakePool";
 import useStatePoolData from '../stakePool/useStatePoolData';
 import { EUTxO } from '../types';

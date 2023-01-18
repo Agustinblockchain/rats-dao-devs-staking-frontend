@@ -1,39 +1,13 @@
 //--------------------------------------
 import type { InferGetServerSidePropsType, NextPage } from 'next';
-import { getSession, useSession } from 'next-auth/react';
-import dynamic from 'next/dynamic';
-import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
 import CreateStakingPool from '../components/CreateStakingPool';
 import Layout from '../components/Layout';
 import Message from '../components/Message';
-import { toJson } from '../utils/utils';
-import { useStoreState } from '../utils/walletProvider';
-
 //--------------------------------------
 const Create : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = ({} : InferGetServerSidePropsType<typeof getServerSideProps>) =>  {
 	
 	const { data: session, status } = useSession()
-	
-	// const router = useRouter();
-	// const [isRefreshing, setIsRefreshing] = useState(true);
-	// const walletStore = useStoreState(state => state.wallet)
-	// const refreshData = () => {
-	// 	console.log ("Create - refreshData - router.replace - walletStore.connected " + walletStore.connected + " - router.asPath: " + router.asPath);
-	// 	router.replace(router.basePath)
-	// 	setIsRefreshing(true);
-	// };
-	// useEffect(() => {
-	// 	setIsRefreshing(false);
-	// }, []);
-	// useEffect(() => {
-	// 	if (walletStore.connected && pkh != walletStore.pkh) {
-	// 		refreshData()
-	// 	}else if (!walletStore.connected) {
-	// 		refreshData()
-	// 	}
-	// }, [walletStore.connected])
-
 	return (
 		<Layout swCreate={session?.user.swCreate}>
 		{

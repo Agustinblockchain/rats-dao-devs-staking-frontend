@@ -11,16 +11,14 @@ export const initializeLucid = async (walletApi?: WalletApi | undefined) => {
             new Blockfrost(process.env.NEXT_PUBLIC_REACT_SERVER_URL + "/api/blockfrost", "xxxx"),
                 process.env.NEXT_PUBLIC_USE_MAINNET === 'true' ? 'Mainnet':'Preview'
         )
-        
         if(walletApi !== undefined) {
             await lucid.selectWallet(walletApi)
         }
-    
         console.log ("initializeLucid - OK - walletApi: " + toJson(walletApi))
-    
         return lucid
     }catch (error){
         console.error("initializeLucid - Error: " + error)
+        throw error
     }
 }
 

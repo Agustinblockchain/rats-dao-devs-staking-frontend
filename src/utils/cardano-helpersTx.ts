@@ -3,7 +3,7 @@
 import { Assets, C, createCostModels, Lucid, TxComplete, TxSigned } from "lucid-cardano";
 import { BigNum, Costmdls, CostModel, hash_script_data, Int, Language, Transaction } from "@dcspark/cardano-multiplatform-lib-browser";
 import { SetStateAction } from "react";
-import { explainError } from "../stakePool/explainError";
+import { explainErrorTx } from "../stakePool/explainError";
 import { EUTxO, Master, Maybe, POSIXTime } from "../types";
 import { maxTxExMem, maxTxExSteps, maxTxSize, TIME_OUT_TRY_TX, txConsumingTime, txPreparingTime, validTimeRangeInSlots } from "../types/constantes";
 import { StakingPoolDBInterface } from "../types/stakePoolDBModel";
@@ -429,7 +429,7 @@ export async function waitForTxConfirmation (lucid: Lucid, txhash: string, eUTxO
 
 export function errorIsBecauseEUTxOsAreNotUpdated (error: string) : boolean {
 
-    const error_explained = explainError(error)
+    const error_explained = explainErrorTx(error)
     
     if (error_explained.includes("You have canceled the transfer!")) {
         return false;
