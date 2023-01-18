@@ -401,7 +401,7 @@ export default function ActionWithSelectInputModalBtn(
 											<>
 												{walletAssetsList.map((asset, idx) => 
 													<div key={idx} >
-														<b>{asset.tokenName}</b> (There are {formatAmount(Number(asset.value), inputDecimals, undefined)} in your wallet)
+														<b>{asset.tokenName}</b> (There are {formatAmount(Number(asset.value), inputDecimals, undefined)} in your Wallet)
 														<br></br>
 														<div>
 															<NumericFormat key={"NumericFormat" + idx} style={{ width: 255, fontSize: 12 }} type="text" value={ walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.amountFormatedValue}

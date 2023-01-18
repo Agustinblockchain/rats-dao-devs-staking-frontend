@@ -65,7 +65,7 @@ export const storeWallet = createStore<AppStoreModel> (({
 		actions.setUTxOsAtWallet(utxosAtWallet!) 
 		//console.log("storeWallet - loadWalletData - state.uTxOsAtWallet length: " + utxosAtWallet.length)
 		if (utxosAtWallet.length == 0) {
-			console.log("storeWallet - loadWalletData: There are no UTxOs available in your wallet");
+			console.log("storeWallet - loadWalletData: There are no UTxOs available in your Wallet");
 		}
 		actions.setIsWalletDataLoaded(true)
 

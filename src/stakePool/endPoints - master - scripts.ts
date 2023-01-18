@@ -25,7 +25,7 @@ export async function masterAddScriptsMasterFund(wallet: Wallet, poolInfo: Staki
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
     //------------------
-    if (wallet?.pkh === undefined) throw "I couldn't get your key hash. Try connecting your wallet again";
+    if (wallet?.pkh === undefined) throw "Couldn't get your Public Key Hash. Try connecting your Wallet again";
     //------------------
     const master = wallet.pkh!;
     const masterAddr = await lucid!.wallet.address();
@@ -78,7 +78,7 @@ export async function masterAddScriptsMasterFundAndMerge(wallet: Wallet, poolInf
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
     //------------------
-    if (wallet?.pkh === undefined) throw "I couldn't get your key hash. Try connecting your wallet again";
+    if (wallet?.pkh === undefined) throw "Couldn't get your Public Key Hash. Try connecting your Wallet again";
     //------------------
     const master = wallet.pkh!;
     const masterAddr = await lucid!.wallet.address();
@@ -131,7 +131,7 @@ export async function masterAddScriptsMasterSplitFund(wallet: Wallet, poolInfo: 
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
     //------------------
-    if (wallet?.pkh === undefined) throw "I couldn't get your key hash. Try connecting your wallet again";
+    if (wallet?.pkh === undefined) throw "Couldn't get your Public Key Hash. Try connecting your Wallet again";
     //------------------
     const master = wallet.pkh!;
     const masterAddr = await lucid!.wallet.address();
@@ -184,7 +184,7 @@ export async function masterAddScriptsMasterClosePool(wallet: Wallet, poolInfo: 
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
     //------------------
-    if (wallet?.pkh === undefined) throw "I couldn't get your key hash. Try connecting your wallet again";
+    if (wallet?.pkh === undefined) throw "Couldn't get your Public Key Hash. Try connecting your Wallet again";
     //------------------
     const master = wallet.pkh!;
     const masterAddr = await lucid!.wallet.address();
@@ -238,7 +238,7 @@ export async function masterAddScriptsMasterTerminatePool(wallet: Wallet, poolIn
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
     //------------------
-    if (wallet?.pkh === undefined) throw "I couldn't get your key hash. Try connecting your wallet again";
+    if (wallet?.pkh === undefined) throw "Couldn't get your Public Key Hash. Try connecting your Wallet again";
     //------------------
     const master = wallet.pkh!;
     const masterAddr = await lucid!.wallet.address();
@@ -292,7 +292,7 @@ export async function masterAddScriptsMasterDeleteFund(wallet: Wallet, poolInfo:
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
     //------------------
-    if (wallet?.pkh === undefined) throw "I couldn't get your key hash. Try connecting your wallet again";
+    if (wallet?.pkh === undefined) throw "Couldn't get your Public Key Hash. Try connecting your Wallet again";
     //------------------
     const master = wallet.pkh!;
     const masterAddr = await lucid!.wallet.address();
@@ -346,7 +346,7 @@ export async function masterAddScriptsMasterDeleteScripts(wallet: Wallet, poolIn
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
     //------------------
-    if (wallet?.pkh === undefined) throw "I couldn't get your key hash. Try connecting your wallet again";
+    if (wallet?.pkh === undefined) throw "Couldn't get your Public Key Hash. Try connecting your Wallet again";
     //------------------
     const master = wallet.pkh!;
     const masterAddr = await lucid!.wallet.address();
@@ -400,7 +400,7 @@ export async function masterAddScriptsMasterSendBackFund(wallet: Wallet, poolInf
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
     //------------------
-    if (wallet?.pkh === undefined) throw "I couldn't get your key hash. Try connecting your wallet again";
+    if (wallet?.pkh === undefined) throw "Couldn't get your Public Key Hash. Try connecting your Wallet again";
     //------------------
     const master = wallet.pkh!;
     const masterAddr = await lucid!.wallet.address();
@@ -454,7 +454,7 @@ export async function masterAddScriptsMasterSendBackDeposit(wallet: Wallet, pool
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
     //------------------
-    if (wallet?.pkh === undefined) throw "I couldn't get your key hash. Try connecting your wallet again";
+    if (wallet?.pkh === undefined) throw "Couldn't get your Public Key Hash. Try connecting your Wallet again";
     //------------------
     const master = wallet.pkh!;
     const masterAddr = await lucid!.wallet.address();
@@ -508,14 +508,14 @@ export async function masterAddScriptsUserDeposit(wallet: Wallet, poolInfo: Stak
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
     //------------------
-    if (wallet?.pkh === undefined) throw "I couldn't get your key hash. Try connecting your wallet again";
+    if (wallet?.pkh === undefined) throw "Couldn't get your Public Key Hash. Try connecting your Wallet again";
     //------------------
     const master = wallet.pkh!;
     const masterAddr = await lucid!.wallet.address();
     //------------------
     const uTxOsAtWallet = await lucid!.wallet.getUtxos();
     if (uTxOsAtWallet.length == 0) {
-        throw "There are no UTxOs available in your wallet";
+        throw "There are no UTxOs available in your Wallet";
     }
     console.log(functionName + " - uTxOsAtWallet: " + uTxOsAtWallet.length);
     console.log(functionName + " - uTxOsAtWallet: " + toJson(uTxOsAtWallet));
@@ -569,7 +569,7 @@ export async function masterAddScriptsUserHarvest(wallet: Wallet, poolInfo: Stak
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
     //------------------
-    if (wallet?.pkh === undefined) throw "I couldn't get your key hash. Try connecting your wallet again";
+    if (wallet?.pkh === undefined) throw "Couldn't get your Public Key Hash. Try connecting your Wallet again";
     //------------------
     const master = wallet.pkh!;
     const masterAddr = await lucid!.wallet.address();
@@ -623,7 +623,7 @@ export async function masterAddScriptsUserWithdraw(wallet: Wallet, poolInfo: Sta
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
     //------------------
-    if (wallet?.pkh === undefined) throw "I couldn't get your key hash. Try connecting your wallet again";
+    if (wallet?.pkh === undefined) throw "Couldn't get your Public Key Hash. Try connecting your Wallet again";
     //------------------
     const master = wallet.pkh!;
     const masterAddr = await lucid!.wallet.address();
@@ -677,7 +677,7 @@ export async function masterDeleteScripts(wallet: Wallet, poolInfo: StakingPoolD
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
     //------------------
-    if (wallet?.pkh === undefined) throw "I couldn't get your key hash. Try connecting your wallet again";
+    if (wallet?.pkh === undefined) throw "Couldn't get your Public Key Hash. Try connecting your Wallet again";
     //------------------
     const master = wallet.pkh!;
     const masterAddr = await lucid!.wallet.address();

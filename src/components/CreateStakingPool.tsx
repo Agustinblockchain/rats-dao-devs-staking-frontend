@@ -295,7 +295,7 @@ export default function CreateStakingPool( ) {
 												<div>
 
 													<li className="info">You have {uTxOsAtWalllet.length} UTxOs available.</li>
-													<li className="info">Use the Split Wallet UTxOs button to generate more UTxo available in your wallet.</li>
+													<li className="info">Use the Split Wallet UTxOs button to generate more UTxo available in your Wallet.</li>
 												</div>
 											}
 											<br></br>

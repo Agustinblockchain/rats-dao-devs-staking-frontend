@@ -133,11 +133,11 @@ export function explainErrorTx(errorIn: any): string {
             }
 
             if (res === "" && error.includes("Cannot read properties of undefined")) {
-                res += sep + "You are missing ADAs or Tokens in your wallet to make this Transaction. It is possible that some transfer is still in the process of being validated"; sep = ", ";
+                res += sep + "You are missing ADAs or Tokens in your Wallet to make this Transaction. It is possible that some transfer is still in the process of being validated"; sep = ", ";
             }
 
             if (res === "" && error.includes("Insufficient input in Transaction")) {
-                res += sep + "You have no funds in your wallet!"; sep = ", ";
+                res += sep + "You have no funds in your Wallet!"; sep = ", ";
             }
            
             if (res === "" && error.includes("Error: 400:") && error.includes("requiredFee")) {
@@ -169,7 +169,7 @@ export function explainErrorTx(errorIn: any): string {
             }
 
             if (res === "" && error.includes("InputsExhaustedError")) {
-                res += sep + "You are dont have enought ADAs or Tokens in your wallet to make this Transaction. It is possible that some transfer is still in the process of being validated. please try again later!"; sep = ", ";
+                res += sep + "You are dont have enought ADAs or Tokens in your Wallet to make this Transaction. It is possible that some transfer is still in the process of being validated. please try again later!"; sep = ", ";
             }
 
             if (res === "" && error.includes("Not enough ADA leftover to cover minADA")) {

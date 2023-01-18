@@ -42,7 +42,7 @@ export async function masterPreparePool(wallet: Wallet, poolInfo: StakingPoolDBI
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
     //------------------
-    if (wallet?.pkh === undefined) throw "I couldn't get your key hash. Try connecting your wallet again";
+    if (wallet?.pkh === undefined) throw "Couldn't get your Public Key Hash. Try connecting your Wallet again";
     //------------------
     const master = wallet.pkh!;
     const masterAddr = await lucid!.wallet.address();
@@ -52,7 +52,7 @@ export async function masterPreparePool(wallet: Wallet, poolInfo: StakingPoolDBI
     //------------------
     const uTxOsAtWallet = await lucid!.wallet.getUtxos();
     if (uTxOsAtWallet.length == 0) {
-        throw "There are no UTxOs available in your wallet";
+        throw "There are no UTxOs available in your Wallet";
     }
     //------------------
     const poolID_UTxO = find_TxOutRef_In_UTxOs(poolID_TxOutRef, uTxOsAtWallet);
@@ -142,7 +142,7 @@ export async function masterNewFund(wallet: Wallet, poolInfo: StakingPoolDBInter
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
     //------------------
-    if (wallet?.pkh === undefined) throw "I couldn't get your key hash. Try connecting your wallet again";
+    if (wallet?.pkh === undefined) throw "Couldn't get your Public Key Hash. Try connecting your Wallet again";
     //------------------
     const master = wallet.pkh!;
     //------------------
@@ -152,7 +152,7 @@ export async function masterNewFund(wallet: Wallet, poolInfo: StakingPoolDBInter
     //------------------
     const uTxOsAtWallet = await lucid!.wallet.getUtxos();
     if (uTxOsAtWallet.length == 0) {
-        throw "There are no UTxOs available in your wallet";
+        throw "There are no UTxOs available in your Wallet";
     }
     //------------------
     const eUTxOs_With_Datum = await apiGetEUTxOsDBByStakingPool(poolInfo.name!)
@@ -257,7 +257,7 @@ export async function masterFundAndMerge(wallet: Wallet, poolInfo: StakingPoolDB
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
     //------------------
-    if (wallet?.pkh === undefined) throw "I couldn't get your key hash. Try connecting your wallet again";
+    if (wallet?.pkh === undefined) throw "Couldn't get your Public Key Hash. Try connecting your Wallet again";
     //------------------
     const master = wallet.pkh!;
     //------------------
@@ -267,7 +267,7 @@ export async function masterFundAndMerge(wallet: Wallet, poolInfo: StakingPoolDB
     //------------------
     const uTxOsAtWallet = await lucid!.wallet.getUtxos();
     if (uTxOsAtWallet.length == 0) {
-        throw "There are no UTxOs available in your wallet";
+        throw "There are no UTxOs available in your Wallet";
     }
     //------------------
     const eUTxOs_With_Datum = await apiGetEUTxOsDBByStakingPool(poolInfo.name!)
@@ -311,7 +311,7 @@ export async function masterFundAndMerge(wallet: Wallet, poolInfo: StakingPoolDB
     //------------------
     const eUTxOs_With_FundDatum = getEUTxOs_With_FundDatum_InEUxTOList(fundID_AC_Lucid, eUTxOs_With_Datum, true)
     if (!eUTxOs_With_FundDatum) {
-        throw "Can't find any UTxO with FundDatum that is not being consumed, please wait for next block";
+        throw "Can't find any available UTxO with FundDatum, please wait for the next block and try again";
     }
     console.log(functionName + " - UTxOs with FundDatum that are not being consumed - length: " + eUTxOs_With_FundDatum.length)
     //------------------
@@ -325,7 +325,7 @@ export async function masterFundAndMerge(wallet: Wallet, poolInfo: StakingPoolDB
         }
     }
     if (eUTxOs_fundDatums_To_Merge.length == 0) {
-        throw "Can't find any UTxO with FundDatum at the choosen UTxOs that is not being consumed, please wait for next block";
+        throw "Can't find any available UTxO with FundDatum at the choosen UTxOs, please wait for the next block and try again";
     }
     //------------------
     const fundAmount = assets![poolInfo!.harvest_Lucid]
@@ -410,7 +410,7 @@ export async function masterMergeFunds(wallet: Wallet, poolInfo: StakingPoolDBIn
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
     //------------------
-    if (wallet?.pkh === undefined) throw "I couldn't get your key hash. Try connecting your wallet again";
+    if (wallet?.pkh === undefined) throw "Couldn't get your Public Key Hash. Try connecting your Wallet again";
     //------------------
     const master = wallet.pkh!;
     //------------------
@@ -420,7 +420,7 @@ export async function masterMergeFunds(wallet: Wallet, poolInfo: StakingPoolDBIn
     //------------------
     const uTxOsAtWallet = await lucid!.wallet.getUtxos();
     if (uTxOsAtWallet.length == 0) {
-        throw "There are no UTxOs available in your wallet";
+        throw "There are no UTxOs available in your Wallet";
     }
     //------------------
     const eUTxOs_With_Datum = await apiGetEUTxOsDBByStakingPool(poolInfo.name!)
@@ -464,7 +464,7 @@ export async function masterMergeFunds(wallet: Wallet, poolInfo: StakingPoolDBIn
     //------------------
     const eUTxOs_With_FundDatum = getEUTxOs_With_FundDatum_InEUxTOList(fundID_AC_Lucid, eUTxOs_With_Datum, true)
     if (!eUTxOs_With_FundDatum) {
-        throw "Can't find any UTxO with FundDatum that is not being consumed, please wait for next block";
+        throw "Can't find any available UTxO with FundDatum, please wait for the next block and try again";
     }
     console.log(functionName + " - UTxOs with FundDatum that are not being consumed - length: " + eUTxOs_With_FundDatum.length)
     //------------------
@@ -478,7 +478,7 @@ export async function masterMergeFunds(wallet: Wallet, poolInfo: StakingPoolDBIn
         }
     }
     if (eUTxOs_fundDatums_To_Merge.length == 0) {
-        throw "Can't find any UTxO with FundDatum at the choosen UTxOs that is not being consumed, please wait for next block";
+        throw "Can't find any available UTxO with FundDatum at the choosen UTxOs, please wait for the next block and try again";
     }
     if (eUTxOs_fundDatums_To_Merge.length == 1) {
         throw "Can't merge less than two FundDatums";
@@ -566,7 +566,7 @@ export async function masterSplitFund(wallet: Wallet, poolInfo: StakingPoolDBInt
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
     //------------------
-    if (wallet?.pkh === undefined) throw "I couldn't get your key hash. Try connecting your wallet again";
+    if (wallet?.pkh === undefined) throw "Couldn't get your Public Key Hash. Try connecting your Wallet again";
     //------------------
     const master = wallet.pkh!;
     //------------------
@@ -576,7 +576,7 @@ export async function masterSplitFund(wallet: Wallet, poolInfo: StakingPoolDBInt
     //------------------
     const uTxOsAtWallet = await lucid!.wallet.getUtxos();
     if (uTxOsAtWallet.length == 0) {
-        throw "There are no UTxOs available in your wallet";
+        throw "There are no UTxOs available in your Wallet";
     }
     //------------------
     const eUTxOs_With_Datum = await apiGetEUTxOsDBByStakingPool(poolInfo.name!)
@@ -627,7 +627,7 @@ export async function masterSplitFund(wallet: Wallet, poolInfo: StakingPoolDBInt
     //------------------
     const eUTxOs_With_FundDatum = getEUTxOs_With_FundDatum_InEUxTOList(fundID_AC_Lucid, eUTxOs_With_Datum, true)
     if (!eUTxOs_With_FundDatum) {
-        throw "Can't find any UTxO with FundDatum that is not being consumed, please wait for next block";
+        throw "Can't find any available UTxO with FundDatum, please wait for the next block and try again";
     }
     console.log(functionName + " - UTxOs with FundDatum that are not being consumed - length: " + eUTxOs_With_FundDatum.length)
     //------------------
@@ -641,7 +641,7 @@ export async function masterSplitFund(wallet: Wallet, poolInfo: StakingPoolDBInt
         }
     }
     if (eUTxOs_fundDatums_To_Split.length == 0) {
-        throw "Can't find any UTxO with FundDatum at the choosen UTxOs that is not being consumed, please wait for next block";
+        throw "Can't find any available UTxO with FundDatum at the choosen UTxOs, please wait for the next block and try again";
     }
     if (eUTxOs_fundDatums_To_Split.length > 1) {
         throw "Can't split more than one FundDatum";
@@ -735,7 +735,7 @@ export async function masterClosePool(wallet: Wallet, poolInfo: StakingPoolDBInt
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
     //------------------
-    if (wallet?.pkh === undefined) throw "I couldn't get your key hash. Try connecting your wallet again";
+    if (wallet?.pkh === undefined) throw "Couldn't get your Public Key Hash. Try connecting your Wallet again";
     //------------------
     const master = wallet.pkh!;
     //------------------
@@ -745,7 +745,7 @@ export async function masterClosePool(wallet: Wallet, poolInfo: StakingPoolDBInt
     //------------------
     const uTxOsAtWallet = await lucid!.wallet.getUtxos();
     if (uTxOsAtWallet.length == 0) {
-        throw "There are no UTxOs available in your wallet";
+        throw "There are no UTxOs available in your Wallet";
     }
     //------------------
     const eUTxOs_With_Datum = await apiGetEUTxOsDBByStakingPool(poolInfo.name!)
@@ -821,7 +821,7 @@ export async function masterTerminatePool(wallet: Wallet, poolInfo: StakingPoolD
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
     //------------------
-    if (wallet?.pkh === undefined) throw "I couldn't get your key hash. Try connecting your wallet again";
+    if (wallet?.pkh === undefined) throw "Couldn't get your Public Key Hash. Try connecting your Wallet again";
     //------------------
     const master = wallet.pkh!;
     //------------------
@@ -831,7 +831,7 @@ export async function masterTerminatePool(wallet: Wallet, poolInfo: StakingPoolD
     //------------------
     const uTxOsAtWallet = await lucid!.wallet.getUtxos();
     if (uTxOsAtWallet.length == 0) {
-        throw "There are no UTxOs available in your wallet";
+        throw "There are no UTxOs available in your Wallet";
     }
     //------------------
     const eUTxOs_With_Datum = await apiGetEUTxOsDBByStakingPool(poolInfo.name!)
@@ -906,7 +906,7 @@ export async function masterDeleteFunds(wallet: Wallet, poolInfo: StakingPoolDBI
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
     //------------------
-    if (wallet?.pkh === undefined) throw "I couldn't get your key hash. Try connecting your wallet again";
+    if (wallet?.pkh === undefined) throw "Couldn't get your Public Key Hash. Try connecting your Wallet again";
     //------------------
     const master = wallet.pkh!;
     //------------------
@@ -916,7 +916,7 @@ export async function masterDeleteFunds(wallet: Wallet, poolInfo: StakingPoolDBI
     //------------------
     const uTxOsAtWallet = await lucid!.wallet.getUtxos();
     if (uTxOsAtWallet.length == 0) {
-        throw "There are no UTxOs available in your wallet";
+        throw "There are no UTxOs available in your Wallet";
     }
     //------------------
     const eUTxOs_With_Datum = await apiGetEUTxOsDBByStakingPool(poolInfo.name!)
@@ -967,7 +967,7 @@ export async function masterDeleteFunds(wallet: Wallet, poolInfo: StakingPoolDBI
     //------------------
     const eUTxOs_With_FundDatum = getEUTxOs_With_FundDatum_InEUxTOList(fundID_AC_Lucid, eUTxOs_With_Datum, true)
     if (!eUTxOs_With_FundDatum) {
-        throw "Can't find any UTxO with FundDatum that is not being consumed, please wait for next block";
+        throw "Can't find any available UTxO with FundDatum, please wait for the next block and try again";
     }
     console.log(functionName + " - UTxOs with FundDatum that are not being consumed - length: " + eUTxOs_With_FundDatum.length)
     //------------------
@@ -981,7 +981,7 @@ export async function masterDeleteFunds(wallet: Wallet, poolInfo: StakingPoolDBI
         }
     }
     if (eUTxOs_fundDatums_To_Delete.length == 0) {
-        throw "Can't find any UTxO with FundDatum at the choosen UTxOs that is not being consumed, please wait for next block";
+        throw "Can't find any available UTxO with FundDatum at the choosen UTxOs, please wait for the next block and try again";
     }
     //------------------
     const value_For_Mint_TxID_Master_DeleteFund: Assets = { [txID_Master_DeleteFund_AC.currencySymbol + txID_Master_DeleteFund_AC.tokenName]: 1n };
@@ -1064,7 +1064,7 @@ export async function masterGetBackFund(wallet: Wallet, poolInfo: StakingPoolDBI
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
     //------------------
-    if (wallet?.pkh === undefined) throw "I couldn't get your key hash. Try connecting your wallet again";
+    if (wallet?.pkh === undefined) throw "Couldn't get your Public Key Hash. Try connecting your Wallet again";
     //------------------
     const master = wallet.pkh!;
     //------------------
@@ -1078,7 +1078,7 @@ export async function masterGetBackFund(wallet: Wallet, poolInfo: StakingPoolDBI
     //------------------
     const uTxOsAtWallet = await lucid!.wallet.getUtxos();
     if (uTxOsAtWallet.length == 0) {
-        throw "There are no UTxOs available in your wallet";
+        throw "There are no UTxOs available in your Wallet";
     }
     //------------------
     const eUTxOs_With_Datum = await apiGetEUTxOsDBByStakingPool(poolInfo.name!)
@@ -1122,7 +1122,7 @@ export async function masterGetBackFund(wallet: Wallet, poolInfo: StakingPoolDBI
     //------------------
     const eUTxOs_With_FundDatum = getEUTxOs_With_FundDatum_InEUxTOList(fundID_AC_Lucid, eUTxOs_With_Datum, true)
     if (!eUTxOs_With_FundDatum) {
-        throw "Can't find any UTxO with FundDatum that is not being consumed, please wait for next block";
+        throw "Can't find any available UTxO with FundDatum, please wait for the next block and try again";
     }
     console.log(functionName + " - UTxOs with FundDatum that are not being consumed - length: " + eUTxOs_With_FundDatum.length)
     //------------------
@@ -1188,7 +1188,7 @@ export async function masterSendBackFund(wallet: Wallet, poolInfo: StakingPoolDB
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
     //------------------
-    if (wallet?.pkh === undefined) throw "I couldn't get your key hash. Try connecting your wallet again";
+    if (wallet?.pkh === undefined) throw "Couldn't get your Public Key Hash. Try connecting your Wallet again";
     //------------------
     const master = wallet.pkh!;
     //------------------
@@ -1202,7 +1202,7 @@ export async function masterSendBackFund(wallet: Wallet, poolInfo: StakingPoolDB
     //------------------
     const uTxOsAtWallet = await lucid!.wallet.getUtxos();
     if (uTxOsAtWallet.length == 0) {
-        throw "There are no UTxOs available in your wallet";
+        throw "There are no UTxOs available in your Wallet";
     }
     //------------------
     const eUTxOs_With_Datum = await apiGetEUTxOsDBByStakingPool(poolInfo.name!)
@@ -1246,7 +1246,7 @@ export async function masterSendBackFund(wallet: Wallet, poolInfo: StakingPoolDB
     //------------------
     const eUTxOs_With_FundDatum = getEUTxOs_With_FundDatum_InEUxTOList(fundID_AC_Lucid, eUTxOs_With_Datum, true)
     if (!eUTxOs_With_FundDatum) {
-        throw "Can't find any UTxO with FundDatum that is not being consumed, please wait for next block";
+        throw "Can't find any available UTxO with FundDatum, please wait for the next block and try again";
     }
     console.log(functionName + " - UTxOs with FundDatum that are not being consumed - length: " + eUTxOs_With_FundDatum.length)
     //------------------
@@ -1316,7 +1316,7 @@ export async function masterSendBackDeposit(wallet: Wallet, poolInfo: StakingPoo
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
     //------------------
-    if (wallet?.pkh === undefined) throw "I couldn't get your key hash. Try connecting your wallet again";
+    if (wallet?.pkh === undefined) throw "Couldn't get your Public Key Hash. Try connecting your Wallet again";
     //------------------
     const master = wallet.pkh!;
     //------------------
@@ -1348,7 +1348,7 @@ export async function masterSendBackDeposit(wallet: Wallet, poolInfo: StakingPoo
     //------------------
     const uTxOsAtWallet = await lucid!.wallet.getUtxos();
     if (uTxOsAtWallet.length == 0) {
-        throw "There are no UTxOs available in your wallet";
+        throw "There are no UTxOs available in your Wallet";
     }
     //------------------
     const eUTxOs_With_Datum = await apiGetEUTxOsDBByStakingPool(poolInfo.name!)
@@ -1383,7 +1383,7 @@ export async function masterSendBackDeposit(wallet: Wallet, poolInfo: StakingPoo
     // busco el utxo que tengan UserDatum validos
     const eUTxOs_With_UserDatum = getEUTxOs_With_UserDatum_InEUxTOList(userID_AC_Lucid, eUTxOs_With_Datum, true)
     if (!eUTxOs_With_UserDatum) {
-        throw "Can't find any UTxO with UserDatum that is not being consumed, please wait for next block";
+        throw "Can't find any available UTxO with UserDatum, please wait for the next block and try again";
     }
     console.log(functionName + " - UTxOs with UserDatum that are not being consumed - length: " + eUTxOs_With_UserDatum.length)
     //------------------
@@ -1397,7 +1397,7 @@ export async function masterSendBackDeposit(wallet: Wallet, poolInfo: StakingPoo
         }
     }
     if (eUTxOs_userDatums_To_SendBackDeposit.length == 0) {
-        throw "Can't find any UTxO with UserDatum at the choosen UTxOs that is not being consumed, please wait for next block";
+        throw "Can't find any available UTxO with UserDatum at the choosen UTxOs, please wait for the next block and try again";
     }
     if (eUTxOs_userDatums_To_SendBackDeposit.length > 1) {
         throw "Can't Send Back Deposit to more than one UserDatum";
@@ -1474,7 +1474,7 @@ export async function masterSendBackDeposit(wallet: Wallet, poolInfo: StakingPoo
         // busco el utxo que tengan FundDatum validos
         const eUTxOs_With_FundDatum = getEUTxOs_With_FundDatum_InEUxTOList(fundID_AC_Lucid, eUTxOs_With_Datum, true)
         if (!eUTxOs_With_FundDatum) {
-            throw "Can't find any UTxO with FundDatum that is not being consumed, please wait for next block";
+            throw "Can't find any available UTxO with FundDatum, please wait for the next block and try again";
         }
         console.log(functionName + " - UTxOs with FundDatum that are not being consumed - length: " + eUTxOs_With_FundDatum.length)
         //------------------

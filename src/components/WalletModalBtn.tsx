@@ -305,7 +305,7 @@ export default function WalletModalBtn() {
 							</>
 							:
 							<>
-							{/* <div>Select your wallet. If you do not have a wallet, click the 'install' button to set one up.</div>
+							{/* <div>Select your Wallet. If you do not have a wallet, click the 'install' button to set one up.</div>
 							<br></br> */}
 							</>
 						}

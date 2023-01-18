@@ -8,14 +8,14 @@ const getFaqText = (n : number) => {
 		<p>It allows you to stake Cardano Assets and earn rewards.</p>'
 		case 2: return '<p>On the Homepage, you can see the Pool list and available staking rewards.</p>\
 		<p>Simply deposit the assets via the “Deposit” buttom and periodically claim your rewards with “Harvest” buttom.</p>\
-		<p>In order to make a deposit, you must have “Staking Unit” assets in your wallet. Upon harvesting, you will receive “Harvest Unit” assets.</p>'
+		<p>In order to make a deposit, you must have “Staking Unit” assets in your Wallet. Upon harvesting, you will receive “Harvest Unit” assets.</p>'
 		case 3: return '<p>The Staking is trustless. When you stake your assets in a Pool, them are held in a Plutus on-chain smart-contract.</p>\
 		<p>Them are owned by your private keys and withdrawable only by that same private key.</p>'
 		case 4: return '<p>Each Staking Pool is created with unique settings and reward conditions.</p>\
 		<p>The “Annual Pay” for each Staking Pool, which can be found alongside the Pool, represents the payment in “Havest Units” per every “Staking Unit” per year.</p>\
 		<p>Rewards are then calculated based on the number of tokens an individual has staked and the length of time since they made their deposit or last claim.</p>'
 		case 5: return '<p>It is the responsibility of the administrator of the Staking Pool to fund it with "Harvest Unit" assets that will be held and available in the smart contract.</p>\
-		<p>When you claim your rewards, a new transaction will be initiated to transfer a portion of those assets to your wallet depending on your deposit.</p>'  
+		<p>When you claim your rewards, a new transaction will be initiated to transfer a portion of those assets to your Wallet depending on your deposit.</p>'  
 		case 6: return '<p>Yes! All the validation code/smart contracts are open source and them can be found in the RatsDAO GitHub (https://github.com/CardanoRatsDAO).</p>\
 		<p>Always demand open source.</p>'
 		case 7: return '<p>When a transaction is confirmed on the blockchain, it means that the transaction has been added to a block and is on its way to being permanently recorded on the blockchain. However, there is still a small chance that the impact of the transaction may not be immediately visible on the Portal. This can happen if there is a delay in the site updating its information to reflect the new transaction.</p>\

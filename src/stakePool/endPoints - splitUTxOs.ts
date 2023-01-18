@@ -14,7 +14,7 @@ export async function splitUTxOs(wallet: Wallet, poolInfo: StakingPoolDBInterfac
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
     //------------------
-    if (wallet?.pkh === undefined) throw "I couldn't get your key hash. Try connecting your wallet again";
+    if (wallet?.pkh === undefined) throw "Couldn't get your Public Key Hash. Try connecting your Wallet again";
     //------------------
     // const master = wallet.pkh!;
     const masterAddr = await lucid!.wallet.address();

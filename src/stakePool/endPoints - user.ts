@@ -4,13 +4,15 @@ import {
     Redeemer_Burn_TxID, Redeemer_Mint_TxID, Redeemer_User_Deposit, Redeemer_User_Harvest, Redeemer_User_Withdraw, UserDatum
 } from '../types';
 import {
+    ADA_Decimals,
+    ADA_UI,
     fundID_TN, maxDiffTokensForUserDatum, maxTxFundDatumInputs, poolID_TN, tokenNameLenght, txID_User_Deposit_For_User_TN, txID_User_Harvest_TN, txID_User_Withdraw_TN, userID_TN
 } from "../types/constantes";
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
 import { addAssets, addAssetsList, calculateMinAda, calculateMinAdaOfAssets, createValue_Adding_Tokens_Of_AC_Lucid, subsAssets } from '../utils/cardano-helpers';
 import { makeTx_And_UpdateEUTxOsIsPreparing } from '../utils/cardano-helpersTx';
 import { pubKeyHashToAddress } from "../utils/cardano-utils";
-import { strToHex, toJson } from '../utils/utils';
+import { formatAmount, strToHex, toJson } from '../utils/utils';
 import { Wallet } from '../utils/walletProvider';
 import { apiGetEUTxOsDBByStakingPool } from './apis';
 import { userDepositTx, userHarvestPoolTx, userWithdrawTx } from "./endPointsTx - user";
@@ -32,7 +34,7 @@ export async function userDeposit(wallet: Wallet, poolInfo: StakingPoolDBInterfa
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
     //------------------
-    if (wallet?.pkh === undefined) throw "I couldn't get your key hash. Try connecting your wallet again";
+    if (wallet?.pkh === undefined) throw "Couldn't get your Public Key Hash. Try connecting your Wallet again";
     //------------------
     const user = wallet.pkh!;
     //------------------
@@ -42,7 +44,7 @@ export async function userDeposit(wallet: Wallet, poolInfo: StakingPoolDBInterfa
     //------------------
     const uTxOsAtWallet = await lucid!.wallet.getUtxos();
     if (uTxOsAtWallet.length == 0) {
-        throw "There are no UTxOs available in your wallet";
+        throw "There are no UTxOs available in your Wallet";
     }
     //------------------
     const poolID_AC_Lucid = poolInfo.pParams.ppPoolID_CS + strToHex(poolID_TN);
@@ -109,7 +111,7 @@ export async function userDeposit(wallet: Wallet, poolInfo: StakingPoolDBInterfa
     //------------------
     if (staking_AC_isAda) {
         if (minAda_For_UserDatum_If_StakingIsNotAda > depositAmount) {
-            throw "The amount of the Deposit must be greater than the minimum ADA required: " + minAda_For_UserDatum_If_StakingIsNotAda;
+            throw "The amount of the Deposit must be greater than the minimum ADA required for this Transaction: " + formatAmount(Number(minAda_For_UserDatum_If_StakingIsNotAda), ADA_Decimals, ADA_UI)
         } else {
             minAda_For_UserDatum_If_StakingIsNotAda = 0n;
         }
@@ -156,7 +158,7 @@ export async function userHarvest(wallet: Wallet, poolInfo: StakingPoolDBInterfa
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
     //------------------
-    if (wallet?.pkh === undefined) throw "I couldn't get your key hash. Try connecting your wallet again";
+    if (wallet?.pkh === undefined) throw "Couldn't get your Public Key Hash. Try connecting your Wallet again";
     //------------------
     const user = wallet.pkh!;
     //------------------
@@ -166,7 +168,7 @@ export async function userHarvest(wallet: Wallet, poolInfo: StakingPoolDBInterfa
     //------------------
     const uTxOsAtWallet = await lucid!.wallet.getUtxos();
     if (uTxOsAtWallet.length == 0) {
-        throw "There are no UTxOs available in your wallet";
+        throw "There are no UTxOs available in your Wallet";
     }
     //------------------
     const eUTxOs_With_Datum = await apiGetEUTxOsDBByStakingPool(poolInfo.name!);
@@ -215,7 +217,7 @@ export async function userHarvest(wallet: Wallet, poolInfo: StakingPoolDBInterfa
     //------------------
     const eUTxOs_With_FundDatum = getEUTxOs_With_FundDatum_InEUxTOList(fundID_AC_Lucid, eUTxOs_With_Datum, true);
     if (!eUTxOs_With_FundDatum) {
-        throw "Can't any UTxO with FundDatum that is not being consumed, please wait for next block";
+        throw "Can't find any available UTxO with FundDatum, please wait for the next block and try again";
     }
     console.log(functionName + " - UTxOs with FundDatum that are not being consumed - length: " + eUTxOs_With_FundDatum.length);
     //------------------
@@ -243,7 +245,7 @@ export async function userHarvest(wallet: Wallet, poolInfo: StakingPoolDBInterfa
     //calculo la cantidad de fondos maximas disponibles que se pueden pagar
     const maxValueToClaim = getTotalAvailaibleFunds(eUTxOs_With_FundDatum);
     if (harvest_Amount > maxValueToClaim)
-        throw "There is not enough funds in the UTxOs with FundDatum that are not being consumed to cover the claim";
+        throw "There are not enough funds in the available UTxOs with FundDatums to cover the claim. Available now: " + formatAmount(Number(maxValueToClaim), poolInfo.harvest_Decimals, poolInfo.harvest_UI);
     //------------------
     const closedAt = poolDatum_In.pdClosedAt.val;
     //------------------
@@ -260,7 +262,7 @@ export async function userHarvest(wallet: Wallet, poolInfo: StakingPoolDBInterfa
     console.log(functionName + " - TotalRewardsCashedOut: " + totalRewardsCashedOut);
     //------------------
     if (harvest_Amount > totalNewRewards) {
-        throw "Trying to get too many rewards... wait some time";
+        throw "Trying to get too many Rewards... wait more time!";
     }
     //------------------
     const userDatum_Out: UserDatum = new UserDatum(userDatum_In.udUser, userDatum_In.udInvest, userDatum_In.udCreatedAt, totalRewardsCashedOut, rewardsNotClaimed, new Maybe(BigInt(claimAt)), userDatum_In.udMinAda);
@@ -280,7 +282,7 @@ export async function userHarvest(wallet: Wallet, poolInfo: StakingPoolDBInterfa
     console.log(functionName + " - EUTxOs With FundDatum With Enough Value To Claim - length: " + eUTxOs_With_FundDatum_WithEnoughValueToClaim.length);
     //------------------
     if (eUTxOs_With_FundDatum_WithEnoughValueToClaim.length > maxTxFundDatumInputs) {
-        throw "Trying to use too many inputs with funds to cover your claim. Please try again later, ask managers of the Pool to create UTxOs with more funds in each of them or reduce the amount you want to claim.";
+        throw "Trying to use too many UTxOs with FundDatums to cover your Claim. Please try again later for other UTxOs being available, ask managers of the Pool to create new UTxOs with more funds or reduce the amount you are claiming";
     }
     //------------------
     let datum_and_values_for_FundDatum: { datum: FundDatum; value: Assets; }[] = [];
@@ -366,7 +368,7 @@ export async function userWithdraw(wallet: Wallet, poolInfo: StakingPoolDBInterf
     const lucid = wallet.lucid;
     const protocolParameters = wallet.protocolParameters;
     //------------------
-    if (wallet?.pkh === undefined) throw "I couldn't get your key hash. Try connecting your wallet again";
+    if (wallet?.pkh === undefined) throw "Couldn't get your Public Key Hash. Try connecting your Wallet again";
     //------------------
     const user = wallet.pkh!;
     //------------------
@@ -408,7 +410,7 @@ export async function userWithdraw(wallet: Wallet, poolInfo: StakingPoolDBInterf
     //------------------
     const uTxOsAtWallet = await lucid!.wallet.getUtxos();
     if (uTxOsAtWallet.length == 0) {
-        throw "There are no UTxOs available in your wallet";
+        throw "There are no UTxOs available in your Wallet";
     }
     //------------------
     const eUTxOs_With_Datum = await apiGetEUTxOsDBByStakingPool(poolInfo.name!);
@@ -524,7 +526,7 @@ export async function userWithdraw(wallet: Wallet, poolInfo: StakingPoolDBInterf
         // busco el utxo que tengan FundDatum validos
         const eUTxOs_With_FundDatum = getEUTxOs_With_FundDatum_InEUxTOList(fundID_AC_Lucid, eUTxOs_With_Datum, true);
         if (!eUTxOs_With_FundDatum) {
-            throw "Can't any UTxO with FundDatum that is not being consumed, please wait for next block";
+            throw "Can't find any available UTxO with FundDatum, please wait for the next block and try again";
         }
         console.log(functionName + " - UTxOs with FundDatum that are not being consumed - length: " + eUTxOs_With_FundDatum.length);
         //------------------
