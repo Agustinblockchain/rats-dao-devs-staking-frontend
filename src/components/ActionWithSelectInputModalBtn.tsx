@@ -395,7 +395,7 @@ export default function ActionWithSelectInputModalBtn(
 								<>
 									<h4 style={{ paddingTop: 10 }}>How many {inputUnitForShowing}?</h4>		
 									<br></br>
-									<div style={{overflow:"hidden", maxHeight: 300, overflowY:"auto"}} >
+									<div style={{overflow:"hidden", maxHeight: 190, overflowY:"auto"}} >
 									{
 										(walletAssetsList.length > 0) ?
 											<>
