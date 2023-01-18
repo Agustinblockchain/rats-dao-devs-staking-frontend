@@ -257,9 +257,21 @@ export default function WalletModalBtn() {
 
 				<div className="modal__content">
 
-					<div className="wallet__content">
-						<h3>Wallet ({process.env.NEXT_PUBLIC_USE_MAINNET === "true"?"Mainnet":"Preview"})</h3>
+					<div className="wallet__content" style={{minWidth:350}}>
+						<h3>
+							{
+							walletStore.connected ?
+								<>
+									Wallet ({process.env.NEXT_PUBLIC_USE_MAINNET === "true"?"Mainnet":"Preview"})
+								</>
+								:	
+								<>
+									Connect your Wallet ({process.env.NEXT_PUBLIC_USE_MAINNET === "true"?"Mainnet":"Preview"})
+								</>
+							}
+						</h3>
 						<br></br>
+
 						{walletMessage ? <div>{walletMessage}<br></br><br></br></div> : <></>}
 
 						{walletStore.connected ?
@@ -267,46 +279,50 @@ export default function WalletModalBtn() {
 								<div>Pkh: {walletStore.connected ? walletStore.pkh : <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
 								<div>UTxOs: {isWalletDataLoaded ? uTxOsAtWallet.length : <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</div>
 								<br></br>
+								{process.env.NODE_ENV==="development" || true?
+									<>
+										<label>
+											<input
+												type="checkbox"
+												checked={swEnviarPorBlockfrost}
+												onChange={handleChangeSavedSwEnviarPorBlockfrost}
+											/>
+											Use the BlockFrost API instead of the Wallet dApp to submit the Transactions
+										</label>
+										<br></br><br></br>
+									</>
+									:
+									<>
+									</>
+								}
 							</>
 							:
-							<></>
-						}
-
-						{process.env.NODE_ENV==="development"?
 							<>
-								<label>
-									<input
-										type="checkbox"
-										checked={swEnviarPorBlockfrost}
-										onChange={handleChangeSavedSwEnviarPorBlockfrost}
-									/>
-									Use the BlockFrost API instead of the Wallet to make transactions
-								</label>
-								<br></br>
-							</>
-							:
-							<>
+							{/* <div>Select your wallet. If you do not have a wallet, click the 'install' button to set one up.</div>
+							<br></br> */}
 							</>
 						}
 
-						<div className="wallet__buttons vr">
+						<div className="wallet__buttons">
 							{walletStore.connected ?
-								<button
-									key={walletStore.pkh}
-									className="btn wallet__button"
-									onClick={async (e) => {
-										try {
-											e.preventDefault()
-											walletDisconnect(false)
-										} catch (error) {
-											console.error("[Session] - Error disconnecting wallet: " + error)
-										}
-									}}
-								>
-									<span>
-										Disconnect Wallet
-									</span>
-								</button>
+								<>
+									<button
+										key={walletStore.pkh}
+										className="btn wallet__button"
+										onClick={async (e) => {
+											try {
+												e.preventDefault()
+												walletDisconnect(false)
+											} catch (error) {
+												console.error("[Session] - Error disconnecting wallet: " + error)
+											}
+										}}
+									>
+										<span>
+											Disconnect Wallet
+										</span>
+									</button>
+								</>
 							:
 								<>
 
@@ -359,7 +375,7 @@ export default function WalletModalBtn() {
 														}}
 													>
 														<span >
-															{wallet} - Install
+															{wallet} (Install)
 														</span>
 													</button>
 												)		
