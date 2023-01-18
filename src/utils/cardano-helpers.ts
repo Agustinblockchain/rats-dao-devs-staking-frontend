@@ -360,7 +360,7 @@ export function calculateMinAda(numAssets: number, sumAssetNameLengths: number, 
         coinsPerUTxOWord * (utxoEntrySizeWithoutVal + sizeWords + hash)
     );
 
-    minAda = Math.floor(110 * minAda / 100); // 10% mas
+    minAda = Math.floor(115 * minAda / 100); // 10% mas
 
     //TODO usando calculo de min ada anterior, es que si uso el nuevo calculo, cuando la construyo a la tx los min ada son mayores y me cambia todo.
     // en cambio con el calculo anterior, los min ada mio son buenos y quedan.
