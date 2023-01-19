@@ -408,7 +408,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 													<li className="info">In return, you will receive User Token (<b>' + txID_User_Deposit_For_User_TN + '</b>).</li>\
 													<li className="info">You can withdraw your <b>' + poolInfo.staking_UI + '</b> at any time in exchange for the User Token (<b>' + txID_User_Deposit_For_User_TN + '</b>).</li>' 
 												: 
-													'<li className="info">You are about to deposit <b>' + poolInfo.staking_UI + '</b> to this pool.</li>\
+													'<li className="info">You are about to deposit <b>' + poolInfo.staking_UI + '</b> to this Pool.</li>\
 													<li className="info">In return, you will receive User Token (<b>' + txID_User_Deposit_For_User_TN + '</b>).</li>\
 													<li className="info">You can withdraw your <b>' + poolInfo.staking_UI + '</b> at any time in exchange for the User Token (<b>' + txID_User_Deposit_For_User_TN + '</b>).</li>\
 													<li className="info">Please note that, in addition to the Transactions Fees, a minimum of ADA is required to be sent along with your <b>' + poolInfo.staking_UI + '</b>.</li>\
@@ -440,7 +440,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 														<li className="info">In return, you will receive User Token (<b>' + txID_User_Deposit_For_User_TN + '</b>).</li>\
 														<li className="info">You can withdraw your <b>' + poolInfo.staking_UI + '</b> at any time in exchange for the User Token (<b>' + txID_User_Deposit_For_User_TN + '</b>).</li>' 
 													: 
-														'<li className="info">You are about to deposit <b>' + poolInfo.staking_UI + '</b> to this pool.</li>\
+														'<li className="info">You are about to deposit <b>' + poolInfo.staking_UI + '</b> to this Pool.</li>\
 														<li className="info">In return, you will receive User Token (<b>' + txID_User_Deposit_For_User_TN + '</b>).</li>\
 														<li className="info">You can withdraw your <b>' + poolInfo.staking_UI + '</b> at any time in exchange for the User Token (<b>' + txID_User_Deposit_For_User_TN + '</b>).</li>\
 														<li className="info">Please note that, in addition to the Transactions Fees, a minimum of ADA is required to be sent along with your <b>' + poolInfo.staking_UI + '</b>.</li>\
