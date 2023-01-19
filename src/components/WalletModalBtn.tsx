@@ -160,10 +160,10 @@ export default function WalletModalBtn() {
 			//setWalletMessage("Wallet Disconnected!")
 			setWalletMessage("")
 		} catch (error) {
-			console.error("[Session] - walletDisconnect Error2: " + error)
-			setWalletError("Error Disconnecting Wallet: " + error)
+			const error_explained = explainError(error)
+			console.error("[Session] - walletDisconnect Error2: " + error_explained)
+			setWalletError("Error Disconnecting Wallet: " + error_explained)
 			setWalletMessage("")
-
 			if (status === "authenticated") {
 				await signOut({ redirect: false })
 			}
@@ -352,7 +352,8 @@ export default function WalletModalBtn() {
 												e.preventDefault()
 												walletDisconnect(false)
 											} catch (error) {
-												console.error("[Session] - Error disconnecting wallet: " + error)
+												const error_explained = explainError(error)
+												console.error("[Session] - Error disconnecting wallet: " + error_explained)
 											}
 										}}
 									>
@@ -378,7 +379,8 @@ export default function WalletModalBtn() {
 																e.preventDefault()
 																walletConnect(wallet, false, false)
 															} catch (error) {
-																console.error("[Session] - Error connecting with wallet: " + error)
+																const error_explained = explainError(error)
+																console.error("[Session] - Error connecting with wallet: " + error_explained)
 															}
 														}}
 													>
@@ -408,7 +410,8 @@ export default function WalletModalBtn() {
 																// }
 
 															} catch (error) {
-																console.error("[Session] - Error installing with wallet: " + error)
+																const error_explained = explainError(error)
+																console.error("[Session] - Error installing with wallet: " + error_explained)
 															}
 														}}
 													>
@@ -432,7 +435,8 @@ export default function WalletModalBtn() {
 														e.preventDefault()
 														walletFromSeedConnect("Master1", false)
 													} catch (error) {
-														console.error("[Session] - Error connecting with wallet from seed" + error)
+														const error_explained = explainError(error)
+														console.error("[Session] - Error connecting with wallet from seed" + error_explained)
 													}
 												}}
 											>
@@ -448,7 +452,8 @@ export default function WalletModalBtn() {
 														e.preventDefault()
 														walletFromSeedConnect("Master2", false)
 													} catch (error) {
-														console.error("[Session] - Error connecting with wallet from seed" + error)
+														const error_explained = explainError(error)
+														console.error("[Session] - Error connecting with wallet from seed" + error_explained)
 													}
 												}}
 											>
