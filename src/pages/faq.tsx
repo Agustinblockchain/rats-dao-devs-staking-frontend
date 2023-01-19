@@ -11,8 +11,8 @@ const getFaqText = (n : number) => {
 		<p>In order to make a Deposit, you must have “Staking Unit” assets in your Wallet. Upon harvesting, you will receive “Harvest Unit” assets.</p>'
 		case 3: return '<p>The Staking is trustless. When you stake your assets in a Pool, them are held in a Plutus on-chain smart-contract.</p>\
 		<p>Them are owned by your private keys and withdrawable only by that same private key.</p>'
-		case 4: return '<p>Proof of your Deposit can be found in the blockchain, where a record is kept of the date and time of the Deposit, as well as the wallet address that owns the Deposited tokens.</p>\
-		Additionally, you will receive in your wallet the same deposit amount in User Tokens, which serves as further proof.</p>\
+		case 4: return '<p>Proof of your Deposit can be found in the blockchain, where a record is kept of the date and time of the Deposit, as well as the Wallet address that owns the Deposited tokens.</p>\
+		Additionally, you will receive User Tokens in your Wallet, which serves as further proof of your Deposit.</p>\
 		The Policy Id of the User Token can be found in the Staking Pool details.</p>\
 		It is important to hold onto these User Tokens, as they will be required to make a Withdrawal and retrieve your original tokens.</p>\
 		If your User Tokens are lost, you will need to wait until the Staking Pool is Closed in order to claim your Deposit.</p>'
