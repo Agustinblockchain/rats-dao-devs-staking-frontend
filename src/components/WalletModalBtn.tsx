@@ -149,7 +149,9 @@ export default function WalletModalBtn() {
 		setWalletMessage("Disconnecting Wallet ...")
 		try {
 			const walletStore = { connected: false, name: '', walletApi: undefined, pkh: "", lucid: undefined, swEnviarPorBlockfrost: false, protocolParameters: undefined }
-			await signOut({ redirect: false })
+			if (status === "authenticated") {
+				await signOut({ redirect: false })
+			}
 			setWalletStore(walletStore)
 			// setSavedWalletConnected(false)
 			// setSavedWalletName("")
@@ -161,6 +163,10 @@ export default function WalletModalBtn() {
 			console.error("[Session] - walletDisconnect Error2: " + error)
 			setWalletError("Error Disconnecting Wallet: " + error)
 			setWalletMessage("")
+
+			if (status === "authenticated") {
+				await signOut({ redirect: false })
+			}
 
 		}
 	}

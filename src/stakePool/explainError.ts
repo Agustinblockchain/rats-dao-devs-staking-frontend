@@ -195,6 +195,10 @@ export function explainErrorTx(errorIn: any): string {
             if (res === "" && error.includes("ValueNotConservedUTxO")) {
                 res += sep + "Technical problems, please try again later!"; sep = ", ";
             }
+
+            if (res === "" && error.includes("is not valid JSON")) {
+                res += sep + "Technical problems, please try again later!"; sep = ", ";
+            }
            
             if (res === "" && error.includes("account changed")) {
                 res += sep + "You have changed the wallet in the dApp Connector, please reconnect with your new wallet!"; sep = ", ";
@@ -245,6 +249,10 @@ export function explainError(errorIn: any): string {
                 res += sep + "Technical problems, please try again!"; sep = ", ";
             }
 
+            if (res === "" && error.includes("is not valid JSON")) {
+                res += sep + "Technical problems, please try again later!"; sep = ", ";
+            }
+            
             if (res === "" && error.includes("The request was refused due to lack of access - e.g. wallet disconnects.")) {
                 res += sep + "You have canceled the connection!"; sep = ", ";
             }
