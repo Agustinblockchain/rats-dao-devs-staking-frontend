@@ -284,8 +284,9 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 					<br></br>
 					
 					<div>
-						User Token&nbsp;
-						{/* (<b>{txID_User_Deposit_For_User_TN}</b>) + " (" + poolInfo.txID_User_Deposit_CS.slice(0,4)+"..."+poolInfo.txID_User_Deposit_CS.slice(52)+")" */}
+						User Token
+						(<b>{txID_User_Deposit_For_User_TN}</b>) &nbsp;
+						{/* {" (" + poolInfo.txID_User_Deposit_CS.slice(0,4)+"..."+poolInfo.txID_User_Deposit_CS.slice(52)+")"} */}
 						<button onClick={() => copyToClipboard(poolInfo.txID_User_Deposit_CS)} className='btn__ghost icon' style={{ cursor: 'pointer' }}>
 							<svg xmlns="http://www.w3.org/2000/svg" className="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
 								<path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -399,15 +400,18 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 											description={poolInfo.swClosed ? 
 												'<p className="info">This Pool in already closed. You can\'t Deposit anymore.</p>' 
 												: 
+
+												
+
 												staking_AC_isAda? 
-													'<li className="info">You are about to Deposit ' + poolInfo.staking_UI + ' to this Pool.</li>\
-													<li className="info">In return, you will receive User Deposit Tokens.</li>\
-													<li className="info">You can withdraw your ' + poolInfo.staking_UI + ' at any time in exchange for the User Deposit Tokens.</li>' 
+													'<li className="info">You are about to Deposit <b>' + poolInfo.staking_UI + '</b> to this Pool.</li>\
+													<li className="info">In return, you will receive User Token (<b>' + txID_User_Deposit_For_User_TN + '</b>).</li>\
+													<li className="info">You can withdraw your <b>' + poolInfo.staking_UI + '</b> at any time in exchange for the User Token (<b>' + txID_User_Deposit_For_User_TN + '</b>).</li>' 
 												: 
-													'<li className="info">You are about to deposit ' + poolInfo.staking_UI + ' to this pool.</li>\
-													<li className="info">In return, you will receive User Deposit Tokens.</li>\
-													<li className="info">You can withdraw your ' + poolInfo.staking_UI + ' at any time in exchange for the User Deposit Tokens.</li>\
-													<li className="info">Please note that, in addition to the Transactions Fees, a minimum of ADA is required to be sent along with your ' + poolInfo.staking_UI + ', as they will be locked in the blockchain.</li>\
+													'<li className="info">You are about to deposit <b>' + poolInfo.staking_UI + '</b> to this pool.</li>\
+													<li className="info">In return, you will receive User Token (<b>' + txID_User_Deposit_For_User_TN + '</b>).</li>\
+													<li className="info">You can withdraw your <b>' + poolInfo.staking_UI + '</b> at any time in exchange for the User Token (<b>' + txID_User_Deposit_For_User_TN + '</b>).</li>\
+													<li className="info">Please note that, in addition to the Transactions Fees, a minimum of ADA is required to be sent along with your <b>' + poolInfo.staking_UI + '</b>.</li>\
 													<li className="info">You will receive the ADA back when you withdraw your deposit.</li>'
 												}
 											poolInfo={poolInfo} 
@@ -432,14 +436,14 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 												'<p className="info">This Pool in already closed. You can\'t Deposit anymore.</p>' 
 												: 
 													staking_AC_isAda? 
-														'<li className="info">You are about to Deposit ' + poolInfo.staking_UI + ' to this Pool.</li>\
-														<li className="info">In return, you will receive User Deposit Tokens.</li>\
-														<li className="info">You can withdraw your ' + poolInfo.staking_UI + ' at any time in exchange for the User Deposit Tokens.</li>' 
+														'<li className="info">You are about to Deposit <b>' + poolInfo.staking_UI + '</b> to this Pool.</li>\
+														<li className="info">In return, you will receive User Token (<b>' + txID_User_Deposit_For_User_TN + '</b>).</li>\
+														<li className="info">You can withdraw your <b>' + poolInfo.staking_UI + '</b> at any time in exchange for the User Token (<b>' + txID_User_Deposit_For_User_TN + '</b>).</li>' 
 													: 
-														'<li className="info">You are about to deposit ' + poolInfo.staking_UI + ' to this pool.</li>\
-														<li className="info">In return, you will receive User Deposit Tokens.</li>\
-														<li className="info">You can withdraw your ' + poolInfo.staking_UI + ' at any time in exchange for the User Deposit Tokens.</li>\
-														<li className="info">Please note that, in addition to the Transactions Fees, a minimum of ADA is required to be sent along with your ' + poolInfo.staking_UI + ', as they will be locked in the blockchain.</li>\
+														'<li className="info">You are about to deposit <b>' + poolInfo.staking_UI + '</b> to this pool.</li>\
+														<li className="info">In return, you will receive User Token (<b>' + txID_User_Deposit_For_User_TN + '</b>).</li>\
+														<li className="info">You can withdraw your <b>' + poolInfo.staking_UI + '</b> at any time in exchange for the User Token (<b>' + txID_User_Deposit_For_User_TN + '</b>).</li>\
+														<li className="info">Please note that, in addition to the Transactions Fees, a minimum of ADA is required to be sent along with your <b>' + poolInfo.staking_UI + '</b>.</li>\
 														<li className="info">You will receive the ADA back when you withdraw your deposit.</li>'
 												}
 											poolInfo={poolInfo} 
