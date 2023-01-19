@@ -12,10 +12,10 @@ const getFaqText = (n : number) => {
 		case 3: return '<p>The Staking is trustless. When you stake your assets in a Pool, them are held in a Plutus on-chain smart-contract.</p>\
 		<p>Them are owned by your private keys and withdrawable only by that same private key.</p>'
 		case 4: return '<p>Proof of your Deposit can be found in the blockchain, where a record is kept of the date and time of the Deposit, as well as the wallet address that owns the Deposited tokens.</p>\
-		Additionally, you will receive a User Deposit Token (UD) in your wallet, which serves as further proof of your Deposit.</p>\
-		The Policy Id of the UD token can be found in the Staking Pool details.</p>\
-		It is important to hold onto these UD tokens, as they will be required to make a Withdrawal and retrieve your original tokens.</p>\
-		If the UD tokens are lost, you will need to wait until the Staking Pool is Closed in order to claim your tokens without the need for the UD tokens.</p>'
+		Additionally, you will receive a User Token in your wallet, which serves as further proof of your Deposit.</p>\
+		The Policy Id of the User Token can be found in the Staking Pool details.</p>\
+		It is important to hold onto these User Tokens, as they will be required to make a Withdrawal and retrieve your original tokens.</p>\
+		If your User Tokens are lost, you will need to wait until the Staking Pool is Closed in order to claim your Deposit.</p>'
 		case 5: return '<p>Each Staking Pool is created with unique settings and reward conditions.</p>\
 		<p>The “Annual Pay” for each Staking Pool, which can be found alongside the Pool, represents the payment in “Havest Units” per every “Staking Unit” per year.</p>\
 		<p>Rewards are then calculated based on the number of tokens an individual has staked and the length of time since they made their Deposit or last claim.</p>'
