@@ -117,11 +117,25 @@ export default function UsersModalBtn(
 	}
 
 	async function downloadCVS(){
-		let csvContent = "data:text/csv;charset=utf-8," + eUTxOs_With_UserDatum.map(e => (e.uTxO.txHash + "," + e.datum.udUser.toString() + "," +(Number(e.datum.udInvest).toString() + " " + poolInfo.staking_UI))).join("\n");
+		let csvContent = "data:text/csv;charset=utf-8," + "Tx Hash,User Pkh,Invest Amount (" + poolInfo.staking_UI + "),Rewards Harvested (" + poolInfo.harvest_UI + "),Rewards Not Claimed (" + poolInfo.harvest_UI + "),ADA locked\n" +  eUTxOs_With_UserDatum.map(
+			e => (
+				e.uTxO.txHash + "," + 
+				e.datum.udUser.toString() + "," + 
+				Number(e.datum.udInvest).toString() + "," + 
+				Number(e.datum.udCashedOut).toString() + "," + 
+				Number((typeof eUTxO_With_PoolDatum == "object" ? Number(getRewardsToPay_In_EUTxO_With_UserDatum (poolInfo, eUTxO_With_PoolDatum, e)):0)).toString() + "," + 
+				Number(e.datum.udMinAda).toString()  
+			)
+		).join("\n");
 
 		var encodedUri = encodeURI(csvContent);
 		window.open(encodedUri);
 	}
+
+
+	
+
+
 
 	return (
 		<div className="modal__action_separator">
