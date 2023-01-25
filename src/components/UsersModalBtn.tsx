@@ -116,9 +116,15 @@ export default function UsersModalBtn(
 		return isWorking
 	}
 
+	async function downloadCVS(){
+		let csvContent = "data:text/csv;charset=utf-8," + eUTxOs_With_UserDatum.map(e => (e.uTxO.txHash + "," + e.datum.udUser.toString() + "," +(Number(e.datum.udInvest) + + poolInfo.staking_UI))).join("\n");
+
+		var encodedUri = encodeURI(csvContent);
+		window.open(encodedUri);
+	}
+
 	return (
 		<div className="modal__action_separator">
-			
 			{swShow?
 				<>
 					{swPaddintTop === true || swPaddintTop === undefined? <div><br></br></div> : null}
@@ -130,7 +136,6 @@ export default function UsersModalBtn(
 								{
 									(isWorkingFromParent === actionNameWithIdx) ?
 										<>
-											
 											<LoadingSpinner size={25} border={5} />
 										</>
 										:
@@ -141,7 +146,6 @@ export default function UsersModalBtn(
 						:
 						<button disabled className="btn btnStakingPool"><span className="wallet__button_disabled">{actionName}</span></button>
 					}
-					
 				</>
 				:
 				<></>
@@ -233,6 +237,9 @@ export default function UsersModalBtn(
 						}
 
 						<div className="modal__content_btns">
+							
+							
+
 							<ActionWithInputModalBtn 
 								action={masterSendBackDepositAction} 
 								postActionSuccess={postActionSuccess}
@@ -248,7 +255,16 @@ export default function UsersModalBtn(
 								swHash={true} 
 								eUTxOs_Selected={eUTxOs_UserDatum_Selected} 
 							/>
-							
+
+							<div className="modal__action_separator">
+								<br></br>
+								<button className="btn btnStakingPool"
+									 onClick={downloadCVS}
+								>
+									Donwload CVS
+								</button>
+							</div>
+
 							<div className="modal__action_separator">
 								<br></br>
 								<button className="btn btnStakingPool"
