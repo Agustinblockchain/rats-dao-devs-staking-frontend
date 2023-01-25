@@ -117,7 +117,7 @@ export default function UsersModalBtn(
 	}
 
 	async function downloadCVS(){
-		let csvContent = "data:text/csv;charset=utf-8," + eUTxOs_With_UserDatum.map(e => (e.uTxO.txHash + "," + e.datum.udUser.toString() + "," +(Number(e.datum.udInvest).toString() + + poolInfo.staking_UI))).join("\n");
+		let csvContent = "data:text/csv;charset=utf-8," + eUTxOs_With_UserDatum.map(e => (e.uTxO.txHash + "," + e.datum.udUser.toString() + "," +(Number(e.datum.udInvest).toString() + " " + poolInfo.staking_UI))).join("\n");
 
 		var encodedUri = encodeURI(csvContent);
 		window.open(encodedUri);
