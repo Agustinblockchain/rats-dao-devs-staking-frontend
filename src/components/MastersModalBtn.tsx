@@ -7,6 +7,7 @@ import useStatePoolData from '../stakePool/useStatePoolData';
 import { EUTxO, Master, Master_Funder } from "../types";
 import { ADA_Decimals, ADA_UI, maxTokensWithDifferentNames, poolDatum_ClaimedFund } from "../types/constantes";
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
+import { formatHash } from "../utils/cardano-helpers";
 import { formatAmount, toJson } from "../utils/utils";
 import { useStoreState } from '../utils/walletProvider';
 import ActionWithInputModalBtn from './ActionWithInputModalBtn';
@@ -192,7 +193,7 @@ export default function MasterModalBtn(
 														/>
 													</td>
 													<td>{index + 1}</td>
-													<td>{masterFunder.mfMaster}</td>
+													<td>{formatHash(masterFunder.mfMaster)}</td>
 													<td>{formatAmount(Number(masterFunder.mfFundAmount), poolInfo.harvest_Decimals, poolInfo.harvest_UI)}</td>
 													<td>{formatAmount((typeof eUTxO_With_PoolDatum == "object" ? Number(getFundAmountsRemains_ForMaster(eUTxO_With_PoolDatum, eUTxOs_With_FundDatum, masterFunder.mfMaster)[0]):0), poolInfo.harvest_Decimals, poolInfo.harvest_UI)}</td>
 													<td>{masterFunder.mfClaimedFund==poolDatum_ClaimedFund?"Claimed":"Not Claimed"}</td>

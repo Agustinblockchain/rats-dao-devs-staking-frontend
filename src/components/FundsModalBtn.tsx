@@ -7,7 +7,8 @@ import useStatePoolData from '../stakePool/useStatePoolData';
 import { EUTxO, FundDatum } from "../types";
 import { maxTokensWithDifferentNames } from "../types/constantes";
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
-import { formatAmount, toJson } from "../utils/utils";
+import { formatHash } from "../utils/cardano-helpers";
+import { copyToClipboard, formatAmount, toJson } from "../utils/utils";
 import { useStoreState } from '../utils/walletProvider';
 import ActionWithInputModalBtn from './ActionWithInputModalBtn';
 import LoadingSpinner from "./LoadingSpinner";
@@ -247,7 +248,22 @@ export default function FundsModalBtn(
 														}}
 													/>
 												</td>
-												<td style={{fontSize:8}}>{eUTxO.uTxO.txHash + "#" + eUTxO.uTxO.outputIndex}</td>
+												<td>
+													{formatHash(eUTxO.uTxO.txHash) + "#" + eUTxO.uTxO.outputIndex}		
+
+													<button onClick={() => copyToClipboard(eUTxO.uTxO.txHash!)} className='btn__ghost icon' style={{ cursor: 'pointer' }}>
+														<svg xmlns="http://www.w3.org/2000/svg" className="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+															<path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+														</svg>
+													</button>
+													<a target={'_blank'} href={`${process.env.NEXT_PUBLIC_BLOCKCHAIN_EXPLORER_URL}tx/${eUTxO.uTxO.txHash}`} className='btn__ghost icon' style={{ cursor: 'pointer' }}>
+														<svg xmlns="http://www.w3.org/2000/svg" className="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+															<path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+														</svg>
+													</a>	
+													
+												</td>
+
 												<td>{eUTxO.isPreparing.val !== undefined || eUTxO.isConsuming.val !== undefined? "No":"Yes"}</td>
 												<td>{formatAmount(Number(getFundAmount_In_EUTxO_With_FundDatum(eUTxO)), poolInfo.harvest_Decimals, poolInfo.harvest_UI)}</td>
 												<td>{formatAmount(Number(eUTxO.datum.fdCashedOut), poolInfo.harvest_Decimals, poolInfo.harvest_UI)}</td>

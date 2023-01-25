@@ -425,3 +425,9 @@ export async function getDecimalsInMetadata(asset_CS: string, asset_TN: string) 
 }
 
 //---------------------------------------------------------------
+
+export function formatHash (txHash: string){
+    return txHash.slice(0,4)+"..."+txHash.slice(txHash.length-4)
+}
+
+//---------------------------------------------------------------
