@@ -415,9 +415,9 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 													<li className="info">You will receive the ADA back when you withdraw your deposit.</li>'
 												}
 											poolInfo={poolInfo} 
-											swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded && false} 
-											swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded && !poolInfo.swClosed && false} 
-											swShow={poolInfo.swFunded && false} 
+											swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded} 
+											swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded && !poolInfo.swClosed} 
+											swShow={poolInfo.swFunded} 
 											swHash={true} 
 											inputUnitForLucid={poolInfo.staking_Lucid} inputUnitForShowing={poolInfo.staking_UI} inputMax={maxStakingAmountUI} inputDecimals={poolInfo.staking_Decimals} 
 											walletAssets={walletStakingAssets}
@@ -447,9 +447,9 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 														<li className="info">You will receive the ADA back when you withdraw your deposit.</li>'
 												}
 											poolInfo={poolInfo} 
-											swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded && false} 
-											swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded && !poolInfo.swClosed && false} 
-											swShow={poolInfo.swFunded && false} 
+											swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded} 
+											swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded && !poolInfo.swClosed} 
+											swShow={poolInfo.swFunded} 
 											swShowInput={true} inputUnitForLucid={poolInfo.staking_Lucid} inputUnitForShowing={poolInfo.staking_UI} inputMax={maxStakingAmountUI} inputDecimals={poolInfo.staking_Decimals}  
 											swHash={true} 
 											swPaddintTop={false} 
