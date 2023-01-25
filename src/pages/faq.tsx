@@ -56,7 +56,7 @@ const Faq : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = (
 			<div className="section__text">
 				<div className="faq">
 					{
-						[1,2,3,4,5,6,7,8].map((n) => <FaqItem
+						[1,2,3,4,5,6,7,8,9].map((n) => <FaqItem
 								key={n}
 								heading= {getFaqTitle(n)}
 								text= {getFaqText(n)}
