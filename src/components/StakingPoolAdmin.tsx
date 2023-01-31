@@ -19,6 +19,7 @@ import useStatePoolData from '../stakePool/useStatePoolData';
 import { EUTxO, Master } from '../types';
 import { maxTokensWithDifferentNames, scriptID_Master_ClosePool_TN, scriptID_Master_DeleteFund_TN, scriptID_Master_FundAndMerge_TN, scriptID_Master_Fund_TN, scriptID_Master_SendBackDeposit_TN, scriptID_Master_SendBackFund_TN, scriptID_Master_SplitFund_TN, scriptID_Master_TerminatePool_TN, scriptID_User_Deposit_TN, scriptID_User_Harvest_TN, scriptID_User_Withdraw_TN, txID_Master_AddScripts_TN, txID_User_Deposit_For_User_TN } from '../types/constantes';
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
+import { formatHash } from '../utils/cardano-helpers';
 import { newTransaction } from '../utils/cardano-helpersTx';
 import { pushSucessNotification, pushWarningNotification } from "../utils/pushNotification";
 import { copyToClipboard, formatAmount, htmlEscape, searchValueInArray, strToHex, toJson } from '../utils/utils';
@@ -1103,37 +1104,37 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 							{/* <div>UTxO required: <br></br>{poolInfo.poolID_TxOutRef.txHash + "#" + poolInfo.poolID_TxOutRef.outputIndex}</div>
 							<br></br> */}
 
-							<div>UTxO At Script With Pool Datum: {eUTxO_With_PoolDatum ? eUTxO_With_PoolDatum.uTxO.txHash + "#" + eUTxO_With_PoolDatum.uTxO.outputIndex : ""} </div>
+							<div>UTxO At Script With Pool Datum: {eUTxO_With_PoolDatum ? formatHash(eUTxO_With_PoolDatum.uTxO.txHash) + "#" + eUTxO_With_PoolDatum.uTxO.outputIndex : ""} </div>
 							<br></br>
 
-							<div>EUTxO At Script With Script Datum: { poolInfo.eUTxO_With_ScriptDatum ? poolInfo.eUTxO_With_ScriptDatum.uTxO.txHash + "#" + poolInfo.eUTxO_With_ScriptDatum.uTxO.outputIndex : ""} </div>
+							<div>EUTxO At Script With Script Datum: { poolInfo.eUTxO_With_ScriptDatum ? formatHash(poolInfo.eUTxO_With_ScriptDatum.uTxO.txHash) + "#" + poolInfo.eUTxO_With_ScriptDatum.uTxO.outputIndex : ""} </div>
 							<br></br>
 
-							<div>EUTxO At Script With Script TxID_Master_Fund_Datum: { poolInfo.eUTxO_With_Script_TxID_Master_Fund_Datum ? poolInfo.eUTxO_With_Script_TxID_Master_Fund_Datum.uTxO.txHash + "#" + poolInfo.eUTxO_With_Script_TxID_Master_Fund_Datum.uTxO.outputIndex : ""} </div>
+							<div>EUTxO At Script With Script TxID_Master_Fund_Datum: { poolInfo.eUTxO_With_Script_TxID_Master_Fund_Datum ? formatHash(poolInfo.eUTxO_With_Script_TxID_Master_Fund_Datum.uTxO.txHash) + "#" + poolInfo.eUTxO_With_Script_TxID_Master_Fund_Datum.uTxO.outputIndex : ""} </div>
 							<br></br>
-							<div>EUTxO At Script With Script TxID_Master_FundAndMerge_Datum: { poolInfo.eUTxO_With_Script_TxID_Master_FundAndMerge_Datum ? poolInfo.eUTxO_With_Script_TxID_Master_FundAndMerge_Datum.uTxO.txHash + "#" + poolInfo.eUTxO_With_Script_TxID_Master_FundAndMerge_Datum.uTxO.outputIndex : ""} </div>
+							<div>EUTxO At Script With Script TxID_Master_FundAndMerge_Datum: { poolInfo.eUTxO_With_Script_TxID_Master_FundAndMerge_Datum ? formatHash(poolInfo.eUTxO_With_Script_TxID_Master_FundAndMerge_Datum.uTxO.txHash) + "#" + poolInfo.eUTxO_With_Script_TxID_Master_FundAndMerge_Datum.uTxO.outputIndex : ""} </div>
 							<br></br>
-							<div>EUTxO At Script With Script TxID_Master_SplitFund_Datum: { poolInfo.eUTxO_With_Script_TxID_Master_SplitFund_Datum ? poolInfo.eUTxO_With_Script_TxID_Master_SplitFund_Datum.uTxO.txHash + "#" + poolInfo.eUTxO_With_Script_TxID_Master_SplitFund_Datum.uTxO.outputIndex : ""} </div>
+							<div>EUTxO At Script With Script TxID_Master_SplitFund_Datum: { poolInfo.eUTxO_With_Script_TxID_Master_SplitFund_Datum ? formatHash(poolInfo.eUTxO_With_Script_TxID_Master_SplitFund_Datum.uTxO.txHash) + "#" + poolInfo.eUTxO_With_Script_TxID_Master_SplitFund_Datum.uTxO.outputIndex : ""} </div>
 							<br></br>
-							<div>EUTxO At Script With Script TxID_Master_ClosePool_Datum: { poolInfo.eUTxO_With_Script_TxID_Master_ClosePool_Datum ? poolInfo.eUTxO_With_Script_TxID_Master_ClosePool_Datum.uTxO.txHash + "#" + poolInfo.eUTxO_With_Script_TxID_Master_ClosePool_Datum.uTxO.outputIndex : ""} </div>
+							<div>EUTxO At Script With Script TxID_Master_ClosePool_Datum: { poolInfo.eUTxO_With_Script_TxID_Master_ClosePool_Datum ? formatHash(poolInfo.eUTxO_With_Script_TxID_Master_ClosePool_Datum.uTxO.txHash) + "#" + poolInfo.eUTxO_With_Script_TxID_Master_ClosePool_Datum.uTxO.outputIndex : ""} </div>
 							<br></br>
-							<div>EUTxO At Script With Script TxID_Master_TerminatePool_Datum: { poolInfo.eUTxO_With_Script_TxID_Master_TerminatePool_Datum ? poolInfo.eUTxO_With_Script_TxID_Master_TerminatePool_Datum.uTxO.txHash + "#" + poolInfo.eUTxO_With_Script_TxID_Master_TerminatePool_Datum.uTxO.outputIndex : ""} </div>
+							<div>EUTxO At Script With Script TxID_Master_TerminatePool_Datum: { poolInfo.eUTxO_With_Script_TxID_Master_TerminatePool_Datum ? formatHash(poolInfo.eUTxO_With_Script_TxID_Master_TerminatePool_Datum.uTxO.txHash) + "#" + poolInfo.eUTxO_With_Script_TxID_Master_TerminatePool_Datum.uTxO.outputIndex : ""} </div>
 							<br></br>
-							<div>EUTxO At Script With Script TxID_Master_DeleteFund_Datum: { poolInfo.eUTxO_With_Script_TxID_Master_DeleteFund_Datum ? poolInfo.eUTxO_With_Script_TxID_Master_DeleteFund_Datum.uTxO.txHash + "#" + poolInfo.eUTxO_With_Script_TxID_Master_DeleteFund_Datum.uTxO.outputIndex : ""} </div>
+							<div>EUTxO At Script With Script TxID_Master_DeleteFund_Datum: { poolInfo.eUTxO_With_Script_TxID_Master_DeleteFund_Datum ? formatHash(poolInfo.eUTxO_With_Script_TxID_Master_DeleteFund_Datum.uTxO.txHash) + "#" + poolInfo.eUTxO_With_Script_TxID_Master_DeleteFund_Datum.uTxO.outputIndex : ""} </div>
 							<br></br>
-							<div>EUTxO At Script With Script TxID_Master_SendBackFund_Datum: { poolInfo.eUTxO_With_Script_TxID_Master_SendBackFund_Datum ? poolInfo.eUTxO_With_Script_TxID_Master_SendBackFund_Datum.uTxO.txHash + "#" + poolInfo.eUTxO_With_Script_TxID_Master_SendBackFund_Datum.uTxO.outputIndex : ""} </div>
+							<div>EUTxO At Script With Script TxID_Master_SendBackFund_Datum: { poolInfo.eUTxO_With_Script_TxID_Master_SendBackFund_Datum ? formatHash(poolInfo.eUTxO_With_Script_TxID_Master_SendBackFund_Datum.uTxO.txHash) + "#" + poolInfo.eUTxO_With_Script_TxID_Master_SendBackFund_Datum.uTxO.outputIndex : ""} </div>
 							<br></br>
-							<div>EUTxO At Script With Script TxID_Master_SendBackDeposit_Datum: { poolInfo.eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum ? poolInfo.eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum.uTxO.txHash + "#" + poolInfo.eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum.uTxO.outputIndex : ""} </div>
+							<div>EUTxO At Script With Script TxID_Master_SendBackDeposit_Datum: { poolInfo.eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum ? formatHash(poolInfo.eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum.uTxO.txHash) + "#" + poolInfo.eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum.uTxO.outputIndex : ""} </div>
 							<br></br>
-							<div>EUTxO At Script With Script TxID_Master_AddScripts_Datum: { poolInfo.eUTxO_With_Script_TxID_Master_AddScripts_Datum ? poolInfo.eUTxO_With_Script_TxID_Master_AddScripts_Datum.uTxO.txHash + "#" + poolInfo.eUTxO_With_Script_TxID_Master_AddScripts_Datum.uTxO.outputIndex : ""} </div>
+							<div>EUTxO At Script With Script TxID_Master_AddScripts_Datum: { poolInfo.eUTxO_With_Script_TxID_Master_AddScripts_Datum ? formatHash(poolInfo.eUTxO_With_Script_TxID_Master_AddScripts_Datum.uTxO.txHash) + "#" + poolInfo.eUTxO_With_Script_TxID_Master_AddScripts_Datum.uTxO.outputIndex : ""} </div>
 							<br></br>
-							<div>EUTxO At Script With Script TxID_Master_DeleteScripts_Datum: { poolInfo.eUTxO_With_Script_TxID_Master_DeleteScripts_Datum ? poolInfo.eUTxO_With_Script_TxID_Master_DeleteScripts_Datum.uTxO.txHash + "#" + poolInfo.eUTxO_With_Script_TxID_Master_DeleteScripts_Datum.uTxO.outputIndex : ""} </div>
+							<div>EUTxO At Script With Script TxID_Master_DeleteScripts_Datum: { poolInfo.eUTxO_With_Script_TxID_Master_DeleteScripts_Datum ? formatHash(poolInfo.eUTxO_With_Script_TxID_Master_DeleteScripts_Datum.uTxO.txHash) + "#" + poolInfo.eUTxO_With_Script_TxID_Master_DeleteScripts_Datum.uTxO.outputIndex : ""} </div>
 							<br></br>
-							<div>EUTxO At Script With Script TxID_User_Deposit_Datum: { poolInfo.eUTxO_With_Script_TxID_User_Deposit_Datum ? poolInfo.eUTxO_With_Script_TxID_User_Deposit_Datum.uTxO.txHash + "#" + poolInfo.eUTxO_With_Script_TxID_User_Deposit_Datum.uTxO.outputIndex : ""} </div>
+							<div>EUTxO At Script With Script TxID_User_Deposit_Datum: { poolInfo.eUTxO_With_Script_TxID_User_Deposit_Datum ? formatHash(poolInfo.eUTxO_With_Script_TxID_User_Deposit_Datum.uTxO.txHash) + "#" + poolInfo.eUTxO_With_Script_TxID_User_Deposit_Datum.uTxO.outputIndex : ""} </div>
 							<br></br>
-							<div>EUTxO At Script With Script TxID_User_Harvest_Datum: { poolInfo.eUTxO_With_Script_TxID_User_Harvest_Datum ? poolInfo.eUTxO_With_Script_TxID_User_Harvest_Datum.uTxO.txHash + "#" + poolInfo.eUTxO_With_Script_TxID_User_Harvest_Datum.uTxO.outputIndex : ""} </div>
+							<div>EUTxO At Script With Script TxID_User_Harvest_Datum: { poolInfo.eUTxO_With_Script_TxID_User_Harvest_Datum ? formatHash(poolInfo.eUTxO_With_Script_TxID_User_Harvest_Datum.uTxO.txHash) + "#" + poolInfo.eUTxO_With_Script_TxID_User_Harvest_Datum.uTxO.outputIndex : ""} </div>
 							<br></br>
-							<div>EUTxO At Script With Script TxID_User_Withdraw_Datum: { poolInfo.eUTxO_With_Script_TxID_User_Withdraw_Datum ? poolInfo.eUTxO_With_Script_TxID_User_Withdraw_Datum.uTxO.txHash + "#" + poolInfo.eUTxO_With_Script_TxID_User_Withdraw_Datum.uTxO.outputIndex : ""} </div>
+							<div>EUTxO At Script With Script TxID_User_Withdraw_Datum: { poolInfo.eUTxO_With_Script_TxID_User_Withdraw_Datum ? formatHash(poolInfo.eUTxO_With_Script_TxID_User_Withdraw_Datum.uTxO.txHash) + "#" + poolInfo.eUTxO_With_Script_TxID_User_Withdraw_Datum.uTxO.outputIndex : ""} </div>
 							<br></br>
 							</div>
 						</>

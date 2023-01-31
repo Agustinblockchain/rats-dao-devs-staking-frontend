@@ -2,7 +2,7 @@
 module.exports = {
   reactStrictMode: false,
   images : {
-    domains: ['ratsdao.io']
+    domains: ['ratsdao.io','upload.wikimedia.org']
   },
   webpack: (config) => {
     config.experiments = { 
@@ -14,3 +14,8 @@ module.exports = {
     return config
   }
 }
+
+
+
+
+
