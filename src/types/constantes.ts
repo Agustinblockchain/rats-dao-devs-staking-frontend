@@ -93,7 +93,7 @@ export const tokenNameLenght = 3
 
 //------------------------------------------
 
-export const maxTokensWithDifferentNames = 3
+export const maxTokensWithDifferentNames = 2
 
 export const maxMasters = 20
 
