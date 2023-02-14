@@ -50,6 +50,7 @@ export function eUTxODBParser(eUTxO: EUTxO | undefined): EUTxO | undefined {
             BigInt(eUTxO.datum.pdTotalCashedOut),
             pdClosedAt,
             Number(eUTxO.datum.pdIsTerminated),
+            Number(eUTxO.datum.pdIsEmergency),
             BigInt(eUTxO.datum.pdMinAda),
         )
     }
@@ -80,6 +81,22 @@ export function eUTxODBParser(eUTxO: EUTxO | undefined): EUTxO | undefined {
     if (eUTxO.datum.plutusDataIndex == ScriptDatum.plutusDataIndex) {
         eUTxO.datum = new ScriptDatum(eUTxO.datum.sdMaster)
     }
+
+    var isPreparing
+    if (eUTxO.isPreparing.plutusDataIndex == 0 && eUTxO.isPreparing.val != undefined) {
+        isPreparing = new Maybe(BigInt(eUTxO.isPreparing.val))
+    } else {
+        isPreparing = new Maybe<POSIXTime>()
+    }
+    eUTxO.isPreparing = isPreparing
+
+    var isConsuming
+    if (eUTxO.isConsuming.plutusDataIndex == 0 && eUTxO.isConsuming.val != undefined) {
+        isConsuming = new Maybe(BigInt(eUTxO.isConsuming.val))
+    } else {
+        isConsuming = new Maybe<POSIXTime>()
+    }
+    eUTxO.isConsuming = isConsuming
 
     return eUTxO;
 
@@ -379,7 +396,7 @@ export function getEUTxOs_With_UserDatum_InEUxTOList_OfUser(eUTxOs_With_UserDatu
 
 //---------------------------------------------------------------
 
-export function getEUTxO_With_AnyScriptDatum_InEUxTOList(txID_Master_AddScripts_AC_Lucid: AC, eUTxOs: EUTxO[]): EUTxO [] {
+export function getEUTxO_With_AnyScriptDatum_InEUxTOList(scriptID_AC_Lucid: AC, eUTxOs: EUTxO[]): EUTxO [] {
     //-------------------
     var eUTxOs_With_ScriptDatum: EUTxO[] = []
     for (var i = 0; i < eUTxOs.length; i += 1) {
@@ -390,7 +407,7 @@ export function getEUTxO_With_AnyScriptDatum_InEUxTOList(txID_Master_AddScripts_
     var eUTxOs_With_ScriptDatum_And_Token: EUTxO[] = []
     for (var i = 0; i < eUTxOs_With_ScriptDatum.length; i += 1) {
         if (
-            isNFT_With_AC_Lucid_InValue(eUTxOs_With_ScriptDatum[i].uTxO.assets, txID_Master_AddScripts_AC_Lucid)
+            isNFT_With_AC_Lucid_InValue(eUTxOs_With_ScriptDatum[i].uTxO.assets, scriptID_AC_Lucid)
         ) {
             eUTxOs_With_ScriptDatum_And_Token.push(eUTxOs_With_ScriptDatum[i])
         }
@@ -431,7 +448,7 @@ export function getEUTxO_With_ScriptDatum_InEUxTOList(scriptID_AC_Lucid: AC, eUT
 }
 
 
-// export function getEUTxO_With_ScriptDatum_InEUxTOList(txID_Master_AddScripts_AC_Lucid: AC, scriptID_AC_Lucid: AC, eUTxOs: EUTxO[], checkConsumingOrPreparing?: boolean | undefined): EUTxO | undefined {
+// export function getEUTxO_With_ScriptDatum_InEUxTOList(scriptID_AC_Lucid: AC, scriptID_AC_Lucid: AC, eUTxOs: EUTxO[], checkConsumingOrPreparing?: boolean | undefined): EUTxO | undefined {
 //     //-------------------
 //     var eUTxOs_With_ScriptDatum: EUTxO[] = []
 //     for (var i = 0; i < eUTxOs.length; i += 1) {
@@ -442,7 +459,7 @@ export function getEUTxO_With_ScriptDatum_InEUxTOList(scriptID_AC_Lucid: AC, eUT
 //     var eUTxOs_With_ScriptDatum_And_Token: EUTxO[] = []
 //     for (var i = 0; i < eUTxOs_With_ScriptDatum.length; i += 1) {
 //         if (
-//             isNFT_With_AC_Lucid_InValue(eUTxOs_With_ScriptDatum[i].uTxO.assets, txID_Master_AddScripts_AC_Lucid) &&
+//             isNFT_With_AC_Lucid_InValue(eUTxOs_With_ScriptDatum[i].uTxO.assets, scriptID_AC_Lucid) &&
 //             isNFT_With_AC_Lucid_InValue(eUTxOs_With_ScriptDatum[i].uTxO.assets, scriptID_AC_Lucid)
 //         ) {
 //             eUTxOs_With_ScriptDatum_And_Token.push(eUTxOs_With_ScriptDatum[i])

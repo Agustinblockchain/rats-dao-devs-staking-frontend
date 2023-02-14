@@ -44,6 +44,7 @@ export function stakingPoolDBParser(stakingPoolDB: StakingPoolDBInterface) {
         eUTxO_With_Script_TxID_Master_SplitFund_Datum: eUTxODBParser(stakingPoolDB.eUTxO_With_Script_TxID_Master_SplitFund_Datum),
         eUTxO_With_Script_TxID_Master_ClosePool_Datum: eUTxODBParser(stakingPoolDB.eUTxO_With_Script_TxID_Master_ClosePool_Datum),
         eUTxO_With_Script_TxID_Master_TerminatePool_Datum: eUTxODBParser(stakingPoolDB.eUTxO_With_Script_TxID_Master_TerminatePool_Datum),
+        eUTxO_With_Script_TxID_Master_Emergency_Datum: eUTxODBParser(stakingPoolDB.eUTxO_With_Script_TxID_Master_Emergency_Datum),
         eUTxO_With_Script_TxID_Master_DeleteFund_Datum: eUTxODBParser(stakingPoolDB.eUTxO_With_Script_TxID_Master_DeleteFund_Datum),
         eUTxO_With_Script_TxID_Master_SendBackFund_Datum: eUTxODBParser(stakingPoolDB.eUTxO_With_Script_TxID_Master_SendBackFund_Datum),
         eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum: eUTxODBParser(stakingPoolDB.eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum),
@@ -84,6 +85,9 @@ export function stakingPoolDBParser(stakingPoolDB: StakingPoolDBInterface) {
 
         txID_Master_TerminatePool_CS: stakingPoolDB.txID_Master_TerminatePool_CS,
         txID_Master_TerminatePool_Script: (stakingPoolDB.txID_Master_TerminatePool_Script),
+
+        txID_Master_Emergency_CS: stakingPoolDB.txID_Master_Emergency_CS,
+        txID_Master_Emergency_Script: (stakingPoolDB.txID_Master_Emergency_Script),
 
         txID_Master_ClosePool_CS: stakingPoolDB.txID_Master_ClosePool_CS,
         txID_Master_ClosePool_Script: (stakingPoolDB.txID_Master_ClosePool_Script),

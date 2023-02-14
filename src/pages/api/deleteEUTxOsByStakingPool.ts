@@ -8,7 +8,7 @@ import { toJson } from '../../utils/utils';
 import { deleteEUTxOsFromDBByAddress } from  '../../types/eUTxODBModel'
 import { EUTxO } from '../../types';
 import { getSession } from 'next-auth/react';
-import { getStakingPoolFromDBByName } from '../../types/stakePoolDBModel';
+import { getStakingPoolDBModel, getStakingPoolFromDBByName } from '../../types/stakePoolDBModel';
 
 type Data = {
     msg: string
@@ -53,6 +53,15 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
             }
 
             const address = stakingPool.scriptAddress
+
+            const tx_count = 0
+
+            const filter = {name : nombrePool};
+            const update = { 
+                tx_count: tx_count, 
+            };
+            var StakingPoolDBModel = getStakingPoolDBModel()
+            await StakingPoolDBModel.findOneAndUpdate(filter, update)
 
             const count = await deleteEUTxOsFromDBByAddress(address) 
             console.log ("/api/deleteEUTxOsByStakingPool - Deleted "+count+" EUTxOs in Database")

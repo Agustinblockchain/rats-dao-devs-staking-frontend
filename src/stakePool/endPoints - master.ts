@@ -10,7 +10,7 @@ import {
     Redeemer_Mint_TxID, ScriptDatum, UserDatum
 } from '../types';
 import {
-    fundID_TN, maxDiffTokensForPoolAndFundDatum, poolDatum_NotTerminated, poolID_TN, scriptID_Master_AddScripts_TN, scriptID_Validator_TN, tokenNameLenght, txID_Master_AddScripts_TN, txID_Master_ClosePool_TN, txID_Master_DeleteFund_TN, txID_Master_FundAndMerge_TN, txID_Master_SendBackDeposit_TN, txID_Master_SendBackFund_TN, txID_Master_SplitFund_TN, txID_Master_TerminatePool_TN, userID_TN
+    fundID_TN, maxDiffTokensForPoolAndFundDatum, poolDatum_NotTerminated, poolID_TN, scriptID_Master_AddScripts_TN, scriptID_Validator_TN, tokenNameLenght, scriptID_TN, txID_Master_ClosePool_TN, txID_Master_DeleteFund_TN, txID_Master_FundAndMerge_TN, txID_Master_SendBackDeposit_TN, txID_Master_SendBackFund_TN, txID_Master_SplitFund_TN, txID_Master_TerminatePool_TN, userID_TN, poolDatum_NotEmergency
 } from "../types/constantes";
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
 import {
@@ -22,6 +22,7 @@ import { strToHex, toJson } from '../utils/utils';
 import { Wallet } from '../utils/walletProvider';
 import { apiGetEUTxOsDBByStakingPool } from './apis';
 import {
+    masterAddInitialScriptsTx,
     masterClosePoolTx, masterDeleteFundsTx, masterFundAndMergeTx, masterNewFundTx, masterPreparePoolTx, masterSendBackDepositTx, masterSendBackFundTx, masterSplitFundTx, masterTerminatePoolTx
 } from './endPointsTx - master';
 import { mkUpdated_FundDatum_With_NewFundAmountAndMerging, mkUpdated_FundDatum_With_SplitFund, mkUpdated_PoolDatum_With_ClosedAt, mkUpdated_PoolDatum_With_DeletingFunds, mkUpdated_PoolDatum_With_NewFund, mkUpdated_PoolDatum_With_NewFundAmountAndMerging, mkUpdated_PoolDatum_With_SendBackFund, mkUpdated_PoolDatum_With_SplitFundAmount, mkUpdated_PoolDatum_With_Terminated } from './helpersDatumsAndRedeemers';
@@ -60,37 +61,6 @@ export async function masterPreparePool(wallet: Wallet, poolInfo: StakingPoolDBI
         throw "Can't find UTxO (" + toJson(poolID_TxOutRef) + ") for Mint PoolID";
     }
     //------------------
-    const txID_Master_AddScripts_CS = poolInfo.txID_Master_AddScripts_CS
-    const txID_Master_AddScripts_TN_Hex = strToHex(txID_Master_AddScripts_TN)
-    const txID_Master_AddScripts_AC: AssetClass = { currencySymbol: txID_Master_AddScripts_CS, tokenName: txID_Master_AddScripts_TN_Hex };
-    console.log(functionName + " - txID_Master_AddScripts_AC: " + toJson(txID_Master_AddScripts_AC));
-    //------------------
-    // const scriptID_Validator_AC_Lucid =  txID_Master_AddScripts_CS + strToHex(scriptID_Validator_TN)
-    // const scriptID_Master_Fund_AC_Lucid =  txID_Master_AddScripts_CS + strToHex(scriptID_Master_Fund_TN)
-    // const scriptID_Master_FundAndMerge_AC_Lucid =  txID_Master_AddScripts_CS + strToHex(scriptID_Master_FundAndMerge_TN)
-    // const scriptID_Master_SplitFund_AC_Lucid =  txID_Master_AddScripts_CS + strToHex(scriptID_Master_SplitFund_TN)
-    // const scriptID_Master_ClosePool_AC_Lucid =  txID_Master_AddScripts_CS + strToHex(scriptID_Master_ClosePool_TN)
-    // const scriptID_Master_TerminatePool_AC_Lucid =  txID_Master_AddScripts_CS + strToHex(scriptID_Master_TerminatePool_TN)
-    // const scriptID_Master_DeleteFund_AC_Lucid =  txID_Master_AddScripts_CS + strToHex(scriptID_Master_DeleteFund_TN)
-    // const scriptID_Master_SendBackFund_AC_Lucid =  txID_Master_AddScripts_CS + strToHex(scriptID_Master_SendBackFund_TN)
-    // const scriptID_Master_SendBackDeposit_AC_Lucid =  txID_Master_AddScripts_CS + strToHex(scriptID_Master_SendBackDeposit_TN)
-    // const scriptID_Master_AddScripts_AC_Lucid =  txID_Master_AddScripts_CS + strToHex(scriptID_Master_AddScripts_TN)
-    // const scriptID_Master_DeleteScripts_AC_Lucid =  txID_Master_AddScripts_CS + strToHex(scriptID_Master_DeleteScripts_TN)
-    // const scriptID_User_Deposit_AC_Lucid =  txID_Master_AddScripts_CS + strToHex(scriptID_User_Deposit_TN)
-    // const scriptID_User_Harvest_AC_Lucid =  txID_Master_AddScripts_CS + strToHex(scriptID_User_Harvest_TN)
-    // const scriptID_User_Withdraw_AC_Lucid =  txID_Master_AddScripts_CS + strToHex(scriptID_User_Withdraw_TN)
-    //------------------
-    const value_For_Mint_TxID_Master_AddScripts: Assets = { [txID_Master_AddScripts_AC.currencySymbol + txID_Master_AddScripts_AC.tokenName]: 2n };
-    const value_For_Each_TxID_Master_AddScripts: Assets = { [txID_Master_AddScripts_AC.currencySymbol + txID_Master_AddScripts_AC.tokenName]: 1n };
-    const value_For_Mint_ScriptID_Validator: Assets = { [txID_Master_AddScripts_AC.currencySymbol + strToHex(scriptID_Validator_TN)]: 1n };
-    const value_For_Mint_ScriptID_Master_AddScripts: Assets = { [txID_Master_AddScripts_AC.currencySymbol + strToHex(scriptID_Master_AddScripts_TN)]: 1n };
-    //------------------
-    const value_For_Mint_ScriptIDs = addAssetsList([value_For_Mint_TxID_Master_AddScripts, value_For_Mint_ScriptID_Validator, value_For_Mint_ScriptID_Master_AddScripts])
-    console.log(functionName + " - Value For Mint ScriptIDs: " + toJson(value_For_Mint_ScriptIDs))
-    //------------------
-    const value_For_ScriptDatum: Assets = addAssets(value_For_Mint_ScriptID_Validator, value_For_Each_TxID_Master_AddScripts)
-    const value_For_Script_TxID_Master_AddScripts: Assets = addAssets(value_For_Mint_ScriptID_Master_AddScripts, value_For_Each_TxID_Master_AddScripts)
-    //------------------
     const value_For_Mint_PoolID: Assets = { [poolID_CS + strToHex(poolID_TN)]: 1n };
     console.log(functionName + " - Value For Mint PoolID: " + toJson(value_For_Mint_PoolID))
     //------------------
@@ -107,10 +77,74 @@ export async function masterPreparePool(wallet: Wallet, poolInfo: StakingPoolDBI
     const totalCashedOut = 0n
     const isClosedAt = new Maybe<POSIXTime>()
     const isTerminated = poolDatum_NotTerminated
+    const isEmergency = poolDatum_NotEmergency
     const minAda = minAda_For_PoolDatum
     //------------------
-    const poolDatum_Out = new PoolDatum(masterFunders, fundCount, totalCashedOut, isClosedAt, isTerminated, minAda);
+    const poolDatum_Out = new PoolDatum(masterFunders, fundCount, totalCashedOut, isClosedAt, isTerminated, isEmergency, minAda);
     console.log(functionName + " - PoolDatum Out: " + toJson(poolDatum_Out))
+    //------------------
+   var tx_Binded = masterPreparePoolTx.bind(functionName,
+        lucid!, protocolParameters, poolInfo, masterAddr,
+        poolDatum_Out, value_For_PoolDatum,
+        poolID_UTxO, value_For_Mint_PoolID
+    );
+    //------------------
+    var eUTxOs_for_consuming: EUTxO[] = [];
+    //------------------
+    const [txHash, eUTxOs_for_consuming_] = await makeTx_And_UpdateEUTxOsIsPreparing (functionName, wallet, protocolParameters, tx_Binded, eUTxOs_for_consuming)
+    return [txHash, eUTxOs_for_consuming_];
+}
+
+//--------------------------------------
+
+export async function masterAddInitialScripts (wallet: Wallet, poolInfo: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) : Promise <[string, EUTxO []]> {
+    //------------------
+    const functionName = "EndPoint Master - Add Initial Scripts"
+    //------------------
+    const lucid = wallet.lucid;
+    const protocolParameters = wallet.protocolParameters;
+    //------------------
+    if (wallet?.pkh === undefined) throw "Couldn't get your Public Key Hash. Try connecting your Wallet again";
+    //------------------
+    const master = wallet.pkh!;
+    const masterAddr = await lucid!.wallet.address();
+    //------------------
+    const uTxOsAtWallet = await lucid!.wallet.getUtxos();
+    if (uTxOsAtWallet.length == 0) {
+        throw "There are no UTxOs available in your Wallet";
+    }
+    //------------------
+    const scriptID_CS = poolInfo.txID_Master_AddScripts_CS
+    const scriptID_TN_Hex = strToHex(scriptID_TN)
+    const scriptID_AC: AssetClass = { currencySymbol: scriptID_CS, tokenName: scriptID_TN_Hex };
+    console.log(functionName + " - scriptID_AC: " + toJson(scriptID_AC));
+    //------------------
+    // const scriptID_Validator_AC_Lucid =  scriptID_CS + strToHex(scriptID_Validator_TN)
+    // const scriptID_Master_Fund_AC_Lucid =  scriptID_CS + strToHex(scriptID_Master_Fund_TN)
+    // const scriptID_Master_FundAndMerge_AC_Lucid =  scriptID_CS + strToHex(scriptID_Master_FundAndMerge_TN)
+    // const scriptID_Master_SplitFund_AC_Lucid =  scriptID_CS + strToHex(scriptID_Master_SplitFund_TN)
+    // const scriptID_Master_ClosePool_AC_Lucid =  scriptID_CS + strToHex(scriptID_Master_ClosePool_TN)
+    // const scriptID_Master_TerminatePool_AC_Lucid =  scriptID_CS + strToHex(scriptID_Master_TerminatePool_TN)
+    // const scriptID_Master_Emergency_AC_Lucid =  scriptID_CS + strToHex(scriptID_Master_Emergency_TN)
+    // const scriptID_Master_DeleteFund_AC_Lucid =  scriptID_CS + strToHex(scriptID_Master_DeleteFund_TN)
+    // const scriptID_Master_SendBackFund_AC_Lucid =  scriptID_CS + strToHex(scriptID_Master_SendBackFund_TN)
+    // const scriptID_Master_SendBackDeposit_AC_Lucid =  scriptID_CS + strToHex(scriptID_Master_SendBackDeposit_TN)
+    // const scriptID_Master_AddScripts_AC_Lucid =  scriptID_CS + strToHex(scriptID_Master_AddScripts_TN)
+    // const scriptID_Master_DeleteScripts_AC_Lucid =  scriptID_CS + strToHex(scriptID_Master_DeleteScripts_TN)
+    // const scriptID_User_Deposit_AC_Lucid =  scriptID_CS + strToHex(scriptID_User_Deposit_TN)
+    // const scriptID_User_Harvest_AC_Lucid =  scriptID_CS + strToHex(scriptID_User_Harvest_TN)
+    // const scriptID_User_Withdraw_AC_Lucid =  scriptID_CS + strToHex(scriptID_User_Withdraw_TN)
+    //------------------
+    const value_For_Mint_ScriptsIDs: Assets = { [scriptID_AC.currencySymbol + scriptID_AC.tokenName]: 2n };
+    const value_For_Each_ScriptID: Assets = { [scriptID_AC.currencySymbol + scriptID_AC.tokenName]: 1n };
+    const value_For_Mint_ScriptID_Validator: Assets = { [scriptID_AC.currencySymbol + strToHex(scriptID_Validator_TN)]: 1n };
+    const value_For_Mint_ScriptID_Master_AddScripts: Assets = { [scriptID_AC.currencySymbol + strToHex(scriptID_Master_AddScripts_TN)]: 1n };
+    //------------------
+    const value_For_Mint_All_ScriptIDs = addAssetsList([value_For_Mint_ScriptsIDs, value_For_Mint_ScriptID_Validator, value_For_Mint_ScriptID_Master_AddScripts])
+    console.log(functionName + " - Value For Mint ScriptIDs: " + toJson(value_For_Mint_All_ScriptIDs))
+    //------------------
+    const value_For_ScriptDatum: Assets = addAssets(value_For_Mint_ScriptID_Validator, value_For_Each_ScriptID)
+    const value_For_Script_TxID_Master_AddScripts: Assets = addAssets(value_For_Mint_ScriptID_Master_AddScripts, value_For_Each_ScriptID)
     //------------------
     const scriptDatum = new ScriptDatum(master)
     const script_TxID_Master_AddScripts_Datum = scriptDatum
@@ -118,11 +152,9 @@ export async function masterPreparePool(wallet: Wallet, poolInfo: StakingPoolDBI
     const redeemer_Master_AddScripts = new Redeemer_Master_AddScripts(master)
     const redeemer_For_Mint_ScriptIDs = new Redeemer_Mint_TxID(redeemer_Master_AddScripts)
     //------------------
-   var tx_Binded = masterPreparePoolTx.bind(functionName,
+   var tx_Binded = masterAddInitialScriptsTx.bind(functionName,
         lucid!, protocolParameters, poolInfo, masterAddr,
-        poolDatum_Out, value_For_PoolDatum,
-        poolID_UTxO, value_For_Mint_PoolID,
-        redeemer_For_Mint_ScriptIDs, value_For_Mint_ScriptIDs,
+        redeemer_For_Mint_ScriptIDs, value_For_Mint_All_ScriptIDs,
         scriptDatum, value_For_ScriptDatum,
         script_TxID_Master_AddScripts_Datum, value_For_Script_TxID_Master_AddScripts,
     );

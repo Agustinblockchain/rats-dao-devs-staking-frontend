@@ -60,6 +60,71 @@ export async function getEUTxOFromDBByTxHashAndIndex (txHash : string, outputInd
 	return eUTxODB.map((eUTxODB) => eUTxODB.eUTxO)
 }
 
+export async function updateEUTxOsFromDBPreparingOrConsumingByAddress (address : string) : Promise<number> {
+
+	const now = new Date()
+	const nowMinusTxPreparinTime = now.getTime() - txPreparingTime
+	const nowMinusTxConsumingTime = now.getTime() - txConsumingTime
+	
+	//------------------
+
+	const EUTxODBModel = getEUTxODBModel()
+	
+	//------------------
+
+	const filter1 = {
+		"eUTxO.uTxO.address": address, 
+		"$or": [
+			{"eUTxO.isPreparing.plutusDataIndex":0, "eUTxO.isPreparing.val": {"$lte":nowMinusTxPreparinTime}}
+		] 
+	};
+
+	const update1 = {
+		"eUTxO.isPreparing.plutusDataIndex":1,
+		"eUTxO.isPreparing.val":undefined
+	}
+
+	var updateSet = {}
+	var updateUnSet = {}
+	for (var key in update1) {
+		if (update1[key as keyof typeof update1] == undefined) {
+			updateUnSet = {...updateUnSet, [key]: ""}
+		}else{
+			updateSet = {...updateSet, [key]: update1[key as keyof typeof update1]}
+		}
+	}
+
+	const updated1 = await EUTxODBModel.updateMany(filter1, { $set : updateSet , $unset : updateUnSet })
+
+	//------------------
+
+	const filter2 = {
+		"eUTxO.uTxO.address": address, 
+		"$or": [
+			{"eUTxO.isConsuming.plutusDataIndex":0, "eUTxO.isConsuming.val":  {"$lte":nowMinusTxConsumingTime}}
+		] 
+	};
+
+	const update2 = {
+		"eUTxO.isConsuming.plutusDataIndex":1,
+		"eUTxO.isConsuming.val":undefined
+	}
+
+	var updateSet = {}
+	var updateUnSet = {}
+	for (var key in update2) {
+		if (update2[key as keyof typeof update2] == undefined) {
+			updateUnSet = {...updateUnSet, [key]: ""}
+		}else{
+			updateSet = {...updateSet, [key]: update2[key as keyof typeof update2]}
+		}
+	}
+
+	const updated2 = await EUTxODBModel.updateMany(filter2, { $set : updateSet , $unset : updateUnSet })
+
+	return updated1.modifiedCount + updated2.modifiedCount 
+}
+
 
 export async function deleteEUTxOsFromDBByAddress (address : string) : Promise<number> {
 

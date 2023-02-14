@@ -40,6 +40,7 @@ export interface StakingPoolDBInterface {
 	eUTxO_With_Script_TxID_Master_SplitFund_Datum: EUTxO | undefined,
 	eUTxO_With_Script_TxID_Master_ClosePool_Datum: EUTxO | undefined,
 	eUTxO_With_Script_TxID_Master_TerminatePool_Datum: EUTxO | undefined,
+	eUTxO_With_Script_TxID_Master_Emergency_Datum: EUTxO | undefined,
 	eUTxO_With_Script_TxID_Master_DeleteFund_Datum: EUTxO | undefined,
 	eUTxO_With_Script_TxID_Master_SendBackFund_Datum: EUTxO | undefined,
 	eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum: EUTxO | undefined,
@@ -83,6 +84,9 @@ export interface StakingPoolDBInterface {
 
 	txID_Master_TerminatePool_CS: CurrencySymbol,
 	txID_Master_TerminatePool_Script: MintingPolicy,
+
+	txID_Master_Emergency_CS: CurrencySymbol,
+	txID_Master_Emergency_Script: MintingPolicy,
 
 	txID_Master_DeleteFund_CS: CurrencySymbol,
 	txID_Master_DeleteFund_Script: MintingPolicy,
@@ -145,6 +149,7 @@ const stakingPoolDBSchema = new Schema<StakingPoolDBInterface>({
 	eUTxO_With_Script_TxID_Master_SplitFund_Datum: { type: Object },
 	eUTxO_With_Script_TxID_Master_ClosePool_Datum: { type: Object },
 	eUTxO_With_Script_TxID_Master_TerminatePool_Datum: { type: Object },
+	eUTxO_With_Script_TxID_Master_Emergency_Datum: { type: Object },
 	eUTxO_With_Script_TxID_Master_DeleteFund_Datum: { type: Object },
 	eUTxO_With_Script_TxID_Master_SendBackFund_Datum: { type: Object },
 	eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum: { type: Object },
@@ -188,6 +193,9 @@ const stakingPoolDBSchema = new Schema<StakingPoolDBInterface>({
 	txID_Master_TerminatePool_CS: { type: String, required: true },
 	txID_Master_TerminatePool_Script: { type: Object, required: true },
 
+	txID_Master_Emergency_CS: { type: String, required: true },
+	txID_Master_Emergency_Script: { type: Object, required: true },
+
 	txID_Master_DeleteFund_CS: { type: String, required: true },
 	txID_Master_DeleteFund_Script: { type: Object, required: true },
 
@@ -227,10 +235,31 @@ export async function getAllStakingPoolsForAdminFromDB (pkh? : string | undefine
 
 	console.log ("getAllStakingPoolsForAdminFromDB - pkh: " + pkh )
 	
-	const stakingPoolsDB_ : StakingPoolDBInterface [] = await StakingPoolDBModel.find({
-		swShowOnSite : true,
-		swDeleted : false
-	})
+	const stakingPoolsDB_ : StakingPoolDBInterface [] = await StakingPoolDBModel.find(
+		{
+			swShowOnSite : true,
+			swDeleted : false,
+		}
+		// ,
+		// {
+		// 	script: 0, 
+		// 	poolID_Script: 0, 
+		// 	txID_Master_Fund_Script: 0,
+		// 	txID_Master_FundAndMerge_Script: 0,
+		// 	txID_Master_SplitFund_Script: 0,
+		// 	txID_Master_ClosePool_Script: 0,
+		// 	txID_Master_TerminatePool_Script: 0,
+		// 	txID_Master_Emergency_Script: 0,
+		// 	txID_Master_DeleteFund_Script: 0,
+		// 	txID_Master_SendBackFund_Script: 0,
+		// 	txID_Master_SendBackDeposit_Script: 0,
+		// 	txID_Master_AddScripts_Script: 0,
+		// 	txID_Master_DeleteScripts_Script: 0,
+		// 	txID_User_Deposit_Script: 0,
+		// 	txID_User_Harvest_Script: 0,
+		// 	txID_User_Withdraw_Script: 0
+		// }
+	)
 
 	var stakingPoolsDB : StakingPoolDBInterface [] = []
 	
@@ -253,10 +282,31 @@ export async function getAllStakingPoolsForHomeFromDB (pkh? : string | undefined
 
 	console.log ("getAllStakingPoolsForHomeFromDB - pkh: " + pkh )
 	
-	const stakingPoolsDB_ : StakingPoolDBInterface [] = await StakingPoolDBModel.find({
-		swShowOnSite : true,
-		swDeleted : false
-	})
+	const stakingPoolsDB_ : StakingPoolDBInterface [] = await StakingPoolDBModel.find(
+		{
+			swShowOnSite : true,
+			swDeleted : false
+		}
+		// ,
+		// {
+		// 	script: 0, 
+		// 	poolID_Script: 0, 
+		// 	txID_Master_Fund_Script: 0,
+		// 	txID_Master_FundAndMerge_Script: 0,
+		// 	txID_Master_SplitFund_Script: 0,
+		// 	txID_Master_ClosePool_Script: 0,
+		// 	txID_Master_TerminatePool_Script: 0,
+		// 	txID_Master_Emergency_Script: 0,
+		// 	txID_Master_DeleteFund_Script: 0,
+		// 	txID_Master_SendBackFund_Script: 0,
+		// 	txID_Master_SendBackDeposit_Script: 0,
+		// 	txID_Master_AddScripts_Script: 0,
+		// 	txID_Master_DeleteScripts_Script: 0,
+		// 	txID_User_Deposit_Script: 0,
+		// 	txID_User_Harvest_Script: 0,
+		// 	txID_User_Withdraw_Script: 0
+		// }
+	)
 
 	var stakingPoolsDB : StakingPoolDBInterface [] = []
 	
@@ -293,7 +343,30 @@ export async function getStakingPoolFromDBByName (name_ : string) : Promise <Sta
 
 	const StakingPoolDBModel = getStakingPoolDBModel()
 
-	const stakingPoolsDB = await StakingPoolDBModel.find({name : name_})
+	const stakingPoolsDB = await StakingPoolDBModel.find(
+		{
+			name : name_
+		}
+		// ,
+		// {
+		// 	script: 0, 
+		// 	poolID_Script: 0, 
+		// 	txID_Master_Fund_Script: 0,
+		// 	txID_Master_FundAndMerge_Script: 0,
+		// 	txID_Master_SplitFund_Script: 0,
+		// 	txID_Master_ClosePool_Script: 0,
+		// 	txID_Master_TerminatePool_Script: 0,
+		// 	txID_Master_Emergency_Script: 0,
+		// 	txID_Master_DeleteFund_Script: 0,
+		// 	txID_Master_SendBackFund_Script: 0,
+		// 	txID_Master_SendBackDeposit_Script: 0,
+		// 	txID_Master_AddScripts_Script: 0,
+		// 	txID_Master_DeleteScripts_Script: 0,
+		// 	txID_User_Deposit_Script: 0,
+		// 	txID_User_Harvest_Script: 0,
+		// 	txID_User_Withdraw_Script: 0
+		// }
+		)
 
 	return stakingPoolsDB
 	

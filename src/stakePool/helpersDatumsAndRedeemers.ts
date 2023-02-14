@@ -1,7 +1,7 @@
 import { C } from "lucid-cardano";
 import {
     BIGINT, FundDatum, FundID_TN, Master, Master_Funder, Maybe, PoolDatum, POSIXTime, Redeemer_Burn_TxID, Redeemer_Master_AddScripts,
-    Redeemer_Master_ClosePool, Redeemer_Master_DeleteFund, Redeemer_Master_DeleteScripts, Redeemer_Master_Fund, Redeemer_Master_FundAndMerge, Redeemer_Master_SendBackDeposit, Redeemer_Master_SendBackFund, Redeemer_Master_SplitFund, Redeemer_Master_TerminatePool, Redeemer_Mint_TxID, Redeemer_TxID, Redeemer_User_Deposit, Redeemer_User_Harvest, Redeemer_User_Withdraw, ScriptDatum, UserDatum, ValidatorRedeemer, Validator_Datum
+    Redeemer_Master_ClosePool, Redeemer_Master_DeleteFund, Redeemer_Master_DeleteScripts, Redeemer_Master_Emergency, Redeemer_Master_Fund, Redeemer_Master_FundAndMerge, Redeemer_Master_SendBackDeposit, Redeemer_Master_SendBackFund, Redeemer_Master_SplitFund, Redeemer_Master_TerminatePool, Redeemer_Mint_TxID, Redeemer_TxID, Redeemer_User_Deposit, Redeemer_User_Harvest, Redeemer_User_Withdraw, ScriptDatum, UserDatum, ValidatorRedeemer, Validator_Datum
 } from "../types";
 import { poolDatum_ClaimedFund, poolDatum_NotClaimedFund, poolDatum_Terminated } from "../types/constantes";
 import { apiSaveDatumDB } from "./apis";
@@ -78,6 +78,7 @@ export async function getHexFrom_Validator_Redeemer(redeemer: ValidatorRedeemer,
         if (redeemer instanceof Redeemer_Master_SplitFund) { tipo = "Redeemer_Master_SplitFund"; }
         if (redeemer instanceof Redeemer_Master_ClosePool) { tipo = "Redeemer_Master_ClosePool"; }
         if (redeemer instanceof Redeemer_Master_TerminatePool) { tipo = "Redeemer_Master_TerminatePool"; }
+        if (redeemer instanceof Redeemer_Master_Emergency) { tipo = "Redeemer_Master_Emergency"; }
         if (redeemer instanceof Redeemer_Master_DeleteFund) { tipo = "Redeemer_Master_DeleteFund"; }
         if (redeemer instanceof Redeemer_Master_SendBackFund) { tipo = "Redeemer_Master_SendBackFund"; }
         if (redeemer instanceof Redeemer_Master_SendBackDeposit) { tipo = "Redeemer_Master_SendBackDeposit"; }
@@ -126,6 +127,7 @@ export async function getHexFrom_Redeemer_TxID(redeemer: Redeemer_TxID, swPrint:
             if (redeemer.mrValidatorRedeemer instanceof Redeemer_Master_SplitFund) { tipo += " - Redeemer_Master_SplitFund"; }
             if (redeemer.mrValidatorRedeemer instanceof Redeemer_Master_ClosePool) { tipo += " - Redeemer_Master_ClosePool"; }
             if (redeemer.mrValidatorRedeemer instanceof Redeemer_Master_TerminatePool) { tipo += " - Redeemer_Master_TerminatePool"; }
+            if (redeemer.mrValidatorRedeemer instanceof Redeemer_Master_Emergency) { tipo += " - Redeemer_Master_Emergency"; }
             if (redeemer.mrValidatorRedeemer instanceof Redeemer_Master_DeleteFund) { tipo += " - Redeemer_Master_DeleteFund"; }
             if (redeemer.mrValidatorRedeemer instanceof Redeemer_Master_SendBackFund) { tipo += " - Redeemer_Master_SendBackFund"; }
             if (redeemer.mrValidatorRedeemer instanceof Redeemer_Master_SendBackDeposit) { tipo += " - Redeemer_Master_SendBackDeposit"; }
@@ -170,6 +172,7 @@ export function mkUpdated_PoolDatum_With_NewFund(
         poolDatum.pdTotalCashedOut,
         poolDatum.pdClosedAt,
         poolDatum.pdIsTerminated,
+        poolDatum.pdIsEmergency,
         poolDatum.pdMinAda
     )
 }
@@ -200,6 +203,7 @@ export function mkUpdated_PoolDatum_With_NewFundAmountAndMerging(
         poolDatum.pdTotalCashedOut,
         poolDatum.pdClosedAt,
         poolDatum.pdIsTerminated,
+        poolDatum.pdIsEmergency,
         poolDatum.pdMinAda
     )
 }
@@ -229,6 +233,7 @@ export function mkUpdated_PoolDatum_With_SplitFundAmount(
         poolDatum.pdTotalCashedOut,
         poolDatum.pdClosedAt,
         poolDatum.pdIsTerminated,
+        poolDatum.pdIsEmergency,
         poolDatum.pdMinAda
     )
 }
@@ -243,6 +248,7 @@ export function mkUpdated_PoolDatum_With_ClosedAt(poolDatum: PoolDatum, closetAt
         poolDatum.pdTotalCashedOut,
         closetAt,
         poolDatum.pdIsTerminated,
+        poolDatum.pdIsEmergency,
         poolDatum.pdMinAda
     )
 }
@@ -256,6 +262,7 @@ export function mkUpdated_PoolDatum_With_Terminated(poolDatum: PoolDatum) {
         poolDatum.pdTotalCashedOut,
         poolDatum.pdClosedAt,
         poolDatum_Terminated,
+        poolDatum.pdIsEmergency,
         poolDatum.pdMinAda
     )
 }
@@ -269,6 +276,7 @@ export function mkUpdated_PoolDatum_With_DeletingFunds(poolDatum: PoolDatum, mer
         poolDatum.pdTotalCashedOut + mergingCashedOut,
         poolDatum.pdClosedAt,
         poolDatum.pdIsTerminated,
+        poolDatum.pdIsEmergency,
         poolDatum.pdMinAda
     )
 }
@@ -295,6 +303,7 @@ export function mkUpdated_PoolDatum_With_SendBackFund(poolDatum: PoolDatum, mast
         poolDatum.pdTotalCashedOut,
         poolDatum.pdClosedAt,
         poolDatum.pdIsTerminated,
+        poolDatum.pdIsEmergency,
         poolDatum.pdMinAda
     )
 }

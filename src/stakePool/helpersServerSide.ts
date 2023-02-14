@@ -1,8 +1,8 @@
 import path from 'path';
 
 import { EUTxO, InterestRate, Maybe, PoolDatum, UserDatum } from '../types';
-import { fundID_TN, poolDatum_ClaimedFund, poolID_TN, scriptID_Master_AddScripts_TN, scriptID_Master_ClosePool_TN, scriptID_Master_DeleteFund_TN, scriptID_Master_DeleteScripts_TN, scriptID_Master_FundAndMerge_TN, scriptID_Master_Fund_TN, scriptID_Master_SendBackDeposit_TN, scriptID_Master_SendBackFund_TN, scriptID_Master_SplitFund_TN, scriptID_Master_TerminatePool_TN, scriptID_User_Deposit_TN, scriptID_User_Harvest_TN, scriptID_User_Withdraw_TN, scriptID_Validator_TN, txID_Master_AddScripts_TN, userID_TN } from '../types/constantes';
-import { deleteEUTxOsFromDBByTxHashAndIndex, deleteEUTxOsFromDBPreparingOrConsumingByAddress, getEUTxODBModel, getEUTxOFromDBByTxHashAndIndex, getEUTxOsFromDBByAddress } from '../types/eUTxODBModel';
+import { fundID_TN, poolDatum_ClaimedFund, poolID_TN, scriptID_Master_AddScripts_TN, scriptID_Master_ClosePool_TN, scriptID_Master_DeleteFund_TN, scriptID_Master_DeleteScripts_TN, scriptID_Master_FundAndMerge_TN, scriptID_Master_Fund_TN, scriptID_Master_SendBackDeposit_TN, scriptID_Master_SendBackFund_TN, scriptID_Master_SplitFund_TN, scriptID_Master_TerminatePool_TN, scriptID_User_Deposit_TN, scriptID_User_Harvest_TN, scriptID_User_Withdraw_TN, scriptID_Validator_TN, scriptID_TN, userID_TN, scriptID_Master_Emergency_TN } from '../types/constantes';
+import { deleteEUTxOsFromDBByTxHashAndIndex, deleteEUTxOsFromDBPreparingOrConsumingByAddress, getEUTxODBModel, getEUTxOFromDBByTxHashAndIndex, getEUTxOsFromDBByAddress, updateEUTxOsFromDBPreparingOrConsumingByAddress } from '../types/eUTxODBModel';
 import { getStakingPoolDBModel, StakingPoolDBInterface } from '../types/stakePoolDBModel';
 
 import { apiSaveEUTxODB } from "./apis";
@@ -98,6 +98,7 @@ export async function getPABPoolParamsFromFile(filename: string) {
             // pppPolicy_TxID_Master_SplitFund : createScriptFromHEXCBOR(jsonFile!.pppPolicy_TxID_Master_SplitFund.getMintingPolicy),
             // pppPolicy_TxID_Master_ClosePool : createScriptFromHEXCBOR(jsonFile!.pppPolicy_TxID_Master_ClosePool.getMintingPolicy),
             // pppPolicy_TxID_Master_TerminatePool : createScriptFromHEXCBOR(jsonFile!.pppPolicy_TxID_Master_TerminatePool.getMintingPolicy),
+            // pppPolicy_TxID_Master_Emergency : createScriptFromHEXCBOR(jsonFile!.pppPolicy_TxID_Master_Emergency.getMintingPolicy),
             // pppPolicy_TxID_Master_DeleteFund : createScriptFromHEXCBOR(jsonFile!.pppPolicy_TxID_Master_DeleteFund.getMintingPolicy),
             // pppPolicy_TxID_Master_SendBackFund : createScriptFromHEXCBOR(jsonFile!.pppPolicy_TxID_Master_SendBackFund.getMintingPolicy),
             // pppPolicy_TxID_Master_SendBackDeposit : createScriptFromHEXCBOR(jsonFile!.pppPolicy_TxID_Master_SendBackDeposit.getMintingPolicy),
@@ -112,6 +113,7 @@ export async function getPABPoolParamsFromFile(filename: string) {
             txID_Master_SplitFund_CS: jsonFile!.pppCurSymbol_TxID_Master_SplitFund.unCurrencySymbol,
             txID_Master_ClosePool_CS: jsonFile!.pppCurSymbol_TxID_Master_ClosePool.unCurrencySymbol,
             txID_Master_TerminatePool_CS: jsonFile!.pppCurSymbol_TxID_Master_TerminatePool.unCurrencySymbol,
+            txID_Master_Emergency_CS: jsonFile!.pppCurSymbol_TxID_Master_Emergency.unCurrencySymbol,
             txID_Master_DeleteFund_CS: jsonFile!.pppCurSymbol_TxID_Master_DeleteFund.unCurrencySymbol,
             txID_Master_SendBackFund_CS: jsonFile!.pppCurSymbol_TxID_Master_SendBackFund.unCurrencySymbol,
             txID_Master_SendBackDeposit_CS: jsonFile!.pppCurSymbol_TxID_Master_SendBackDeposit.unCurrencySymbol,
@@ -183,24 +185,25 @@ export async function serverSide_updateStakingPool (poolInfo: StakingPoolDBInter
         const userID_CS = poolInfo.txID_User_Deposit_CS
         // const userID_AC_Lucid = userID_CS + strToHex(userID_TN);
         //------------------
-        const txID_Master_AddScripts_CS = poolInfo.txID_Master_AddScripts_CS
-        const txID_Master_AddScripts_TN_Hex = strToHex(txID_Master_AddScripts_TN)
-        const txID_Master_AddScripts_AC_Lucid = txID_Master_AddScripts_CS + txID_Master_AddScripts_TN_Hex;
+        const scriptID_CS = poolInfo.txID_Master_AddScripts_CS
+        const scriptID_TN_Hex = strToHex(scriptID_TN)
+        const scriptID_AC_Lucid = scriptID_CS + scriptID_TN_Hex;
         //------------------
-        const scriptID_Validator_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_Validator_TN)
-        const scriptID_Master_Fund_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_Master_Fund_TN)
-        const scriptID_Master_FundAndMerge_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_Master_FundAndMerge_TN)
-        const scriptID_Master_SplitFund_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_Master_SplitFund_TN)
-        const scriptID_Master_ClosePool_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_Master_ClosePool_TN)
-        const scriptID_Master_TerminatePool_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_Master_TerminatePool_TN)
-        const scriptID_Master_DeleteFund_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_Master_DeleteFund_TN)
-        const scriptID_Master_SendBackFund_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_Master_SendBackFund_TN)
-        const scriptID_Master_SendBackDeposit_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_Master_SendBackDeposit_TN)
-        const scriptID_Master_AddScripts_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_Master_AddScripts_TN)
-        const scriptID_Master_DeleteScripts_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_Master_DeleteScripts_TN)
-        const scriptID_User_Deposit_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_User_Deposit_TN)
-        const scriptID_User_Harvest_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_User_Harvest_TN)
-        const scriptID_User_Withdraw_AC_Lucid = txID_Master_AddScripts_CS + strToHex(scriptID_User_Withdraw_TN)
+        const scriptID_Validator_AC_Lucid = scriptID_CS + strToHex(scriptID_Validator_TN)
+        const scriptID_Master_Fund_AC_Lucid = scriptID_CS + strToHex(scriptID_Master_Fund_TN)
+        const scriptID_Master_FundAndMerge_AC_Lucid = scriptID_CS + strToHex(scriptID_Master_FundAndMerge_TN)
+        const scriptID_Master_SplitFund_AC_Lucid = scriptID_CS + strToHex(scriptID_Master_SplitFund_TN)
+        const scriptID_Master_ClosePool_AC_Lucid = scriptID_CS + strToHex(scriptID_Master_ClosePool_TN)
+        const scriptID_Master_TerminatePool_AC_Lucid = scriptID_CS + strToHex(scriptID_Master_TerminatePool_TN)
+        const scriptID_Master_Emergency_AC_Lucid = scriptID_CS + strToHex(scriptID_Master_Emergency_TN)
+        const scriptID_Master_DeleteFund_AC_Lucid = scriptID_CS + strToHex(scriptID_Master_DeleteFund_TN)
+        const scriptID_Master_SendBackFund_AC_Lucid = scriptID_CS + strToHex(scriptID_Master_SendBackFund_TN)
+        const scriptID_Master_SendBackDeposit_AC_Lucid = scriptID_CS + strToHex(scriptID_Master_SendBackDeposit_TN)
+        const scriptID_Master_AddScripts_AC_Lucid = scriptID_CS + strToHex(scriptID_Master_AddScripts_TN)
+        const scriptID_Master_DeleteScripts_AC_Lucid = scriptID_CS + strToHex(scriptID_Master_DeleteScripts_TN)
+        const scriptID_User_Deposit_AC_Lucid = scriptID_CS + strToHex(scriptID_User_Deposit_TN)
+        const scriptID_User_Harvest_AC_Lucid = scriptID_CS + strToHex(scriptID_User_Harvest_TN)
+        const scriptID_User_Withdraw_AC_Lucid = scriptID_CS + strToHex(scriptID_User_Withdraw_TN)
         //------------------
         var new_tx_count: number | undefined = undefined
         const urlApi = process.env.NEXT_PUBLIC_REACT_SERVER_URL + "/api/blockfrost" + '/addresses/' + scriptAddress + '/total'
@@ -232,14 +235,22 @@ export async function serverSide_updateStakingPool (poolInfo: StakingPoolDBInter
             if (eUTxOParsed) eUTxOs_With_Datum[i] = eUTxOParsed
         }
         //------------------
+        // desmarco aquellas reservadas y que ya paso el tiempo minimo de reserva
+        // si fueron consumidas seran eliminadas luego, por que habrá nueva tx count y ahi se controlara todas las utxos que hay.
+        // si no fueron consumidas, se marcaran como disponibles para ser usadas en nuevas transacciones
+        const count = await updateEUTxOsFromDBPreparingOrConsumingByAddress(scriptAddress) 
+        console.log ("ServerSide - Update StakingPool - " + poolInfo.name + " - eUTxOs Updated in DB Preparing Or Consuming: " + count)
         if (new_tx_count !== undefined && new_tx_count > tx_count) {
             console.log ("ServerSide - Update StakingPool - " + poolInfo.name + " - new_tx_count: " +  new_tx_count + " > old_tx_count: " + tx_count)	
             //------------------ 
             tx_count = new_tx_count
             swUpdate = true
             // elimino todas las eutxos que estan en la base de datos marcadas como preparadas o consumidas y que paso el tiempo de espera
-            const count = await deleteEUTxOsFromDBPreparingOrConsumingByAddress(scriptAddress) 
-            console.log ("ServerSide - Update StakingPool - " + poolInfo.name + " - eUTxOs Delete in DB Preparing Or Consuming: "+count)
+            // update: no quiero eliminarlas. el hecho de tener el tx count me asegura de que reviso todo cada vez que hay una tx nueva
+            // eso va a eliminar todo lo que sea necesario.
+            // la marca de en preparacion o en consumo sirve solo para evitar que dos quieran usarlas al mismo tiempo.
+            // const count = await deleteEUTxOsFromDBPreparingOrConsumingByAddress(scriptAddress) 
+            // console.log ("ServerSide - Update StakingPool - " + poolInfo.name + " - eUTxOs Delete in DB Preparing Or Consuming: "+count)
             //------------------
             const uTxOsAtScript = await lucid!.utxosAt(scriptAddress)
             //------------------
@@ -366,7 +377,7 @@ export async function serverSide_updateStakingPool (poolInfo: StakingPoolDBInter
             }
         }
         //------------------
-        const eUTxOs_With_ScriptDatum = getEUTxO_With_AnyScriptDatum_InEUxTOList (txID_Master_AddScripts_AC_Lucid, eUTxOs_With_Datum)
+        const eUTxOs_With_ScriptDatum = getEUTxO_With_AnyScriptDatum_InEUxTOList (scriptID_AC_Lucid, eUTxOs_With_Datum)
         //------------------
         var eUTxO_With_ScriptDatum: EUTxO | undefined = getEUTxO_With_ScriptDatum_InEUxTOList(scriptID_Validator_AC_Lucid, eUTxOs_With_ScriptDatum)
         if (!isEqual (eUTxO_With_ScriptDatum, poolInfo.eUTxO_With_ScriptDatum)) {
@@ -396,6 +407,11 @@ export async function serverSide_updateStakingPool (poolInfo: StakingPoolDBInter
         var eUTxO_With_Script_TxID_Master_TerminatePool_Datum: EUTxO | undefined = getEUTxO_With_ScriptDatum_InEUxTOList(scriptID_Master_TerminatePool_AC_Lucid, eUTxOs_With_ScriptDatum)
         if (!isEqual (eUTxO_With_Script_TxID_Master_TerminatePool_Datum, poolInfo.eUTxO_With_Script_TxID_Master_TerminatePool_Datum)) {
             poolInfo.eUTxO_With_Script_TxID_Master_TerminatePool_Datum = eUTxO_With_Script_TxID_Master_TerminatePool_Datum
+            swUpdate = true
+        } 
+        var eUTxO_With_Script_TxID_Master_Emergency_Datum: EUTxO | undefined = getEUTxO_With_ScriptDatum_InEUxTOList(scriptID_Master_Emergency_AC_Lucid, eUTxOs_With_ScriptDatum)
+        if (!isEqual (eUTxO_With_Script_TxID_Master_Emergency_Datum, poolInfo.eUTxO_With_Script_TxID_Master_Emergency_Datum)) {
+            poolInfo.eUTxO_With_Script_TxID_Master_Emergency_Datum = eUTxO_With_Script_TxID_Master_Emergency_Datum
             swUpdate = true
         } 
         var eUTxO_With_Script_TxID_Master_DeleteFund_Datum: EUTxO | undefined = getEUTxO_With_ScriptDatum_InEUxTOList(scriptID_Master_DeleteFund_AC_Lucid, eUTxOs_With_ScriptDatum)
@@ -459,6 +475,7 @@ export async function serverSide_updateStakingPool (poolInfo: StakingPoolDBInter
                 eUTxO_With_Script_TxID_Master_SplitFund_Datum !== undefined ||
                 eUTxO_With_Script_TxID_Master_ClosePool_Datum !== undefined ||
                 eUTxO_With_Script_TxID_Master_TerminatePool_Datum !== undefined ||
+                eUTxO_With_Script_TxID_Master_Emergency_Datum !== undefined ||
                 eUTxO_With_Script_TxID_Master_DeleteFund_Datum !== undefined ||
                 eUTxO_With_Script_TxID_Master_SendBackFund_Datum !== undefined ||
                 eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum !== undefined)
@@ -562,6 +579,7 @@ export async function serverSide_updateStakingPool (poolInfo: StakingPoolDBInter
                 eUTxO_With_Script_TxID_Master_SplitFund_Datum: eUTxO_With_Script_TxID_Master_SplitFund_Datum? JSON.parse(toJson(eUTxO_With_Script_TxID_Master_SplitFund_Datum)) : undefined,
                 eUTxO_With_Script_TxID_Master_ClosePool_Datum: eUTxO_With_Script_TxID_Master_ClosePool_Datum? JSON.parse(toJson(eUTxO_With_Script_TxID_Master_ClosePool_Datum)) : undefined,
                 eUTxO_With_Script_TxID_Master_TerminatePool_Datum: eUTxO_With_Script_TxID_Master_TerminatePool_Datum? JSON.parse(toJson(eUTxO_With_Script_TxID_Master_TerminatePool_Datum)) : undefined,
+                eUTxO_With_Script_TxID_Master_Emergency_Datum: eUTxO_With_Script_TxID_Master_Emergency_Datum? JSON.parse(toJson(eUTxO_With_Script_TxID_Master_Emergency_Datum)) : undefined,
                 eUTxO_With_Script_TxID_Master_DeleteFund_Datum: eUTxO_With_Script_TxID_Master_DeleteFund_Datum? JSON.parse(toJson(eUTxO_With_Script_TxID_Master_DeleteFund_Datum)) : undefined,
                 eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum: eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum? JSON.parse(toJson(eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum)) : undefined,
                 eUTxO_With_Script_TxID_Master_SendBackFund_Datum: eUTxO_With_Script_TxID_Master_SendBackFund_Datum? JSON.parse(toJson(eUTxO_With_Script_TxID_Master_SendBackFund_Datum)) : undefined,
@@ -607,6 +625,7 @@ export async function serverSide_updateStakingPool (poolInfo: StakingPoolDBInter
         poolInfo.eUTxO_With_Script_TxID_Master_SplitFund_Datum = eUTxO_With_Script_TxID_Master_SplitFund_Datum? JSON.parse(toJson(eUTxO_With_Script_TxID_Master_SplitFund_Datum)) : undefined,
         poolInfo.eUTxO_With_Script_TxID_Master_ClosePool_Datum = eUTxO_With_Script_TxID_Master_ClosePool_Datum? JSON.parse(toJson(eUTxO_With_Script_TxID_Master_ClosePool_Datum)) : undefined,
         poolInfo.eUTxO_With_Script_TxID_Master_TerminatePool_Datum = eUTxO_With_Script_TxID_Master_TerminatePool_Datum? JSON.parse(toJson(eUTxO_With_Script_TxID_Master_TerminatePool_Datum)) : undefined,
+        poolInfo.eUTxO_With_Script_TxID_Master_Emergency_Datum = eUTxO_With_Script_TxID_Master_Emergency_Datum? JSON.parse(toJson(eUTxO_With_Script_TxID_Master_Emergency_Datum)) : undefined,
         poolInfo.eUTxO_With_Script_TxID_Master_DeleteFund_Datum = eUTxO_With_Script_TxID_Master_DeleteFund_Datum? JSON.parse(toJson(eUTxO_With_Script_TxID_Master_DeleteFund_Datum)) : undefined,
         poolInfo.eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum = eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum? JSON.parse(toJson(eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum)) : undefined,
         poolInfo.eUTxO_With_Script_TxID_Master_SendBackFund_Datum = eUTxO_With_Script_TxID_Master_SendBackFund_Datum? JSON.parse(toJson(eUTxO_With_Script_TxID_Master_SendBackFund_Datum)) : undefined,

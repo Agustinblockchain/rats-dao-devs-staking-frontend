@@ -124,8 +124,8 @@ export async function fixTx(tx_Building: any, lucid: Lucid, protocolParameters: 
         throw "Error: Can't get last block from Blockfrost"
     }
     console.log ("blockLast: " +  blockLast)	
-    const from = blockLast! + 0
-    const until = blockLast! + validTimeRangeInSlots
+    const from = blockLast! -1*60
+    const until = blockLast! + validTimeRangeInSlots -1*60
 
     // console.log ("from: " +  from!.toString())	
     // console.log ("until: " +  until.toString())	
@@ -141,8 +141,8 @@ export async function fixTx(tx_Building: any, lucid: Lucid, protocolParameters: 
 
     const transaction_NOT_READY_ONLY_FOR_SHOWING = tx_Building.txBuilder.build_tx();
 
-    // console.log("fixTx - Tx Complete before evaluate:");
-    // console.log(transaction_NOT_READY_ONLY_FOR_SHOWING.to_json());
+    console.log("fixTx - Tx Complete before evaluate:");
+    console.log(transaction_NOT_READY_ONLY_FOR_SHOWING.to_json());
 
     const feeActual = tx_Building.txBuilder.get_fee_if_set()
 
@@ -400,13 +400,13 @@ export async function waitForTxConfirmation (lucid: Lucid, txhash: string, eUTxO
             eUTxOs_for_consuming[i] = eUTxO_Updated;
         }
     }
-    async function deleteIsConsuming() {
-        console.log("waitForTxConfirmation - deleteIsConsuming: " + eUTxOs_for_consuming.length);
-        if (timeOut) clearTimeout(timeOut);
-        for (let i = 0; i < eUTxOs_for_consuming.length; i++) {
-            await apiDeleteEUTxODB(eUTxOs_for_consuming[i]);
-        }
-    }
+    // async function deleteIsConsuming() {
+    //     console.log("waitForTxConfirmation - deleteIsConsuming: " + eUTxOs_for_consuming.length);
+    //     if (timeOut) clearTimeout(timeOut);
+    //     for (let i = 0; i < eUTxOs_for_consuming.length; i++) {
+    //         await apiDeleteEUTxODB(eUTxOs_for_consuming[i]);
+    //     }
+    // }
     try {
         //------------------
         await updateIsConsuming(true);
@@ -415,7 +415,8 @@ export async function waitForTxConfirmation (lucid: Lucid, txhash: string, eUTxO
         //------------------
         if (await lucid.awaitTx(txhash)) {
             console.log("waitForTxConfirmation - Tx confirmed");
-            await deleteIsConsuming();
+            // await deleteIsConsuming();
+            // update: no elimino utxo. se eliminaran en el server cuando se confirme la nueva tx y se actualice la tx count.s
         } else {
             console.log("waitForTxConfirmation - Tx not confirmed");
             await updateIsConsuming(false);

@@ -25,6 +25,8 @@ export const fundID_TN = "F"
 
 export const userID_TN = "U"
 
+export const scriptID_TN = "S"
+
 //------------------------------------------
 
 export const scriptID_Validator_TN = "SV"
@@ -39,6 +41,8 @@ export const scriptID_Master_ClosePool_TN = "SMCP"
 
 export const scriptID_Master_TerminatePool_TN = "SMTP"
 
+export const scriptID_Master_Emergency_TN = "SME"
+
 export const scriptID_Master_DeleteFund_TN = "SMDF"
 
 export const scriptID_Master_SendBackFund_TN = "SMSBF"
@@ -50,8 +54,6 @@ export const scriptID_Master_AddScripts_TN = "SMAS"
 export const scriptID_Master_DeleteScripts_TN = "SMDS"
 
 export const scriptID_User_Deposit_TN = "SUD"
-
-export const scriptID_User_Deposit_For_User_TN = "SUD"
 
 export const scriptID_User_Harvest_TN = "SUH"
 
@@ -67,13 +69,15 @@ export const txID_Master_ClosePool_TN = "MCP"
 
 export const txID_Master_TerminatePool_TN = "MTP"
 
+export const txID_Master_Emergency_TN = "ME"
+
 export const txID_Master_DeleteFund_TN = "MDF"
 
 export const txID_Master_SendBackFund_TN = "MSBF"
 
 export const txID_Master_SendBackDeposit_TN = "MSBD"
 
-export const txID_Master_AddScripts_TN = "MAS"
+//export const txID_Master_AddScripts_TN = "MAS"
 
 export const txID_Master_DeleteScripts_TN = "MDS"
 
@@ -93,7 +97,7 @@ export const tokenNameLenght = 3
 
 //------------------------------------------
 
-export const maxTokensWithDifferentNames = 2
+export const maxTokensWithDifferentNames = 20
 
 export const maxMasters = 20
 
@@ -116,6 +120,10 @@ export const maxTxFundDatumInputs = 2
 export const poolDatum_NotTerminated = 0
 
 export const poolDatum_Terminated = 1
+
+export const poolDatum_NotEmergency = 0
+
+export const poolDatum_Emergency = 1
 
 export const poolDatum_NotClaimedFund = 0
 

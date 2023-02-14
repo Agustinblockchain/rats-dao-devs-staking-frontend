@@ -15,10 +15,7 @@ import { getHexFrom_Redeemer_TxID, getHexFrom_Validator_Datum, getHexFrom_Valida
 export async function masterPreparePoolTx(
     lucid: Lucid, protocolParameters: any, poolInfo: StakingPoolDBInterface, addressWallet: Address,
     poolDatum_Out: PoolDatum, value_For_PoolDatum: Assets,
-    poolID_UTxO: UTxO, value_For_Mint_PoolID: Assets,
-    redeemer_For_Mint_TxID_Master_AddScripts: Redeemer_Mint_TxID, value_For_Mint_TxID_Master_AddScripts: Assets ,
-    scriptDatum : ScriptDatum, value_For_ScriptDatum : Assets ,
-    script_TxID_Master_AddScripts_Datum: ScriptDatum, value_For_Script_TxID_Master_AddScripts: Assets 
+    poolID_UTxO: UTxO, value_For_Mint_PoolID: Assets
 ) {
     //------------------
     const functionName = "EndPoint Tx Master - Prepare Pool"
@@ -26,10 +23,6 @@ export async function masterPreparePoolTx(
     console.log(functionName + " - poolID_UTxO: " + poolID_UTxO.txHash + "#" + poolID_UTxO.outputIndex)
     //------------------
     const scriptAddress: Address = poolInfo.scriptAddress
-    //------------------
-    const scriptDatum_Hex = await getHexFrom_Validator_Datum (scriptDatum, true);
-    //------------------
-    const script_TxID_Master_AddScripts_Datum_Hex = await getHexFrom_Validator_Datum (script_TxID_Master_AddScripts_Datum, true);
     //------------------
     const poolDatum_Out_Hex = await getHexFrom_Validator_Datum (poolDatum_Out, true);
     //------------------
@@ -39,8 +32,6 @@ export async function masterPreparePoolTx(
     //const redeemer_For_Mint_PoolID_Hex = Data.empty() //Data.to(new Construct (0, [])) // d87980 
     const plutusData = objToPlutusData(redeemer_For_Mint_PoolID);
     const redeemer_For_Mint_PoolID_Hex = showPtrInHex(plutusData);
-    //------------------
-    const redeemer_For_Mint_TxID_Master_AddScripts_Hex = await getHexFrom_Redeemer_TxID (redeemer_For_Mint_TxID_Master_AddScripts, true);
     //------------------
     // const now = Math.floor(Date.now())
     // console.log(functionName + " - now: " + now)
@@ -53,11 +44,47 @@ export async function masterPreparePoolTx(
     tx_Building = await tx_Building
         .collectFrom([poolID_UTxO])
         .attachMintingPolicy(poolInfo.poolID_Script)
-        .attachMintingPolicy(poolInfo.txID_Master_AddScripts_Script) 
         .mintAssets(value_For_Mint_PoolID, redeemer_For_Mint_PoolID_Hex)
-        .mintAssets(value_For_Mint_TxID_Master_AddScripts, redeemer_For_Mint_TxID_Master_AddScripts_Hex) 
-        .mintAssets(value_For_Mint_TxID_Master_AddScripts, redeemer_For_Mint_TxID_Master_AddScripts_Hex) 
         .payToContract(scriptAddress, { inline: poolDatum_Out_Hex }, value_For_PoolDatum)
+        .addSigner(addressWallet)
+        // .validFrom(from)
+        // .validTo(until)
+    //------------------
+    const txComplete_FIXED = await fixTx(tx_Building, lucid, protocolParameters)
+    return txComplete_FIXED
+}
+
+//------------------
+
+export async function masterAddInitialScriptsTx(
+    lucid: Lucid, protocolParameters: any, poolInfo: StakingPoolDBInterface, addressWallet: Address,
+    redeemer_For_Mint_TxID_Master_AddScripts: Redeemer_Mint_TxID, value_For_Mint_TxID_Master_AddScripts: Assets ,
+    scriptDatum : ScriptDatum, value_For_ScriptDatum : Assets ,
+    script_TxID_Master_AddScripts_Datum: ScriptDatum, value_For_Script_TxID_Master_AddScripts: Assets 
+) {
+    //------------------
+    const functionName = "EndPoint Tx Master - Add Initial Scripts"
+    //------------------
+    const scriptAddress: Address = poolInfo.scriptAddress
+    //------------------
+    const scriptDatum_Hex = await getHexFrom_Validator_Datum (scriptDatum, true);
+    //------------------
+    const script_TxID_Master_AddScripts_Datum_Hex = await getHexFrom_Validator_Datum (script_TxID_Master_AddScripts_Datum, true);
+    //------------------
+    const redeemer_For_Mint_TxID_Master_AddScripts_Hex = await getHexFrom_Redeemer_TxID (redeemer_For_Mint_TxID_Master_AddScripts, true);
+    //------------------
+    // const now = Math.floor(Date.now())
+    // console.log(functionName + " - now: " + now)
+    // const from = now - (5 * 60 * 1000)
+    // const until = now + (validTimeRange) - (5 * 60 * 1000) 
+    //------------------
+    var tx = lucid.newTx()
+    var tx_Building = createTx( lucid, protocolParameters, tx);
+    //------------------
+    tx_Building = await tx_Building
+        .attachMintingPolicy(poolInfo.txID_Master_AddScripts_Script) 
+        .mintAssets(value_For_Mint_TxID_Master_AddScripts, redeemer_For_Mint_TxID_Master_AddScripts_Hex) 
+        //.mintAssets(value_For_Mint_TxID_Master_AddScripts, redeemer_For_Mint_TxID_Master_AddScripts_Hex) 
         .payToContract(scriptAddress, {
             inline: scriptDatum_Hex,
             scriptRef: poolInfo.script, 
@@ -75,6 +102,7 @@ export async function masterPreparePoolTx(
 }
 
 //------------------
+
 
 export async function masterNewFundTx(
     lucid: Lucid, protocolParameters: any, poolInfo: StakingPoolDBInterface, addressWallet: Address,

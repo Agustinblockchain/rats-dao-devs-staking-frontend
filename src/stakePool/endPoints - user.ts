@@ -525,7 +525,7 @@ export async function userWithdraw(wallet: Wallet, poolInfo: StakingPoolDBInterf
         //------------------
         // busco el utxo que tengan FundDatum validos
         const eUTxOs_With_FundDatum = getEUTxOs_With_FundDatum_InEUxTOList(fundID_AC_Lucid, eUTxOs_With_Datum, true);
-        if (!eUTxOs_With_FundDatum) {
+        if (!eUTxOs_With_FundDatum || eUTxOs_With_FundDatum.length == 0) {
             throw "Can't find any available UTxO with FundDatum, please wait for the next block and try again";
         }
         console.log(functionName + " - UTxOs with FundDatum that are not being consumed - length: " + eUTxOs_With_FundDatum.length);
@@ -539,6 +539,7 @@ export async function userWithdraw(wallet: Wallet, poolInfo: StakingPoolDBInterf
         //------------------
         const value_In_FundDatum = eUTxO_With_FundDatum.uTxO.assets;
         console.log(functionName + " - value In FundDatum: " + toJson(value_In_FundDatum));
+        //var value_For_FundDatum = addAssetsList([value_In_FundDatum, value_For_Mint_TxID_User_Withdraw]);
         var value_For_FundDatum = addAssetsList([value_In_FundDatum, value_For_Mint_TxID_User_Withdraw, value_In_UserDatum, value_For_Burn_UserID]);
         value_For_FundDatum = subsAssets(value_For_FundDatum, value_For_SendBackDeposit_To_User);
         console.log(functionName + " - value For FundDatum: " + toJson(value_For_FundDatum));

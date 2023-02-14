@@ -18,6 +18,8 @@ export function explainErrorTx(errorIn: any): string {
         return res;
     } else {
 
+
+
         if (typeof error === 'string') {
 
             if (error.includes("\"JN\"")) { res += sep + "From just error"; sep = ", "; }
@@ -45,6 +47,7 @@ export function explainErrorTx(errorIn: any): string {
             if (error.includes("\"OFD\"")) { res += sep + "Can't find output with FundDatum"; sep = ", "; }
             if (error.includes("\"OFDS\"")) { res += sep + "Can't find outputs with FundDatums"; sep = ", "; }
             if (error.includes("\"OUD\"")) { res += sep + "Can't find output with UserDatum"; sep = ", "; }
+            if (error.includes("\"OSDS\"")) { res += sep + "Can't find outputs with ScriptDatums"; sep = ", "; }
 
             if (error.includes("\"PD\"")) { res += sep + "Wrong PoolDatum"; sep = ", "; }
             if (error.includes("\"FD\"")) { res += sep + "Wrong FundDatum"; sep = ", "; }
@@ -74,7 +77,8 @@ export function explainErrorTx(errorIn: any): string {
 
             if (error.includes("\"PPMSM\"")) { res += sep + "The signature of one of the Pool Masters is required"; sep = ", "; }
             if (error.includes("\"MSM\"")) { res += sep + "The signature of the Master and the Redeemer do not match"; sep = ", "; }
-
+            if (error.includes("\"APPMSM\"")) { res += sep + "The signature of all of the Pool Masters is required"; sep = ", "; }
+            
             if (error.includes("\"USM\"")) { res += sep + "Signature of user and Redeemer do not match"; sep = ", "; }
             if (error.includes("\"UR\"")) { res += sep + "User signature and Datum do not match"; sep = ", "; }
 
@@ -86,6 +90,8 @@ export function explainErrorTx(errorIn: any): string {
 
             if (error.includes("\"UTXO\"")) { res += sep + "NFT mining UTxO missing"; sep = ", "; }
 
+            if (error.includes("\"WIO\"")) { res += sep + "Wrong Input Output set"; sep = ", "; }
+            if (error.includes("\"ADD\"")) { res += sep + "Can't find any Address"; sep = ", "; }
             if (error.includes("\"INVIO\"")) { res += sep + "Invalid Inputs and Outputs"; sep = ", "; }
             if (error.includes("\"INVR\"")) { res += sep + "Invalid Redeemers"; sep = ", "; }
 
@@ -96,13 +102,20 @@ export function explainErrorTx(errorIn: any): string {
             if (error.includes("\"FundID\"")) { res += sep + "Missing Minted FundID NFT"; sep = ", "; }
             if (error.includes("\"UserID\"")) { res += sep + "Missing Minted UserID NFT"; sep = ", "; }
             if (error.includes("\"ScriptID\"")) { res += sep + "Missing Minted ScriptID NFT"; sep = ", "; }
+            if (error.includes("\"ScriptID2\"")) { res += sep + "Missing Minted ScriptID Type NFT"; sep = ", "; }
             if (error.includes("\"TxID\"")) { res += sep + "Missing Minted TxID NFT"; sep = ", "; }
+
+            if (error.includes("\"BFID\"")) { res += sep + "Not Burning FundID"; sep = ", "; }
+            if (error.includes("\"BUID\"")) { res += sep + "Not Burning UserID"; sep = ", "; }
+            if (error.includes("\"BUD\"")) { res += sep + "Not Burning User Deposit Tokens"; sep = ", "; }
+            if (error.includes("\"BSID\"")) { res += sep + "Not Burning ScriptID"; sep = ", "; }
 
             if (error.includes("\"MFAM\"")) { res += sep + "Missing Minted TxID Master Fund And Merge NFT"; sep = ", "; }
             if (error.includes("\"MM\"")) { res += sep + "Missing Minted TxID Master Merge Fund NFT"; sep = ", "; }
             if (error.includes("\"MS\"")) { res += sep + "Missing Minted TxID Master Split Fund NFT"; sep = ", "; }
             if (error.includes("\"MCP\"")) { res += sep + "Missing Minted TxID Master Close Pool NFT"; sep = ", "; }
             if (error.includes("\"MTP\"")) { res += sep + "Missing Minted TxID Master Terminate Pool NFT"; sep = ", "; }
+            if (error.includes("\"MCE\"")) { res += sep + "Missing Minted TxID Master Emergency NFT"; sep = ", "; }
             if (error.includes("\"MD\"")) { res += sep + "Missing Minted TxID Master Delete Fund NFT"; sep = ", "; }
             if (error.includes("\"MSBF\"")) { res += sep + "Missing Minted TxID Master Send Back Fund NFT"; sep = ", "; }
             if (error.includes("\"MSBI\"")) { res += sep + "Missing Minted TxID Master Send Back Deposit NFT"; sep = ", "; }
@@ -133,7 +146,7 @@ export function explainErrorTx(errorIn: any): string {
             }
 
             if (res === "" && error.includes("Cannot read properties of undefined")) {
-                res += sep + "You are missing ADAs or Tokens in your Wallet to make this Transaction. It is possible that some transfer is still in the process of being validated"; sep = ", ";
+                res += sep + "Technical problems, please try again!"; sep = ", ";
             }
 
             if (res === "" && error.includes("Insufficient input in Transaction")) {

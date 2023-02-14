@@ -1,7 +1,7 @@
 //--------------------------------------
 import { useEffect, useRef, useState } from "react";
 import { AssetClass, BIGINT, EUTxO, Master_Funder, PoolDatum, UserDatum } from "../types";
-import { ADA_Decimals, ADA_UI, fundID_TN, poolDatum_ClaimedFund, poolID_TN, scriptID_Master_AddScripts_TN, scriptID_Master_ClosePool_TN, scriptID_Master_DeleteFund_TN, scriptID_Master_DeleteScripts_TN, scriptID_Master_FundAndMerge_TN, scriptID_Master_Fund_TN, scriptID_Master_SendBackDeposit_TN, scriptID_Master_SendBackFund_TN, scriptID_Master_SplitFund_TN, scriptID_Master_TerminatePool_TN, scriptID_User_Deposit_TN, scriptID_User_Harvest_TN, scriptID_User_Withdraw_TN, scriptID_Validator_TN, txID_Master_AddScripts_TN, userID_TN } from "../types/constantes";
+import { ADA_Decimals, ADA_UI, fundID_TN, poolDatum_ClaimedFund, poolID_TN, scriptID_Master_AddScripts_TN, scriptID_Master_ClosePool_TN, scriptID_Master_DeleteFund_TN, scriptID_Master_DeleteScripts_TN, scriptID_Master_FundAndMerge_TN, scriptID_Master_Fund_TN, scriptID_Master_SendBackDeposit_TN, scriptID_Master_SendBackFund_TN, scriptID_Master_SplitFund_TN, scriptID_Master_TerminatePool_TN, scriptID_User_Deposit_TN, scriptID_User_Harvest_TN, scriptID_User_Withdraw_TN, scriptID_Validator_TN, scriptID_TN, userID_TN } from "../types/constantes";
 import { StakingPoolDBInterface } from "../types/stakePoolDBModel";
 import { apiSaveEUTxODB, apiGetEUTxOsDBByStakingPool,
     apiGetStakingPoolDB, 
@@ -66,9 +66,11 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
 
     const [swAnyScriptsMaster, setSwAnyScriptsMaster] = useState<boolean>(false)
     const [swAnyScriptsUser, setSwAnyScriptsUser] = useState<boolean>(false)
+    const [swAnyInitialScripts, setSwAnyInitialScripts] = useState<boolean>(false)
     const [swAnyMainScripts, setSwAnyMainScripts] = useState<boolean>(false)
     const [swAllScriptsMaster, setSwAllScriptsMaster] = useState<boolean>(false)
     const [swAllScriptsUser, setSwAllScriptsUser] = useState<boolean>(false)
+    const [swAllInitialScripts, setSwAllInitialScripts] = useState<boolean>(false)
     const [swAllMainScripts, setSwAllMainScripts] = useState<boolean>(false)
 
     const [masterFunders, setMasterFunders] = useState<Master_Funder[]>([])
@@ -299,9 +301,9 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
         // const userID_CS = poolInfo.txID_User_Deposit_CS
         // const userID_AC_Lucid = userID_CS + strToHex(userID_TN);
         //------------------
-        // const txID_Master_AddScripts_CS = poolInfo.txID_Master_AddScripts_CS
-        // const txID_Master_AddScripts_TN_Hex = strToHex(txID_Master_AddScripts_TN)
-        // const txID_Master_AddScripts_AC_Lucid = txID_Master_AddScripts_CS + txID_Master_AddScripts_TN_Hex;
+        // const scriptID_CS = poolInfo.txID_Master_AddScripts_CS
+        // const scriptID_TN_Hex = strToHex(scriptID_TN)
+        // const scriptID_AC_Lucid = scriptID_CS + scriptID_TN_Hex;
         //------------------
         var eUTxOs_With_Datum : EUTxO [] = []
         eUTxOs_With_Datum = await apiGetEUTxOsDBByStakingPool(poolInfo.name);
@@ -515,6 +517,7 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
             poolInfo.eUTxO_With_Script_TxID_Master_SplitFund_Datum !== undefined ||
             poolInfo.eUTxO_With_Script_TxID_Master_ClosePool_Datum !== undefined ||
             poolInfo.eUTxO_With_Script_TxID_Master_TerminatePool_Datum !== undefined ||
+            poolInfo.eUTxO_With_Script_TxID_Master_Emergency_Datum !== undefined ||
             poolInfo.eUTxO_With_Script_TxID_Master_DeleteFund_Datum !== undefined ||
             poolInfo.eUTxO_With_Script_TxID_Master_SendBackFund_Datum !== undefined ||
             poolInfo.eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum !== undefined);
@@ -524,12 +527,25 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
             poolInfo.eUTxO_With_Script_TxID_Master_SplitFund_Datum !== undefined &&
             poolInfo.eUTxO_With_Script_TxID_Master_ClosePool_Datum !== undefined &&
             poolInfo.eUTxO_With_Script_TxID_Master_TerminatePool_Datum !== undefined &&
+            poolInfo.eUTxO_With_Script_TxID_Master_Emergency_Datum !== undefined &&
             poolInfo.eUTxO_With_Script_TxID_Master_DeleteFund_Datum !== undefined &&
             poolInfo.eUTxO_With_Script_TxID_Master_SendBackFund_Datum !== undefined &&
             poolInfo.eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum !== undefined);
+        //------------------
+        const swAnyInitialScripts = (
+            poolInfo.eUTxO_With_ScriptDatum !== undefined ||
+            poolInfo.eUTxO_With_Script_TxID_Master_AddScripts_Datum !== undefined )
+        const swAllInitialScripts = (
+            poolInfo.eUTxO_With_ScriptDatum !== undefined &&
+            poolInfo.eUTxO_With_Script_TxID_Master_AddScripts_Datum !== undefined )    
+        //------------------
         const swAnyMainScripts = (
             poolInfo.eUTxO_With_ScriptDatum !== undefined ||
             poolInfo.eUTxO_With_Script_TxID_Master_AddScripts_Datum !== undefined ||
+            poolInfo.eUTxO_With_Script_TxID_Master_DeleteScripts_Datum !== undefined)    
+        const swAllMainScripts = (
+            poolInfo.eUTxO_With_ScriptDatum !== undefined &&
+            poolInfo.eUTxO_With_Script_TxID_Master_AddScripts_Datum !== undefined &&
             poolInfo.eUTxO_With_Script_TxID_Master_DeleteScripts_Datum !== undefined)    
         //------------------
         const swAnyScriptsUser = (
@@ -540,17 +556,16 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
             poolInfo.eUTxO_With_Script_TxID_User_Deposit_Datum !== undefined &&
             poolInfo.eUTxO_With_Script_TxID_User_Withdraw_Datum !== undefined &&
             poolInfo.eUTxO_With_Script_TxID_User_Harvest_Datum !== undefined);
-        const swAllMainScripts = (
-            poolInfo.eUTxO_With_ScriptDatum !== undefined &&
-            poolInfo.eUTxO_With_Script_TxID_Master_AddScripts_Datum !== undefined &&
-            poolInfo.eUTxO_With_Script_TxID_Master_DeleteScripts_Datum !== undefined)    
+       
         //------------------
         setSwAnyScriptsMaster(swAnyScriptsMaster);
         setSwAnyScriptsUser(swAnyScriptsUser);
+        setSwAnyInitialScripts(swAnyInitialScripts);
         setSwAnyMainScripts(swAnyMainScripts);
         //------------------
         setSwAllScriptsMaster(swAllScriptsMaster);
         setSwAllScriptsUser(swAllScriptsUser);
+        setSwAllInitialScripts(swAllInitialScripts);
         setSwAllMainScripts(swAllMainScripts);
     }
 
@@ -605,11 +620,15 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
 		userRewardsToPayUI,
 
         swUserRegistered,
+
         swAnyScriptsMaster,
         swAnyScriptsUser,
+        swAnyInitialScripts,
         swAnyMainScripts,
+
         swAllScriptsMaster,
         swAllScriptsUser,
+        swAllInitialScripts,
         swAllMainScripts,
 
         isPoolDataLoading,

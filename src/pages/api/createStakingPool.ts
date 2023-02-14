@@ -155,6 +155,9 @@ async function crearStakingPool(nombrePool: any, image: any, staking_UI: any, ha
 	// const stakePlusV2_Mint_TxID_Master_TerminatePool_Symbol_FileName = nombrePool + "/" + 'Mint_TxID_Master_TerminatePool.symbol';
 	const stakePlusV2_Mint_TxID_Master_TerminatePool_Plutus_FileName = nombrePool + "/" + 'Mint_TxID_Master_TerminatePool.plutus';
 
+	// const stakePlusV2_Mint_TxID_Master_Emergency_Symbol_FileName = nombrePool + "/" + 'Mint_TxID_Master_Emergency.symbol';
+	const stakePlusV2_Mint_TxID_Master_Emergency_Plutus_FileName = nombrePool + "/" + 'Mint_TxID_Master_Emergency.plutus';
+
 	// const stakePlusV2_Mint_TxID_Master_DeleteFund_Symbol_FileName = nombrePool + "/" + 'Mint_TxID_Master_DeleteFund.symbol';
 	const stakePlusV2_Mint_TxID_Master_DeleteFund_Plutus_FileName = nombrePool + "/" + 'Mint_TxID_Master_DeleteFund.plutus';
 
@@ -201,6 +204,9 @@ async function crearStakingPool(nombrePool: any, image: any, staking_UI: any, ha
 
 	var txID_Master_TerminatePool_CS: CurrencySymbol;
 	var txID_Master_TerminatePool_Script: MintingPolicy;
+
+	var txID_Master_Emergency_CS: CurrencySymbol;
+	var txID_Master_Emergency_Script: MintingPolicy;
 
 	var txID_Master_DeleteFund_CS: CurrencySymbol;
 	var txID_Master_DeleteFund_Script: MintingPolicy;
@@ -249,6 +255,9 @@ async function crearStakingPool(nombrePool: any, image: any, staking_UI: any, ha
 	// txID_Master_TerminatePool_CS = await getSymbolFromFile(stakePlusV2_Mint_TxID_Master_TerminatePool_Symbol_FileName);
 	txID_Master_TerminatePool_Script = await getScriptFromFile(stakePlusV2_Mint_TxID_Master_TerminatePool_Plutus_FileName);
 
+	// txID_Master_Emergency_CS = await getSymbolFromFile(stakePlusV2_Mint_TxID_Master_Emergency_Symbol_FileName);
+	txID_Master_Emergency_Script = await getScriptFromFile(stakePlusV2_Mint_TxID_Master_Emergency_Plutus_FileName);
+
 	// txID_Master_DeleteFund_CS = await getSymbolFromFile(stakePlusV2_Mint_TxID_Master_DeleteFund_Symbol_FileName);
 	txID_Master_DeleteFund_Script = await getScriptFromFile(stakePlusV2_Mint_TxID_Master_DeleteFund_Plutus_FileName);
 
@@ -279,6 +288,7 @@ async function crearStakingPool(nombrePool: any, image: any, staking_UI: any, ha
 	// txID_Master_SplitFund_Script = pabPoolParams.ppolicy_TxID_Master_SplitFund;
 	// txID_Master_ClosePool_Script = pabPoolParams.ppolicy_TxID_Master_ClosePool;
 	// txID_Master_TerminatePool_Script = pabPoolParams.ppolicy_TxID_Master_TerminatePool;
+	// txID_Master_Emergency_Script = pabPoolParams.ppolicy_TxID_Master_Emergency;
 	// txID_Master_DeleteFund_Script = pabPoolParams.ppolicy_TxID_Master_DeleteFund;
 	// txID_Master_SendBackFund_Script = pabPoolParams.ppolicy_TxID_Master_SendBackFund;
 	// txID_Master_SendBackDeposit_Script = pabPoolParams.ppolicy_TxID_Master_SendBackDeposit;
@@ -294,6 +304,7 @@ async function crearStakingPool(nombrePool: any, image: any, staking_UI: any, ha
 	txID_Master_SplitFund_CS = pabPoolParams.txID_Master_SplitFund_CS;
 	txID_Master_ClosePool_CS = pabPoolParams.txID_Master_ClosePool_CS;
 	txID_Master_TerminatePool_CS = pabPoolParams.txID_Master_TerminatePool_CS;
+	txID_Master_Emergency_CS = pabPoolParams.txID_Master_Emergency_CS;
 	txID_Master_DeleteFund_CS = pabPoolParams.txID_Master_DeleteFund_CS;
 	txID_Master_SendBackFund_CS = pabPoolParams.txID_Master_SendBackFund_CS;
 	txID_Master_SendBackDeposit_CS = pabPoolParams.txID_Master_SendBackDeposit_CS;
@@ -361,6 +372,7 @@ async function crearStakingPool(nombrePool: any, image: any, staking_UI: any, ha
 		eUTxO_With_Script_TxID_Master_SplitFund_Datum: undefined,
 		eUTxO_With_Script_TxID_Master_ClosePool_Datum: undefined,
 		eUTxO_With_Script_TxID_Master_TerminatePool_Datum: undefined,
+		eUTxO_With_Script_TxID_Master_Emergency_Datum: undefined,
 		eUTxO_With_Script_TxID_Master_DeleteFund_Datum: undefined,
 		eUTxO_With_Script_TxID_Master_SendBackFund_Datum: undefined,
 		eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum: undefined,
@@ -404,6 +416,9 @@ async function crearStakingPool(nombrePool: any, image: any, staking_UI: any, ha
 
 		txID_Master_TerminatePool_CS: txID_Master_TerminatePool_CS,
 		txID_Master_TerminatePool_Script: (txID_Master_TerminatePool_Script),
+
+		txID_Master_Emergency_CS: txID_Master_Emergency_CS,
+		txID_Master_Emergency_Script: (txID_Master_Emergency_Script),
 
 		txID_Master_DeleteFund_CS: txID_Master_DeleteFund_CS,
 		txID_Master_DeleteFund_Script: (txID_Master_DeleteFund_Script),

@@ -48,6 +48,7 @@ export default function WalletModalBtn() {
 	const walletConnect = async (walletName: string, closeModal = true, tryAgain = false) => {
 		console.log("[Session] - walletConnect: " + walletName)
 		setWalletMessage("Connecting with <b>" + walletName + "</b>...")
+		setWalletError("")
 		try {
 
 			var walletApi = undefined
@@ -147,6 +148,7 @@ export default function WalletModalBtn() {
 	const walletDisconnect = async (closeModal = true) => {
 		console.log("[Session] - walletDisconnect")
 		setWalletMessage("Disconnecting Wallet ...")
+		setWalletError("")
 		try {
 			const walletStore = { connected: false, name: '', walletApi: undefined, pkh: "", lucid: undefined, swEnviarPorBlockfrost: false, protocolParameters: undefined }
 			if (status === "authenticated") {
@@ -179,6 +181,7 @@ export default function WalletModalBtn() {
 					//si la wallet estaba conectada en la session anterior, tengo que reconectarla
 					console.log("[Session] - sessionWalletConnect - session.walletName: " + session.user.walletName)
 					setWalletMessage("Loading session...")
+					setWalletError("")
 					await new Promise(r => setTimeout(r, 2000));
 					await walletConnect(session.user.walletName, false, true)
 				} else {

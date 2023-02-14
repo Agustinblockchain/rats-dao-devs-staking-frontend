@@ -139,9 +139,10 @@ export class PoolDatum {
     pdTotalCashedOut : BIGINT
     pdClosedAt! : Maybe<POSIXTime>
     pdIsTerminated!    : number
+    pdIsEmergency!    : number
     pdMinAda : BIGINT
 
-    constructor(pdMasterFunders : Master_Funder [], pdFundCount : number, pdTotalCashedOut : BIGINT, pdClosedAt : Maybe<POSIXTime>, pdIsTerminated : number , pdMinAda : BIGINT) {
+    constructor(pdMasterFunders : Master_Funder [], pdFundCount : number, pdTotalCashedOut : BIGINT, pdClosedAt : Maybe<POSIXTime>, pdIsTerminated : number, pdIsEmergency : number, pdMinAda : BIGINT) {
 
         this.pdMasterFunders = pdMasterFunders.sort((a,b) => {
             if (a.mfMaster < b.mfMaster) return -1
@@ -153,6 +154,7 @@ export class PoolDatum {
         this.pdTotalCashedOut = pdTotalCashedOut
         this.pdClosedAt = pdClosedAt
         this.pdIsTerminated = pdIsTerminated
+        this.pdIsEmergency = pdIsEmergency
         this.pdMinAda = pdMinAda
 
         // console.log ("PoolDatum: " + toJson(this))
@@ -166,6 +168,7 @@ export function mkPoolDatum_FromCbor ( datumCbor : string){
     var pdTotalCashedOut!    : BIGINT
     var pdClosedAt! : Maybe<POSIXTime>
     var pdIsTerminated!    : number
+    var pdIsEmergency!    : number
     var pdMinAda!    : BIGINT
 
     const lucidDataForDatum : any = Data.from(datumCbor)    
@@ -180,14 +183,15 @@ export function mkPoolDatum_FromCbor ( datumCbor : string){
             //lista de campos de Pool Datum
             const lucidDataForFields= lucidDataForConstr0[0].fields
 
-            if (lucidDataForFields.length == 6) {
+            if (lucidDataForFields.length == 7) {
 
                 const lucidDataForMaster_Funders = lucidDataForFields[0]
                 pdFundCount = Number (lucidDataForFields[1])
                 pdTotalCashedOut = BigInt (lucidDataForFields[2])
                 const lucidDataForIsClosedAt = lucidDataForFields[3]
                 pdIsTerminated = Number (lucidDataForFields[4])
-                pdMinAda = BigInt (lucidDataForFields[5])
+                pdIsEmergency = Number (lucidDataForFields[5])
+                pdMinAda = BigInt (lucidDataForFields[6])
 
                 for (var i=0;i< lucidDataForMaster_Funders.length;i+=1){
                     const lucidDataForMaster_Funder = lucidDataForMaster_Funders[i]
@@ -208,7 +212,7 @@ export function mkPoolDatum_FromCbor ( datumCbor : string){
             }else{
                 throw "Error: Can't get PoolDatum"	
             }
-            return new PoolDatum (pdMaster_Funders, pdFundCount, pdTotalCashedOut, pdClosedAt, pdIsTerminated, pdMinAda)
+            return new PoolDatum (pdMaster_Funders, pdFundCount, pdTotalCashedOut, pdClosedAt, pdIsTerminated, pdIsEmergency, pdMinAda)
         }else{
             throw "Error: Can't get PoolDatum"	
         }
@@ -448,6 +452,7 @@ export class Redeemer_Mint_TxID    {
         if(mrValidatorRedeemer instanceof Redeemer_Master_SplitFund ){ tipo = "Redeemer_Master_SplitFund" }
         if(mrValidatorRedeemer instanceof Redeemer_Master_ClosePool ){ tipo = "Redeemer_Master_ClosePool" }
         if(mrValidatorRedeemer instanceof Redeemer_Master_TerminatePool ){ tipo = "Redeemer_Master_TerminatePool" }
+        if(mrValidatorRedeemer instanceof Redeemer_Master_Emergency ){ tipo = "Redeemer_Master_Emergency" }
         if(mrValidatorRedeemer instanceof Redeemer_Master_DeleteFund ){ tipo = "Redeemer_Master_DeleteFund" }
         if(mrValidatorRedeemer instanceof Redeemer_Master_SendBackFund ){ tipo = "Redeemer_Master_SendBackFund" }
         if(mrValidatorRedeemer instanceof Redeemer_Master_SendBackDeposit ){ tipo = "Redeemer_Master_SendBackDeposit" }
@@ -561,6 +566,16 @@ export class Redeemer_Master_TerminatePool {
     }
 }
 
+export class Redeemer_Master_Emergency { 
+    plutusDataIndex = 24
+    subtypo = true //es un subtipo de ValidatorRedeemer, y necesita dos niveles de constr para serializar
+    
+    rmeMaster : Master
+    constructor (rmeMaster : Master) {
+        this.rmeMaster = rmeMaster     
+        console.log ("Redeemer_Master_Emergency: " + toJson(this))
+    }
+}
 
 export class Redeemer_Master_DeleteFund { 
     plutusDataIndex = 6
@@ -689,6 +704,7 @@ export type ValidatorRedeemer =
     Redeemer_Master_SplitFund |
     Redeemer_Master_ClosePool |
     Redeemer_Master_TerminatePool |
+    Redeemer_Master_Emergency |
     Redeemer_Master_DeleteFund |
     Redeemer_Master_SendBackFund |
     Redeemer_Master_SendBackDeposit |
