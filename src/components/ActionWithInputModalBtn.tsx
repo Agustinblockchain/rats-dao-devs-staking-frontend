@@ -338,7 +338,20 @@ export default function ActionWithInputModalBtn(
 												<h4 style={{ paddingTop: 10 }}>How many {inputUnitForShowing}?</h4>
 												<br></br>
 												<div>
-													<NumericFormat style={{ width: 255, fontSize: 12 }} type="text" value={tokenAmountFormatedValue} 
+													<button disabled={ tokenAmount === "0" ? true: false}  style={{ width: 45}} onClick={e => {
+															// console.log("max - setTokenAmount " +  userMaxTokens?.toString())
+															if(inputDecimals){
+																const pot = Math.pow(10, inputDecimals)
+																// console.log("max - setTokenAmountFormatedValue " + (Number(userMaxTokens?.toString())/pot).toString())
+																setTokenAmountFormatedValue((Number("0")/pot).toString())
+															}else{
+																// console.log("max - setTokenAmountFormatedValue " + Number(userMaxTokens?.toString()).toString())
+																setTokenAmountFormatedValue(Number("0").toString())
+															}
+															setTokenAmount("0")
+														}}>ZERO</button>
+
+													<NumericFormat style={{ width: 210, fontSize: 12 }} type="text" value={tokenAmountFormatedValue} 
 														onValueChange={(values) => {
 																const { formattedValue, value } = values;
 																// formattedValue = $2,223
@@ -357,7 +370,7 @@ export default function ActionWithInputModalBtn(
 														thousandsGroupStyle="thousand" thousandSeparator="," decimalSeparator="." decimalScale={inputDecimals}
 													/>
 
-													<button style={{ width: 45}} onClick={e => {
+													<button disabled={ tokenAmount === userMaxTokens?.toString() ? true: false} style={{ width: 45}} onClick={e => {
 																// console.log("max - setTokenAmount " +  userMaxTokens?.toString())
 																if(inputDecimals){
 																	const pot = Math.pow(10, inputDecimals)

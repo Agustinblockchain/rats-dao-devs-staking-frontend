@@ -393,7 +393,7 @@ export default function ActionWithSelectInputModalBtn(
 								
 								{swEnabledBtnAction && BigInt(userMaxTokens) > 0 ?
 								<>
-									<h4 style={{ paddingTop: 10 }}>How many {inputUnitForShowing}?</h4>		
+									<h4 style={{ paddingTop: 10 }}>Select {inputUnitForShowing} to Deposit:</h4>		
 									<br></br>
 									<div style={{overflow:"hidden", maxHeight: 190, overflowY:"auto"}} >
 									{
@@ -401,30 +401,57 @@ export default function ActionWithSelectInputModalBtn(
 											<>
 												{walletAssetsList.map((asset, idx) => 
 													<div key={idx} >
-														<b>{asset.tokenName}</b> (There are {formatAmount(Number(asset.value), inputDecimals, undefined)} in your Wallet)
-														<br></br>
-														<div>
-															<NumericFormat key={"NumericFormat" + idx} style={{ width: 255, fontSize: 12 }} type="text" value={ walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.amountFormatedValue}
-																onValueChange={(values) => {
-																		const { formattedValue, value } = values;
-																		handleChangeFormatedValue (asset.tokenNameHEX, value)
-																	}
-																}
-																thousandsGroupStyle="thousand" thousandSeparator="," decimalSeparator="." decimalScale={inputDecimals}
-															/>
-															<button style={{ width: 45}} onClick={e => {
-																const v = walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.max
-																// console.log(asset.tokenNameHEX + " - max: " +  v)
-																if (v !== undefined) handleChangeValue(asset.tokenNameHEX, v)
-															}}>MAX</button>
-														</div>
+														{ asset.value>1?
+															<>
+																<b>{asset.tokenName}</b> (There {asset.value>1?"are":"is"} {formatAmount(Number(asset.value), inputDecimals, undefined)} in your Wallet)
+																<br></br>
+																<div>
+																	<button disabled={ walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.amount == "0" ? true: false}  style={{ width: 45}} onClick={e => {
+																		const v = "0"
+																		// console.log(asset.tokenNameHEX + " - max: " +  v)
+																		if (v !== undefined) handleChangeValue(asset.tokenNameHEX, v)
+																	}}>ZERO</button>
 
-														<input key={"input" + idx} style={{ width: 300, fontSize: 12 }} type="range" min={0} max={walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.max} value={walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.amount}
-															onChange={e => {
-																handleChangeValue (asset.tokenNameHEX, Number(e.target.value).toString())
-															}}
-														/>
-														<br></br>
+																	<NumericFormat key={"NumericFormat" + idx} style={{ width: 210, fontSize: 12 }} type="text" value={ walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.amountFormatedValue}
+																		onValueChange={(values) => {
+																				const { formattedValue, value } = values;
+																				handleChangeFormatedValue (asset.tokenNameHEX, value)
+																			}
+																		}
+																		thousandsGroupStyle="thousand" thousandSeparator="," decimalSeparator="." decimalScale={inputDecimals}
+																	/>
+																	<button disabled={ walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.amount == walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.max ? true: false} style={{ width: 45}} onClick={e => {
+																		const v = walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.max
+																		// console.log(asset.tokenNameHEX + " - max: " +  v)
+																		if (v !== undefined) handleChangeValue(asset.tokenNameHEX, v)
+																	}}>MAX</button>
+																</div>
+																<input key={"input" + idx} style={{ width: 300, fontSize: 12 }} type="range" min={0} max={walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.max} value={walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.amount}
+																	onChange={e => {
+																		handleChangeValue (asset.tokenNameHEX, Number(e.target.value).toString())
+																	}}
+																/>
+																<br></br>
+															</>
+														:
+															<>
+																<b>{asset.tokenName}</b> 
+																<br></br>
+																<div>
+																	<button  className="btn2" disabled={ walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.amount == "0" ? true: false}   style={{ width: 45}} onClick={e => {
+																		const v = "0"
+																		// console.log(asset.tokenNameHEX + " - max: " +  v)
+																		if (v !== undefined) handleChangeValue(asset.tokenNameHEX, v)
+																	}}>No</button>
+																	<button  className="btn2" disabled={ walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.amount == walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.max ? true: false}  style={{ width: 45}} onClick={e => {
+																		const v = walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.max
+																		// console.log(asset.tokenNameHEX + " - max: " +  v)
+																		if (v !== undefined) handleChangeValue(asset.tokenNameHEX, v)
+																	}}>Yes</button>
+																</div>
+															</>
+														}
+														
 													</div>
 												)}
 											</>

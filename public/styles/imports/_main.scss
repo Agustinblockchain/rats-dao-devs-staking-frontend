@@ -1285,6 +1285,22 @@ $gap: 25px;
   }
 }
 
+
+.btn2 {
+  border: none;
+
+  &:hover {
+    background-color: $orange;
+    border: none;
+
+  }
+  &:disabled  {
+    background-color: darken($orange, 20%);
+    color: #000;
+    border: none;
+  }
+}
+
 .welcome {
   display: flex;
   flex-direction: column;
