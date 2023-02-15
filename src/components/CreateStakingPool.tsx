@@ -7,7 +7,7 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { format } from 'date-fns';
 import { Assets, UTxO } from 'lucid-cardano';
 import 'react-loading-skeleton/dist/skeleton.css';
-import { splitUTxOs } from "../stakePool/endPoints - splitUTxOs";
+import { splitUTxOs } from "../stakePool/endPoints - others";
 import { apiCreateStakingPoolDB, apiGetTokenMetadata, getEstadoDeployAPI } from "../stakePool/apis";
 import { ADA_Decimals, ADA_UI, maxMasters } from '../types/constantes';
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';

@@ -18,8 +18,6 @@ export function explainErrorTx(errorIn: any): string {
         return res;
     } else {
 
-
-
         if (typeof error === 'string') {
 
             if (error.includes("\"JN\"")) { res += sep + "From just error"; sep = ", "; }
@@ -133,7 +131,7 @@ export function explainErrorTx(errorIn: any): string {
             if (error.includes("\"MSBFV\"")) { res += sep + "Wrong Value paid to Master "; sep = ", "; }
             if (error.includes("\"MSBIV\"")) { res += sep + "Wrong Value paid to User "; sep = ", "; }
             if (error.includes("\"UIGB\"")) { res += sep + "You must return UI Tokens"; sep = ", "; }
-            if (error.includes("\"F0\"")) { res += sep + "Fund Count is not Zero"; sep = ", "; }
+            if (error.includes("\"FCNZ\"")) { res += sep + "Fund Count is not Zero"; sep = ", "; }
 
             if (error.includes("\"FUNDAMT0\"")) { res += sep + "Fund Amount should be Zero"; sep = ", "; }
 

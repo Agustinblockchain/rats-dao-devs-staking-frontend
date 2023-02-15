@@ -12,7 +12,7 @@ import {
 	masterAddScriptsMasterAddScripts,
 	masterAddScriptsMasterClosePool, masterAddScriptsMasterDeleteFund, masterAddScriptsMasterDeleteScripts, masterAddScriptsMasterEmergency, masterAddScriptsMasterFund, masterAddScriptsMasterFundAndMerge, masterAddScriptsMasterSendBackDeposit, masterAddScriptsMasterSendBackFund, masterAddScriptsMasterSplitFund, masterAddScriptsMasterTerminatePool, masterAddScriptsUserDeposit, masterAddScriptsUserHarvest, masterAddScriptsUserWithdraw, masterAddScriptValidator, masterDeleteScripts,
 } from "../stakePool/endPoints - master - scripts";
-import { splitUTxOs } from "../stakePool/endPoints - splitUTxOs";
+import { splitUTxOs } from "../stakePool/endPoints - others";
 import { explainErrorTx } from "../stakePool/explainError";
 import { getEUTxO_With_ScriptDatum_InEUxTOList } from '../stakePool/helpersEUTxOs';
 import { stakingPoolDBParser } from "../stakePool/helpersStakePool";

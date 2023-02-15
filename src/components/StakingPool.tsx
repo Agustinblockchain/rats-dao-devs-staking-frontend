@@ -5,7 +5,7 @@ import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
-import { splitUTxOs } from "../stakePool/endPoints - splitUTxOs";
+import { delegate, splitUTxOs } from "../stakePool/endPoints - others";
 import { userDeposit, userHarvest, userWithdraw } from '../stakePool/endPoints - user';
 import { explainErrorTx } from "../stakePool/explainError";
 import { stakingPoolDBParser } from "../stakePool/helpersStakePool";
@@ -242,10 +242,14 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 
 	//--------------------------------------
 	
+	const delegateAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
+		return await newTransaction ("StakingPool - Delegate", walletStore, poolInfo, delegate, isWorkingInABuffer.current, setActionMessage, setActionHash, setIsWorking, eUTxOs_Selected, assets) 
+	}
+	
 	const splitUTxOsAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
 		return await newTransaction ("StakingPool - Split Wallet UTxOs", walletStore, poolInfo, splitUTxOs, isWorkingInABuffer.current, setActionMessage, setActionHash, setIsWorking, eUTxOs_Selected, assets) 
 	}
-	
+
 	//--------------------------------------
 
 	return (
@@ -400,9 +404,6 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 											description={poolInfo.swClosed ? 
 												'<p className="info">This Pool in already closed. You can\'t Deposit anymore.</p>' 
 												: 
-
-												
-
 												staking_AC_isAda? 
 													'<li className="info">You are about to Deposit <b>' + poolInfo.staking_UI + '</b> to this Pool.</li>\
 													<li className="info">In return, you will receive User Token (<b>' + txID_User_Deposit_For_User_TN + '</b>).</li>\
@@ -480,6 +481,20 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 						<div className="pool__stat">
 						
 							<ActionWithInputModalBtn 
+								action={delegateAction} 
+								postActionSuccess={updateDetailsStakingPoolAndWallet}
+								postActionError={updateDetailsStakingPoolAndWallet}
+								setIsWorking={handleSetIsWorking} 
+								actionName="Delegate" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
+								description={'<p className="info" style="text-align: center;">When you delegate your wallet to the 1Mate pool, you are providing us with direct support! You can be confident that none of your ADA will be taken from your wallet and that you will retain complete control.</p>'}
+								swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded} 
+								swEnabledBtnAction={walletStore.connected && isPoolDataLoaded}
+								swShow={true }
+								swHash={true}
+								swPaddintTop={false}
+							/>
+							
+							<ActionWithInputModalBtn 
 								action={splitUTxOsAction} 
 								postActionSuccess={updateDetailsStakingPoolAndWallet}
 								postActionError={updateDetailsStakingPoolAndWallet}
@@ -488,10 +503,12 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 								description={'<p className="info" style="text-align: center;">It is recommended to Split your Wallet\'s UTxOs (Unspent Transaction Outputs) into smaller amounts. This will make it easier to use them as collateral for Smart Contracts and will provide more flexibility in managing your funds.</p>'}
 								swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded} 
 								swEnabledBtnAction={walletStore.connected && isPoolDataLoaded}
-								swShow={true }
+								swShow={true}
 								swHash={true}
-								swPaddintTop={false}
+								swPaddintTop={true}
 							/>
+
+							
 						</div>
 					</div>
 
