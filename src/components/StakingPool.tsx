@@ -11,7 +11,7 @@ import { explainErrorTx } from "../stakePool/explainError";
 import { stakingPoolDBParser } from "../stakePool/helpersStakePool";
 import useStatePoolData from '../stakePool/useStatePoolData';
 import { EUTxO } from '../types';
-import { maxTokensWithDifferentNames, txID_User_Deposit_For_User_TN } from '../types/constantes';
+import { maxTokensWithDifferentNames, userDeposit_TN } from '../types/constantes';
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
 import { addAssets } from '../utils/cardano-helpers';
 import { newTransaction } from '../utils/cardano-helpersTx';
@@ -31,8 +31,8 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 	const ui_notConnected = '...'
 
 	const walletStore = useStoreState(state => state.wallet)
-	const { uTxOsAtWallet, isWalletDataLoaded, getTotalOfUnit } = useStoreState(state => {
-		return { uTxOsAtWallet: state.uTxOsAtWallet, isWalletDataLoaded: state.isWalletDataLoaded, getTotalOfUnit: state.walletGetTotalOfUnit };
+	const { uTxOsAtWallet, isWalletDataLoaded, walletGetTotalOfUnit } = useStoreState(state => {
+		return { uTxOsAtWallet: state.uTxOsAtWallet, isWalletDataLoaded: state.isWalletDataLoaded, walletGetTotalOfUnit: state.walletGetTotalOfUnit };
 	});
 	const { loadWalletData } = useStoreActions(actions => {
 		return { loadWalletData: actions.loadWalletData };
@@ -124,8 +124,8 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 			setWalletStakingAssets({})
 		} else if (walletStore.connected && isWalletDataLoaded) {
 			//------------------
-			const walletStakingAmount = getTotalOfUnit(poolInfo.staking_Lucid)
-			const walletHarvestAmount = getTotalOfUnit(poolInfo.harvest_Lucid)
+			const walletStakingAmount = walletGetTotalOfUnit(poolInfo.staking_Lucid)
+			const walletHarvestAmount = walletGetTotalOfUnit(poolInfo.harvest_Lucid)
 			//------------------
 			setWalletStakingAmountUI(walletStakingAmount.toString())
 			setWalletHarvestAmountUI(walletHarvestAmount.toString())
@@ -289,7 +289,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 					
 					<div>
 						User Token
-						(<b>{txID_User_Deposit_For_User_TN}</b>) &nbsp;
+						(<b>{userDeposit_TN}</b>) &nbsp;
 						{/* {" (" + poolInfo.txID_User_Deposit_CS.slice(0,4)+"..."+poolInfo.txID_User_Deposit_CS.slice(52)+")"} */}
 						<button onClick={() => copyToClipboard(poolInfo.txID_User_Deposit_CS)} className='btn__ghost icon' style={{ cursor: 'pointer' }}>
 							<svg xmlns="http://www.w3.org/2000/svg" className="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -406,12 +406,12 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 												: 
 												staking_AC_isAda? 
 													'<li className="info">You are about to Deposit <b>' + poolInfo.staking_UI + '</b> to this Pool.</li>\
-													<li className="info">In return, you will receive User Token (<b>' + txID_User_Deposit_For_User_TN + '</b>).</li>\
-													<li className="info">You can withdraw your <b>' + poolInfo.staking_UI + '</b> at any time in exchange for the User Token (<b>' + txID_User_Deposit_For_User_TN + '</b>).</li>' 
+													<li className="info">In return, you will receive User Token (<b>' + userDeposit_TN + '</b>).</li>\
+													<li className="info">You can withdraw your <b>' + poolInfo.staking_UI + '</b> at any time in exchange for the User Token (<b>' + userDeposit_TN + '</b>).</li>' 
 												: 
 													'<li className="info">You are about to deposit <b>' + poolInfo.staking_UI + '</b> to this Pool.</li>\
-													<li className="info">In return, you will receive User Token (<b>' + txID_User_Deposit_For_User_TN + '</b>).</li>\
-													<li className="info">You can withdraw your <b>' + poolInfo.staking_UI + '</b> at any time in exchange for the User Token (<b>' + txID_User_Deposit_For_User_TN + '</b>).</li>\
+													<li className="info">In return, you will receive User Token (<b>' + userDeposit_TN + '</b>).</li>\
+													<li className="info">You can withdraw your <b>' + poolInfo.staking_UI + '</b> at any time in exchange for the User Token (<b>' + userDeposit_TN + '</b>).</li>\
 													<li className="info">Please note that, in addition to the Transactions Fees, a minimum of ADA is required to be sent along with your <b>' + poolInfo.staking_UI + '</b>.</li>\
 													<li className="info">You will receive the ADA back when you withdraw your deposit.</li>'
 												}
@@ -438,12 +438,12 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 												: 
 													staking_AC_isAda? 
 														'<li className="info">You are about to Deposit <b>' + poolInfo.staking_UI + '</b> to this Pool.</li>\
-														<li className="info">In return, you will receive User Token (<b>' + txID_User_Deposit_For_User_TN + '</b>).</li>\
-														<li className="info">You can withdraw your <b>' + poolInfo.staking_UI + '</b> at any time in exchange for the User Token (<b>' + txID_User_Deposit_For_User_TN + '</b>).</li>' 
+														<li className="info">In return, you will receive User Token (<b>' + userDeposit_TN + '</b>).</li>\
+														<li className="info">You can withdraw your <b>' + poolInfo.staking_UI + '</b> at any time in exchange for the User Token (<b>' + userDeposit_TN + '</b>).</li>' 
 													: 
 														'<li className="info">You are about to deposit <b>' + poolInfo.staking_UI + '</b> to this Pool.</li>\
-														<li className="info">In return, you will receive User Token (<b>' + txID_User_Deposit_For_User_TN + '</b>).</li>\
-														<li className="info">You can withdraw your <b>' + poolInfo.staking_UI + '</b> at any time in exchange for the User Token (<b>' + txID_User_Deposit_For_User_TN + '</b>).</li>\
+														<li className="info">In return, you will receive User Token (<b>' + userDeposit_TN + '</b>).</li>\
+														<li className="info">You can withdraw your <b>' + poolInfo.staking_UI + '</b> at any time in exchange for the User Token (<b>' + userDeposit_TN + '</b>).</li>\
 														<li className="info">Please note that, in addition to the Transactions Fees, a minimum of ADA is required to be sent along with your <b>' + poolInfo.staking_UI + '</b>.</li>\
 														<li className="info">You will receive the ADA back when you withdraw your deposit.</li>'
 												}
@@ -487,6 +487,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 								setIsWorking={handleSetIsWorking} 
 								actionName="Delegate" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
 								description={'<p className="info" style="text-align: center;">When you delegate your wallet to the 1Mate pool, you are providing us with direct support! You can be confident that none of your ADA will be taken from your wallet and that you will retain complete control.</p>'}
+								poolInfo={poolInfo} 
 								swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded} 
 								swEnabledBtnAction={walletStore.connected && isPoolDataLoaded}
 								swShow={true }
@@ -500,7 +501,11 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 								postActionError={updateDetailsStakingPoolAndWallet}
 								setIsWorking={handleSetIsWorking} 
 								actionName="Split Wallet UTxOs" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-								description={'<p className="info" style="text-align: center;">It is recommended to Split your Wallet\'s UTxOs (Unspent Transaction Outputs) into smaller amounts. This will make it easier to use them as collateral for Smart Contracts and will provide more flexibility in managing your funds.</p>'}
+								description={'<li className="info">It is recommended to Split your Wallet\'s UTxOs (Unspent Transaction Outputs) into smaller amounts.</li>\
+								<li className="info">This will make it easier to use them as Collateral for Smart Contracts and will provide more flexibility in managing your funds.</li>\
+								<li className="info">Additionally, this action will transfer your User Deposit Tokens to a separate UTxO, making them easily accessible in the future.</li>\
+								<li className="info">You will need at least between 6 and 10 ADA for doing this Transaction.</li>'}
+								poolInfo={poolInfo} 
 								swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded} 
 								swEnabledBtnAction={walletStore.connected && isPoolDataLoaded}
 								swShow={true}

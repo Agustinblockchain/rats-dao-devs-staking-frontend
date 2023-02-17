@@ -18,7 +18,7 @@ import { getEUTxO_With_ScriptDatum_InEUxTOList } from '../stakePool/helpersEUTxO
 import { stakingPoolDBParser } from "../stakePool/helpersStakePool";
 import useStatePoolData from '../stakePool/useStatePoolData';
 import { EUTxO, Master } from '../types';
-import { maxTokensWithDifferentNames, scriptID_Master_ClosePool_TN, scriptID_Master_DeleteFund_TN, scriptID_Master_FundAndMerge_TN, scriptID_Master_Fund_TN, scriptID_Master_SendBackDeposit_TN, scriptID_Master_SendBackFund_TN, scriptID_Master_SplitFund_TN, scriptID_Master_TerminatePool_TN, scriptID_User_Deposit_TN, scriptID_User_Harvest_TN, scriptID_User_Withdraw_TN, scriptID_TN, txID_User_Deposit_For_User_TN } from '../types/constantes';
+import { maxTokensWithDifferentNames, scriptID_Master_ClosePool_TN, scriptID_Master_DeleteFund_TN, scriptID_Master_FundAndMerge_TN, scriptID_Master_Fund_TN, scriptID_Master_SendBackDeposit_TN, scriptID_Master_SendBackFund_TN, scriptID_Master_SplitFund_TN, scriptID_Master_TerminatePool_TN, scriptID_User_Deposit_TN, scriptID_User_Harvest_TN, scriptID_User_Withdraw_TN, scriptID_TN, userDeposit_TN } from '../types/constantes';
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
 import { formatHash } from '../utils/cardano-helpers';
 import { newTransaction } from '../utils/cardano-helpersTx';
@@ -44,8 +44,8 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 	const router = useRouter();
 
 	const walletStore = useStoreState(state => state.wallet)
-	const { uTxOsAtWallet, isWalletDataLoaded, getTotalOfUnit } = useStoreState(state => {
-		return { uTxOsAtWallet: state.uTxOsAtWallet, isWalletDataLoaded: state.isWalletDataLoaded, getTotalOfUnit: state.walletGetTotalOfUnit };
+	const { uTxOsAtWallet, isWalletDataLoaded, walletGetTotalOfUnit } = useStoreState(state => {
+		return { uTxOsAtWallet: state.uTxOsAtWallet, isWalletDataLoaded: state.isWalletDataLoaded, walletGetTotalOfUnit: state.walletGetTotalOfUnit };
 	});
 	const { loadWalletData } = useStoreActions(actions => {
 		return { loadWalletData: actions.loadWalletData };
@@ -152,8 +152,8 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 			setIsMasterUI(ui_loading)
 		} else if (walletStore.connected && isWalletDataLoaded) {
 			//------------------
-			const walletStakingAmount = getTotalOfUnit(poolInfo.staking_Lucid)
-			const walletHarvestAmount = getTotalOfUnit(poolInfo.harvest_Lucid)
+			const walletStakingAmount = walletGetTotalOfUnit(poolInfo.staking_Lucid)
+			const walletHarvestAmount = walletGetTotalOfUnit(poolInfo.harvest_Lucid)
 			//------------------
 			setWalletStakingAmountUI(walletStakingAmount.toString())
 			setWalletHarvestAmountUI(walletHarvestAmount.toString())
@@ -1256,7 +1256,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 					
 					<div>
 					User Token
-						(<b>{txID_User_Deposit_For_User_TN}</b>) &nbsp;
+						(<b>{userDeposit_TN}</b>) &nbsp;
 						{/* (<b>{txID_User_Deposit_For_User_TN}</b>) + " (" + poolInfo.txID_User_Deposit_CS.slice(0,4)+"..."+poolInfo.txID_User_Deposit_CS.slice(52)+")" */}
 						<button onClick={() => copyToClipboard(poolInfo.txID_User_Deposit_CS)} className='btn__ghost icon' style={{ cursor: 'pointer' }}>
 							<svg xmlns="http://www.w3.org/2000/svg" className="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -1448,7 +1448,11 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 									postActionError={updateDetailsStakingPoolAndWallet}
 									setIsWorking={handleSetIsWorking} 
 									actionName="Split Wallet UTxOs" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-									description={'<p className="info" style="text-align: center;">It is recommended to Split your Wallet\'s UTxOs (Unspent Transaction Outputs) into smaller amounts. This will make it easier to use them as Collateral for Smart Contracts and will provide more flexibility in managing your funds.</p>'}
+									description={'<li className="info">It is recommended to Split your Wallet\'s UTxOs (Unspent Transaction Outputs) into smaller amounts.</li>\
+									<li className="info">This will make it easier to use them as Collateral for Smart Contracts and will provide more flexibility in managing your funds.</li>\
+									<li className="info">Additionally, this action will transfer your User Deposit Tokens to a separate UTxO, making them easily accessible in the future.</li>\
+									<li className="info">You will need at least between 6 and 10 ADA for doing this Transaction.</li>'}
+									poolInfo={poolInfo} 
 									swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded}
 									swEnabledBtnAction={walletStore.connected && isPoolDataLoaded}
 									swShow={poolInfo.swPreparado}

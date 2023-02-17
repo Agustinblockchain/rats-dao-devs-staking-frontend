@@ -6,7 +6,7 @@ import {
 import {
     ADA_Decimals,
     ADA_UI,
-    fundID_TN, maxDiffTokensForUserDatum, maxTxFundDatumInputs, poolID_TN, tokenNameLenght, txID_User_Deposit_For_User_TN, txID_User_Harvest_TN, txID_User_Withdraw_TN, userID_TN
+    fundID_TN, maxDiffTokensForUserDatum, maxTxFundDatumInputs, poolID_TN, tokenNameLenght, userDeposit_TN, txID_User_Harvest_TN, txID_User_Withdraw_TN, userID_TN
 } from "../types/constantes";
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
 import { addAssets, addAssetsList, calculateMinAda, calculateMinAdaOfAssets, createValue_Adding_Tokens_Of_AC_Lucid, subsAssets } from '../utils/cardano-helpers';
@@ -64,10 +64,9 @@ export async function userDeposit(wallet: Wallet, poolInfo: StakingPoolDBInterfa
     const staking_AC_isAda = (staking_CS === 'lovelace');
     const staking_AC_isWithoutTokenName = !staking_AC_isAda && staking_TN == "";
     //------------------
-    const txID_User_Deposit_CS = poolInfo.txID_User_Deposit_CS;
-    const txID_user_Deposit_For_User_TN_Hex = strToHex(txID_User_Deposit_For_User_TN);
-    const txID_User_Deposit_AC: AssetClass = { currencySymbol: txID_User_Deposit_CS, tokenName: txID_user_Deposit_For_User_TN_Hex };
-    console.log(functionName + " - txID_User_Deposit_AC: " + toJson(txID_User_Deposit_AC));
+    const userDeposit_TN_Hex = strToHex(userDeposit_TN);
+    const userDeposit_AC: AssetClass = { currencySymbol: userID_CS, tokenName: userDeposit_TN_Hex };
+    console.log(functionName + " - userDeposit_AC: " + toJson(userDeposit_AC));
     //------------------
     const eUTxOs_With_Datum = await apiGetEUTxOsDBByStakingPool(poolInfo.name!);
     //------------------
@@ -100,8 +99,8 @@ export async function userDeposit(wallet: Wallet, poolInfo: StakingPoolDBInterfa
     //------------------
     const value_For_Mint_UserID: Assets = { [userID_AC.currencySymbol + userID_AC.tokenName]: 1n };
     console.log(functionName + " - Value For Mint UserID: " + toJson(value_For_Mint_UserID));
-    const value_For_Mint_TxID_User_Deposit: Assets = { [txID_User_Deposit_AC.currencySymbol + txID_User_Deposit_AC.tokenName]: depositAmount };
-    console.log(functionName + " - Value For Mint TxID User Deposit: " + toJson(value_For_Mint_TxID_User_Deposit));
+    const value_For_Mint_UserDeposit: Assets = { [userDeposit_AC.currencySymbol + userDeposit_AC.tokenName]: depositAmount };
+    console.log(functionName + " - Value For Mint User Deposit: " + toJson(value_For_Mint_UserDeposit));
     //------------------
     var value_For_UserDatum: Assets = addAssets(value_Deposit, value_For_Mint_UserID);
     //------------------
@@ -121,7 +120,7 @@ export async function userDeposit(wallet: Wallet, poolInfo: StakingPoolDBInterfa
     }
     console.log(functionName + " - Value For UserDatum: " + toJson(value_For_UserDatum));
     //------------------
-    const value_For_User_Wallet: Assets = value_For_Mint_TxID_User_Deposit;
+    const value_For_User_Wallet: Assets = value_For_Mint_UserDeposit;
     console.log(functionName + " - Value For User Wallet: " + toJson(value_For_User_Wallet));
     //------------------
     const puiInvest = depositAmount;
@@ -140,7 +139,7 @@ export async function userDeposit(wallet: Wallet, poolInfo: StakingPoolDBInterfa
         eUTxO_With_PoolDatum.uTxO,
         userDatum_Out, value_For_UserDatum,
         value_For_User_Wallet,
-        redeemer_For_Mint_TxID_User_Deposit, value_For_Mint_TxID_User_Deposit, value_For_Mint_UserID
+        redeemer_For_Mint_TxID_User_Deposit, value_For_Mint_UserDeposit, value_For_Mint_UserID
     );
     //------------------
     var eUTxOs_for_consuming: EUTxO[] = [];
@@ -398,10 +397,9 @@ export async function userWithdraw(wallet: Wallet, poolInfo: StakingPoolDBInterf
     const txID_User_Withdraw_AC: AssetClass = { currencySymbol: txID_User_Withdraw_CS, tokenName: txID_User_Withdraw_TN_Hex };
     console.log(functionName + " - txID_User_Withdraw_AC: " + toJson(txID_User_Withdraw_AC));
     //------------------ User Deposit, para hacer el Burning
-    const txID_User_Deposit_CS = poolInfo.txID_User_Deposit_CS;
-    const txID_user_Deposit_For_User_TN_Hex = strToHex(txID_User_Deposit_For_User_TN);
-    const txID_User_Deposit_AC: AssetClass = { currencySymbol: txID_User_Deposit_CS, tokenName: txID_user_Deposit_For_User_TN_Hex };
-    console.log(functionName + " - txID_User_Deposit_AC: " + toJson(txID_User_Deposit_AC));
+    const userDeposit_TN_Hex = strToHex(userDeposit_TN);
+    const userDeposit_AC: AssetClass = { currencySymbol: userID_CS, tokenName: userDeposit_TN_Hex };
+    console.log(functionName + " - userDeposit_AC: " + toJson(userDeposit_AC));
     //------------------ User Harvest, para hacer el Burning
     const txID_User_Harvest_CS = poolInfo.txID_User_Harvest_CS;
     const txID_User_Harvest_TN_Hex = strToHex(txID_User_Harvest_TN);
@@ -478,8 +476,8 @@ export async function userWithdraw(wallet: Wallet, poolInfo: StakingPoolDBInterf
     //------------------
     const value_For_Burn_UserID: Assets = { [userID_AC.currencySymbol + userID_AC.tokenName]: -1n };
     console.log(functionName + " - Value For Burn UserID: " + toJson(value_For_Burn_UserID));
-    const value_For_Burn_TxID_User_Deposit: Assets = { [txID_User_Deposit_AC.currencySymbol + txID_User_Deposit_AC.tokenName]: -(investAmount_In_UserDatum) };
-    console.log(functionName + " - Value For Burn_TxID_User_Deposit: " + toJson(value_For_Burn_TxID_User_Deposit));
+    const value_For_Burn_User_Deposit: Assets = { [userDeposit_AC.currencySymbol + userDeposit_AC.tokenName]: -(investAmount_In_UserDatum) };
+    console.log(functionName + " - Value For Burn User Deposit: " + toJson(value_For_Burn_User_Deposit));
     //------------------
     const poolDatum_In: PoolDatum = eUTxO_With_PoolDatum.datum as PoolDatum;
     console.log(functionName + " - PoolDatum In: " + toJson(poolDatum_In));
@@ -511,7 +509,7 @@ export async function userWithdraw(wallet: Wallet, poolInfo: StakingPoolDBInterf
             undefined, undefined,
             user_To_SendBackAddr, value_For_SendBackDeposit_To_User,
             redeemer_For_Mint_TxID_User_Withdraw, value_For_Mint_TxID_User_Withdraw,
-            redeemer_Burn_UserID, value_For_Burn_UserID, value_For_Burn_TxID_User_Deposit
+            redeemer_Burn_UserID, value_For_Burn_UserID, value_For_Burn_User_Deposit
         );
         //------------------
         var eUTxOs_for_consuming: EUTxO[] = [];
@@ -556,7 +554,7 @@ export async function userWithdraw(wallet: Wallet, poolInfo: StakingPoolDBInterf
             fundDatum_Out, value_For_FundDatum,
             user_To_SendBackAddr, value_For_SendBackDeposit_To_User,
             redeemer_For_Mint_TxID_User_Withdraw, value_For_Mint_TxID_User_Withdraw,
-            redeemer_Burn_UserID, value_For_Burn_UserID, value_For_Burn_TxID_User_Deposit
+            redeemer_Burn_UserID, value_For_Burn_UserID, value_For_Burn_User_Deposit
         );
         //------------------
         var eUTxOs_for_consuming: EUTxO[] = [];

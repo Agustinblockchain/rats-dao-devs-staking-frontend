@@ -1,10 +1,11 @@
 import { Address, Assets, Lucid, PoolId, Redeemer } from 'lucid-cardano';
+import { addAssets } from '../utils/cardano-helpers';
 import { createTx, fixTx } from '../utils/cardano-helpersTx';
 import { toJson } from '../utils/utils';
 
 //--------------------------------------
 
-export async function splitUTxOsTx(lucid: Lucid, protocolParameters: any, addressWallet: Address, value_For_SplitUTxO: Assets) {
+export async function splitUTxOsTx(lucid: Lucid, protocolParameters: any, addressWallet: Address, value_For_SplitUTxO: Assets, value_User_Deposit?: Assets) {
     //------------------
     const functionName = "EndPoint Tx - Split Wallet UTxOs";
     //------------------
@@ -21,7 +22,14 @@ export async function splitUTxOsTx(lucid: Lucid, protocolParameters: any, addres
     //------------------
     tx_Building = await tx_Building
         .payToAddress(addressWallet, value_For_SplitUTxO)
-        .payToAddress(addressWallet, value_For_SplitUTxO)
+        //.payToAddress(addressWallet, value_For_SplitUTxO)
+    
+    if (value_User_Deposit) {
+        tx_Building = await tx_Building
+            .payToAddress(addressWallet, value_User_Deposit)
+    }
+
+    tx_Building = await tx_Building   
         .addSigner(addressWallet)
     //------------------
     const txComplete_FIXED = await fixTx(tx_Building, lucid, protocolParameters);

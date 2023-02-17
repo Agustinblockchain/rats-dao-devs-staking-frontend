@@ -25,6 +25,8 @@ export const fundID_TN = "F"
 
 export const userID_TN = "U"
 
+export const userDeposit_TN = "UD"
+
 export const scriptID_TN = "S"
 
 //------------------------------------------
@@ -81,7 +83,7 @@ export const txID_Master_SendBackDeposit_TN = "MSBD"
 
 export const txID_Master_DeleteScripts_TN = "MDS"
 
-export const txID_User_Deposit_For_User_TN = "UD"
+// export const txID_User_Deposit_For_User_TN = "UD"
 
 export const txID_User_Harvest_TN = "UH"
 

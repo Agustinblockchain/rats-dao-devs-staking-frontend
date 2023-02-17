@@ -1,6 +1,7 @@
 import { Action, action, computed, Computed, createStore, createTypedHooks, Thunk, thunk } from 'easy-peasy';
 import { Lucid, PaymentKeyHash, UTxO, WalletApi } from "lucid-cardano";
 import { BIGINT } from "../types";
+import { getTotalOfUnitInWallet } from './cardano-helpers';
 
 //------------------------------------
 
@@ -72,39 +73,7 @@ export const storeWallet = createStore<AppStoreModel> (({
 	}),
 
 	walletGetTotalOfUnit: computed(state => (unit: string) => {
-	
-		// console.log("storeWallet - getTotalOfUnit - unit: " + unit)
-
-		const CS = unit.slice(0,56)
-		const TN = unit.slice(56)
-
-		const isAda = (unit === 'lovelace')
-		const isWithoutTokenName = !isAda && TN == ""
-
-		// console.log("storeWallet - getTotalOfUnit - isAda: " + isAda + " - isWithoutTokenName: " + isWithoutTokenName)
-
-		let total: BIGINT = 0n;
-
-		state.uTxOsAtWallet.forEach(u => { 
-			
-			if (isWithoutTokenName){
-				for (const [key, value] of Object.entries(u.assets)) {
-					const CS_ = key.slice(0,56)
-					
-					if (CS == CS_) {
-						// console.log("storeWallet - getTotalOfUnit - CS: " + CS + " - CS_: " + CS_ + " - value: " + value)
-						total += value
-					}
-				}
-			}else{
-				if(u.assets[unit]) 
-					total += (u.assets[unit] as BIGINT) 
-			}
-		})
-
-		// console.log("storeWallet - getTotalOfUnit - total: " + total)
-
-		return BigInt(total.toString()) as BIGINT
+		return getTotalOfUnitInWallet(unit, state.uTxOsAtWallet);
 	}),
 	
 }))
@@ -117,6 +86,9 @@ export {
 	useStoreDispatch,
 	useStore
 };
+
+
+
 
 //------------------------------------
 
